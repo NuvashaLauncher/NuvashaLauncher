@@ -134,17 +134,7 @@ build/tests/%: tests/%.c $(TESTLIBA) $(RESOURCE_O) | build/tests
 		-o $@ $< $(RESOURCE_O) $(TESTLIBA) $(PKG_LIBS)
 
 define run_test_suite
-	@set -e; test_tmp=$$(mktemp -d "$(CURDIR)/build/test-tmp-XXXXXX"); \
-	trap 'rm -rf "$$test_tmp"' EXIT HUP INT TERM; \
-	mkdir -p "$$test_tmp/config" "$$test_tmp/data" "$$test_tmp/cache" "$$test_tmp/state" "$$test_tmp/runtime"; chmod 700 "$$test_tmp/runtime"; \
-	pass=0; skip=0; test_output="$$test_tmp/output"; for t in $(1); do echo "RUN  $$t"; if $(2) NUVASHALAUNCHER_TEST_SECRET_STORE=1 TMPDIR="$$test_tmp" XDG_CONFIG_HOME="$$test_tmp/config" XDG_DATA_HOME="$$test_tmp/data" XDG_CACHE_HOME="$$test_tmp/cache" XDG_STATE_HOME="$$test_tmp/state" XDG_RUNTIME_DIR="$$test_tmp/runtime" GSETTINGS_SCHEMA_DIR="$(CURDIR)/build/schemas" GSETTINGS_BACKEND=memory ./$$t >"$$test_output" 2>&1; then status=0; else status=$$?; fi; cat "$$test_output"; \
-		if test $$status -eq 77; then skip=$$((skip + 1)); \
-		elif test $$status -ne 0; then exit $$status; \
-		elif grep -q '^TAP version' "$$test_output"; then \
-			tap_skip=$$(grep -c '^ok .*# SKIP' "$$test_output" || true); tap_pass=$$(grep -c '^ok ' "$$test_output" || true); \
-			pass=$$((pass + tap_pass - tap_skip)); skip=$$((skip + tap_skip)); \
-		else pass=$$((pass + 1)); fi; done; \
-		echo "PASS $$pass test(s), SKIP $$skip test(s)"
+	@$(2) python3 scripts/run-tests.py --schema-dir "$(CURDIR)/build/schemas" $(1)
 endef
 
 # Tests never write to the real data directory and never touch the network.

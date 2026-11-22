@@ -185,11 +185,88 @@ test_dialog_imports_and_installs (void)
   g_print ("ok - the dialog reads a pack and installs it in one go\n");
 }
 
+static void
+write_nested_file (const char *base, const char *rel, const char *content)
+{
+  g_autofree char *path = g_build_filename (base, rel, NULL);
+  g_autofree char *parent = g_path_get_dirname (path);
+  g_autoptr (GError) error = NULL;
+
+  g_assert_cmpint (g_mkdir_with_parents (parent, 0755), ==, 0);
+  g_assert_true (g_file_set_contents (path, content, -1, &error));
+  g_assert_no_error (error);
+}
+
+static void
+test_export_atomic_failure_and_exclusions (void)
+{
+  g_autofree char *root = make_tmp_dir ();
+  g_autofree char *data_dir = g_build_filename (root, "data", NULL);
+  g_autofree char *inst_dir = g_build_filename (root, "inst", NULL);
+  g_autofree char *bad_dest = g_build_filename (root, "missing-dir", "out.mrpack", NULL);
+  g_autofree char *good_dest = g_build_filename (root, "out.mrpack", NULL);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = manager_new (data_dir);
+  g_autoptr (NuvashaLauncherInstance) inst = NULL;
+
+  inst = nuvashalauncher_instance_manager_create (
+    manager, "ExportCheck", inst_dir, "1.21.1",
+    NUVASHALAUNCHER_LOADER_VANILLA, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (inst);
+
+  write_nested_file (inst_dir, "mods/keep.jar", "mod-data");
+  write_nested_file (inst_dir, "screenshots/shot.png", "png-data");
+  write_nested_file (inst_dir, "crash-reports/crash-1.txt", "crash-data");
+  write_nested_file (inst_dir, "logs/latest.log", "log-data");
+  write_nested_file (inst_dir, "cache/tmp.bin", "cache-data");
+
+  /* Exporting to a nonexistent parent directory must fail cleanly without leaving artifacts. */
+  g_assert_false (export_now (inst, bad_dest, &error));
+  g_assert_nonnull (error);
+  g_clear_error (&error);
+  g_assert_false (g_file_test (bad_dest, G_FILE_TEST_EXISTS));
+
+  /* Valid export preserves mods/ overrides and excludes transient directories. */
+  g_assert_true (export_now (inst, good_dest, &error));
+  g_assert_no_error (error);
+  g_assert_true (g_file_test (good_dest, G_FILE_TEST_IS_REGULAR));
+
+  {
+    struct archive *reader = archive_read_new ();
+    struct archive_entry *entry = NULL;
+    gboolean saw_mod = FALSE;
+    gboolean saw_excluded = FALSE;
+
+    g_assert_cmpint (archive_read_support_format_zip (reader), ==, ARCHIVE_OK);
+    g_assert_cmpint (archive_read_open_filename (reader, good_dest, 10240), ==, ARCHIVE_OK);
+    while (archive_read_next_header (reader, &entry) == ARCHIVE_OK)
+      {
+        const char *name = archive_entry_pathname (entry);
+        if (g_strcmp0 (name, "overrides/mods/keep.jar") == 0)
+          saw_mod = TRUE;
+        if (strstr (name, "screenshots/") != NULL ||
+            strstr (name, "crash-reports/") != NULL ||
+            strstr (name, "logs/") != NULL ||
+            strstr (name, "cache/") != NULL)
+          saw_excluded = TRUE;
+      }
+    g_assert_cmpint (archive_read_free (reader), ==, ARCHIVE_OK);
+    g_assert_true (saw_mod);
+    g_assert_false (saw_excluded);
+  }
+
+  remove_recursive (root);
+  g_print ("ok - export failure is atomic and excludes transient directories\n");
+}
+
 int
 main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
   g_test_add_func ("/modpack/export-import-round-trip", test_export_import_round_trip);
+  g_test_add_func ("/modpack/export-exclusions-and-failure",
+                   test_export_atomic_failure_and_exclusions);
   if (gtk_init_check ())
     {
       g_test_add_func ("/modpack/dialog-import", test_dialog_imports_and_installs);

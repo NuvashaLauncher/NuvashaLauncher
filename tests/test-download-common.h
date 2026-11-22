@@ -93,6 +93,8 @@ server_handler (SoupServer *server, SoupServerMessage *message,
   else if (g_str_equal (path, "/json"))
     reply_with (message, 200, "application/json", JSON_BODY,
                 strlen (JSON_BODY));
+  else if (g_str_equal (path, "/bad-json"))
+    reply_with (message, 200, "application/json", "{not valid json", 15);
   else if (g_str_equal (path, "/etag"))
     {
       const char *etag = soup_message_headers_get_one (

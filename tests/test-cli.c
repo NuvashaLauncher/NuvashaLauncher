@@ -327,6 +327,26 @@ test_extended_cli_commands (void)
     g_clear_pointer (&output, g_free);
   }
 
+  /* --list-worlds, --list-servers, and --switch-account fail cleanly on unknown targets. */
+  {
+    const char *args[] = { "--list-worlds", "DoesNotExist", "--json", NULL };
+    output = run_cli_v (args, &status);
+    g_assert_cmpint (status, !=, 0);
+    g_clear_pointer (&output, g_free);
+  }
+  {
+    const char *args[] = { "--list-servers", "DoesNotExist", "--json", NULL };
+    output = run_cli_v (args, &status);
+    g_assert_cmpint (status, !=, 0);
+    g_clear_pointer (&output, g_free);
+  }
+  {
+    const char *args[] = { "--switch-account", "NoSuchPlayer", NULL };
+    output = run_cli_v (args, &status);
+    g_assert_cmpint (status, !=, 0);
+    g_clear_pointer (&output, g_free);
+  }
+
   g_print ("ok - extended CLI commands work headlessly\n");
 }
 

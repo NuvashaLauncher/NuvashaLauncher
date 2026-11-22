@@ -521,6 +521,8 @@ attempt_failed (DownloadRequest *request, GError *error)
 
   if (retry)
     {
+      if (delay_ms > 1 && g_getenv ("NUVASHALAUNCHER_TEST_FAST_TIMERS") != NULL)
+        delay_ms = 1;
       nuvashalauncher_download_discard_temporary (request);
       g_clear_error (&error);
       nuvashalauncher_task_scope_set_state (request->scope, NUVASHALAUNCHER_TASK_STATE_RETRYING);

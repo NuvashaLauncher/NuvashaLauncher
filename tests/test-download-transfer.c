@@ -358,6 +358,47 @@ test_connection_refused (void)
   g_print ("ok - a refused connection is a network error\n");
 }
 
+static void
+bad_json_finished (GObject *source G_GNUC_UNUSED,
+                   GAsyncResult *result,
+                   gpointer user_data)
+{
+  AsyncCall *call = user_data;
+  g_autoptr (JsonParser) parser = nuvashalauncher_download_json_finish (result, &call->error);
+  g_assert_null (parser);
+  nuvashalauncher_task_scope_unref (call->operation);
+  call->operation = NULL;
+  call->run->pending--;
+  if (call->run->pending == 0)
+    g_main_loop_quit (call->run->loop);
+}
+
+static void
+test_malformed_json_is_not_retried (void)
+{
+  g_autofree char *url = server_url ("/bad-json");
+  AsyncRun run = { 0 };
+  AsyncCall call = { 0 };
+
+  fixture.hits = 0;
+
+  async_run_init (&run);
+  call.run = &run;
+  run.pending++;
+  call.operation = nuvashalauncher_download_json_async (
+    nuvashalauncher_downloads_get_service (), url, bad_json_finished, &call);
+  async_run_wait (&run);
+
+  g_assert_nonnull (call.error);
+  g_assert_cmpint (call.error->domain, ==, JSON_PARSER_ERROR);
+  g_assert_cmpuint (fixture.hits, ==, 1);
+
+  async_call_clear (&call);
+  async_run_clear (&run);
+
+  g_print ("ok - malformed JSON fails once without retrying\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -385,6 +426,7 @@ main (int argc, char **argv)
   test_rate_limit ();
   test_invalid_url ();
   test_connection_refused ();
+  test_malformed_json_is_not_retried ();
   fixture_stop ();
   return EXIT_SUCCESS;
 }
