@@ -94,7 +94,8 @@ global_cache_restore_ready (GObject *source, GAsyncResult *result,
             request, nuvashalauncher_download_cancelled_error ());
           return;
         }
-      nuvashalauncher_download_request_fail (request, g_steal_pointer (&error));
+      nuvashalauncher_download_discard_temporary (request);
+      start_attempt (request);
       return;
     }
 
