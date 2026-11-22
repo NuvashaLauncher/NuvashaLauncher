@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Flatpak tooling
         run: |
-          apt-get update
+          apt-get update -o Acquire::Languages=none
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             ca-certificates \
             flatpak \

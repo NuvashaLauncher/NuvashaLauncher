@@ -2,7 +2,13 @@ name: Build and test
 
 on:
   push:
+    paths-ignore:
+      - '*.md'
+      - 'LICENSE'
   pull_request:
+    paths-ignore:
+      - '*.md'
+      - 'LICENSE'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,21 +34,29 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apt-get update
+          apt-get update -o Acquire::Languages=none
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-             gcc make pkg-config gettext \
+             gcc ccache make pkg-config gettext \
              libasan8 libubsan1 \
              libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
              libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
 
+      - name: Restore ccache
+        uses: actions/cache@v5
+        with:
+          path: /root/.ccache
+          key: ccache-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ matrix.arch }}-
+
       - name: Build
-        run: make fast CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
+        run: make fast CC="ccache gcc" CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
 
       - name: Run tests
-        run: make -j$(nproc) test
+        run: make -j$(nproc) test CC="ccache gcc" CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
 
       - name: Run sanitizer tests
-        run: make -j$(nproc) test-debug
+        run: make -j$(nproc) test-debug CC="ccache gcc"
 
       - name: Run static analysis
         run: make -j$(nproc) static-analysis
