@@ -133,14 +133,19 @@ build/tests/%: tests/%.c $(TESTLIBA) $(RESOURCE_O) | build/tests
 		-DNUVASHALAUNCHER_SRC_DIR=\"$(CURDIR)/src\" -DNUVASHALAUNCHER_PO_DIR=\"$(CURDIR)/po\" \
 		-o $@ $< $(RESOURCE_O) $(TESTLIBA) $(PKG_LIBS)
 
+TESTRUNNER  := build/test-runner
+
+$(TESTRUNNER): tests/runner.c | build
+	$(CC) -std=c17 -Wall -Wextra -Wpedantic -O2 -pthread -o $@ $<
+
 define run_test_suite
-	@$(2) python3 scripts/run-tests.py --schema-dir "$(CURDIR)/build/schemas" $(1)
+	@$(2) ./$(TESTRUNNER) --schema-dir "$(CURDIR)/build/schemas" $(1)
 endef
 
 # Tests never write to the real data directory and never touch the network.
 # Display-backed tests use invisible windows so they can exercise GTK without
 # covering the developer's desktop; they skip when no display is available.
-test: $(if $(SRCS),$(BIN)) $(TESTBINS) $(SCHEMA_COMPILED)
+test: $(if $(SRCS),$(BIN)) $(TESTRUNNER) $(TESTBINS) $(SCHEMA_COMPILED)
 	$(call run_test_suite,$(TESTBINS),)
 
 # Run the same suite with an existing Wayland session. Display-backed GTK
@@ -195,7 +200,7 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGA) $(RESOURCE_DBG_O) | build-debug/te
 
 # The display guard test runs the release launcher, so test-debug builds both
 # binaries.
-test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTDBGBINS) $(SCHEMA_COMPILED)
+test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTRUNNER) $(TESTDBGBINS) $(SCHEMA_COMPILED)
 	$(call run_test_suite,$(TESTDBGBINS),ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 LSAN_OPTIONS=detect_leaks=1:exitcode=1:suppressions="$(CURDIR)/tests/gtk-lsan.supp")
 
 # LeakSanitizer is included with the Linux AddressSanitizer runtime and is
