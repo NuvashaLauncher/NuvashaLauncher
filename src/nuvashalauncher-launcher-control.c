@@ -247,7 +247,7 @@ nuvashalauncher_launcher_stop (NuvashaLauncher *self)
   if (self->process.stop_timeout == 0)
     {
       if (g_getenv ("NUVASHALAUNCHER_TEST_FAST_TIMERS") != NULL)
-        self->process.stop_timeout = g_timeout_add (100, on_stop_timeout, self);
+        self->process.stop_timeout = g_timeout_add (500, on_stop_timeout, self);
       else
         self->process.stop_timeout = g_timeout_add_seconds (
           NUVASHALAUNCHER_LAUNCH_STOP_TIMEOUT, on_stop_timeout, self);
