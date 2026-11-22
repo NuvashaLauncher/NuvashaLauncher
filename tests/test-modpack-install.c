@@ -406,6 +406,79 @@ test_install_icon_and_remove_archive (void)
   remove_recursive (dir);
 }
 
+typedef struct
+{
+  GMainLoop *loop;
+  NuvashaLauncherInstance *instance;
+  GError *error;
+  NuvashaLauncherTaskScope *scope;
+} CancelInstallWait;
+
+static void
+on_cancel_install_done (GObject *source G_GNUC_UNUSED,
+                        GAsyncResult *result,
+                        gpointer user_data)
+{
+  CancelInstallWait *wait = user_data;
+  wait->instance = nuvashalauncher_modpack_install_finish (result, &wait->error);
+  nuvashalauncher_task_scope_unref (wait->scope);
+  wait->scope = NULL;
+  g_main_loop_quit (wait->loop);
+}
+
+static void
+test_install_cancellation_cleans_up (void)
+{
+  g_autofree char *dir = make_tmp_dir ();
+  g_autofree char *data_dir = g_build_filename (dir, "data", NULL);
+  g_autofree char *target_dir = g_build_filename (dir, "cancelled-inst", NULL);
+  g_autofree char *zip_path = g_build_filename (dir, "cancel.mrpack", NULL);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaLauncherInstanceManager) manager = manager_new (data_dir);
+  g_autoptr (NuvashaLauncherModpack) pack = NULL;
+  g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+  static const char index[] =
+    "{"
+    "  \"formatVersion\": 1,"
+    "  \"game\": \"minecraft\","
+    "  \"versionId\": \"1.0\","
+    "  \"name\": \"Cancel Pack\","
+    "  \"files\": [],"
+    "  \"dependencies\": { \"minecraft\": \"1.20.1\" }"
+    "}";
+  const ZipEntry entries[] = {
+    ZIP_FILE ("modrinth.index.json", index),
+    ZIP_FILE ("overrides/config/a.txt", "abc")
+  };
+
+  zip_write (zip_path, entries, G_N_ELEMENTS (entries));
+  pack = nuvashalauncher_modpack_new_from_zip (zip_path, &error);
+  g_assert_no_error (error);
+  g_assert_true (nuvashalauncher_modpack_resolve (pack, &error));
+  g_assert_no_error (error);
+
+  CancelInstallWait wait = { .loop = g_main_loop_new (NULL, FALSE) };
+  wait.scope = nuvashalauncher_modpack_install_async (
+    pack, manager, "Cancel Pack", target_dir, NULL, NULL,
+    on_cancel_install_done, &wait);
+  nuvashalauncher_task_scope_follow_cancellable (wait.scope, cancellable);
+  g_cancellable_cancel (cancellable);
+  g_main_loop_run (wait.loop);
+
+  g_assert_null (wait.instance);
+  g_assert_nonnull (wait.error);
+  g_clear_error (&wait.error);
+  g_main_loop_unref (wait.loop);
+
+  g_assert_cmpuint (
+    g_list_model_get_n_items (
+      G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (manager))),
+    ==, 0);
+  g_assert_false (g_file_test (target_dir, G_FILE_TEST_EXISTS));
+
+  remove_recursive (dir);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -417,5 +490,6 @@ main (int argc, char **argv)
   g_test_add_func ("/modpack/install-invalid-args", test_install_invalid_arguments);
   g_test_add_func ("/modpack/install-content-types", test_install_with_content_types);
   g_test_add_func ("/modpack/install-icon-and-remove", test_install_icon_and_remove_archive);
+  g_test_add_func ("/modpack/install-cancel", test_install_cancellation_cleans_up);
   return g_test_run ();
 }

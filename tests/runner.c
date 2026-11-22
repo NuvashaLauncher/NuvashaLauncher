@@ -31,6 +31,7 @@ typedef struct
   const char *schema_dir;
   int count;
   atomic_int next_idx;
+  int *order;
   TestResult *results;
 } RunnerCtx;
 
@@ -216,16 +217,38 @@ run_one (RunnerCtx *ctx, int idx)
   res->output_len = len;
 }
 
+static int
+priority_rank (const char *binary)
+{
+  const char *base = strrchr (binary, '/');
+  const char *name = base != NULL ? base + 1 : binary;
+  static const char *const heavy[] = {
+    "test-mrpack-security",
+    "test-launcher-process",
+    "test-cli",
+    "test-download-queue",
+    "test-modpack-install",
+    "test-versions-network",
+    "test-skin-service",
+  };
+  for (size_t i = 0; i < sizeof (heavy) / sizeof (heavy[0]); i++)
+    {
+      if (strcmp (name, heavy[i]) == 0)
+        return (int) i;
+    }
+  return 100;
+}
+
 static void *
 worker_main (void *arg)
 {
   RunnerCtx *ctx = arg;
   for (;;)
     {
-      int idx = atomic_fetch_add (&ctx->next_idx, 1);
-      if (idx >= ctx->count)
+      int pos = atomic_fetch_add (&ctx->next_idx, 1);
+      if (pos >= ctx->count)
         break;
-      run_one (ctx, idx);
+      run_one (ctx, ctx->order[pos]);
     }
   return NULL;
 }
@@ -299,12 +322,24 @@ main (int argc, char **argv)
     .schema_dir = schema_dir,
     .count = count,
     .next_idx = 0,
+    .order = calloc ((size_t) count, sizeof (int)),
     .results = calloc ((size_t) count, sizeof (TestResult)),
   };
-  if (ctx.results == NULL)
+  if (ctx.order == NULL || ctx.results == NULL)
     abort ();
   for (int i = 0; i < count; i++)
     ctx.results[i].binary = argv[first_bin + i];
+
+  int pos = 0;
+  for (int pass = 0; pass <= 7; pass++)
+    {
+      for (int i = 0; i < count; i++)
+        {
+          int r = priority_rank (ctx.results[i].binary);
+          if ((pass < 7 && r == pass) || (pass == 7 && r >= 7))
+            ctx.order[pos++] = i;
+        }
+    }
 
   long nproc = sysconf (_SC_NPROCESSORS_ONLN);
   int jobs = (nproc > 0 && nproc <= 64) ? (int) nproc : 4;
@@ -359,6 +394,7 @@ main (int argc, char **argv)
 
   for (int i = 0; i < count; i++)
     free (ctx.results[i].output);
+  free (ctx.order);
   free (ctx.results);
   rm_rf (root_tmp);
   return exit_code;

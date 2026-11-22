@@ -60,7 +60,7 @@ SCHEMA_COMPILED := build/schemas/gschemas.compiled
 CFLAGS     ?= -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
 RELFLAGS   := -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE
 RELLDFLAGS := -pie -Wl,-z,relro,-z,now
-DBGFLAGS   := -g -O0 -fsanitize=address,undefined -fno-sanitize-recover=all
+DBGFLAGS   := -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all
 
 BIN    := build/nuvashalauncher
 DBGBIN := build-debug/nuvashalauncher
@@ -126,7 +126,7 @@ $(TESTLIBA): $(TESTLIBOBJS) | build
 	$(AR) rcs $@ $(TESTLIBOBJS)
 
 build/tests/%: tests/%.c $(TESTLIBA) $(RESOURCE_O) | build/tests
-	$(CC) $(CFLAGS) $(RELFLAGS) $(RELLDFLAGS) -Isrc $(PKG_CFLAGS) \
+	$(CC) $(CFLAGS) $(RELFLAGS) $(RELLDFLAGS) -Wl,--as-needed -Isrc $(PKG_CFLAGS) \
 		-DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" -DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
 		-DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
 		-DNUVASHALAUNCHER_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
@@ -191,7 +191,7 @@ $(TESTLIBDBGA): $(TESTLIBDBGOBJS) | build-debug
 	$(AR) rcs $@ $(TESTLIBDBGOBJS)
 
 build-debug/tests/%: tests/%.c $(TESTLIBDBGA) $(RESOURCE_DBG_O) | build-debug/tests
-	$(CC) $(CFLAGS) $(DBGFLAGS) -Isrc $(PKG_CFLAGS) \
+	$(CC) $(CFLAGS) $(DBGFLAGS) -Wl,--as-needed -Isrc $(PKG_CFLAGS) \
 		-DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" -DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
 		-DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\" \
 		-DNUVASHALAUNCHER_TEST_FIXTURES=\"$(CURDIR)/tests/fixtures\" \
