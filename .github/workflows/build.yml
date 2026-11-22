@@ -35,10 +35,10 @@ jobs:
         run: make fast CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
 
       - name: Run tests
-        run: time make -j$(nproc) test
+        run: make -j$(nproc) test
 
       - name: Run sanitizer tests
-        run: time make -j$(nproc) test-debug
+        run: make -j$(nproc) test-debug
 
       - name: Run static analysis
         run: make static-analysis
