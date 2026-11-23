@@ -47,10 +47,6 @@ struct _NuvashaLauncherServersPage {
   AdwClamp *header_search_clamp;
   GPtrArray *rows;
   GPtrArray *servers;
-  GHashTable *selected_indices;
-  GtkActionBar *selection_footer;
-  GtkLabel *selection_label;
-  GtkButton *selection_delete;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherServersPage, nuvashalauncher_servers_page, GTK_TYPE_BOX)
@@ -333,157 +329,6 @@ on_delete_server_clicked (GtkButton *button, gpointer user_data)
   adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
 }
 
-static void
-servers_page_update_selection (NuvashaLauncherServersPage *self)
-{
-  guint selected = self->selected_indices != NULL
-    ? g_hash_table_size (self->selected_indices)
-    : 0;
-  guint total = self->servers != NULL ? self->servers->len : 0;
-
-  nuvashalauncher_ui_selection_footer_update (self->selection_footer,
-                                            self->selection_label,
-                                            self->selection_delete,
-                                            selected, total);
-}
-
-static void
-servers_page_clear_selection (NuvashaLauncherServersPage *self)
-{
-  if (self->selected_indices != NULL)
-    g_hash_table_remove_all (self->selected_indices);
-  for (guint i = 0; i < self->rows->len; i++)
-    {
-      GtkWidget *row = g_ptr_array_index (self->rows, i);
-      GtkCheckButton *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-server-check");
-      if (check != NULL && gtk_check_button_get_active (check))
-        gtk_check_button_set_active (check, FALSE);
-    }
-  servers_page_update_selection (self);
-}
-
-static void
-on_server_check_toggled (GtkCheckButton *check, gpointer user_data)
-{
-  NuvashaLauncherServersPage *self = NUVASHALAUNCHER_SERVERS_PAGE (user_data);
-  GtkStack *stack = g_object_get_data (G_OBJECT (check), "nuvashalauncher-icon-stack");
-  gpointer idx_key = g_object_get_data (G_OBJECT (check), "nuvashalauncher-server-idx");
-  gboolean active = gtk_check_button_get_active (check);
-
-  if (stack != NULL)
-    gtk_stack_set_visible_child_name (stack, active ? "check" : "icon");
-  if (self->selected_indices == NULL)
-    return;
-
-  if (active)
-    g_hash_table_add (self->selected_indices, idx_key);
-  else
-    g_hash_table_remove (self->selected_indices, idx_key);
-  servers_page_update_selection (self);
-}
-
-static void
-on_server_row_activated (AdwActionRow *row, gpointer user_data G_GNUC_UNUSED)
-{
-  GtkCheckButton *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-server-check");
-
-  if (check != NULL)
-    gtk_check_button_set_active (check, !gtk_check_button_get_active (check));
-}
-
-static int
-compare_uint_desc (const void *a, const void *b)
-{
-  guint ua = *(const guint *) a;
-  guint ub = *(const guint *) b;
-  if (ua > ub)
-    return -1;
-  if (ua < ub)
-    return 1;
-  return 0;
-}
-
-typedef struct {
-  NuvashaLauncherServersPage *page;
-  GArray *indices;
-} DeleteServersData;
-
-static void
-on_delete_selected_servers_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
-                                     const char *response,
-                                     gpointer user_data)
-{
-  DeleteServersData *d = user_data;
-
-  if (g_strcmp0 (response, "delete") == 0)
-    {
-      for (guint i = 0; i < d->indices->len; i++)
-        {
-          guint idx = g_array_index (d->indices, guint, i);
-          if (idx < d->page->servers->len)
-            g_ptr_array_remove_index (d->page->servers, idx);
-        }
-      if (d->page->selected_indices != NULL)
-        g_hash_table_remove_all (d->page->selected_indices);
-      persist_and_reload (d->page);
-    }
-  g_array_unref (d->indices);
-  g_free (d);
-}
-
-static void
-on_servers_selection_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  NuvashaLauncherServersPage *self = NUVASHALAUNCHER_SERVERS_PAGE (user_data);
-  guint count;
-  GHashTableIter iter;
-  gpointer key;
-
-  if (self->selected_indices == NULL)
-    return;
-  count = g_hash_table_size (self->selected_indices);
-  if (count == 0)
-    return;
-
-  GArray *indices = g_array_new (FALSE, FALSE, sizeof (guint));
-  g_autoptr (GString) names = g_string_new (NULL);
-  g_hash_table_iter_init (&iter, self->selected_indices);
-  while (g_hash_table_iter_next (&iter, &key, NULL))
-    {
-      guint idx = GPOINTER_TO_UINT (key);
-      g_array_append_val (indices, idx);
-      if (idx < self->servers->len)
-        {
-          ServerEntry *s = g_ptr_array_index (self->servers, idx);
-          const char *label = s->name != NULL && *s->name != '\0' ? s->name : s->ip;
-          if (label != NULL)
-            {
-              if (names->len > 0)
-                g_string_append_c (names, '\n');
-              g_string_append (names, label);
-            }
-        }
-    }
-  g_array_sort (indices, compare_uint_desc);
-
-  g_autofree char *title = g_strdup_printf (_("Delete selected %s?"), "servers");
-  g_autofree char *body = g_strdup_printf (_("Selected %s:\n%s"), _("Servers"), names->str);
-
-  AdwAlertDialog *alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (title, body));
-  adw_alert_dialog_add_responses (alert,
-                                  "cancel", _("Cancel"),
-                                  "delete", _("Delete"),
-                                  NULL);
-  adw_alert_dialog_set_response_appearance (alert, "delete", ADW_RESPONSE_DESTRUCTIVE);
-  adw_alert_dialog_set_default_response (alert, "cancel");
-
-  DeleteServersData *d = g_new0 (DeleteServersData, 1);
-  d->page = self;
-  d->indices = indices;
-  g_signal_connect (alert, "response", G_CALLBACK (on_delete_selected_servers_response), d);
-  adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
-}
-
 static GtkWidget *
 server_icon_widget (const char *icon_b64)
 {
@@ -532,24 +377,8 @@ build_server_row (NuvashaLauncherServersPage *self, ServerEntry *s, guint index)
   adw_action_row_set_subtitle (row, s->ip != NULL ? s->ip : "");
 
   GtkWidget *icon = server_icon_widget (s->icon_b64);
-  GtkStack *icon_stack = NULL;
-  GtkCheckButton *check = nuvashalauncher_ui_selection_prefix_new (icon, &icon_stack);
-  gboolean selected = self->selected_indices != NULL &&
-                      g_hash_table_contains (self->selected_indices,
-                                             GUINT_TO_POINTER (index));
-  g_object_set_data (G_OBJECT (check), "nuvashalauncher-icon-stack", icon_stack);
-  g_object_set_data (G_OBJECT (check), "nuvashalauncher-server-idx",
-                     GUINT_TO_POINTER (index));
-  if (selected)
-    {
-      gtk_check_button_set_active (check, TRUE);
-      gtk_stack_set_visible_child_name (icon_stack, "check");
-    }
-  g_signal_connect (check, "toggled", G_CALLBACK (on_server_check_toggled), self);
-  adw_action_row_add_prefix (row, GTK_WIDGET (check));
-  g_object_set_data (G_OBJECT (row), "nuvashalauncher-server-check", check);
-  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
-  g_signal_connect (row, "activated", G_CALLBACK (on_server_row_activated), self);
+  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+  adw_action_row_add_prefix (row, icon);
 
   adw_action_row_add_suffix (
     row, server_action_button ("media-playback-start-symbolic", _("Play"),
@@ -629,7 +458,6 @@ rebuild_server_rows (NuvashaLauncherServersPage *self)
   filter_server_rows (self);
   adw_view_stack_set_visible_child_name (
     self->stack, self->servers->len > 0 ? "list" : "empty");
-  servers_page_update_selection (self);
 }
 
 static void
@@ -657,13 +485,6 @@ on_server_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
       nuvashalauncher_servers_page_set_search_visible (self, FALSE);
       return GDK_EVENT_STOP;
     }
-  if (keyval == GDK_KEY_Escape &&
-      self->selected_indices != NULL &&
-      g_hash_table_size (self->selected_indices) > 0)
-    {
-      servers_page_clear_selection (self);
-      return GDK_EVENT_STOP;
-    }
   return GDK_EVENT_PROPAGATE;
 }
 
@@ -672,8 +493,6 @@ nuvashalauncher_servers_page_reload (NuvashaLauncherServersPage *self)
 {
   g_return_if_fail (NUVASHALAUNCHER_IS_SERVERS_PAGE (self));
 
-  if (self->selected_indices != NULL)
-    g_hash_table_remove_all (self->selected_indices);
   g_ptr_array_set_size (self->servers, 0);
 
   if (self->servers_dat_path != NULL &&
@@ -739,7 +558,6 @@ nuvashalauncher_servers_page_dispose (GObject *object)
   g_clear_pointer (&self->servers_dat_path, g_free);
   g_clear_pointer (&self->rows, g_ptr_array_unref);
   g_clear_pointer (&self->servers, g_ptr_array_unref);
-  g_clear_pointer (&self->selected_indices, g_hash_table_unref);
 
   G_OBJECT_CLASS (nuvashalauncher_servers_page_parent_class)->dispose (object);
 }
@@ -755,7 +573,6 @@ nuvashalauncher_servers_page_init (NuvashaLauncherServersPage *self)
 {
   self->rows = g_ptr_array_new ();
   self->servers = g_ptr_array_new_with_free_func ((GDestroyNotify) server_entry_free);
-  self->selected_indices = g_hash_table_new (g_direct_hash, g_direct_equal);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (self), GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
 }
@@ -831,12 +648,6 @@ nuvashalauncher_servers_page_new (NuvashaLauncherInstance *instance,
   adw_view_stack_add_named (self->stack, GTK_WIDGET (scroller), "list");
   adw_view_stack_add_named (self->stack, GTK_WIDGET (empty), "empty");
   gtk_box_append (inner, GTK_WIDGET (self->stack));
-
-  self->selection_footer = nuvashalauncher_ui_selection_footer_new (
-    &self->selection_label, &self->selection_delete);
-  g_signal_connect (self->selection_delete, "clicked",
-                    G_CALLBACK (on_servers_selection_delete_clicked), self);
-  gtk_box_append (inner, GTK_WIDGET (self->selection_footer));
 
   self->toasts = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (self->toasts, GTK_WIDGET (inner));

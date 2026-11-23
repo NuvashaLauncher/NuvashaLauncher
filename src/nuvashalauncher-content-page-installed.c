@@ -102,18 +102,8 @@ nuvashalauncher_content_page_toggle_file (NuvashaLauncherContentPage *self,
 
   if (row != NULL)
     {
-      GtkWidget *check = g_object_get_data (G_OBJECT (row),
-                                            "nuvashalauncher-file-check");
-
       g_hash_table_remove (self->installed.rows, old_path);
       g_hash_table_insert (self->installed.rows, g_strdup (file->path), row);
-      if (check != NULL)
-        g_object_set_data_full (G_OBJECT (check), "nuvashalauncher-file-path",
-                                g_strdup (file->path), g_free);
-      if (self->installed.selected_paths != NULL &&
-          g_hash_table_remove (self->installed.selected_paths, old_path))
-        g_hash_table_add (self->installed.selected_paths,
-                          g_strdup (file->path));
     }
 
   show_toast (self, file->enabled ? _("Enabled") : _("Disabled"));
@@ -179,11 +169,8 @@ file_row_refresh (GtkWidget *row)
     return;
 
   {
-    GtkWidget *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file-check");
     GtkWidget *trash = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file-trash");
     GtkWidget *sw = g_object_get_data (G_OBJECT (row), "nuvashalauncher-mod-switch");
-    if (check != NULL)
-      gtk_widget_set_visible (check, TRUE);
     if (trash != NULL)
       gtk_widget_set_visible (trash, TRUE);
     if (sw != NULL)
@@ -209,60 +196,6 @@ file_row_refresh (GtkWidget *row)
     g_autofree char *needle = g_utf8_casefold (query, -1);
     installed_filter_row (row, needle);
   }
-}
-
-static void
-on_content_file_check_toggled (GtkCheckButton *check, gpointer user_data)
-{
-  NuvashaLauncherContentPage *self = user_data;
-  const char *path = g_object_get_data (G_OBJECT (check), "nuvashalauncher-file-path");
-  GtkStack *stack = g_object_get_data (G_OBJECT (check), "nuvashalauncher-icon-stack");
-
-  if (stack != NULL)
-    gtk_stack_set_visible_child_name (stack,
-      gtk_check_button_get_active (check) ? "check" : "icon");
-
-  if (path == NULL)
-    return;
-  if (gtk_check_button_get_active (check))
-    g_hash_table_add (self->installed.selected_paths, g_strdup (path));
-  else
-    g_hash_table_remove (self->installed.selected_paths, path);
-  content_page_update_selection (self);
-}
-
-static void
-on_content_file_row_activated (AdwActionRow *row, gpointer user_data)
-{
-  GtkCheckButton *check = g_object_get_data (G_OBJECT (row),
-                                             "nuvashalauncher-file-check");
-
-  if (check != NULL)
-    gtk_check_button_set_active (check, !gtk_check_button_get_active (check));
-
-  (void) user_data;
-}
-
-void
-content_page_update_selection (NuvashaLauncherContentPage *self)
-{
-  guint selected = g_hash_table_size (self->installed.selected_paths);
-  guint total = self->installed.files != NULL ? self->installed.files->len : 0;
-  g_autofree char *text = g_strdup_printf (_("%u/%u selected"), selected, total);
-
-  gtk_label_set_text (self->installed.selection_label, text);
-  gtk_action_bar_set_revealed (self->installed.selection_footer, selected > 0);
-  gtk_widget_set_visible (GTK_WIDGET (self->installed.selection_delete),
-                          selected > 0);
-  gtk_widget_set_sensitive (GTK_WIDGET (self->installed.selection_delete),
-                            selected > 0);
-}
-
-void
-content_page_toggle_edit (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  NuvashaLauncherContentPage *self = user_data;
-  (void) self;
 }
 
 /* The first @max_sentences sentences of @text (0 for all of it), with
@@ -355,7 +288,6 @@ file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
   AdwActionRow *row = ADW_ACTION_ROW (g_object_ref_sink (adw_action_row_new ()));
   gtk_widget_add_css_class (GTK_WIDGET (row), "nuvashalauncher-content-file-row");
   GtkWidget *icon = nuvashalauncher_icon_widget_new (nuvashalauncher_content_type_icon (self->type));
-  GtkCheckButton *check = GTK_CHECK_BUTTON (gtk_check_button_new ());
 
   /* Treat file names and paths as plain text. The tooltip contains the path;
      the subtitle contains project metadata when available. */
@@ -371,45 +303,8 @@ file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
   /* Use a fixed icon square and replace the placeholder when project data
      becomes available. */
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-
-  GtkStack *icon_stack = GTK_STACK (gtk_stack_new ());
-  GtkBox *badge_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-  GtkImage *check_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("object-select-symbolic"));
-
-  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-content-icon");
-  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-select-badge");
-  gtk_widget_set_size_request (GTK_WIDGET (badge_box), NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
-  gtk_widget_set_valign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
-  gtk_widget_set_hexpand (GTK_WIDGET (badge_box), TRUE);
-  gtk_widget_set_vexpand (GTK_WIDGET (badge_box), TRUE);
-
-  gtk_image_set_pixel_size (check_icon, 24);
-  gtk_widget_set_valign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
-  gtk_widget_set_hexpand (GTK_WIDGET (check_icon), TRUE);
-  gtk_widget_set_vexpand (GTK_WIDGET (check_icon), TRUE);
-  gtk_box_append (badge_box, GTK_WIDGET (check_icon));
-
-  gtk_stack_add_named (icon_stack, GTK_WIDGET (icon), "icon");
-  gtk_stack_add_named (icon_stack, GTK_WIDGET (badge_box), "check");
-  gtk_stack_set_visible_child_name (icon_stack, "icon");
-  gtk_widget_set_size_request (GTK_WIDGET (icon_stack), NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
-  gtk_widget_set_valign (GTK_WIDGET (icon_stack), GTK_ALIGN_CENTER);
-
-  gtk_check_button_set_child (check, GTK_WIDGET (icon_stack));
-  gtk_widget_add_css_class (GTK_WIDGET (check), "nuvashalauncher-select-checkbox");
-  gtk_widget_set_valign (GTK_WIDGET (check), GTK_ALIGN_CENTER);
-  g_object_set_data (G_OBJECT (check), "nuvashalauncher-icon-stack", icon_stack);
-
-  gtk_widget_set_visible (GTK_WIDGET (check), TRUE);
-  g_object_set_data_full (G_OBJECT (check), "nuvashalauncher-file-path",
-                          g_strdup (file->path), g_free);
-  g_signal_connect (check, "toggled",
-                    G_CALLBACK (on_content_file_check_toggled), self);
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-icon", icon);
-  g_object_set_data (G_OBJECT (row), "nuvashalauncher-file-check", check);
 
   /* Only a mod is something that can be turned off: a resource pack or a
      shader pack is loaded whenever it is present, so neither has a
@@ -456,9 +351,6 @@ file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
      know where the file came from. */
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-file", file);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-page", self);
-  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
-  g_signal_connect (row, "activated",
-                    G_CALLBACK (on_content_file_row_activated), self);
 
   file_row_refresh (GTK_WIDGET (row));
 

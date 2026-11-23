@@ -228,9 +228,6 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
               page->install_model->updating = FALSE;
             }
 
-          if (page->install_model->picking)
-            batch_stopped (page);
-
           /* A cancel is not a failure worth a message. */
           if (!cancelled)
              show_error (page, _("The file could not be installed"), error);
@@ -314,9 +311,6 @@ fetch_next (FetchRun *run)
             /* One update of the batch is in: start the next one. The
                list is read once, when the whole batch is done. */
             update_batch_next (self);
-          else if (self->install_model->picking)
-
-            batch_next (self);
           else
             reload_installed (self);
         }
@@ -602,9 +596,8 @@ static void
 show_plan (NuvashaLauncherContentPage *self, PlanRun *plan)
 {
   /* An update of the whole list was confirmed once, as a whole: this plan
-     is not asked for again, it is simply carried out. So is one pick of a
-     confirmed batch of them. */
-  if (self->install_model->updating || self->install_model->picking)
+     is not asked for again, it is simply carried out. */
+  if (self->install_model->updating)
     {
       start_fetch (self, plan->files);
       plan->files = NULL; /* the fetch owns them now */

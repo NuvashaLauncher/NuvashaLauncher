@@ -29,7 +29,6 @@ test_row_toggle_and_selection_keep_state_consistent (void)
   NuvashaLauncherContentFile *file = NULL;
   GtkWidget *row = NULL;
   GtkSwitch *sw = NULL;
-  GtkCheckButton *check = NULL;
 
   g_assert_no_error (error);
   g_assert_nonnull (instance);
@@ -62,10 +61,7 @@ test_row_toggle_and_selection_keep_state_consistent (void)
 
   sw = GTK_SWITCH (g_object_get_data (G_OBJECT (row),
                                       "nuvashalauncher-mod-switch"));
-  check = GTK_CHECK_BUTTON (g_object_get_data (G_OBJECT (row),
-                                               "nuvashalauncher-file-check"));
   g_assert_nonnull (sw);
-  g_assert_nonnull (check);
 
   gtk_switch_set_active (sw, FALSE);
   g_assert_false (gtk_switch_get_active (sw));
@@ -75,17 +71,7 @@ test_row_toggle_and_selection_keep_state_consistent (void)
   g_assert_null (g_hash_table_lookup (page->installed.rows, enabled_path));
   g_assert_true (g_hash_table_lookup (page->installed.rows, disabled_path) == row);
 
-  gtk_check_button_set_active (check, TRUE);
-  g_assert_cmpuint (g_hash_table_size (page->installed.selected_paths), ==, 1);
-  g_assert_true (gtk_action_bar_get_revealed (page->installed.selection_footer));
-  g_assert_true (gtk_widget_get_visible (
-    GTK_WIDGET (page->installed.selection_delete)));
-
-  gtk_check_button_set_active (check, FALSE);
-  g_assert_cmpuint (g_hash_table_size (page->installed.selected_paths), ==, 0);
-  g_assert_false (gtk_action_bar_get_revealed (page->installed.selection_footer));
-
-  g_print ("ok - installed row toggles and selection preserve filesystem maps\n");
+  g_print ("ok - installed row toggles preserve filesystem maps\n");
   g_clear_object (&page);
   g_remove (disabled_path);
   g_remove (mods);

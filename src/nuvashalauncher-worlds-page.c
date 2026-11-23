@@ -58,10 +58,6 @@ struct _NuvashaLauncherWorldsPage {
   AdwClamp *header_search_clamp;
   GPtrArray *rows;
   GPtrArray *worlds;
-  GHashTable *selected_paths;
-  GtkActionBar *selection_footer;
-  GtkLabel *selection_label;
-  GtkButton *selection_delete;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherWorldsPage, nuvashalauncher_worlds_page, GTK_TYPE_BOX)
@@ -477,149 +473,14 @@ popover_menu_button (const char *label, WorldEntry *w, GtkWidget *popover,
   return btn;
 }
 
-static void
-worlds_page_update_selection (NuvashaLauncherWorldsPage *self)
-{
-  guint selected = self->selected_paths != NULL
-    ? g_hash_table_size (self->selected_paths)
-    : 0;
-  guint total = self->worlds != NULL ? self->worlds->len : 0;
-
-  nuvashalauncher_ui_selection_footer_update (self->selection_footer,
-                                            self->selection_label,
-                                            self->selection_delete,
-                                            selected, total);
-}
-
-static void
-worlds_page_clear_selection (NuvashaLauncherWorldsPage *self)
-{
-  if (self->selected_paths != NULL)
-    g_hash_table_remove_all (self->selected_paths);
-  for (guint i = 0; i < self->rows->len; i++)
-    {
-      GtkWidget *row = g_ptr_array_index (self->rows, i);
-      GtkCheckButton *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-world-check");
-      if (check != NULL && gtk_check_button_get_active (check))
-        gtk_check_button_set_active (check, FALSE);
-    }
-  worlds_page_update_selection (self);
-}
-
-static void
-on_world_check_toggled (GtkCheckButton *check, gpointer user_data)
-{
-  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (user_data);
-  GtkStack *stack = g_object_get_data (G_OBJECT (check), "nuvashalauncher-icon-stack");
-  const char *path = g_object_get_data (G_OBJECT (check), "nuvashalauncher-world-path");
-  gboolean active = gtk_check_button_get_active (check);
-
-  if (stack != NULL)
-    gtk_stack_set_visible_child_name (stack, active ? "check" : "icon");
-  if (path == NULL || self->selected_paths == NULL)
-    return;
-
-  if (active)
-    g_hash_table_add (self->selected_paths, g_strdup (path));
-  else
-    g_hash_table_remove (self->selected_paths, path);
-  worlds_page_update_selection (self);
-}
-
-static void
-on_world_row_activated (AdwActionRow *row, gpointer user_data G_GNUC_UNUSED)
-{
-  GtkCheckButton *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-world-check");
-
-  if (check != NULL)
-    gtk_check_button_set_active (check, !gtk_check_button_get_active (check));
-}
-
-typedef struct {
-  NuvashaLauncherWorldsPage *page;
-  GPtrArray *paths;
-} DeleteWorldsData;
-
-static void
-on_delete_selected_worlds_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
-                                    const char *response,
-                                    gpointer user_data)
-{
-  DeleteWorldsData *d = user_data;
-
-  if (g_strcmp0 (response, "delete") == 0)
-    {
-      for (guint i = 0; i < d->paths->len; i++)
-        nuvashalauncher_fs_remove_tree (g_ptr_array_index (d->paths, i));
-      if (d->page->selected_paths != NULL)
-        g_hash_table_remove_all (d->page->selected_paths);
-      nuvashalauncher_worlds_page_reload (d->page);
-    }
-  g_ptr_array_unref (d->paths);
-  g_free (d);
-}
-
-static void
-on_worlds_selection_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
-{
-  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (user_data);
-  guint count;
-  GHashTableIter iter;
-  gpointer key;
-
-  if (self->selected_paths == NULL)
-    return;
-  count = g_hash_table_size (self->selected_paths);
-  if (count == 0)
-    return;
-
-  GPtrArray *paths = g_ptr_array_new_with_free_func (g_free);
-  g_autoptr (GString) names = g_string_new (NULL);
-  g_hash_table_iter_init (&iter, self->selected_paths);
-  while (g_hash_table_iter_next (&iter, &key, NULL))
-    {
-      const char *path = key;
-      const char *label = path;
-      for (guint i = 0; i < self->worlds->len; i++)
-        {
-          WorldEntry *w = g_ptr_array_index (self->worlds, i);
-          if (g_strcmp0 (w->path, path) == 0 && w->name != NULL)
-            {
-              label = w->name;
-              break;
-            }
-        }
-      if (names->len > 0)
-        g_string_append_c (names, '\n');
-      g_string_append (names, label);
-      g_ptr_array_add (paths, g_strdup (path));
-    }
-
-  g_autofree char *title = g_strdup_printf (_("Delete selected %s?"), "worlds");
-  g_autofree char *body = g_strdup_printf (_("Selected %s:\n%s"), _("Worlds"), names->str);
-
-  AdwAlertDialog *alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (title, body));
-  adw_alert_dialog_add_responses (alert,
-                                  "cancel", _("Cancel"),
-                                  "delete", _("Delete"),
-                                  NULL);
-  adw_alert_dialog_set_response_appearance (alert, "delete", ADW_RESPONSE_DESTRUCTIVE);
-  adw_alert_dialog_set_default_response (alert, "cancel");
-
-  DeleteWorldsData *d = g_new0 (DeleteWorldsData, 1);
-  d->page = self;
-  d->paths = paths;
-  g_signal_connect (alert, "response", G_CALLBACK (on_delete_selected_worlds_response), d);
-  adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
-}
-
 static GtkWidget *
 build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w)
 {
-  g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-file-row.ui");
-  AdwActionRow *row = ADW_ACTION_ROW (g_object_ref (
-    gtk_builder_get_object (builder, "row")));
+  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_action_row_set_subtitle_lines (row, 2);
+  adw_action_row_set_subtitle_selectable (row, FALSE);
+  gtk_widget_add_css_class (GTK_WIDGET (row), "nuvashalauncher-content-file-row");
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), w->name);
 
   g_autoptr (GString) sub = g_string_new (game_type_label (w->game_type));
@@ -638,23 +499,8 @@ build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w)
   GtkWidget *icon = nuvashalauncher_icon_widget_new ("applications-games-symbolic");
   if (w->icon_path != NULL)
     nuvashalauncher_icon_widget_set_file (icon, w->icon_path);
-  GtkStack *icon_stack = NULL;
-  GtkCheckButton *check = nuvashalauncher_ui_selection_prefix_new (icon, &icon_stack);
-  gboolean selected = self->selected_paths != NULL && w->path != NULL &&
-                      g_hash_table_contains (self->selected_paths, w->path);
-  g_object_set_data (G_OBJECT (check), "nuvashalauncher-icon-stack", icon_stack);
-  g_object_set_data_full (G_OBJECT (check), "nuvashalauncher-world-path",
-                          g_strdup (w->path), g_free);
-  if (selected)
-    {
-      gtk_check_button_set_active (check, TRUE);
-      gtk_stack_set_visible_child_name (icon_stack, "check");
-    }
-  g_signal_connect (check, "toggled", G_CALLBACK (on_world_check_toggled), self);
-  adw_action_row_add_prefix (row, GTK_WIDGET (check));
-  g_object_set_data (G_OBJECT (row), "nuvashalauncher-world-check", check);
-  gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
-  g_signal_connect (row, "activated", G_CALLBACK (on_world_row_activated), self);
+  gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
+  adw_action_row_add_prefix (row, icon);
 
   GtkWidget *join_btn = gtk_button_new_from_icon_name ("media-playback-start-symbolic");
   gtk_widget_add_css_class (join_btn, "flat");
@@ -745,7 +591,6 @@ rebuild_world_rows (NuvashaLauncherWorldsPage *self)
   filter_world_rows (self);
   adw_view_stack_set_visible_child_name (
     self->stack, self->worlds->len > 0 ? "list" : "empty");
-  worlds_page_update_selection (self);
 }
 
 static void
@@ -771,13 +616,6 @@ on_world_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
   if (keyval == GDK_KEY_Escape && nuvashalauncher_worlds_page_is_search_visible (self))
     {
       nuvashalauncher_worlds_page_set_search_visible (self, FALSE);
-      return GDK_EVENT_STOP;
-    }
-  if (keyval == GDK_KEY_Escape &&
-      self->selected_paths != NULL &&
-      g_hash_table_size (self->selected_paths) > 0)
-    {
-      worlds_page_clear_selection (self);
       return GDK_EVENT_STOP;
     }
   return GDK_EVENT_PROPAGATE;
@@ -1060,7 +898,6 @@ nuvashalauncher_worlds_page_dispose (GObject *object)
   g_clear_pointer (&self->saves_dir, g_free);
   g_clear_pointer (&self->rows, g_ptr_array_unref);
   g_clear_pointer (&self->worlds, g_ptr_array_unref);
-  g_clear_pointer (&self->selected_paths, g_hash_table_unref);
 
   G_OBJECT_CLASS (nuvashalauncher_worlds_page_parent_class)->dispose (object);
 }
@@ -1076,7 +913,6 @@ nuvashalauncher_worlds_page_init (NuvashaLauncherWorldsPage *self)
 {
   self->rows = g_ptr_array_new ();
   self->worlds = g_ptr_array_new_with_free_func ((GDestroyNotify) world_entry_free);
-  self->selected_paths = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (self), GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
 }
@@ -1160,12 +996,6 @@ nuvashalauncher_worlds_page_new (NuvashaLauncherInstance *instance,
   adw_view_stack_add_named (self->stack, GTK_WIDGET (scroller), "list");
   adw_view_stack_add_named (self->stack, GTK_WIDGET (empty), "empty");
   gtk_box_append (inner, GTK_WIDGET (self->stack));
-
-  self->selection_footer = nuvashalauncher_ui_selection_footer_new (
-    &self->selection_label, &self->selection_delete);
-  g_signal_connect (self->selection_delete, "clicked",
-                    G_CALLBACK (on_worlds_selection_delete_clicked), self);
-  gtk_box_append (inner, GTK_WIDGET (self->selection_footer));
 
   self->toasts = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (self->toasts, GTK_WIDGET (inner));

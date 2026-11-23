@@ -112,10 +112,6 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
   AdwSpinner *update_spinner = ADW_SPINNER (adw_spinner_new ());
    AdwPreferencesGroup *group =
      ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
-   GtkActionBar *selection_footer = GTK_ACTION_BAR (gtk_action_bar_new ());
-   GtkLabel *selection_label = GTK_LABEL (gtk_label_new (""));
-   GtkButton *selection_delete = GTK_BUTTON (gtk_button_new_from_icon_name (
-     "edit-delete-symbolic"));
    GtkButton *update_all = GTK_BUTTON (gtk_button_new ());
     GtkPopover *update_popover = GTK_POPOVER (gtk_popover_new ());
     GtkScrolledWindow *update_scroller = GTK_SCROLLED_WINDOW (
@@ -197,16 +193,6 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
      switched, so this one is held here: without it, taking it out would
      be the last reference to it and would destroy the box. */
    self->installed.actions = g_object_ref_sink (GTK_BOX (actions));
-   self->installed.selection_footer = selection_footer;
-   self->installed.selection_label = selection_label;
-   self->installed.selection_delete = selection_delete;
-   gtk_action_bar_set_center_widget (selection_footer, GTK_WIDGET (selection_label));
-   gtk_action_bar_pack_end (selection_footer, GTK_WIDGET (selection_delete));
-   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (selection_delete), _("Delete"));
-   gtk_widget_set_visible (GTK_WIDGET (selection_delete), FALSE);
-   gtk_action_bar_set_revealed (selection_footer, FALSE);
-   g_signal_connect (selection_delete, "clicked",
-                     G_CALLBACK (content_page_bulk_delete), self);
   g_object_ref_sink (actions);
 
    self->installed.status = ADW_STATUS_PAGE (adw_status_page_new ());
@@ -254,7 +240,6 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
   gtk_box_append (GTK_BOX (content), GTK_WIDGET (scroller));
   gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);
    gtk_box_append (GTK_BOX (box), GTK_WIDGET (content));
-   gtk_box_append (GTK_BOX (box), GTK_WIDGET (selection_footer));
 
   adw_view_stack_add_titled_with_icon (ADW_VIEW_STACK (self->stack), GTK_WIDGET (box),
                                         "installed", _("Installed"),
@@ -279,9 +264,6 @@ nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspe
 
   /* The row shows the actions of whichever list is on top. */
   nuvashalauncher_content_page_move_actions_into_bar (self, browsing);
-
-  if (!browsing)
-    nuvashalauncher_content_page_clear_picks (self);
 
   if (!browsing || self->browse.model->searched)
     return;
@@ -324,13 +306,6 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
   GtkBox *retry_row = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkLabel *retry_label = GTK_LABEL (gtk_label_new (NULL));
   GtkButton *retry_button = GTK_BUTTON (gtk_button_new_with_label (_("Retry")));
-   GtkActionBar *foot = GTK_ACTION_BAR (gtk_action_bar_new ());
-  GtkButton *pick_button = GTK_BUTTON (gtk_button_new ());
-  GtkImage *pick_icon = GTK_IMAGE (gtk_image_new_from_icon_name (
-      "folder-download-symbolic"));
-  GtkOverlay *pick_overlay = GTK_OVERLAY (gtk_overlay_new ());
-  GtkLabel *pick_badge = GTK_LABEL (gtk_label_new (NULL));
-  g_autofree char *pick_accessible_label = NULL;
   AdwPreferencesGroup *group =
     ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
 
@@ -421,45 +396,6 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
   gtk_box_append (GTK_BOX (content), GTK_WIDGET (scroller));
   gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);
   gtk_box_append (GTK_BOX (box), GTK_WIDGET (content));
-
-  /* The foot of the list: the button that installs everything the
-     checkmarks of the versions have on, and nothing else. It is a plain
-     download icon at the left end of the row, where the actions of the
-     other list sit. */
-  gtk_widget_add_css_class (GTK_WIDGET (pick_button), "flat");
-  gtk_widget_set_valign (GTK_WIDGET (pick_button), GTK_ALIGN_CENTER);
-   pick_accessible_label = g_strdup_printf (
-       _("Install the selected %s?"), nuvashalauncher_content_type_title (self->type));
-   gtk_accessible_update_property (GTK_ACCESSIBLE (pick_button),
-                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                   pick_accessible_label, -1);
-  gtk_button_set_child (GTK_BUTTON (pick_button), GTK_WIDGET (pick_icon));
-   g_signal_connect_object (pick_button, "clicked",
-                            G_CALLBACK (nuvashalauncher_content_page_on_pick_button_clicked), self, 0);
-
-   /* Keep the count attached to the button without putting it inside the
-      button's hit target. The overlay keeps it correctly positioned at
-      every scale without changing the button's width. */
-   gtk_widget_add_css_class (GTK_WIDGET (pick_badge), "caption-heading");
-   gtk_widget_add_css_class (GTK_WIDGET (pick_badge), "numeric");
-   gtk_widget_set_valign (GTK_WIDGET (pick_badge), GTK_ALIGN_START);
-   gtk_widget_set_halign (GTK_WIDGET (pick_badge), GTK_ALIGN_END);
-   gtk_widget_set_margin_top (GTK_WIDGET (pick_badge), 1);
-   gtk_widget_set_margin_end (GTK_WIDGET (pick_badge), 1);
-
-   gtk_overlay_set_child (GTK_OVERLAY (pick_overlay), GTK_WIDGET (pick_button));
-   gtk_overlay_add_overlay (GTK_OVERLAY (pick_overlay), GTK_WIDGET (pick_badge));
-    gtk_action_bar_pack_start (foot, GTK_WIDGET (pick_overlay));
-    gtk_action_bar_set_revealed (foot, FALSE);
-  gtk_box_append (GTK_BOX (box), GTK_WIDGET (foot));
-
-   self->pick_button = GTK_BUTTON (pick_button);
-   self->pick_badge = GTK_LABEL (pick_badge);
-   self->pick_footer = foot;
-
-  /* Nothing is picked yet: the button starts where the list starts, with
-     no number on it and nothing to install. */
-  nuvashalauncher_content_page_refresh_picks (self);
 
   /* The bottom of the list: a spinner while the next page is on its way
      and a retry row when one failed. Neither is a button the user has to

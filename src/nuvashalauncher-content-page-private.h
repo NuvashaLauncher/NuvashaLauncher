@@ -20,10 +20,6 @@ typedef struct {
   NuvashaLauncherTaskScope *operation;
 } PageWatch;
 
-typedef struct _Pick Pick;
-void pick_free (Pick *pick);
-void batch_next (NuvashaLauncherContentPage *self);
-void batch_stopped (NuvashaLauncherContentPage *self);
 void update_batch_next (NuvashaLauncherContentPage *self);
 void plan_stopped (NuvashaLauncherContentPage *self);
 
@@ -32,9 +28,6 @@ void page_watch_free (PageWatch *watch);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (PageWatch, page_watch_free)
 void take_rows_out (GList **rows, AdwPreferencesGroup *group);
 void file_row_refresh (GtkWidget *row);
-void content_page_toggle_edit (GtkButton *button, gpointer user_data);
-void content_page_update_selection (NuvashaLauncherContentPage *self);
-void content_page_bulk_delete (GtkButton *button, gpointer user_data);
 void installed_filter_rows (NuvashaLauncherContentPage *self);
 GtkWidget *file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file);
 void load_visible_icons (NuvashaLauncherContentPage *self);
@@ -98,10 +91,6 @@ struct _NuvashaLauncherContentPage
     GCancellable *scan;
     gboolean loaded;
     gboolean identifying;
-    GtkActionBar *selection_footer;
-    GtkLabel *selection_label;
-    GtkButton *selection_delete;
-    GHashTable *selected_paths; /* path -> TRUE */
     guint index_flush_source;
   } installed;
   GtkBox *browse_actions;
@@ -124,12 +113,6 @@ struct _NuvashaLauncherContentPage
     GList *result_rows;
     NuvashaLauncherContentBrowserModel *model;
   } browse;
-
-  /* Browse state is grouped below. */
-
-  GtkButton *pick_button;
-  GtkLabel *pick_badge;
-  GtkActionBar *pick_footer;
 };
 
 
@@ -158,8 +141,6 @@ gboolean nuvashalauncher_content_page_on_search_key (GtkEventControllerKey *cont
                                          gpointer user_data);
 void nuvashalauncher_content_page_on_filter_clicked (GtkWidget *popover,
                                           gpointer user_data);
-void nuvashalauncher_content_page_on_pick_button_clicked (GtkButton *button,
-                                              gpointer user_data);
 void nuvashalauncher_content_page_on_retry_page_clicked (GtkButton *button,
                                              gpointer user_data);
 void nuvashalauncher_content_page_on_scroll_changed (GtkAdjustment *adjustment,
@@ -168,8 +149,6 @@ gboolean nuvashalauncher_content_page_on_content_search_key (GtkEventControllerK
                                                  guint keyval, guint keycode,
                                                  GdkModifierType state,
                                                  gpointer user_data);
-void nuvashalauncher_content_page_refresh_picks (NuvashaLauncherContentPage *self);
-void nuvashalauncher_content_page_clear_picks (NuvashaLauncherContentPage *self);
 void nuvashalauncher_content_page_reset_for_tab_switch (NuvashaLauncherContentPage *self);
 void nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, gboolean append);
 void nuvashalauncher_content_page_on_stack_switched (GObject *stack, GParamSpec *pspec,
@@ -192,9 +171,6 @@ void nuvashalauncher_content_page_quick_install_project (NuvashaLauncherContentP
 void nuvashalauncher_content_page_choose_version (NuvashaLauncherContentPage *self,
                                                   NuvashaLauncherModrinthProject *project);
 const char *version_name_of (NuvashaLauncherModrinthVersion *version);
-void pick_add (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version);
-void pick_remove (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version);
-void refresh_pick_check (NuvashaLauncherContentPage *self);
 gboolean nuvashalauncher_content_page_toggle_file (NuvashaLauncherContentPage *self,
                                                    NuvashaLauncherContentFile *file);
 const char *nuvashalauncher_content_page_file_display_name (NuvashaLauncherContentFile *file);

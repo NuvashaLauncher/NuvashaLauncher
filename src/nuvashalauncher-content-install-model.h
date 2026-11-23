@@ -9,7 +9,7 @@
 
 typedef struct _NuvashaLauncherContentInstallModel NuvashaLauncherContentInstallModel;
 
-NuvashaLauncherContentInstallModel *nuvashalauncher_content_install_model_new (GDestroyNotify pick_free);
+NuvashaLauncherContentInstallModel *nuvashalauncher_content_install_model_new (void);
 void nuvashalauncher_content_install_model_free (NuvashaLauncherContentInstallModel *model);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherContentInstallModel,
@@ -17,24 +17,10 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (NuvashaLauncherContentInstallModel,
 
 struct _NuvashaLauncherContentInstallModel
 {
-  GDestroyNotify pick_free;
   gboolean updating;
   GPtrArray *updates; /* UpdateItem* */
   guint update_index;
-  GPtrArray *picks;   /* Pick* */
-  GPtrArray *batch;   /* Pick*, the list being installed */
-  gboolean picking;
-  guint pick_index;
 };
-
-void nuvashalauncher_content_install_model_clear_picks (
-  NuvashaLauncherContentInstallModel *model);
-void nuvashalauncher_content_install_model_start_pick_batch (
-  NuvashaLauncherContentInstallModel *model);
-gpointer nuvashalauncher_content_install_model_next_pick (
-  NuvashaLauncherContentInstallModel *model);
-guint nuvashalauncher_content_install_model_finish_picks (
-  NuvashaLauncherContentInstallModel *model);
 
 void nuvashalauncher_content_install_model_start_updates (
   NuvashaLauncherContentInstallModel *model,

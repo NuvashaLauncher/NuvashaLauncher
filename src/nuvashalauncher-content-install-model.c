@@ -5,13 +5,9 @@
 #include "nuvashalauncher-content-install-model.h"
 
 NuvashaLauncherContentInstallModel *
-nuvashalauncher_content_install_model_new (GDestroyNotify pick_free)
+nuvashalauncher_content_install_model_new (void)
 {
-  NuvashaLauncherContentInstallModel *model = g_new0 (NuvashaLauncherContentInstallModel, 1);
-
-  model->pick_free = pick_free;
-  model->picks = g_ptr_array_new_with_free_func (pick_free);
-  return model;
+  return g_new0 (NuvashaLauncherContentInstallModel, 1);
 }
 
 void
@@ -21,59 +17,7 @@ nuvashalauncher_content_install_model_free (NuvashaLauncherContentInstallModel *
     return;
 
   g_clear_pointer (&model->updates, g_ptr_array_unref);
-  g_clear_pointer (&model->picks, g_ptr_array_unref);
-  g_clear_pointer (&model->batch, g_ptr_array_unref);
   g_free (model);
-}
-
-void
-nuvashalauncher_content_install_model_clear_picks (
-  NuvashaLauncherContentInstallModel *model)
-{
-  g_return_if_fail (model != NULL);
-
-  g_clear_pointer (&model->picks, g_ptr_array_unref);
-  model->picks = g_ptr_array_new_with_free_func (model->pick_free);
-}
-
-void
-nuvashalauncher_content_install_model_start_pick_batch (
-  NuvashaLauncherContentInstallModel *model)
-{
-  g_return_if_fail (model != NULL);
-
-  g_clear_pointer (&model->batch, g_ptr_array_unref);
-  model->batch = g_steal_pointer (&model->picks);
-  model->picks = g_ptr_array_new_with_free_func (model->pick_free);
-  model->picking = TRUE;
-  model->pick_index = 0;
-}
-
-gpointer
-nuvashalauncher_content_install_model_next_pick (
-  NuvashaLauncherContentInstallModel *model)
-{
-  g_return_val_if_fail (model != NULL, NULL);
-
-  if (model->batch == NULL || model->pick_index >= model->batch->len)
-    return NULL;
-
-  return g_ptr_array_index (model->batch, model->pick_index++);
-}
-
-guint
-nuvashalauncher_content_install_model_finish_picks (
-  NuvashaLauncherContentInstallModel *model)
-{
-  guint done;
-
-  g_return_val_if_fail (model != NULL, 0);
-
-  done = model->batch != NULL ? model->batch->len : 0;
-  g_clear_pointer (&model->batch, g_ptr_array_unref);
-  model->picking = FALSE;
-  model->pick_index = 0;
-  return done;
 }
 
 void

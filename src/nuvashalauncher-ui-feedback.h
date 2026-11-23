@@ -31,15 +31,6 @@ void nuvashalauncher_ui_error_toast (GtkWidget *page, GtkWidget *overlay,
 void nuvashalauncher_ui_set_action_label (GtkWidget *button, const char *label);
 void nuvashalauncher_ui_prepare_icon_button (GtkWidget *button, const char *label);
 void nuvashalauncher_ui_prepare_dialog_content (GtkWidget *content);
-GtkCheckButton *nuvashalauncher_ui_selection_prefix_new (GtkWidget *icon,
-                                                        GtkStack **out_stack);
-GtkActionBar *nuvashalauncher_ui_selection_footer_new (GtkLabel **out_label,
-                                                       GtkButton **out_delete_button);
-void nuvashalauncher_ui_selection_footer_update (GtkActionBar *footer,
-                                                 GtkLabel *label,
-                                                 GtkButton *delete_button,
-                                                 guint selected,
-                                                 guint total);
 
 G_END_DECLS
 

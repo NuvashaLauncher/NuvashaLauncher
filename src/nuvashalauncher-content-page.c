@@ -47,7 +47,6 @@ nuvashalauncher_content_page_size_allocate (GtkWidget *widget, int width, int he
 }
 
 void update_batch_next (NuvashaLauncherContentPage *self);
-void batch_next (NuvashaLauncherContentPage *self);
 void plan_stopped (NuvashaLauncherContentPage *self);
 
 static void
@@ -193,12 +192,6 @@ nuvashalauncher_content_page_new_with_base (NuvashaLauncherInstance *instance,
   self->loader = loader != NULL ? g_strdup (loader) : NULL;
 
   self->installed.identifying = FALSE;
-  self->install_model->batch = NULL;
-  self->install_model->picking = FALSE;
-  self->install_model->pick_index = 0;
-
-  self->pick_button = NULL;
-  self->pick_badge = NULL;
 
   self->stack = ADW_VIEW_STACK (adw_view_stack_new ());
   gtk_widget_set_vexpand (GTK_WIDGET (self->stack), TRUE);
@@ -274,15 +267,6 @@ nuvashalauncher_content_page_dispose (GObject *object)
   g_clear_object (&self->browse.search_bar);
   self->browse.search_entry = NULL;
 
-  self->pick_button = NULL;
-  self->pick_badge = NULL;
-
-  /* A batch that was still being installed is not applied any more: the
-     plans and fetches hold the page weakly and stop. */
-  g_clear_pointer (&self->install_model->batch, g_ptr_array_unref);
-  self->install_model->picking = FALSE;
-  self->install_model->pick_index = 0;
-
   if (self->browse.model->debounce_source != 0)
     {
       /* Through the model, which is where this source is registered: a
@@ -329,7 +313,6 @@ nuvashalauncher_content_page_finalize (GObject *object)
 
   g_clear_pointer (&self->installed.files, g_ptr_array_unref);
   g_clear_pointer (&self->installed.rows, g_hash_table_unref);
-  g_clear_pointer (&self->installed.selected_paths, g_hash_table_unref);
   nuvashalauncher_content_browser_model_free (self->browse.model);
   self->browse.model = NULL;
   nuvashalauncher_content_install_model_free (self->install_model);
@@ -356,13 +339,7 @@ nuvashalauncher_content_page_class_init (NuvashaLauncherContentPageClass *klass)
 static void
 nuvashalauncher_content_page_init (NuvashaLauncherContentPage *self)
 {
-  /* Keep the selected-file list and required loader state. Everything else
-     is built in nuvashalauncher_content_page_new(), which knows the instance and the
-     kind of content. */
-  self->install_model =
-    nuvashalauncher_content_install_model_new ((GDestroyNotify) pick_free);
-  self->installed.selected_paths = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                          g_free, NULL);
+  self->install_model = nuvashalauncher_content_install_model_new ();
 }
 
 PageWatch *

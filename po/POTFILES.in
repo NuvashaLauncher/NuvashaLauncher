@@ -18,7 +18,6 @@ src/nuvashalauncher-content-page-identify.c
 src/nuvashalauncher-content-page-install.c
 src/nuvashalauncher-content-page-installed-delete.c
 src/nuvashalauncher-content-page-installed.c
-src/nuvashalauncher-content-page-picks.c
 src/nuvashalauncher-content-page-ui.c
 src/nuvashalauncher-content-page-updates.c
 src/nuvashalauncher-content-page.c

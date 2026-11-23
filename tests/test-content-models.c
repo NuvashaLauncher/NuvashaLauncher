@@ -87,29 +87,11 @@ test_install_model (void)
 {
   freed = 0;
   g_autoptr (NuvashaLauncherContentInstallModel) model =
-    nuvashalauncher_content_install_model_new (count_free);
+    nuvashalauncher_content_install_model_new ();
 
-  g_assert_nonnull (model->picks);
   g_assert_null (model->updates);
-  g_assert_null (model->batch);
   g_assert_false (model->updating);
-  g_assert_false (model->picking);
   g_assert_cmpuint (model->update_index, ==, 0);
-  g_assert_cmpuint (model->pick_index, ==, 0);
-
-  g_ptr_array_add (model->picks, g_strdup ("selected-project"));
-  g_ptr_array_add (model->picks, g_strdup ("second-project"));
-  g_assert_cmpuint (model->picks->len, ==, 2);
-
-  nuvashalauncher_content_install_model_start_pick_batch (model);
-  g_assert_true (model->picking);
-  g_assert_cmpuint (model->picks->len, ==, 0);
-  g_assert_cmpstr (nuvashalauncher_content_install_model_next_pick (model), ==, "selected-project");
-  g_assert_cmpstr (nuvashalauncher_content_install_model_next_pick (model), ==, "second-project");
-  g_assert_null (nuvashalauncher_content_install_model_next_pick (model));
-  g_assert_cmpuint (nuvashalauncher_content_install_model_finish_picks (model), ==, 2);
-  g_assert_false (model->picking);
-  g_assert_cmpuint (freed, ==, 2);
 
   GPtrArray *updates = g_ptr_array_new_with_free_func (count_free);
   g_ptr_array_add (updates, g_strdup ("update-a"));
@@ -125,7 +107,7 @@ test_install_model (void)
   g_assert_null (nuvashalauncher_content_install_model_next_update (model, &idx, &total));
   g_assert_cmpuint (nuvashalauncher_content_install_model_finish_updates (model), ==, 1);
   g_assert_false (model->updating);
-  g_assert_cmpuint (freed, ==, 3);
+  g_assert_cmpuint (freed, ==, 1);
 }
 
 int

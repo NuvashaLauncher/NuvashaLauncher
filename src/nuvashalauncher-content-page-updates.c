@@ -191,8 +191,6 @@ plan_stopped (NuvashaLauncherContentPage *self)
 {
   if (self->install_model->updating)
     update_batch_next (self);
-  else if (self->install_model->picking)
-    batch_next (self);
 }
 
 /* Handle the update confirmation result. */

@@ -466,29 +466,6 @@ nuvashalauncher_content_page_on_content_search_key (GtkEventControllerKey *contr
       g_strcmp0 (adw_view_stack_get_visible_child_name (self->stack), "installed") == 0)
     {
       close_installed_search (self);
-
-      /* Escape also leaves installed-content selection mode. Toggle the
-       * existing row checks so their handlers keep the selection table and
-       * the action bar in sync. */
-      for (GList *item = self->installed.rows_list; item != NULL; item = item->next)
-        {
-          GtkWidget *check = g_object_get_data (G_OBJECT (item->data),
-                                                "nuvashalauncher-file-check");
-          if (check != NULL &&
-              gtk_check_button_get_active (GTK_CHECK_BUTTON (check)))
-            gtk_check_button_set_active (GTK_CHECK_BUTTON (check), FALSE);
-        }
-      g_hash_table_remove_all (self->installed.selected_paths);
-      content_page_update_selection (self);
-      return GDK_EVENT_STOP;
-    }
-
-  if (keyval == GDK_KEY_d && (state & GDK_CONTROL_MASK) &&
-      g_strcmp0 (adw_view_stack_get_visible_child_name (self->stack), "installed") == 0 &&
-      !gtk_widget_has_focus (GTK_WIDGET (self->installed.search_entry)) &&
-      g_hash_table_size (self->installed.selected_paths) > 0)
-    {
-      content_page_bulk_delete (NULL, self);
       return GDK_EVENT_STOP;
     }
 
