@@ -2,6 +2,35 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [1.5] - 2026-11-23
+
+### UI Streamlining & Selection Simplification
+- **Removal of Multi-Selection Overhead**: Removed complex multi-selection checkboxes, circular selection badge overlays, and sticky bottom selection footers across the Instance list, Worlds tab, Servers tab, and Installed Content tabs (`nuvashalauncher-content-page-installed.c`, `nuvashalauncher-worlds-page.c`, `nuvashalauncher-servers-page.c`, `nuvashalauncher-main-window-instance-row.c`).
+- **Direct Interaction Model**: Clicking an instance row now selects it immediately without intermediate badge states or row selection mode, removing the separate settings button in favor of unified context actions and cleaner row layouts.
+- **Cleanup**: Eliminated obsolete selection CSS classes from `data/nuvashalauncher.css` and removed outdated multi-selection helper modules (`nuvashalauncher-content-page-picks.c`, `nuvashalauncher-content-page-installed-delete.c`, `nuvashalauncher-ui-feedback.c`).
+
+### Performance & Background Offloading
+- **Worker-Thread JSON Parsing & Cache Encoding**: Offloaded HTTP JSON response parsing and Modrinth cache envelope serialization to background worker threads via `g_task_run_in_thread()` (`nuvashalauncher-download-json.c`, `nuvashalauncher-download-cache-operations.c`), preventing UI stutter during large API lookups and cache refreshes.
+- **Worker-Thread Asset Pre-Verification**: Moved Minecraft asset index parsing and on-disk SHA1 verification (`file_matches_sha1`) to background worker threads (`nuvashalauncher-minecraft-resolve-assets.c`), pre-populating verified hashes to skip redundant downloads and avoiding blocking main-thread I/O.
+- **Copy-on-Write (`FICLONE`) Acceleration**: Added kernel reflink cloning helpers (`nuvashalauncher_fs_try_clone_fd`, `nuvashalauncher_fs_try_clone_path` in `nuvashalauncher-fs.c`) across download cache restores, virtual asset directory copies, and world duplication, falling back gracefully to streaming copies when unsupported by the filesystem.
+- **Async World Operations**: Converted blocking world directory deletion, world renaming, and ZIP extraction to asynchronous tasks (`nuvashalauncher-worlds-page.c`), keeping the UI responsive during large world imports or deletions.
+- **Fast-Path Java Selection**: Skipped redundant candidate discovery sweeps during instance launch when an explicitly configured or currently selected Java path is already verified and valid (`nuvashalauncher-java.c`).
+- **Icon Lookup & Caching**: Upgraded installed content icon resolution to an O(1) hash table lookup, optimized startup custom icon loading with an in-memory scaled icon cache (`nuvashalauncher-main-window-instance-row.c`), and eliminated redundant file stat lookups.
+- **I/O & Link-Time Optimization**: Parallelized modpack extraction and loader artifact downloads; enabled Link-Time Optimization (`-flto=auto`) in production release builds.
+
+### Codebase Normalization & Consistency
+- **SPDX Headers & C Encapsulation**: Added standard `SPDX-License-Identifier: GPL-3.0-only` headers across 36 source and header files, and added `G_BEGIN_DECLS` / `G_END_DECLS` guards to all public library headers.
+- **Task Scope Unification**: Replaced the legacy `NuvashaLauncherOperation` wrapper with direct `NuvashaLauncherTaskScope` references throughout the codebase.
+- **Standardized UI Patterns**: Unified `AdwAlertDialog` dialog presentation using `adw_alert_dialog_choose()` and explicit markup strings, standardized delete icon naming to `"edit-delete-symbolic"`, normalized instance GObject property names with hyphens (`java-path`, `java-version`, `java-auto`, `custom-icon`), and precomputed lowercase search keys for Worlds and Servers filtering.
+- **Settings & Launching**: Centralized `GSettings` access through `nuvashalauncher_settings_open_gsettings()` and switched external link launching to asynchronous `gtk_show_uri()`.
+
+### Test Suite & CI Hardening
+- **Broadway Headless Display Fix**: Installed structured log filtering in `tests/test-filter-entry.c` via `g_log_set_writer_func()` to handle Broadway frame clock duplicate timing warnings (`gdk_frame_timings_submitted`), allowing display tests to pass cleanly in headless environments.
+- **New Unit Test Coverage**: Added dedicated unit tests for kernel `FICLONE` reflink helpers in `tests/test-fs.c`, worker-thread JSON cache encoding and error handling in `tests/test-download-cache.c`, and worker-thread asset pre-verification in `tests/test-resolve-integration.c`.
+- **Zero Warnings & Sanitizer Clean**: Maintained strict zero compiler warnings (`-std=c17 -Wall -Wextra -Wpedantic -Werror`), full pass under GCC `-fanalyzer` static analysis, and clean AddressSanitizer/UBSan/LeakSanitizer test runs.
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.4...main
+
 ## [1.4] - 2026-11-23
 
 ### Instance Management & UI
