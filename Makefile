@@ -52,7 +52,7 @@ CPPFLAGS += -DNUVASHALAUNCHER_BUILD_SCHEMA_DIR=\"$(CURDIR)/build/schemas\"
 ifeq ($(FLATPAK),1)
 CPPFLAGS += -DNUVASHALAUNCHER_FLATPAK
 endif
-LOCALES := es es_AR es_ES pt_BR pt_PT fr de it ja ko zh_CN zh_TW ru pl uk tr nl cs hu sv da fi nb ro vi id ar
+LOCALES := es es_AR es_ES pt pt_BR pt_PT fr de it ja ko zh_CN zh_TW ru pl uk tr nl cs hu sv da fi nb ro vi id ar
 LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvashalauncher.mo)
 SCHEMA_XML := data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml
 SCHEMA_COMPILED := build/schemas/gschemas.compiled

@@ -46,6 +46,7 @@ static const NuvashaLauncherLanguage languages[] = {
   { "es", N_("Español") },
   { "es_AR", N_("Español (Argentina)") },
   { "es_ES", N_("Español (España)") },
+  { "pt", N_("Português") },
   { "pt_BR", N_("Português (Brasil)") },
   { "pt_PT", N_("Português (Portugal)") },
   { "fr", N_("Français") },
