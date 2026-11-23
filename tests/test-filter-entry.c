@@ -3,6 +3,28 @@
  */
 #include "nuvashalauncher-filter-entry.h"
 #include <adwaita.h>
+#include <string.h>
+
+static GLogWriterOutput
+filter_entry_log_writer (GLogLevelFlags   log_level,
+                         const GLogField *fields,
+                         gsize            n_fields,
+                         gpointer         user_data)
+{
+  (void) user_data;
+
+  for (gsize i = 0; i < n_fields; i++)
+    {
+      if (g_strcmp0 (fields[i].key, "MESSAGE") == 0 &&
+          fields[i].value != NULL &&
+          strstr ((const char *) fields[i].value, "gdk_frame_timings_submitted") != NULL)
+        {
+          return G_LOG_WRITER_HANDLED;
+        }
+    }
+
+  return g_log_writer_default (log_level, fields, n_fields, NULL);
+}
 
 static void
 check_filter_entry (GtkEntry *entry)
@@ -84,6 +106,7 @@ test_modpack_filter_entry (void)
 int
 main (int argc, char **argv)
 {
+  g_log_set_writer_func (filter_entry_log_writer, NULL, NULL);
   g_test_init (&argc, &argv, NULL);
   if (!gtk_init_check ())
     return 77;

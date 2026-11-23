@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 
 #include "test-download-common.h"
+#include "nuvashalauncher-download-private.h"
 
 static void
 json_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
@@ -495,6 +496,90 @@ test_api_cache_cancellation (void)
   g_print ("ok - API cache requests remain cancellable\n");
 }
 
+static void
+test_api_cache_encoding_and_worker (void)
+{
+  /* 1. Test encoding with and without ETag */
+  {
+    gsize encoded_len = 0;
+    g_autofree char *encoded = nuvashalauncher_download_cache_encode (
+      "{\"test_key\":\"test_value\"}", "\"etag-42\"", &encoded_len);
+    gboolean fresh = FALSE;
+    g_autofree char *resp = NULL;
+    g_autofree char *etag = NULL;
+    g_autoptr (JsonParser) parser = NULL;
+    JsonObject *root_obj = NULL;
+
+    g_assert_nonnull (encoded);
+    g_assert_cmpuint (encoded_len, >, 0);
+
+    parser = nuvashalauncher_download_cache_parser (
+      encoded, encoded_len, NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_DAY,
+      &fresh, &resp, &etag);
+    g_assert_nonnull (parser);
+    g_assert_true (fresh);
+    g_assert_cmpstr (resp, ==, "{\"test_key\":\"test_value\"}");
+    g_assert_cmpstr (etag, ==, "\"etag-42\"");
+
+    root_obj = json_node_get_object (json_parser_get_root (parser));
+    g_assert_nonnull (root_obj);
+    g_assert_cmpstr (json_object_get_string_member (root_obj, "test_key"), ==, "test_value");
+  }
+
+  /* 2. Test encoding without ETag */
+  {
+    gsize encoded_len = 0;
+    g_autofree char *encoded = nuvashalauncher_download_cache_encode (
+      "{\"plain\":123}", NULL, &encoded_len);
+    gboolean fresh = FALSE;
+    g_autofree char *resp = NULL;
+    g_autofree char *etag = NULL;
+    g_autoptr (JsonParser) parser = NULL;
+
+    parser = nuvashalauncher_download_cache_parser (
+      encoded, encoded_len, NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_DAY,
+      &fresh, &resp, &etag);
+    g_assert_nonnull (parser);
+    g_assert_true (fresh);
+    g_assert_cmpstr (resp, ==, "{\"plain\":123}");
+    g_assert_null (etag);
+  }
+
+  /* 3. Test malformed cache envelopes */
+  {
+    gboolean fresh = FALSE;
+    g_autofree char *resp = NULL;
+    g_autofree char *etag = NULL;
+    g_autoptr (JsonParser) parser = NULL;
+
+    parser = nuvashalauncher_download_cache_parser (
+      "{corrupt json", 13, NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_DAY,
+      &fresh, &resp, &etag);
+    g_assert_null (parser);
+    g_assert_null (resp);
+    g_assert_null (etag);
+  }
+
+  /* 4. Test worker thread JSON parsing with malformed JSON from network */
+  {
+    g_autofree char *bad_url = server_url ("/bad-json");
+    AsyncRun run = { 0 };
+    AsyncCall call = { 0 };
+
+    async_run_init (&run);
+    call_json (&run, &call, bad_url);
+    async_run_wait (&run);
+
+    g_assert_nonnull (call.error);
+    g_assert_null (call.parser);
+
+    async_call_clear (&call);
+    async_run_clear (&run);
+  }
+
+  g_print ("ok - download cache encoding and worker parser handle valid and corrupt data\n");
+}
+
 int
 main (int argc, char **argv)
 {
@@ -523,6 +608,7 @@ main (int argc, char **argv)
   test_api_cache_etag ();
   test_api_cache_stale_offline ();
   test_api_cache_cancellation ();
+  test_api_cache_encoding_and_worker ();
   fixture_stop ();
   return EXIT_SUCCESS;
 }

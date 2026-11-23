@@ -19,6 +19,7 @@
 #include "nuvashalauncher-minecraft-resolve.h"
 
 #include "nuvashalauncher-minecraft-versions.h"
+#include "nuvashalauncher-cache.h"
 
 #include <archive.h>
 #include <archive_entry.h>

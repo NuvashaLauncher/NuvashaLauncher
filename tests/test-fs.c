@@ -122,6 +122,70 @@ main (void)
     g_clear_error (&error);
   }
 
+  /* Tests for FICLONE helpers */
+  {
+    g_autofree char *source_path = g_build_filename (root, "clone-src.txt", NULL);
+    g_autofree char *target_path = g_build_filename (root, "clone-dst.txt", NULL);
+    g_autofree char *target_excl = g_build_filename (root, "clone-excl.txt", NULL);
+    g_autofree char *clone_content = NULL;
+    gsize clone_len = 0;
+    int src_fd = -1;
+    int dst_fd = -1;
+
+    /* Invalid arguments */
+    g_assert_false (nuvashalauncher_fs_try_clone_fd (-1, -1));
+    g_assert_false (nuvashalauncher_fs_try_clone_path (NULL, NULL, FALSE));
+    g_assert_false (nuvashalauncher_fs_try_clone_path (source_path, NULL, FALSE));
+    g_assert_false (nuvashalauncher_fs_try_clone_path (NULL, target_path, FALSE));
+    g_assert_false (nuvashalauncher_fs_try_clone_path ("/nonexistent/path/for/clone", target_path, FALSE));
+
+    /* Create source file */
+    g_assert_true (nuvashalauncher_fs_replace_contents (source_path, "FICLONE test payload 12345", 26, 0644, &error));
+    g_assert_no_error (error);
+
+    src_fd = open (source_path, O_RDONLY | O_CLOEXEC);
+    g_assert_cmpint (src_fd, >=, 0);
+    g_assert_false (nuvashalauncher_fs_try_clone_fd (src_fd, -1));
+    g_assert_false (nuvashalauncher_fs_try_clone_fd (-1, src_fd));
+
+    dst_fd = open (target_path, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+    g_assert_cmpint (dst_fd, >=, 0);
+    /* Valid FDs: clone may succeed or fail depending on filesystem FICLONE support */
+    nuvashalauncher_fs_try_clone_fd (src_fd, dst_fd);
+    close (dst_fd);
+    close (src_fd);
+    nuvashalauncher_fs_unlink (target_path, NULL);
+
+    /* Test try_clone_path */
+    if (nuvashalauncher_fs_try_clone_path (source_path, target_path, FALSE))
+      {
+        g_assert_true (g_file_test (target_path, G_FILE_TEST_EXISTS));
+        g_assert_true (nuvashalauncher_fs_get_contents_within (target_path, 1024, &clone_content, &clone_len, &error));
+        g_assert_no_error (error);
+        g_assert_cmpstr (clone_content, ==, "FICLONE test payload 12345");
+        g_clear_pointer (&clone_content, g_free);
+      }
+    else
+      {
+        /* When filesystem doesn't support FICLONE, target must be cleaned up */
+        g_assert_false (g_file_test (target_path, G_FILE_TEST_EXISTS));
+      }
+
+    /* Test exclusive clone: when destination exists and exclusive is TRUE, must fail */
+    g_assert_true (nuvashalauncher_fs_replace_contents (target_excl, "existing target", 15, 0644, &error));
+    g_assert_no_error (error);
+    g_assert_false (nuvashalauncher_fs_try_clone_path (source_path, target_excl, TRUE));
+    /* Destination content must remain untouched */
+    g_assert_true (nuvashalauncher_fs_get_contents_within (target_excl, 1024, &clone_content, &clone_len, &error));
+    g_assert_no_error (error);
+    g_assert_cmpstr (clone_content, ==, "existing target");
+    g_clear_pointer (&clone_content, g_free);
+    nuvashalauncher_fs_unlink (target_excl, NULL);
+
+    nuvashalauncher_fs_unlink (source_path, NULL);
+    nuvashalauncher_fs_unlink (target_path, NULL);
+  }
+
   nuvashalauncher_fs_remove_tree (root);
   g_print ("ok - filesystem nofollow and bounds checks\n");
   return 0;
