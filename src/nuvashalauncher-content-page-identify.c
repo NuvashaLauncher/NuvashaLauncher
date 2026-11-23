@@ -92,10 +92,17 @@ void
 persist_identified_file (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
 {
   g_autofree char *directory = NULL;
-  g_autofree char *filename = g_path_get_basename (file->path);
+  g_autofree char *filename = NULL;
   NuvashaLauncherContentIndexEntry entry = { 0 };
 
+  if (self == NULL || file == NULL || file->path == NULL || *file->path == '\0')
+    return;
+
   directory = content_page_base_directory (self);
+  if (directory == NULL || *directory == '\0')
+    return;
+
+  filename = g_path_get_basename (file->path);
   entry.filename = filename;
   entry.size = file->size;
   entry.mtime_usec = file->mtime_usec;
@@ -125,6 +132,9 @@ persist_identified_file (NuvashaLauncherContentPage *self, NuvashaLauncherConten
 void
 flush_dirty_index_files (NuvashaLauncherContentPage *self)
 {
+  if (self == NULL)
+    return;
+
   g_clear_handle_id (&self->installed.index_flush_source, g_source_remove);
 
   if (self->installed.files == NULL)
@@ -136,7 +146,7 @@ flush_dirty_index_files (NuvashaLauncherContentPage *self)
       if (file != NULL && file->index_dirty)
         {
           file->index_dirty = FALSE;
-          queue_persist_identified_file (self, file);
+          persist_identified_file (self, file);
         }
     }
 }
@@ -781,21 +791,23 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       for (guint i = 0; self->installed.files != NULL &&
                         i < self->installed.files->len; i++)
         {
-           NuvashaLauncherContentFile *file =
-             g_ptr_array_index (self->installed.files, i);
-          GtkWidget *row = GTK_WIDGET (
-            g_hash_table_lookup (self->installed.rows, file->path));
+          NuvashaLauncherContentFile *file =
+            g_ptr_array_index (self->installed.files, i);
 
-           if (row != NULL)
-             file_row_refresh (row);
+          if (file != NULL && file->metadata_dirty)
+            {
+              GtkWidget *row = self->installed.rows != NULL
+                                 ? GTK_WIDGET (g_hash_table_lookup (
+                                     self->installed.rows, file->path))
+                                 : NULL;
 
-           if (file->metadata_dirty)
-             {
-               queue_persist_identified_file (self, file);
-               file->metadata_dirty = FALSE;
-             }
+              if (row != NULL)
+                file_row_refresh (row);
+
+              queue_persist_identified_file (self, file);
+              file->metadata_dirty = FALSE;
+            }
         }
-      installed_filter_rows (self);
       load_visible_icons (self);
     }
 

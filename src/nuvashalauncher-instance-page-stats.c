@@ -2,8 +2,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#define _GNU_SOURCE
+
 #include "nuvashalauncher-instance-page-private.h"
 #include "nuvashalauncher-i18n.h"
+#include <glib/gstdio.h>
+#include <sys/stat.h>
 
 /* The Stats page of an instance: activity history and instance storage/creation
  * metadata. Read-only, searchable via the shared header search bar. */
@@ -145,22 +149,19 @@ directory_size_recursive (const char *path, GCancellable *cancellable)
 
   while ((entry = g_dir_read_name (dir)) != NULL)
     {
+      GStatBuf st;
+
       if (g_cancellable_is_cancelled (cancellable))
         return total;
 
       g_autofree char *full = g_build_filename (path, entry, NULL);
-      g_autoptr (GFile) file = g_file_new_for_path (full);
-      g_autoptr (GFileInfo) info = g_file_query_info (
-        file, G_FILE_ATTRIBUTE_STANDARD_TYPE "," G_FILE_ATTRIBUTE_STANDARD_SIZE,
-        G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, cancellable, NULL);
-
-      if (info == NULL)
+      if (g_lstat (full, &st) != 0)
         continue;
 
-      if (g_file_info_get_file_type (info) == G_FILE_TYPE_DIRECTORY)
+      if (S_ISDIR (st.st_mode))
         total += directory_size_recursive (full, cancellable);
-      else
-        total += (guint64) g_file_info_get_size (info);
+      else if (st.st_size > 0)
+        total += (guint64) st.st_size;
     }
 
   return total;

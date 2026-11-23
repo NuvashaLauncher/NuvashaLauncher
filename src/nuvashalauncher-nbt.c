@@ -382,20 +382,32 @@ read_payload (NbtReader *r, NuvashaLauncherNbtTag *tag, guint depth, GError **er
         if (!read_u32_be (r, &ulen, error))
           return FALSE;
         gint32 slen = (gint32) ulen;
-        if (slen < 0 || (gsize) slen > (r->len - r->pos) / 4)
+        if (slen < 0 || (gsize) slen > (r->len - r->pos) / sizeof (gint32))
           {
             g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
                                  "Invalid NBT int array length");
             return FALSE;
           }
         tag->v_int_array.len = (gsize) slen;
-        tag->v_int_array.data = slen > 0 ? g_new (gint32, (gsize) slen) : NULL;
-        for (gint32 i = 0; i < slen; i++)
+        if (slen > 0)
           {
-            guint32 u = 0;
-            if (!read_u32_be (r, &u, error))
-              return FALSE;
-            tag->v_int_array.data[i] = (gint32) u;
+            gsize byte_len = (gsize) slen * sizeof (gint32);
+            tag->v_int_array.data = g_new (gint32, (gsize) slen);
+            memcpy (tag->v_int_array.data, r->data + r->pos, byte_len);
+            r->pos += byte_len;
+#if G_BYTE_ORDER != G_BIG_ENDIAN
+            for (gsize i = 0; i < (gsize) slen; i++)
+              {
+                guint32 u = 0;
+                memcpy (&u, &tag->v_int_array.data[i], sizeof u);
+                u = GUINT32_FROM_BE (u);
+                tag->v_int_array.data[i] = (gint32) u;
+              }
+#endif
+          }
+        else
+          {
+            tag->v_int_array.data = NULL;
           }
         return TRUE;
       }
@@ -405,20 +417,32 @@ read_payload (NbtReader *r, NuvashaLauncherNbtTag *tag, guint depth, GError **er
         if (!read_u32_be (r, &ulen, error))
           return FALSE;
         gint32 slen = (gint32) ulen;
-        if (slen < 0 || (gsize) slen > (r->len - r->pos) / 8)
+        if (slen < 0 || (gsize) slen > (r->len - r->pos) / sizeof (gint64))
           {
             g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
                                  "Invalid NBT long array length");
             return FALSE;
           }
         tag->v_long_array.len = (gsize) slen;
-        tag->v_long_array.data = slen > 0 ? g_new (gint64, (gsize) slen) : NULL;
-        for (gint32 i = 0; i < slen; i++)
+        if (slen > 0)
           {
-            guint64 u = 0;
-            if (!read_u64_be (r, &u, error))
-              return FALSE;
-            tag->v_long_array.data[i] = (gint64) u;
+            gsize byte_len = (gsize) slen * sizeof (gint64);
+            tag->v_long_array.data = g_new (gint64, (gsize) slen);
+            memcpy (tag->v_long_array.data, r->data + r->pos, byte_len);
+            r->pos += byte_len;
+#if G_BYTE_ORDER != G_BIG_ENDIAN
+            for (gsize i = 0; i < (gsize) slen; i++)
+              {
+                guint64 u = 0;
+                memcpy (&u, &tag->v_long_array.data[i], sizeof u);
+                u = GUINT64_FROM_BE (u);
+                tag->v_long_array.data[i] = (gint64) u;
+              }
+#endif
+          }
+        else
+          {
+            tag->v_long_array.data = NULL;
           }
         return TRUE;
       }
@@ -540,6 +564,65 @@ write_u64_be (GByteArray *out, guint64 v)
   g_byte_array_append (out, buf, 8);
 }
 
+static gsize
+string_payload_size (const char *s)
+{
+  const char *str = s != NULL ? s : "";
+  return 2 + MIN (strlen (str), G_MAXUINT16);
+}
+
+static gsize
+nbt_payload_size (const NuvashaLauncherNbtTag *tag)
+{
+  if (tag == NULL)
+    return 0;
+
+  switch (tag->type)
+    {
+    case NUVASHALAUNCHER_NBT_BYTE:
+      return 1;
+    case NUVASHALAUNCHER_NBT_SHORT:
+      return 2;
+    case NUVASHALAUNCHER_NBT_INT:
+    case NUVASHALAUNCHER_NBT_FLOAT:
+      return 4;
+    case NUVASHALAUNCHER_NBT_LONG:
+    case NUVASHALAUNCHER_NBT_DOUBLE:
+      return 8;
+    case NUVASHALAUNCHER_NBT_BYTE_ARRAY:
+      return 4 + (tag->v_byte_array.data != NULL ? tag->v_byte_array.len : 0);
+    case NUVASHALAUNCHER_NBT_STRING:
+      return string_payload_size (tag->v_string);
+    case NUVASHALAUNCHER_NBT_LIST:
+      {
+        gsize total = 5;
+        guint count = tag->v_list.items != NULL ? tag->v_list.items->len : 0;
+        for (guint i = 0; i < count; i++)
+          total += nbt_payload_size (g_ptr_array_index (tag->v_list.items, i));
+        return total;
+      }
+    case NUVASHALAUNCHER_NBT_COMPOUND:
+      {
+        gsize total = 1;
+        if (tag->v_compound != NULL)
+          {
+            for (guint i = 0; i < tag->v_compound->len; i++)
+              {
+                const NuvashaLauncherNbtTag *child = g_ptr_array_index (tag->v_compound, i);
+                total += 1 + string_payload_size (child->name) + nbt_payload_size (child);
+              }
+          }
+        return total;
+      }
+    case NUVASHALAUNCHER_NBT_INT_ARRAY:
+      return 4 + (tag->v_int_array.data != NULL ? tag->v_int_array.len * sizeof (guint32) : 0);
+    case NUVASHALAUNCHER_NBT_LONG_ARRAY:
+      return 4 + (tag->v_long_array.data != NULL ? tag->v_long_array.len * sizeof (guint64) : 0);
+    default:
+      return 0;
+    }
+}
+
 static void
 write_string (GByteArray *out, const char *s)
 {
@@ -612,15 +695,53 @@ write_payload (GByteArray *out, const NuvashaLauncherNbtTag *tag)
       write_u8 (out, NUVASHALAUNCHER_NBT_END);
       break;
     case NUVASHALAUNCHER_NBT_INT_ARRAY:
-      write_u32_be (out, (guint32) tag->v_int_array.len);
-      for (gsize i = 0; i < tag->v_int_array.len; i++)
-        write_u32_be (out, (guint32) tag->v_int_array.data[i]);
-      break;
+      {
+        gsize count = tag->v_int_array.data != NULL ? tag->v_int_array.len : 0;
+        write_u32_be (out, (guint32) count);
+        if (count > 0)
+          {
+            gsize old_len = out->len;
+            gsize add_bytes = count * sizeof (guint32);
+            g_byte_array_set_size (out, (guint) (old_len + add_bytes));
+#if G_BYTE_ORDER == G_BIG_ENDIAN
+            memcpy (out->data + old_len, tag->v_int_array.data, add_bytes);
+#else
+            {
+              guint8 *dst = out->data + old_len;
+              for (gsize i = 0; i < count; i++)
+                {
+                  guint32 be = GUINT32_TO_BE ((guint32) tag->v_int_array.data[i]);
+                  memcpy (dst + i * sizeof be, &be, sizeof be);
+                }
+            }
+#endif
+          }
+        break;
+      }
     case NUVASHALAUNCHER_NBT_LONG_ARRAY:
-      write_u32_be (out, (guint32) tag->v_long_array.len);
-      for (gsize i = 0; i < tag->v_long_array.len; i++)
-        write_u64_be (out, (guint64) tag->v_long_array.data[i]);
-      break;
+      {
+        gsize count = tag->v_long_array.data != NULL ? tag->v_long_array.len : 0;
+        write_u32_be (out, (guint32) count);
+        if (count > 0)
+          {
+            gsize old_len = out->len;
+            gsize add_bytes = count * sizeof (guint64);
+            g_byte_array_set_size (out, (guint) (old_len + add_bytes));
+#if G_BYTE_ORDER == G_BIG_ENDIAN
+            memcpy (out->data + old_len, tag->v_long_array.data, add_bytes);
+#else
+            {
+              guint8 *dst = out->data + old_len;
+              for (gsize i = 0; i < count; i++)
+                {
+                  guint64 be = GUINT64_TO_BE ((guint64) tag->v_long_array.data[i]);
+                  memcpy (dst + i * sizeof be, &be, sizeof be);
+                }
+            }
+#endif
+          }
+        break;
+      }
     default:
       break;
     }
@@ -631,9 +752,13 @@ nuvashalauncher_nbt_serialize (const NuvashaLauncherNbtTag *root,
                                gboolean gzip,
                                GError **error)
 {
-  g_autoptr (GByteArray) buf = g_byte_array_new ();
+  g_autoptr (GByteArray) buf = NULL;
+  gsize total_size = 0;
 
   g_return_val_if_fail (root != NULL && root->type == NUVASHALAUNCHER_NBT_COMPOUND, NULL);
+
+  total_size = 1 + string_payload_size (root->name) + nbt_payload_size (root);
+  buf = g_byte_array_sized_new ((guint) MIN (total_size, G_MAXUINT));
 
   write_u8 (buf, (guint8) root->type);
   write_string (buf, root->name);

@@ -137,14 +137,24 @@ installed_filter_row (GtkWidget *row, const char *needle)
   gtk_widget_set_visible (row, visible);
 }
 
-void
-installed_filter_rows (NuvashaLauncherContentPage *self)
+static char *
+installed_search_needle (NuvashaLauncherContentPage *self)
 {
-  const char *query = self->installed.search_entry != NULL
+  const char *query = self != NULL && self->installed.search_entry != NULL
                         ? gtk_editable_get_text (
                             GTK_EDITABLE (self->installed.search_entry))
                         : "";
-  g_autofree char *needle = g_utf8_casefold (query, -1);
+
+  if (query == NULL || *query == '\0')
+    return NULL;
+
+  return g_utf8_casefold (query, -1);
+}
+
+void
+installed_filter_rows (NuvashaLauncherContentPage *self)
+{
+  g_autofree char *needle = installed_search_needle (self);
 
   for (GList *item = self->installed.rows_list; item != NULL; item = item->next)
     installed_filter_row (GTK_WIDGET (item->data), needle);
@@ -168,6 +178,8 @@ file_row_refresh (GtkWidget *row)
   if (file == NULL || !GTK_IS_WIDGET (row))
     return;
 
+  nuvashalauncher_content_file_refresh_search_key (file);
+
   {
     GtkWidget *trash = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file-trash");
     GtkWidget *sw = g_object_get_data (G_OBJECT (row), "nuvashalauncher-mod-switch");
@@ -189,11 +201,7 @@ file_row_refresh (GtkWidget *row)
     row_show_description (row, file->description);
 
   {
-    const char *query = self->installed.search_entry != NULL
-                          ? gtk_editable_get_text (
-                              GTK_EDITABLE (self->installed.search_entry))
-                          : "";
-    g_autofree char *needle = g_utf8_casefold (query, -1);
+    g_autofree char *needle = installed_search_needle (self);
     installed_filter_row (row, needle);
   }
 }

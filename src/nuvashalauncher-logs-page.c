@@ -133,7 +133,7 @@ display_line (const char *line)
                               body);
   }
 
-  return g_strdup (formatted);
+  return g_steal_pointer (&formatted);
 }
 
 /* ---------------------------------------------------------- *
@@ -154,7 +154,7 @@ show_lines (NuvashaLauncherLogsPage *self)
 {
   GtkTextBuffer *buffer =
     gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
-  g_autofree char *needle = NULL;
+  const char *needle = NULL;
   GString *built = NULL;
   guint shown = 0;
 
@@ -168,10 +168,12 @@ show_lines (NuvashaLauncherLogsPage *self)
   self->pending_removed = 0;
 
   if (self->search_entry != NULL)
-    needle = g_strdup (gtk_editable_get_text (
-                         GTK_EDITABLE (self->search_entry)));
+    needle = gtk_editable_get_text (GTK_EDITABLE (self->search_entry));
 
-  built = g_string_new (NULL);
+  {
+    gsize estimate = (gsize) g_queue_get_length (self->lines) * 96;
+    built = g_string_sized_new (MAX (estimate, 256));
+  }
 
   for (GList *item = self->lines->head; item != NULL; item = item->next)
     {
@@ -188,7 +190,8 @@ show_lines (NuvashaLauncherLogsPage *self)
       shown++;
     }
 
-  gtk_text_buffer_set_text (buffer, built->str, -1);
+  gtk_text_buffer_set_text (buffer, built->str,
+                            (gint) MIN (built->len, (gsize) G_MAXINT));
   self->rendered = shown;
 
   g_string_free (built, TRUE);
@@ -289,15 +292,29 @@ static void
 append_line (NuvashaLauncherLogsPage *self, const char *line)
 {
   g_autofree char *display = display_line (line);
+  guint limit = 0;
+  guint removed = 0;
 
   if (display == NULL || *display == '\0')
     return;
 
-  line = display;
-  guint limit = nuvashalauncher_launcher_get_line_limit (self->launcher);
-  guint removed = 0;
+  if (!self->filtered && self->view != NULL)
+    {
+      GtkTextBuffer *buffer =
+        gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
 
-  g_queue_push_tail (self->lines, g_strdup (line));
+      if (self->pending_text == NULL)
+        self->pending_text = g_string_new (NULL);
+
+      if (self->pending_text->len > 0 ||
+          gtk_text_buffer_get_char_count (buffer) > 0)
+        g_string_append_c (self->pending_text, '\n');
+
+      g_string_append (self->pending_text, display);
+    }
+
+  limit = nuvashalauncher_launcher_get_line_limit (self->launcher);
+  g_queue_push_tail (self->lines, g_steal_pointer (&display));
 
   /* The launcher drops the oldest line when its log is full, so the page
      drops the same one and stays the same log. */
@@ -311,17 +328,6 @@ append_line (NuvashaLauncherLogsPage *self, const char *line)
      Minecraft startup output does not trigger per-line GTK layout passes. */
   if (!self->filtered && self->view != NULL)
     {
-      GtkTextBuffer *buffer =
-        gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
-
-      if (self->pending_text == NULL)
-        self->pending_text = g_string_new (NULL);
-
-      if (self->pending_text->len > 0 ||
-          gtk_text_buffer_get_char_count (buffer) > 0)
-        g_string_append_c (self->pending_text, '\n');
-
-      g_string_append (self->pending_text, line);
       self->pending_removed += removed;
 
       if (self->flush_timer == 0)

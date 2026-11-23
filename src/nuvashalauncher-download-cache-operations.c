@@ -343,16 +343,106 @@ cache_info_ready (GObject *source, GAsyncResult *result, gpointer user_data)
                                cache_load_ready, request);
 }
 
+typedef struct {
+  char *contents;
+  gsize length;
+  gint64 expiration;
+  JsonParser *parser;
+  char *response;
+  char *etag;
+  gboolean fresh;
+} CacheParseTask;
+
+static void
+cache_parse_task_free (CacheParseTask *state)
+{
+  if (state == NULL)
+    return;
+
+  g_free (state->contents);
+  g_clear_object (&state->parser);
+  g_free (state->response);
+  g_free (state->etag);
+  g_free (state);
+}
+
+static void
+cache_parse_worker (GTask *task,
+                    gpointer source_object G_GNUC_UNUSED,
+                    gpointer task_data,
+                    GCancellable *cancellable G_GNUC_UNUSED)
+{
+  CacheParseTask *state = task_data;
+
+  if (g_task_return_error_if_cancelled (task))
+    return;
+
+  state->parser = nuvashalauncher_download_cache_parser (
+    state->contents, state->length, state->expiration,
+    &state->fresh, &state->response, &state->etag);
+  g_clear_pointer (&state->contents, g_free);
+  state->length = 0;
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+cache_parse_ready (GObject *source G_GNUC_UNUSED,
+                   GAsyncResult *result,
+                   gpointer user_data)
+{
+  DownloadRequest *request = user_data;
+  GTask *task = G_TASK (result);
+  g_autoptr (GError) error = NULL;
+  CacheParseTask *state = g_task_get_task_data (task);
+
+  g_task_propagate_boolean (task, &error);
+
+  if (request_was_cancelled (request, error))
+    {
+      nuvashalauncher_download_request_fail (
+        request, nuvashalauncher_download_cancelled_error ());
+      return;
+    }
+
+  if (state == NULL)
+    {
+      start_attempt (request);
+      return;
+    }
+
+  g_clear_pointer (&request->cache_etag, g_free);
+  request->cache_etag = g_steal_pointer (&state->etag);
+
+  if (state->response == NULL)
+    {
+      start_attempt (request);
+      return;
+    }
+
+  if (state->fresh && state->parser != NULL)
+    {
+      nuvashalauncher_download_request_succeed_json (
+        request, g_steal_pointer (&state->parser));
+      return;
+    }
+
+  /* Keep only a valid JSON response. It may still be useful if the
+   * refresh cannot reach Modrinth. */
+  g_clear_pointer (&request->stale_json, g_free);
+  request->stale_json = g_steal_pointer (&state->response);
+  start_attempt (request);
+}
+
 static void
 cache_load_ready (GObject *source, GAsyncResult *result, gpointer user_data)
 {
   DownloadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
   g_autofree char *contents = NULL;
-  g_autoptr (JsonParser) parser = NULL;
-  g_autofree char *response = NULL;
-  gboolean fresh = FALSE;
   gsize length = 0;
+  CacheParseTask *state = NULL;
+  g_autoptr (GTask) parse_task = NULL;
 
   if (!g_file_load_contents_finish (G_FILE (source), result, &contents,
                                     &length, NULL, &error))
@@ -367,37 +457,22 @@ cache_load_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       return;
     }
 
+  if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
     {
-      g_autofree char *etag = NULL;
-
-      parser = nuvashalauncher_download_cache_parser (
-        contents, length, (gint64) request->cache_expiration,
-        &fresh, &response, &etag);
-      g_clear_pointer (&request->cache_etag, g_free);
-      request->cache_etag = g_steal_pointer (&etag);
-    }
-  if (response == NULL)
-    {
-      start_attempt (request);
+      nuvashalauncher_download_request_fail (request, nuvashalauncher_download_cancelled_error ());
       return;
     }
 
-  if (fresh && parser != NULL)
-    {
-      if (g_cancellable_is_cancelled (g_task_get_cancellable (request->task)))
-        {
-          nuvashalauncher_download_request_fail (request, nuvashalauncher_download_cancelled_error ());
-          return;
-        }
+  state = g_new0 (CacheParseTask, 1);
+  state->contents = g_steal_pointer (&contents);
+  state->length = length;
+  state->expiration = (gint64) request->cache_expiration;
 
-      nuvashalauncher_download_request_succeed_json (request, g_steal_pointer (&parser));
-      return;
-    }
-
-  /* Keep only a valid JSON response. It may still be useful if the
-   * refresh cannot reach Modrinth. */
-  request->stale_json = g_steal_pointer (&response);
-  start_attempt (request);
+  parse_task = g_task_new (NULL, g_task_get_cancellable (request->task),
+                           cache_parse_ready, request);
+  g_task_set_task_data (parse_task, state,
+                        (GDestroyNotify) cache_parse_task_free);
+  g_task_run_in_thread (parse_task, cache_parse_worker);
 }
 
 static void

@@ -365,6 +365,7 @@ scan_index_entry (ScanRun *run, NuvashaLauncherContentFile *file)
   const char *slash;
   const char *name;
   NuvashaLauncherContentIndexEntry *entry;
+  gint64 subsec_usec;
 
   if (run->index_by_name == NULL)
     return NULL;
@@ -372,9 +373,13 @@ scan_index_entry (ScanRun *run, NuvashaLauncherContentFile *file)
   slash = strrchr (file->path, G_DIR_SEPARATOR);
   name = slash != NULL ? slash + 1 : file->path;
   entry = g_hash_table_lookup (run->index_by_name, name);
+  subsec_usec = file->mtime_usec >= 0 ? file->mtime_usec % G_USEC_PER_SEC : -1;
   if (entry != NULL &&
       entry->size == file->size &&
-      entry->mtime_usec == file->mtime_usec &&
+      (entry->mtime_usec == file->mtime_usec ||
+       (entry->mtime_usec >= 0 &&
+        entry->mtime_usec < G_USEC_PER_SEC &&
+        entry->mtime_usec == subsec_usec)) &&
       entry->hash != NULL && *entry->hash != '\0')
     return entry;
   return NULL;
@@ -464,13 +469,20 @@ batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       if (!name_is_content (name, run->extension))
         continue;
 
+      guint64 mtime_sec = g_file_info_get_attribute_uint64 (
+        info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
+      guint32 mtime_subsec = g_file_info_get_attribute_uint32 (
+        info, G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC);
+
       child = g_file_get_child (run->folder, name);
       file = g_new0 (NuvashaLauncherContentFile, 1);
       file->path = g_file_get_path (child);
       file->filename = nuvashalauncher_content_disabled_name (name, TRUE);
       file->size = g_file_info_get_size (info);
-      file->mtime_usec = g_file_info_get_attribute_uint32 (
-        info, G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC);
+      file->mtime_usec = mtime_sec <= (guint64) (G_MAXINT64 / G_USEC_PER_SEC - 1)
+                           ? (gint64) mtime_sec * G_USEC_PER_SEC +
+                             (gint64) mtime_subsec
+                           : 0;
       file->enabled = g_strcmp0 (name, file->filename) == 0;
       apply_index_entry (run, file);
       g_ptr_array_add (run->files, file);
@@ -557,7 +569,8 @@ scan_index_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_file_enumerate_children_async (
     run->folder,
     G_FILE_ATTRIBUTE_STANDARD_NAME "," G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-    G_FILE_ATTRIBUTE_STANDARD_SIZE "," G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC,
+    G_FILE_ATTRIBUTE_STANDARD_SIZE "," G_FILE_ATTRIBUTE_TIME_MODIFIED ","
+    G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC,
     G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, G_PRIORITY_DEFAULT,
      nuvashalauncher_task_scope_get_cancellable (run->scope), scan_children_ready, run);
 }

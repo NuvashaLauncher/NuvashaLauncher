@@ -235,16 +235,17 @@ expire during startup. If refresh fails, the launcher enters
 
 `NuvashaLauncherSettings` is a typed wrapper around the installed GSettings schema in
 `data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml`. It validates values and
-writes each accepted change. To support custom installation prefixes,
-distribution build environments, and development runs, schema lookup searches
-`GSETTINGS_SCHEMA_DIR`, the default system schema source,
-`PREFIX/share/glib-2.0/schemas`, `<exe_dir>/../share/glib-2.0/schemas`,
-`XDG_DATA_DIRS`, and local `build/schemas` directories, falling back to compiling
-the bundled schema into `<user cache>/nuvashalauncher/schemas` via
-`glib-compile-schemas` when no installed schema is found. The settings include
-version-list filters, log retention, language, Modrinth API caching, export
-behavior, dependency delete behavior, and custom Java runtime paths. Window
-geometry is kept separately by the window code.
+writes each accepted change. To support installed prefixes, development runs,
+and distribution build environments, schema lookup caches the resolved schema
+for the active `GSETTINGS_SCHEMA_DIR` after checking the default system schema
+source, an explicit `GSETTINGS_SCHEMA_DIR`, local build directories
+(`NUVASHALAUNCHER_BUILD_SCHEMA_DIR`, `build/schemas`, `../build/schemas`), and
+`<exe_dir>/../share/glib-2.0/schemas`, falling back to compiling the bundled
+schema into `<user cache>/nuvashalauncher/schemas` via `glib-compile-schemas`
+when no compiled schema is found. The settings include version and loader
+stability filters, log retention, language, Modrinth API caching and cache
+expiration, export behavior, dependency delete behavior, and custom Java
+runtime paths. Window geometry is kept separately by the window code.
 
 ## Asynchronous work and ownership
 
@@ -293,23 +294,27 @@ File transfers follow this sequence:
 3. Create a temporary file beside the destination.
 4. Stream the response into it while calculating the expected checksum.
 5. Check the HTTP result and checksum.
-6. Flush/sync the file and atomically rename it into place.
+6. Flush/sync the file on a worker thread (`fsync`) and atomically rename it into place.
 7. Release the slot and complete the task.
 
-An existing file with the expected hash is reused. A wrong checksum is retried
-once; network failures, HTTP 5xx responses, and HTTP 429 responses use bounded
-retries and `Retry-After` where appropriate. A 404 and other non-retryable
-statuses fail directly. Cancellation or failure discards the temporary file
-and never replaces a valid destination.
+An existing file with the expected hash is reused. On a global hash cache hit,
+restoring into the exclusive temporary file attempts a `FICLONE` copy-on-write
+reflink before falling back to an async copy and atomic rename. A wrong checksum
+is retried once; network failures, HTTP 5xx responses, and HTTP 429 responses use
+bounded retries and `Retry-After` where appropriate. A 404 and other
+non-retryable statuses fail directly. Cancellation or failure discards the
+temporary file and never replaces a valid destination.
 
 JSON requests use the same transfer and retry machinery (with in-flight request
 deduplication implemented on top for Modrinth API queries in
 `nuvashalauncher-modrinth-requests.c`).
 API responses (including Mojang's version manifest) can be cached with their
-creation time and ETag. When enabled, an expired entry is revalidated without
-parsing the stale inner payload first; if the network is unavailable, a stale
-response can be used as a fallback. Cache clearing only removes the global cache
-tree, not installed instance content or its indexes.
+creation time and ETag using the configured `cache-expiration` interval, with
+cached envelope and JSON parsing offloaded to a worker thread. When enabled, an
+expired entry is revalidated without parsing the stale inner payload first; if
+the network is unavailable, a stale response can be used as a fallback. Cache
+clearing only removes the global cache tree, not installed instance content or
+its indexes.
 
 ### Minecraft metadata and resolution
 
@@ -324,8 +329,9 @@ structured arguments and legacy `minecraftArguments`.
 - applicable libraries are converted to Maven paths;
 - native classifiers are selected for the current Linux architecture;
 - the client JAR, libraries, logging configuration, asset index, and asset
-  objects are downloaded and hash-checked;
-- native JARs are extracted into a separate directory;
+  objects are downloaded and hash-checked (asset index parsing runs on a worker
+  thread);
+- native JARs are extracted into a separate directory on a worker thread;
 - the final classpath and argument arrays are assembled in document order.
 
 Resolved Minecraft data is kept below the user's data/cache locations rather
@@ -333,8 +339,9 @@ than inside the instance directory. The instance directory receives the game
 files and logs; shared client artifacts can be reused by multiple instances.
 
 Network-provided archive entries are not trusted. Native extraction rejects
-unsafe paths and skips links. The resolver only writes regular files and real
-directories below the intended destination.
+unsafe paths, enforces per-entry and total unpacked size bounds, and skips
+links. The resolver only writes regular files and real directories below the
+intended destination.
 
 ### Mod loaders
 
@@ -365,21 +372,20 @@ reaches the UI:
   offered as compatible results.
 
 Content pages use models and rows, not raw API JSON. Details are converted from
-Modrinth Markdown to the restricted GTK markup the UI expects. Installed
-content pages, Worlds, Servers, and the main instance list share a direct
-selection model: clicking a row or its circular badge toggles selection, and the
-action footer appears only when something is selected. On the main instance
-list, each row exposes a dedicated Settings button alongside Play to open the
-instance dialog; on installed content pages, bulk deletion uses the same
-dependency-delete policy and deletion pipeline as a single-file delete. Update
-All uses that page's asynchronous operation state and exposes its scan/install
-progress and cancellation through a downloads-style popover.
+Modrinth Markdown to the restricted GTK markup the UI expects. Main-window
+instance rows open the instance dialog directly when activated alongside their
+Play/Stop action button; installed content pages, Worlds, and Servers use
+single-row actions (such as toggle, update, or delete, with content deletion
+honoring the `delete-dependents` policy). Update All uses that page's
+asynchronous operation state and exposes its scan/install progress and
+cancellation through a downloads-style popover.
 
 `nuvashalauncher-content-index.c` maintains local metadata for installed content. The
-index records hashes, filenames, provider/project identity, versions,
-environment flags, and required/optional/incompatible dependencies. It lets
-the UI identify and update installed content without treating the directory
-listing as the source of truth.
+index records hashes, file sizes, modification timestamps (`mtime_usec`),
+filenames, provider/project identity, versions, environment flags, and
+required/optional/incompatible dependencies. Combined with batched Modrinth hash
+identification and project lookups, it lets the UI identify and update
+installed content without re-hashing unchanged archives on every scan.
 
 ### Modpacks
 
