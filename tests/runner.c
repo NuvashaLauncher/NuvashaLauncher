@@ -326,6 +326,8 @@ priority_rank (const char *binary)
 {
   const char *name = base_name (binary);
   static const char *const heavy[] = {
+    "test-window",
+    "test-skin-dialog",
     "test-mrpack-security",
     "test-launcher-process",
     "test-cli",
@@ -762,12 +764,12 @@ main (int argc, char **argv)
     }
 
   int pos = 0;
-  for (int pass = 0; pass <= 7; pass++)
+  for (int pass = 0; pass <= 8; pass++)
     {
       for (int j = 0; j < count; j++)
         {
           int r = priority_rank (ctx.results[j].binary);
-          if ((pass < 7 && r == pass) || (pass == 7 && r >= 7))
+          if ((pass < 8 && r == pass) || (pass == 8 && r >= 8))
             ctx.order[pos++] = j;
         }
     }

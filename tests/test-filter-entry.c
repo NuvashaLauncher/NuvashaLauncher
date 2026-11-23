@@ -2,6 +2,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 #include "nuvashalauncher-filter-entry.h"
+#include <adwaita.h>
 
 static void
 check_filter_entry (GtkEntry *entry)
@@ -86,6 +87,7 @@ main (int argc, char **argv)
   g_test_init (&argc, &argv, NULL);
   if (!gtk_init_check ())
     return 77;
+  adw_init ();
   g_type_ensure (NUVASHALAUNCHER_TYPE_FILTER_ENTRY);
   g_test_add_func ("/filter-entry/content", test_content_filter_entry);
   g_test_add_func ("/filter-entry/modpack", test_modpack_filter_entry);

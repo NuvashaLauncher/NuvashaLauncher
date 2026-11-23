@@ -603,10 +603,10 @@ test_archive_size_bomb_is_refused (void)
      is lowered to what the archive below crosses. What is checked is
      that an archive past whatever the cap is is refused, not the size of
      the cap itself. */
-  nuvashalauncher_modpack_set_content_limit ((guint64) 128 * 1024 * 1024);
+  nuvashalauncher_modpack_set_content_limit ((guint64) 8 * 1024 * 1024);
 
   /* One entry that announces more content than one pack carries. */
-  zip_write_size_bomb (zip_path, index_json, 129);
+  zip_write_size_bomb (zip_path, index_json, 9);
   expect_zip_refused ("an archive that announces too much content", zip_path,
                       NUVASHALAUNCHER_MODPACK_ERROR_BOMB);
 

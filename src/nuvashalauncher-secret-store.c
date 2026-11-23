@@ -112,11 +112,130 @@ account_from_payload (const char *payload)
   return account_from_json (json_node_get_object (root));
 }
 
+static const char *
+test_secret_store_file (void)
+{
+  const char *path = NULL;
+
+  if (g_strcmp0 (g_getenv ("NUVASHALAUNCHER_TEST_SECRET_STORE"), "1") != 0)
+    return NULL;
+
+  path = g_getenv ("NUVASHALAUNCHER_TEST_SECRET_STORE_FILE");
+  return (path != NULL && path[0] != '\0') ? path : NULL;
+}
+
+static gboolean
+file_store_read (const char  *path,
+                 GPtrArray  **accounts,
+                 char       **active_id,
+                 GError     **error)
+{
+  g_autoptr (GPtrArray) loaded =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_account_free);
+  g_autofree char *active = NULL;
+  g_autofree char *contents = NULL;
+  gsize len = 0;
+  g_autoptr (GError) local_error = NULL;
+  g_autoptr (JsonParser) parser = NULL;
+  JsonNode *root = NULL;
+  JsonObject *obj = NULL;
+
+  if (!g_file_test (path, G_FILE_TEST_EXISTS))
+    {
+      *accounts = g_steal_pointer (&loaded);
+      *active_id = NULL;
+      return TRUE;
+    }
+
+  if (!g_file_get_contents (path, &contents, &len, &local_error))
+    return secret_error (error, g_steal_pointer (&local_error));
+
+  if (len == 0)
+    {
+      *accounts = g_steal_pointer (&loaded);
+      *active_id = NULL;
+      return TRUE;
+    }
+
+  parser = json_parser_new ();
+  if (!json_parser_load_from_data (parser, contents, (gssize) len, &local_error))
+    return secret_error (error, g_steal_pointer (&local_error));
+
+  root = json_parser_get_root (parser);
+  if (root != NULL && JSON_NODE_HOLDS_OBJECT (root))
+    {
+      obj = json_node_get_object (root);
+      if (json_object_has_member (obj, "active") &&
+          !json_object_get_null_member (obj, "active"))
+        active = g_strdup (json_object_get_string_member (obj, "active"));
+
+      if (json_object_has_member (obj, "accounts"))
+        {
+          JsonArray *arr = json_object_get_array_member (obj, "accounts");
+          guint n = arr != NULL ? json_array_get_length (arr) : 0;
+
+          for (guint i = 0; i < n; i++)
+            {
+              JsonObject *item = json_array_get_object_element (arr, i);
+              g_autoptr (NuvashaLauncherAccount) acc =
+                item != NULL ? account_from_json (item) : NULL;
+
+              if (acc != NULL)
+                g_ptr_array_add (loaded, g_steal_pointer (&acc));
+            }
+        }
+    }
+
+  *accounts = g_steal_pointer (&loaded);
+  *active_id = g_steal_pointer (&active);
+  return TRUE;
+}
+
+static gboolean
+file_store_write (const char *path,
+                  GPtrArray  *accounts,
+                  const char *active_id,
+                  GError    **error)
+{
+  g_autoptr (JsonBuilder) builder = json_builder_new ();
+  g_autoptr (JsonGenerator) generator = json_generator_new ();
+  g_autoptr (JsonNode) root = NULL;
+  g_autofree char *data = NULL;
+  g_autofree char *dir = g_path_get_dirname (path);
+  g_autoptr (GError) local_error = NULL;
+
+  g_mkdir_with_parents (dir, 0700);
+
+  json_builder_begin_object (builder);
+  json_builder_set_member_name (builder, "active");
+  if (active_id != NULL)
+    json_builder_add_string_value (builder, active_id);
+  else
+    json_builder_add_null_value (builder);
+
+  json_builder_set_member_name (builder, "accounts");
+  json_builder_begin_array (builder);
+  for (guint i = 0; i < accounts->len; i++)
+    account_to_json (builder, g_ptr_array_index (accounts, i));
+  json_builder_end_array (builder);
+  json_builder_end_object (builder);
+
+  root = json_builder_get_root (builder);
+  json_generator_set_root (generator, root);
+  data = json_generator_to_data (generator, NULL);
+
+  if (!g_file_set_contents (path, data, -1, &local_error))
+    return secret_error (error, g_steal_pointer (&local_error));
+
+  return TRUE;
+}
+
 gboolean
 nuvashalauncher_secret_store_load (GPtrArray **accounts,
                                    char      **active_id,
                                    GError    **error)
 {
+  const char *store_file = test_secret_store_file ();
   g_autoptr (GError) local_error = NULL;
   g_autofree char *active = NULL;
   g_autoptr (SecretService) service = NULL;
@@ -129,6 +248,9 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
   g_return_val_if_fail (accounts != NULL, FALSE);
   g_return_val_if_fail (active_id != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (store_file != NULL)
+    return file_store_read (store_file, accounts, active_id, error);
 
   service = secret_service_get_sync (SECRET_SERVICE_NONE, NULL, &local_error);
   if (service == NULL)
@@ -177,11 +299,40 @@ gboolean
 nuvashalauncher_secret_store_save_account (const NuvashaLauncherAccount *account,
                                            GError **error)
 {
+  const char *store_file = test_secret_store_file ();
   g_autofree char *payload = NULL;
   g_autoptr (GError) local_error = NULL;
 
   g_return_val_if_fail (account != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (store_file != NULL)
+    {
+      g_autoptr (GPtrArray) accounts = NULL;
+      g_autofree char *active_id = NULL;
+      gboolean replaced = FALSE;
+
+      if (!file_store_read (store_file, &accounts, &active_id, error))
+        return FALSE;
+
+      for (guint i = 0; i < accounts->len; i++)
+        {
+          NuvashaLauncherAccount *cur = g_ptr_array_index (accounts, i);
+
+          if (g_strcmp0 (cur->id, account->id) == 0)
+            {
+              g_ptr_array_remove_index (accounts, i);
+              g_ptr_array_insert (accounts, (gint) i,
+                                  nuvashalauncher_account_copy (account));
+              replaced = TRUE;
+              break;
+            }
+        }
+      if (!replaced)
+        g_ptr_array_add (accounts, nuvashalauncher_account_copy (account));
+
+      return file_store_write (store_file, accounts, active_id, error);
+    }
 
   payload = account_payload (account);
   if (!secret_password_store_sync (account_schema_for_store (), SECRET_COLLECTION_DEFAULT,
@@ -195,10 +346,21 @@ nuvashalauncher_secret_store_save_account (const NuvashaLauncherAccount *account
 gboolean
 nuvashalauncher_secret_store_save_active (const char *account_id, GError **error)
 {
+  const char *store_file = test_secret_store_file ();
   g_autoptr (GError) local_error = NULL;
 
   g_return_val_if_fail (account_id != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (store_file != NULL)
+    {
+      g_autoptr (GPtrArray) accounts = NULL;
+      g_autofree char *old_active = NULL;
+
+      if (!file_store_read (store_file, &accounts, &old_active, error))
+        return FALSE;
+      return file_store_write (store_file, accounts, account_id, error);
+    }
 
   if (!secret_password_store_sync (active_schema_for_store (), SECRET_COLLECTION_DEFAULT,
                                    "Nuvasha Launcher active account", account_id,
@@ -210,10 +372,33 @@ nuvashalauncher_secret_store_save_active (const char *account_id, GError **error
 gboolean
 nuvashalauncher_secret_store_remove_account (const char *account_id, GError **error)
 {
+  const char *store_file = test_secret_store_file ();
   g_autoptr (GError) local_error = NULL;
 
   g_return_val_if_fail (account_id != NULL, FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (store_file != NULL)
+    {
+      g_autoptr (GPtrArray) accounts = NULL;
+      g_autofree char *active_id = NULL;
+
+      if (!file_store_read (store_file, &accounts, &active_id, error))
+        return FALSE;
+
+      for (guint i = 0; i < accounts->len; i++)
+        {
+          NuvashaLauncherAccount *cur = g_ptr_array_index (accounts, i);
+
+          if (g_strcmp0 (cur->id, account_id) == 0)
+            {
+              g_ptr_array_remove_index (accounts, i);
+              break;
+            }
+        }
+
+      return file_store_write (store_file, accounts, active_id, error);
+    }
 
   secret_password_clear_sync (account_schema_for_store (), NULL, &local_error,
                               "account-id", account_id, NULL);
@@ -225,9 +410,20 @@ nuvashalauncher_secret_store_remove_account (const char *account_id, GError **er
 gboolean
 nuvashalauncher_secret_store_clear_active (GError **error)
 {
+  const char *store_file = test_secret_store_file ();
   g_autoptr (GError) local_error = NULL;
 
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (store_file != NULL)
+    {
+      g_autoptr (GPtrArray) accounts = NULL;
+      g_autofree char *old_active = NULL;
+
+      if (!file_store_read (store_file, &accounts, &old_active, error))
+        return FALSE;
+      return file_store_write (store_file, accounts, NULL, error);
+    }
 
   secret_password_clear_sync (active_schema_for_store (), NULL, &local_error,
                               "kind", "active-account", NULL);

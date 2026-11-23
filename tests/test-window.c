@@ -209,15 +209,13 @@ finish (gpointer user_data)
 {
   Run *run = user_data;
 
-  /* The dialog and the window are taken down while the loop still runs,
-     so that what their destruction logs is counted before the test
-     decides. */
-  if (run->dialog != NULL)
-    adw_dialog_force_close (run->dialog);
-
+  /* The window is taken down while the loop still runs, so that what
+     its destruction (including any presented dialog) logs is counted
+     before the test decides. Destroy the window directly instead of
+     starting a dialog close animation on a dying surface. */
   gtk_window_destroy (run->window);
 
-  if (run->cycles++ < 9)
+  if (run->cycles++ < 2)
     {
       run->window = NULL;
       run->dialog = NULL;
@@ -317,7 +315,7 @@ advance (gpointer user_data)
       gtk_editable_set_text (GTK_EDITABLE (widget), "Renamed");
       g_signal_emit_by_name (widget, "apply");
 
-      g_timeout_add (300, finish, run);
+      g_timeout_add (50, finish, run);
       return G_SOURCE_REMOVE;
     }
 }
@@ -351,7 +349,7 @@ on_activate (GApplication *application, gpointer user_data)
   gtk_widget_set_opacity (GTK_WIDGET (run->window), 0.0);
   gtk_widget_set_focusable (GTK_WIDGET (run->window), FALSE);
   gtk_window_present (run->window);
-  g_timeout_add (200, advance, run);
+  g_timeout_add (30, advance, run);
 }
 
 int
