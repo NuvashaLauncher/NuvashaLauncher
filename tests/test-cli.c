@@ -8,6 +8,7 @@
 #include "nuvashalauncher-nbt.h"
 #include "nuvashalauncher-secret-store.h"
 
+#include <gio/gio.h>
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,6 +47,70 @@ run_cli (const char *first, const char *second, int *status)
 {
   const char *args[] = { first, second, NULL };
   return run_cli_v (args, status);
+}
+
+typedef struct
+{
+  const char * const *args;
+  char *stdout_buf;
+  int exit_status;
+  gboolean exited;
+  int *remaining;
+} CliBatchItem;
+
+static void
+on_cli_batch_done (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+  CliBatchItem *item = user_data;
+  GSubprocess *proc = G_SUBPROCESS (source);
+  g_autoptr (GError) error = NULL;
+  g_autofree char *stderr_buf = NULL;
+
+  g_assert_true (g_subprocess_communicate_utf8_finish (proc, res,
+                                                      &item->stdout_buf,
+                                                      &stderr_buf, &error));
+  g_assert_no_error (error);
+  item->exited = g_subprocess_get_if_exited (proc);
+  item->exit_status = item->exited ? g_subprocess_get_exit_status (proc) : -1;
+  (*item->remaining)--;
+}
+
+static void
+run_cli_batch (CliBatchItem *items, size_t count)
+{
+  g_autoptr (GSubprocessLauncher) launcher =
+    g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_STDOUT_PIPE |
+                               G_SUBPROCESS_FLAGS_STDERR_PIPE);
+  int remaining = (int) count;
+
+  g_subprocess_launcher_setenv (launcher, "XDG_DATA_HOME", data_home, TRUE);
+  g_subprocess_launcher_setenv (launcher, "GSETTINGS_BACKEND", "memory", TRUE);
+  g_subprocess_launcher_unsetenv (launcher, "DISPLAY");
+  g_subprocess_launcher_unsetenv (launcher, "WAYLAND_DISPLAY");
+
+  for (size_t i = 0; i < count; i++)
+    {
+      g_autoptr (GPtrArray) argv = g_ptr_array_new ();
+      g_autoptr (GError) error = NULL;
+      g_autoptr (GSubprocess) proc = NULL;
+
+      g_ptr_array_add (argv, (gpointer) NUVASHALAUNCHER_BIN);
+      for (guint j = 0; items[i].args[j] != NULL; j++)
+        g_ptr_array_add (argv, (gpointer) items[i].args[j]);
+      g_ptr_array_add (argv, NULL);
+
+      items[i].remaining = &remaining;
+      proc = g_subprocess_launcher_spawnv (launcher,
+                                           (const char * const *) argv->pdata,
+                                           &error);
+      g_assert_no_error (error);
+      g_assert_nonnull (proc);
+      g_subprocess_communicate_utf8_async (proc, NULL, NULL,
+                                           on_cli_batch_done, &items[i]);
+    }
+
+  while (remaining > 0)
+    g_main_context_iteration (NULL, TRUE);
 }
 
 static void
@@ -157,29 +222,47 @@ test_extended_cli_commands (void)
   g_autofree char *output = NULL;
   int status = -1;
 
-  /* Headless --help works without DISPLAY/WAYLAND_DISPLAY. */
-  output = run_cli ("--help", NULL, &status);
-  g_assert_cmpint (status, ==, 0);
-  g_assert_nonnull (strstr (output, "--create-instance"));
-  g_assert_nonnull (strstr (output, "--server"));
-  g_assert_nonnull (strstr (output, "--world"));
-  g_assert_nonnull (strstr (output, "--list-worlds"));
-  g_assert_nonnull (strstr (output, "--list-servers"));
-  g_clear_pointer (&output, g_free);
-
-  /* --server/--world require --launch and cannot be combined together. */
-  output = run_cli ("--server", "play.example.com", &status);
-  g_assert_true (WIFEXITED (status));
-  g_assert_cmpint (WEXITSTATUS (status), ==, 2);
-  g_clear_pointer (&output, g_free);
-
+  /* Headless stateless/error CLI checks run in parallel. */
   {
-    const char *args[] = { "--launch", "Inst", "--server", "play.example.com",
-                           "--world", "MyWorld", NULL };
-    output = run_cli_v (args, &status);
-    g_assert_true (WIFEXITED (status));
-    g_assert_cmpint (WEXITSTATUS (status), ==, 2);
-    g_clear_pointer (&output, g_free);
+    const char *help_args[] = { "--help", NULL };
+    const char *srv_args[] = { "--server", "play.example.com", NULL };
+    const char *both_args[] = { "--launch", "Inst", "--server", "play.example.com",
+                                "--world", "MyWorld", NULL };
+    const char *cache_args[] = { "--clear-cache", NULL };
+    const char *missing_launch[] = { "--launch", "DoesNotExist", "--headless", NULL };
+    const char *missing_worlds[] = { "--list-worlds", "DoesNotExist", "--json", NULL };
+    const char *missing_servers[] = { "--list-servers", "DoesNotExist", "--json", NULL };
+    const char *missing_acct[] = { "--switch-account", "NoSuchPlayer", NULL };
+
+    CliBatchItem batch[] = {
+      { .args = help_args },
+      { .args = srv_args },
+      { .args = both_args },
+      { .args = cache_args },
+      { .args = missing_launch },
+      { .args = missing_worlds },
+      { .args = missing_servers },
+      { .args = missing_acct },
+    };
+    run_cli_batch (batch, G_N_ELEMENTS (batch));
+
+    g_assert_true (batch[0].exited && batch[0].exit_status == 0);
+    g_assert_nonnull (strstr (batch[0].stdout_buf, "--create-instance"));
+    g_assert_nonnull (strstr (batch[0].stdout_buf, "--server"));
+    g_assert_nonnull (strstr (batch[0].stdout_buf, "--world"));
+    g_assert_nonnull (strstr (batch[0].stdout_buf, "--list-worlds"));
+    g_assert_nonnull (strstr (batch[0].stdout_buf, "--list-servers"));
+
+    g_assert_true (batch[1].exited && batch[1].exit_status == 2);
+    g_assert_true (batch[2].exited && batch[2].exit_status == 2);
+    g_assert_true (batch[3].exited && batch[3].exit_status == 0);
+    g_assert_true (batch[4].exited && batch[4].exit_status != 0);
+    g_assert_true (batch[5].exited && batch[5].exit_status != 0);
+    g_assert_true (batch[6].exited && batch[6].exit_status != 0);
+    g_assert_true (batch[7].exited && batch[7].exit_status != 0);
+
+    for (size_t i = 0; i < G_N_ELEMENTS (batch); i++)
+      g_free (batch[i].stdout_buf);
   }
 
   /* --add-offline-account creates an offline account and --list-accounts --json lists it. */
@@ -292,18 +375,22 @@ test_extended_cli_commands (void)
     g_assert_no_error (error);
 
     const char *worlds_args[] = { "--list-worlds", "CliPack", "--json", NULL };
-    output = run_cli_v (worlds_args, &status);
-    g_assert_cmpint (status, ==, 0);
-    g_assert_nonnull (strstr (output, "\"folder\" : \"MyWorld\""));
-    g_assert_nonnull (strstr (output, "\"name\" : \"My World\""));
-    g_clear_pointer (&output, g_free);
-
     const char *servers_args[] = { "--list-servers", "CliPack", "--json", NULL };
-    output = run_cli_v (servers_args, &status);
-    g_assert_cmpint (status, ==, 0);
-    g_assert_nonnull (strstr (output, "\"name\" : \"Test Server\""));
-    g_assert_nonnull (strstr (output, "\"ip\" : \"play.example.com\""));
-    g_clear_pointer (&output, g_free);
+    CliBatchItem ro_batch[] = {
+      { .args = worlds_args },
+      { .args = servers_args },
+    };
+    run_cli_batch (ro_batch, G_N_ELEMENTS (ro_batch));
+
+    g_assert_true (ro_batch[0].exited && ro_batch[0].exit_status == 0);
+    g_assert_nonnull (strstr (ro_batch[0].stdout_buf, "\"folder\" : \"MyWorld\""));
+    g_assert_nonnull (strstr (ro_batch[0].stdout_buf, "\"name\" : \"My World\""));
+    g_free (ro_batch[0].stdout_buf);
+
+    g_assert_true (ro_batch[1].exited && ro_batch[1].exit_status == 0);
+    g_assert_nonnull (strstr (ro_batch[1].stdout_buf, "\"name\" : \"Test Server\""));
+    g_assert_nonnull (strstr (ro_batch[1].stdout_buf, "\"ip\" : \"play.example.com\""));
+    g_free (ro_batch[1].stdout_buf);
   }
 
   {
@@ -313,39 +400,6 @@ test_extended_cli_commands (void)
     g_clear_pointer (&output, g_free);
   }
   g_assert_true (g_file_test (created_dir, G_FILE_TEST_IS_DIR));
-
-  /* --clear-cache succeeds headlessly. */
-  output = run_cli ("--clear-cache", NULL, &status);
-  g_assert_cmpint (status, ==, 0);
-  g_clear_pointer (&output, g_free);
-
-  /* --launch --headless on a missing instance exits non-zero cleanly without a display. */
-  {
-    const char *args[] = { "--launch", "DoesNotExist", "--headless", NULL };
-    output = run_cli_v (args, &status);
-    g_assert_cmpint (status, !=, 0);
-    g_clear_pointer (&output, g_free);
-  }
-
-  /* --list-worlds, --list-servers, and --switch-account fail cleanly on unknown targets. */
-  {
-    const char *args[] = { "--list-worlds", "DoesNotExist", "--json", NULL };
-    output = run_cli_v (args, &status);
-    g_assert_cmpint (status, !=, 0);
-    g_clear_pointer (&output, g_free);
-  }
-  {
-    const char *args[] = { "--list-servers", "DoesNotExist", "--json", NULL };
-    output = run_cli_v (args, &status);
-    g_assert_cmpint (status, !=, 0);
-    g_clear_pointer (&output, g_free);
-  }
-  {
-    const char *args[] = { "--switch-account", "NoSuchPlayer", NULL };
-    output = run_cli_v (args, &status);
-    g_assert_cmpint (status, !=, 0);
-    g_clear_pointer (&output, g_free);
-  }
 
   g_print ("ok - extended CLI commands work headlessly\n");
 }
