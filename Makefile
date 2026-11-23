@@ -59,6 +59,7 @@ SCHEMA_COMPILED := build/schemas/gschemas.compiled
 
 CFLAGS     ?= -std=c17 -Wall -Wextra -Wpedantic -MMD -MP -pipe
 RELFLAGS   := -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIC
+override RELFLAGS += -fPIC
 RELLDFLAGS := -pie -Wl,-z,relro,-z,now
 DBGFLAGS   := -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all
 

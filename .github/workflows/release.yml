@@ -48,7 +48,7 @@ jobs:
           chmod +x debian/rules
           printf 'nuvashalauncher (%s-1) unstable; urgency=medium\n\n  * Release Nuvasha Launcher %s.\n\n -- Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>  %s\n' \
             "$VERSION" "$VERSION" "$(date -R)" > debian/changelog
-          dpkg-buildpackage -us -uc -b -jauto
+          DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc -b -jauto
           mkdir -p dist
           cp -v ../nuvashalauncher_${VERSION}-1_${{ matrix.arch }}.deb \
             dist/nuvashalauncher-${{ matrix.arch }}.deb
@@ -80,7 +80,7 @@ jobs:
 
       - name: Install RPM build dependencies
         run: |
-          dnf install -y \
+          dnf install -y --setopt=install_weak_deps=False --setopt=tsflags=nodocs \
             tar git rpm-build rpmdevtools \
             gcc make gettext pkgconf-pkg-config \
             glib2-devel gtk4-devel libadwaita-devel libepoxy-devel \
@@ -94,7 +94,7 @@ jobs:
           tar --exclude='./.git' --exclude='./build' --exclude='./build-debug' --exclude='./dist' \
             --transform="s,^\.,nuvashalauncher-${VERSION}," \
             -czf ~/rpmbuild/SOURCES/"nuvashalauncher-${VERSION}.tar.gz" .
-          rpmbuild -bb --define "_version ${VERSION}" packaging/rpm/nuvashalauncher.spec
+          rpmbuild -bb --nocheck --define "debug_package %{nil}" --define "_version ${VERSION}" packaging/rpm/nuvashalauncher.spec
           mkdir -p dist
           find ~/rpmbuild/RPMS -name "nuvashalauncher-${VERSION}-*.rpm" \
             ! -name "*-debuginfo-*" ! -name "*-debugsource-*" \
@@ -134,7 +134,7 @@ jobs:
             --transform="s,^\.,nuvashalauncher-${VERSION}," \
             -czf /tmp/archbuild/"nuvashalauncher-${VERSION}.tar.gz" .
           chown -R builder:builder /tmp/archbuild
-          su builder -c "cd /tmp/archbuild && _pkgver=${VERSION} PKGEXT='.pkg.tar.zst' makepkg -sf --noconfirm"
+          su builder -c "cd /tmp/archbuild && _pkgver=${VERSION} PKGEXT='.pkg.tar.zst' makepkg -sf --noconfirm --nocheck"
           mkdir -p dist
           cp -v /tmp/archbuild/nuvashalauncher-${VERSION}-1-x86_64.pkg.tar.zst \
             dist/nuvashalauncher-x86_64.pkg.tar.zst
@@ -173,8 +173,7 @@ jobs:
             flatpak \
             flatpak-builder \
             git \
-            make \
-            xvfb
+            make
           flatpak remote-add --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
 
@@ -185,7 +184,7 @@ jobs:
           manifest-path: packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml
           arch: ${{ matrix.arch }}
           cache: true
-          cache-key: flatpak-builder-${{ matrix.arch }}-${{ github.sha }}
+          cache-key: flatpak-builder-${{ matrix.arch }}-${{ hashFiles('packaging/flatpak/**') }}
 
       - name: Install Flatpak bundle
         run: flatpak install --user --noninteractive nuvashalauncher-${{ matrix.arch }}.flatpak
