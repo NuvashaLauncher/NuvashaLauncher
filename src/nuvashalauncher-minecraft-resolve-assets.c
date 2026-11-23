@@ -225,6 +225,8 @@ resolve_objects (ResolveRequest *request)
 
   g_autoptr (GHashTable) seen_hashes =
     g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  g_autoptr (GHashTable) ensured_buckets =
+    g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
   request->total = request->done + json_object_get_size (objects);
   report (request);
@@ -330,10 +332,15 @@ resolve_objects (ResolveRequest *request)
               return;
             }
 
-          if (!nuvashalauncher_resolve_ensure_parent_directory (destination, &local))
+          if (!g_hash_table_contains (ensured_buckets, bucket))
             {
-              request_fail_and_wait (request, g_steal_pointer (&local));
-              return;
+              if (!nuvashalauncher_resolve_ensure_parent_directory (destination, &local))
+                {
+                  request_fail_and_wait (request, g_steal_pointer (&local));
+                  return;
+                }
+              g_hash_table_add (ensured_buckets, g_steal_pointer (&bucket));
+              bucket = g_strndup (hash, 2);
             }
 
           url = g_strdup_printf ("%s/%s/%s", request->asset_base_url, bucket, hash);

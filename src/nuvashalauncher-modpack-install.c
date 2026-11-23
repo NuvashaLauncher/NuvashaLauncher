@@ -105,25 +105,27 @@ loader_version_matches (NuvashaLauncherLoader loader,
  * The flow of one install
  * ---------------------------------------------------------- */
 
+#define MODPACK_DOWNLOAD_CONCURRENCY 6
+
 typedef struct
 {
+  gatomicrefcount refs;
   NuvashaLauncherModpack *pack;     /* borrowed: alive until the last finish */
   NuvashaLauncherInstanceManager *manager;
   char *name;
   char *target;
   char *temp;
   GCancellable *cancellable;
+  GCancellable *children_cancellable;
+  gulong cancel_handler;
   GPtrArray *files; /* merged required + chosen optional, borrowed */
   guint total;
   guint current;
+  guint next_index;
+  guint in_flight;
+  gboolean failed;
   guint pending_index_writes;
   GError *index_error;
-  guint attempt;       /* which URL of the current file */
-  gboolean saw_disallowed;
-  gboolean saw_download_error;
-  gboolean saw_hash_error;
-  char *last_download_url;
-  char *last_download_error;
   gboolean moved;
   NuvashaLauncherModpackProgressFunc progress;
   gpointer progress_data; /* user_data both for the result and progress */
@@ -131,8 +133,22 @@ typedef struct
   NuvashaLauncherTaskScope *scope;
 } InstallRun;
 
+typedef struct
+{
+  InstallRun *run;
+  guint file_index;
+  guint attempt;       /* which URL of the current file */
+  gboolean saw_disallowed;
+  gboolean saw_download_error;
+  gboolean saw_hash_error;
+  char *last_download_url;
+  char *last_download_error;
+} InstallFileOp;
+
+static InstallRun *install_run_ref (InstallRun *run);
+static void install_run_unref (InstallRun *run);
 static void install_next (InstallRun *run);
-static void dispatch_download (InstallRun *run);
+static void dispatch_download (InstallFileOp *op);
 static void install_file_done (GObject *, GAsyncResult *, gpointer);
 static void install_file_verified (GObject *, GAsyncResult *, gpointer);
 static void install_loader_versions (GObject *, GAsyncResult *, gpointer);
@@ -261,6 +277,25 @@ install_index_written (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
+install_file_op_free (InstallFileOp *op)
+{
+  if (op == NULL)
+    return;
+
+  g_free (op->last_download_url);
+  g_free (op->last_download_error);
+  install_run_unref (op->run);
+  g_free (op);
+}
+
+static InstallRun *
+install_run_ref (InstallRun *run)
+{
+  g_atomic_ref_count_inc (&run->refs);
+  return run;
+}
+
+static void
 install_run_free (InstallRun *run)
 {
   if (run == NULL)
@@ -270,6 +305,10 @@ install_run_free (InstallRun *run)
     nuvashalauncher_fs_remove_tree (run->temp);
 
   g_ptr_array_unref (run->files); /* elements stay with the pack */
+  if (run->cancel_handler != 0 && run->cancellable != NULL)
+    g_cancellable_disconnect (run->cancellable, run->cancel_handler);
+  run->cancel_handler = 0;
+  g_clear_object (&run->children_cancellable);
   g_clear_object (&run->manager);
   g_clear_object (&run->cancellable);
   g_clear_object (&run->task);
@@ -277,9 +316,17 @@ install_run_free (InstallRun *run)
   g_free (run->name);
   g_free (run->target);
   g_free (run->temp);
-  g_free (run->last_download_url);
-  g_free (run->last_download_error);
   g_free (run);
+}
+
+static void
+install_run_unref (InstallRun *run)
+{
+  if (run == NULL)
+    return;
+
+  if (g_atomic_ref_count_dec (&run->refs))
+    install_run_free (run);
 }
 
 /* Everything of ours goes away; anything that was on disk before the
@@ -287,6 +334,14 @@ install_run_free (InstallRun *run)
 static void
 install_fail (InstallRun *run, GError *error)
 {
+  if (run->failed)
+    {
+      g_error_free (error);
+      return;
+    }
+
+  run->failed = TRUE;
+
   if (run->temp != NULL)
     nuvashalauncher_fs_remove_tree (run->temp);
 
@@ -294,7 +349,8 @@ install_fail (InstallRun *run, GError *error)
     nuvashalauncher_fs_remove_tree (run->target);
 
   nuvashalauncher_task_scope_return_error (run->scope, error);
-  install_run_free (run);
+  g_cancellable_cancel (run->children_cancellable);
+  install_run_unref (run);
 }
 
 /* One of our temp validation went wrong, in front of any transfer: the
@@ -304,7 +360,7 @@ static void
 install_refuse (InstallRun *run, GError *error)
 {
   nuvashalauncher_task_scope_return_error_deferred (run->scope, error);
-  install_run_free (run);
+  install_run_unref (run);
 }
 
 static void
@@ -469,13 +525,22 @@ install_finish_registration (InstallRun *run)
 
   nuvashalauncher_task_scope_return_pointer (run->scope, g_object_ref (instance),
                                  g_object_unref);
-  install_run_free (run);
+  install_run_unref (run);
 }
 
-/* The next file in line, or the overrides once there are none. */
+/* Fill up to MODPACK_DOWNLOAD_CONCURRENCY in-flight file downloads, or
+ * extract overrides once every file has completed. */
 static void
 install_next (InstallRun *run)
 {
+  install_run_ref (run);
+
+  if (run->failed)
+    {
+      install_run_unref (run);
+      return;
+    }
+
   if (run->current >= run->total)
     {
       if (run->progress != NULL)
@@ -484,17 +549,23 @@ install_next (InstallRun *run)
         extract_overrides_async (run->pack->archive_path, run->temp,
                                  overrides_extracted, run),
         run->cancellable);
+      install_run_unref (run);
       return;
     }
 
-  run->attempt = 0;
-  run->saw_disallowed = FALSE;
-  run->saw_download_error = FALSE;
-  run->saw_hash_error = FALSE;
-  g_clear_pointer (&run->last_download_url, g_free);
-  g_clear_pointer (&run->last_download_error, g_free);
+  while (!run->failed &&
+         run->next_index < run->total &&
+         run->in_flight < MODPACK_DOWNLOAD_CONCURRENCY)
+    {
+      InstallFileOp *op = g_new0 (InstallFileOp, 1);
 
-  dispatch_download (run);
+      op->run = install_run_ref (run);
+      op->file_index = run->next_index++;
+      run->in_flight++;
+      dispatch_download (op);
+    }
+
+  install_run_unref (run);
 }
 
 static void
@@ -514,10 +585,18 @@ overrides_extracted (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
-dispatch_download (InstallRun *run)
+dispatch_download (InstallFileOp *op)
 {
-  NuvashaLauncherModpackFile *file = g_ptr_array_index (run->files, run->current);
+  InstallRun *run = op->run;
+  NuvashaLauncherModpackFile *file = g_ptr_array_index (run->files, op->file_index);
   const char *url = NULL;
+
+  if (run->failed)
+    {
+      run->in_flight--;
+      install_file_op_free (op);
+      return;
+    }
 
   if (file->downloads == NULL || file->downloads->len == 0)
     {
@@ -525,42 +604,44 @@ dispatch_download (InstallRun *run)
       g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR,
                    NUVASHALAUNCHER_MODPACK_ERROR_DOWNLOAD,
                    "\"%s\" has no download URL", file->path);
+      run->in_flight--;
       install_fail (run, g_steal_pointer (&error));
+      install_file_op_free (op);
       return;
     }
 
-  while (run->attempt < file->downloads->len)
+  while (op->attempt < file->downloads->len)
     {
-      url = g_ptr_array_index (file->downloads, run->attempt);
+      url = g_ptr_array_index (file->downloads, op->attempt);
 
       if (nuvashalauncher_modpack_download_url_allowed (url))
         break;
 
-      run->saw_disallowed = TRUE;
-      run->attempt++;
+      op->saw_disallowed = TRUE;
+      op->attempt++;
     }
 
-  if (run->attempt >= file->downloads->len)
+  if (op->attempt >= file->downloads->len)
     {
       g_autoptr (GError) error = NULL;
 
-      if (run->saw_hash_error)
+      if (op->saw_hash_error)
         {
           g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_HASH,
                        "what arrived for \"%s\" did not match the hashes of "
                        "the manifest",
                        file->path);
         }
-      else if (run->saw_download_error)
+      else if (op->saw_download_error)
         {
           g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR,
                        NUVASHALAUNCHER_MODPACK_ERROR_DOWNLOAD,
                        "\"%s\" could not be downloaded from %s: %s",
                        file->path,
-                       run->last_download_url != NULL ? run->last_download_url : "an available URL",
-                       run->last_download_error != NULL ? run->last_download_error : "unknown download error");
+                       op->last_download_url != NULL ? op->last_download_url : "an available URL",
+                       op->last_download_error != NULL ? op->last_download_error : "unknown download error");
         }
-      else if (run->saw_disallowed)
+      else if (op->saw_disallowed)
         {
           g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_URL,
                        "every URL the manifest gives for \"%s\" is from a "
@@ -573,7 +654,9 @@ dispatch_download (InstallRun *run)
                        "\"%s\" has no download URL", file->path);
         }
 
+      run->in_flight--;
       install_fail (run, g_steal_pointer (&error));
+      install_file_op_free (op);
       return;
     }
 
@@ -589,7 +672,9 @@ dispatch_download (InstallRun *run)
                    "the manifest wants \"%s\", which is not a path the "
                    "instance can hold",
                    file->path);
+      run->in_flight--;
       install_fail (run, g_steal_pointer (&error));
+      install_file_op_free (op);
       return;
     }
 
@@ -605,7 +690,9 @@ dispatch_download (InstallRun *run)
         g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_IO,
                      "a directory under the instance cannot be made: %s",
                      directory_error->message);
+        run->in_flight--;
         install_fail (run, g_steal_pointer (&error));
+        install_file_op_free (op);
         return;
       }
 
@@ -615,8 +702,8 @@ dispatch_download (InstallRun *run)
        nuvashalauncher_task_scope_release_when_done (
        nuvashalauncher_download_file_limited_async (nuvashalauncher_downloads_get_service (), url, dest, NULL, 0,
                                                      -1, NULL, install_file_done,
-                                 run),
-      run->cancellable);
+                                 op),
+      run->children_cancellable);
   }
 }
 
@@ -625,36 +712,47 @@ install_file_done (GObject *source G_GNUC_UNUSED,
                    GAsyncResult *result,
                    gpointer user_data)
 {
-  InstallRun *run = user_data;
+  InstallFileOp *op = user_data;
+  InstallRun *run = op->run;
   g_autoptr (GError) error = NULL;
   NuvashaLauncherModpackFile *file =
-    g_ptr_array_index (run->files, run->current);
-  const char *failed_url = file->downloads != NULL && run->attempt < file->downloads->len
-                             ? g_ptr_array_index (file->downloads, run->attempt)
+    g_ptr_array_index (run->files, op->file_index);
+  const char *failed_url = file->downloads != NULL && op->attempt < file->downloads->len
+                             ? g_ptr_array_index (file->downloads, op->attempt)
                              : NULL;
 
   if (!nuvashalauncher_download_file_finish (result, &error))
     {
-      if (g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+      if (run->failed ||
+          g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
                            NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED) ||
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
+          run->in_flight--;
           install_fail (
             run,
             g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
                                  NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled"));
+          install_file_op_free (op);
           return;
         }
 
-      run->saw_download_error = TRUE;
-      g_free (run->last_download_url);
-      run->last_download_url = g_strdup (failed_url);
-      g_free (run->last_download_error);
-      run->last_download_error = g_strdup (error->message);
+      op->saw_download_error = TRUE;
+      g_free (op->last_download_url);
+      op->last_download_url = g_strdup (failed_url);
+      g_free (op->last_download_error);
+      op->last_download_error = g_strdup (error->message);
 
       /* The next URL of the same file may work where the last did not. */
-      run->attempt++;
-      dispatch_download (run);
+      op->attempt++;
+      dispatch_download (op);
+      return;
+    }
+
+  if (run->failed)
+    {
+      run->in_flight--;
+      install_file_op_free (op);
       return;
     }
 
@@ -662,8 +760,8 @@ install_file_done (GObject *source G_GNUC_UNUSED,
     g_autofree char *dest = g_build_filename (run->temp, file->path, NULL);
 
     nuvashalauncher_task_scope_release_when_done (
-      nuvashalauncher_modpack_verify_file_async (file, dest, install_file_verified, run),
-      run->cancellable);
+      nuvashalauncher_modpack_verify_file_async (file, dest, install_file_verified, op),
+      run->children_cancellable);
   }
 }
 
@@ -672,7 +770,8 @@ install_file_verified (GObject *source G_GNUC_UNUSED,
                        GAsyncResult *result,
                        gpointer user_data)
 {
-  InstallRun *run = user_data;
+  InstallFileOp *op = user_data;
+  InstallRun *run = op->run;
   g_autoptr (GError) error = NULL;
   NuvashaLauncherModpackFile *file = NULL;
   g_autofree char *dest = NULL;
@@ -681,39 +780,59 @@ install_file_verified (GObject *source G_GNUC_UNUSED,
     {
       /* A hash that does not match is no good download: wrong in a way
        * a try of the next URL may put right. */
-      if (g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+      if (run->failed ||
+          g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
                            NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED) ||
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
+          run->in_flight--;
           install_fail (
             run,
             g_error_new_literal (NUVASHALAUNCHER_MODPACK_ERROR,
                                  NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED, "cancelled"));
+          install_file_op_free (op);
           return;
         }
 
-      file = g_ptr_array_index (run->files, run->current);
+      file = g_ptr_array_index (run->files, op->file_index);
       dest = g_build_filename (run->temp, file->path, NULL);
 
       nuvashalauncher_fs_unlink (dest, NULL);
 
-      run->saw_hash_error = TRUE;
-      run->attempt++;
+      op->saw_hash_error = TRUE;
+      op->attempt++;
 
-      dispatch_download (run);
+      dispatch_download (op);
       return;
     }
 
-  file = g_ptr_array_index (run->files, run->current);
+  file = g_ptr_array_index (run->files, op->file_index);
+  run->in_flight--;
 
-  /* The file that arrived has the two hashes: the next file, and what
-   * of this one the user sees. */
+  if (run->failed)
+    {
+      install_file_op_free (op);
+      return;
+    }
+
+  /* The file that arrived has the two hashes: update progress and keep
+   * the pipeline full. */
   run->current++;
 
   if (run->progress != NULL)
     run->progress (run->current, run->total, file->path, run->progress_data);
 
+  install_file_op_free (op);
   install_next (run);
+}
+
+static void
+on_outer_cancelled (GCancellable *cancellable G_GNUC_UNUSED,
+                    gpointer user_data)
+{
+  GCancellable *children = user_data;
+
+  g_cancellable_cancel (children);
 }
 
 NuvashaLauncherTaskScope *
@@ -756,11 +875,16 @@ nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
     }
 
   run = g_new0 (InstallRun, 1);
+  g_atomic_ref_count_init (&run->refs);
 
   run->pack = modpack;
   run->manager = g_object_ref (manager);
   run->name = g_strdup (name);
   run->cancellable = g_object_ref (nuvashalauncher_task_scope_get_cancellable (task_scope));
+  run->children_cancellable = g_cancellable_new ();
+  run->cancel_handler = g_cancellable_connect (
+    run->cancellable, G_CALLBACK (on_outer_cancelled),
+    g_object_ref (run->children_cancellable), g_object_unref);
   run->progress = progress;
   run->progress_data = user_data;
   run->files = g_ptr_array_new ();
@@ -812,7 +936,6 @@ nuvashalauncher_modpack_install_async (NuvashaLauncherModpack *modpack,
 
   run->total = run->files->len;
   run->current = 0;
-  run->attempt = 0;
 
   /* Room for the tree the install is built in, next to where it ends
    * up: the final move is one rename on one filesystem. The parent is

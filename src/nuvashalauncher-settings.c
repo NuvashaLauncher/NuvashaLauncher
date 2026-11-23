@@ -69,30 +69,27 @@ load (NuvashaLauncherSettings *self)
 }
 
 static gboolean
-save (NuvashaLauncherSettings *self, GError **error)
+save_boolean (NuvashaLauncherSettings *self, const char *key, gboolean value)
 {
-  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+  if (self->desktop_settings != NULL)
+    g_settings_set_boolean (self->desktop_settings, key, value);
+  return TRUE;
+}
 
-  if (self->desktop_settings == NULL)
-    return TRUE; /* In-memory fallback persists throughout session when GSettings schema is absent */
+static gboolean
+save_uint (NuvashaLauncherSettings *self, const char *key, guint value)
+{
+  if (self->desktop_settings != NULL)
+    g_settings_set_uint (self->desktop_settings, key, value);
+  return TRUE;
+}
 
-  g_settings_set_boolean (self->desktop_settings, SHOW_UNSTABLE_VERSIONS_KEY,
-                          self->show_unstable_versions);
-  g_settings_set_uint (self->desktop_settings, LOG_LINE_LIMIT_KEY,
-                       self->log_line_limit);
-  g_settings_set_boolean (self->desktop_settings, SHOW_UNSTABLE_LOADERS_KEY,
-                          self->show_unstable_loaders);
-  g_settings_set_string (self->desktop_settings, LANGUAGE_KEY,
-                         self->language != NULL ? self->language : "");
-  g_settings_set_boolean (self->desktop_settings,
-                          CACHE_MODRINTH_API_RESPONSES_KEY,
-                          self->cache_modrinth_api_responses);
-  g_settings_set_uint (self->desktop_settings, CACHE_EXPIRATION_KEY,
-                       self->cache_expiration);
-  g_settings_set_boolean (self->desktop_settings, EXPORT_METADATA_KEY,
-                          self->export_metadata);
-  g_settings_set_boolean (self->desktop_settings, DELETE_DEPENDENTS_KEY,
-                          self->delete_dependents);
+static gboolean
+save_string (NuvashaLauncherSettings *self, const char *key, const char *value)
+{
+  if (self->desktop_settings != NULL)
+    g_settings_set_string (self->desktop_settings, key,
+                           value != NULL ? value : "");
   return TRUE;
 }
 
@@ -121,7 +118,7 @@ nuvashalauncher_settings_set_export_metadata (NuvashaLauncherSettings *self, gbo
 
   previous = self->export_metadata;
   self->export_metadata = value;
-  if (save (self, error))
+  if (save_boolean (self, EXPORT_METADATA_KEY, value))
     return TRUE;
 
   self->export_metadata = previous;
@@ -146,7 +143,7 @@ nuvashalauncher_settings_set_delete_dependents (NuvashaLauncherSettings *self, g
 
   previous = self->delete_dependents;
   self->delete_dependents = value;
-  if (save (self, error))
+  if (save_boolean (self, DELETE_DEPENDENTS_KEY, value))
     return TRUE;
 
   self->delete_dependents = previous;
@@ -174,7 +171,7 @@ nuvashalauncher_settings_set_show_unstable_versions (NuvashaLauncherSettings *se
   previous = self->show_unstable_versions;
   self->show_unstable_versions = value;
 
-  if (save (self, error))
+  if (save_boolean (self, SHOW_UNSTABLE_VERSIONS_KEY, value))
     return TRUE;
 
   /* The file did not change, so neither does the answer. */
@@ -211,7 +208,7 @@ nuvashalauncher_settings_set_log_line_limit (NuvashaLauncherSettings *self,
   previous = self->log_line_limit;
   self->log_line_limit = limit;
 
-  if (save (self, error))
+  if (save_uint (self, LOG_LINE_LIMIT_KEY, limit))
     return TRUE;
 
   /* The file did not change, so neither does the answer. */
@@ -240,7 +237,7 @@ nuvashalauncher_settings_set_show_unstable_loaders (NuvashaLauncherSettings *sel
   previous = self->show_unstable_loaders;
   self->show_unstable_loaders = value;
 
-  if (save (self, error))
+  if (save_boolean (self, SHOW_UNSTABLE_LOADERS_KEY, value))
     return TRUE;
 
   /* The file did not change, so neither does the answer. */
@@ -270,7 +267,7 @@ nuvashalauncher_settings_set_language (NuvashaLauncherSettings *self,
   previous = self->language;
   self->language = g_strdup (language);
 
-  if (save (self, error))
+  if (save_string (self, LANGUAGE_KEY, self->language))
     {
       g_free (previous);
       return TRUE;
@@ -301,7 +298,7 @@ nuvashalauncher_settings_set_cache_modrinth_api_responses (NuvashaLauncherSettin
 
   previous = self->cache_modrinth_api_responses;
   self->cache_modrinth_api_responses = value;
-  if (save (self, error))
+  if (save_boolean (self, CACHE_MODRINTH_API_RESPONSES_KEY, value))
     return TRUE;
 
   self->cache_modrinth_api_responses = previous;
@@ -339,7 +336,7 @@ nuvashalauncher_settings_set_cache_expiration (NuvashaLauncherSettings *self,
 
   previous = self->cache_expiration;
   self->cache_expiration = value;
-  if (save (self, error))
+  if (save_uint (self, CACHE_EXPIRATION_KEY, value))
     return TRUE;
 
   self->cache_expiration = previous;

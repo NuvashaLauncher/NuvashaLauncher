@@ -404,14 +404,45 @@ nuvashalauncher_icon_widget_set_texture (GtkWidget *widget, GdkTexture *texture)
   return TRUE;
 }
 
+static GHashTable *
+icon_texture_cache (void)
+{
+  GApplication *app = g_application_get_default ();
+  GHashTable *cache;
+
+  if (app == NULL)
+    return NULL;
+
+  cache = g_object_get_data (G_OBJECT (app), "nuvashalauncher-icon-texture-cache");
+  if (cache == NULL)
+    {
+      cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                     g_object_unref);
+      g_object_set_data_full (G_OBJECT (app), "nuvashalauncher-icon-texture-cache",
+                              cache, (GDestroyNotify) g_hash_table_unref);
+    }
+
+  return cache;
+}
+
 gboolean
 nuvashalauncher_icon_widget_set_file (GtkWidget *widget, const char *path)
 {
   g_autoptr (GdkPixbuf) pixbuf = NULL;
   g_autoptr (GdkTexture) texture = NULL;
+  GHashTable *cache = NULL;
 
   if (widget == NULL || !GTK_IS_STACK (widget) || path == NULL)
     return FALSE;
+
+  cache = icon_texture_cache ();
+  if (cache != NULL)
+    {
+      GdkTexture *cached = g_hash_table_lookup (cache, path);
+
+      if (cached != NULL)
+        return nuvashalauncher_icon_widget_set_texture (widget, cached);
+    }
 
   /* Decode at display size rather than retaining a full-size source texture
      for a 64-pixel row. Large modpack icons can otherwise consume megabytes
@@ -429,6 +460,13 @@ nuvashalauncher_icon_widget_set_file (GtkWidget *widget, const char *path)
     {
       g_debug ("the icon \"%s\" could not be decoded", path);
       return FALSE;
+    }
+
+  if (cache != NULL)
+    {
+      if (g_hash_table_size (cache) >= 256)
+        g_hash_table_remove_all (cache);
+      g_hash_table_replace (cache, g_strdup (path), g_object_ref (texture));
     }
 
   return nuvashalauncher_icon_widget_set_texture (widget, texture);

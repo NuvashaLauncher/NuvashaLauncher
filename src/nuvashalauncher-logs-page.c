@@ -41,6 +41,10 @@ struct _NuvashaLauncherLogsPage
    * user scrolling away from the live tail. */
   gboolean auto_scrolling;
   guint scroll_idle;
+
+  GString *pending_text;
+  guint pending_removed;
+  guint flush_timer;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherLogsPage, nuvashalauncher_logs_page, GTK_TYPE_BOX)
@@ -154,6 +158,15 @@ show_lines (NuvashaLauncherLogsPage *self)
   GString *built = NULL;
   guint shown = 0;
 
+  if (self->flush_timer != 0)
+    {
+      g_source_remove (self->flush_timer);
+      self->flush_timer = 0;
+    }
+  if (self->pending_text != NULL)
+    g_string_truncate (self->pending_text, 0);
+  self->pending_removed = 0;
+
   if (self->search_entry != NULL)
     needle = g_strdup (gtk_editable_get_text (
                          GTK_EDITABLE (self->search_entry)));
@@ -210,6 +223,69 @@ reload_log (NuvashaLauncherLogsPage *self)
 }
 
 static void
+flush_pending_lines (NuvashaLauncherLogsPage *self)
+{
+  GtkTextBuffer *buffer;
+  GtkTextIter start;
+  GtkTextIter end;
+
+  if (self->flush_timer != 0)
+    {
+      g_source_remove (self->flush_timer);
+      self->flush_timer = 0;
+    }
+
+  if (self->pending_text == NULL || self->pending_text->len == 0 ||
+      self->view == NULL)
+    {
+      self->pending_removed = 0;
+      if (self->pending_text != NULL)
+        g_string_truncate (self->pending_text, 0);
+      return;
+    }
+
+  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
+
+  if (self->pending_removed > 0)
+    {
+      gint total_lines = gtk_text_buffer_get_line_count (buffer);
+      gint del_lines = (gint) self->pending_removed;
+
+      if (del_lines >= total_lines)
+        {
+          gtk_text_buffer_get_bounds (buffer, &start, &end);
+          gtk_text_buffer_delete (buffer, &start, &end);
+        }
+      else
+        {
+          gtk_text_buffer_get_start_iter (buffer, &start);
+          gtk_text_buffer_get_iter_at_line (buffer, &end, del_lines);
+          gtk_text_buffer_delete (buffer, &start, &end);
+        }
+      self->pending_removed = 0;
+    }
+
+  gtk_text_buffer_get_end_iter (buffer, &end);
+  gtk_text_buffer_insert (buffer, &end, self->pending_text->str,
+                          (gint) self->pending_text->len);
+  g_string_truncate (self->pending_text, 0);
+  self->rendered = g_queue_get_length (self->lines);
+
+  if (self->following)
+    schedule_scroll_to_end (self);
+}
+
+static gboolean
+flush_pending_cb (gpointer user_data)
+{
+  NuvashaLauncherLogsPage *self = NUVASHALAUNCHER_LOGS_PAGE (user_data);
+
+  self->flush_timer = 0;
+  flush_pending_lines (self);
+  return G_SOURCE_REMOVE;
+}
+
+static void
 append_line (NuvashaLauncherLogsPage *self, const char *line)
 {
   g_autofree char *display = display_line (line);
@@ -219,7 +295,7 @@ append_line (NuvashaLauncherLogsPage *self, const char *line)
 
   line = display;
   guint limit = nuvashalauncher_launcher_get_line_limit (self->launcher);
-  gboolean removed = FALSE;
+  guint removed = 0;
 
   g_queue_push_tail (self->lines, g_strdup (line));
 
@@ -228,41 +304,40 @@ append_line (NuvashaLauncherLogsPage *self, const char *line)
   while (g_queue_get_length (self->lines) > limit)
     {
       g_free (g_queue_pop_head (self->lines));
-      removed = TRUE;
+      removed++;
     }
 
-  /* With no search on, only the tail of the view changed: appending it
-     avoids rebuilding the whole buffer for every line. A filtered view
-     still has to be rebuilt, because a new line may or may not match. */
+  /* With no search on, batch incoming lines over a 50ms window so rapid
+     Minecraft startup output does not trigger per-line GTK layout passes. */
   if (!self->filtered && self->view != NULL)
     {
       GtkTextBuffer *buffer =
         gtk_text_view_get_buffer (GTK_TEXT_VIEW (self->view));
-      GtkTextIter start;
-      GtkTextIter end;
 
-      if (removed)
-        {
-          gtk_text_buffer_get_start_iter (buffer, &start);
-          gtk_text_buffer_get_iter_at_line (buffer, &end, 1);
-          gtk_text_buffer_delete (buffer, &start, &end);
-        }
+      if (self->pending_text == NULL)
+        self->pending_text = g_string_new (NULL);
 
-      gtk_text_buffer_get_end_iter (buffer, &end);
+      if (self->pending_text->len > 0 ||
+          gtk_text_buffer_get_char_count (buffer) > 0)
+        g_string_append_c (self->pending_text, '\n');
 
-      if (gtk_text_buffer_get_char_count (buffer) > 0)
-        gtk_text_buffer_insert (buffer, &end, "\n", 1);
+      g_string_append (self->pending_text, line);
+      self->pending_removed += removed;
 
-      gtk_text_buffer_get_end_iter (buffer, &end);
-      gtk_text_buffer_insert (buffer, &end, line, -1);
-
-      self->rendered = g_queue_get_length (self->lines);
-
-      if (self->following)
-        schedule_scroll_to_end (self);
+      if (self->flush_timer == 0)
+        self->flush_timer = g_timeout_add (50, flush_pending_cb, self);
 
       return;
     }
+
+  if (self->flush_timer != 0)
+    {
+      g_source_remove (self->flush_timer);
+      self->flush_timer = 0;
+    }
+  if (self->pending_text != NULL)
+    g_string_truncate (self->pending_text, 0);
+  self->pending_removed = 0;
 
   show_lines (self);
 
@@ -716,6 +791,12 @@ nuvashalauncher_logs_page_dispose (GObject *object)
   if (self->launcher != NULL)
     g_signal_handlers_disconnect_by_data (self->launcher, self);
 
+  if (self->flush_timer != 0)
+    {
+      g_source_remove (self->flush_timer);
+      self->flush_timer = 0;
+    }
+
   if (self->scroll_idle != 0)
     {
       g_source_remove (self->scroll_idle);
@@ -734,6 +815,11 @@ nuvashalauncher_logs_page_finalize (GObject *object)
   NuvashaLauncherLogsPage *self = NUVASHALAUNCHER_LOGS_PAGE (object);
 
   g_clear_object (&self->launcher);
+  if (self->pending_text != NULL)
+    {
+      g_string_free (self->pending_text, TRUE);
+      self->pending_text = NULL;
+    }
   if (self->lines != NULL)
     {
       g_queue_free_full (self->lines, g_free);
