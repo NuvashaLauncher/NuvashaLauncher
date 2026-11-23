@@ -43,6 +43,7 @@ nuvashalauncher_i18n_template_strings (void)
 static const NuvashaLauncherLanguage languages[] = {
   { "system", N_("System default") },
   { "en", N_("English") },
+  { "es", N_("Español") },
   { "es_AR", N_("Español (Argentina)") },
   { "es_ES", N_("Español (España)") },
   { "pt_BR", N_("Português (Brasil)") },
