@@ -36,7 +36,7 @@ build() {
   cd "${pkgname}-${pkgver}"
   local pkg_libs
   pkg_libs="$(pkg-config --libs gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy libsecret-1) -lm"
-  make PREFIX=/usr \
+  make -j"$(nproc)" PREFIX=/usr \
     RELFLAGS="${CFLAGS} ${CPPFLAGS}" \
     PKG_LIBS="${LDFLAGS} ${pkg_libs}"
 }
@@ -46,7 +46,7 @@ check() {
   local pkg_libs
   pkg_libs="$(pkg-config --libs gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epoxy libsecret-1) -lm"
   desktop-file-validate data/com.github.NuvashaLauncher.NuvashaLauncher.desktop
-  make test PREFIX=/usr \
+  make -j"$(nproc)" test PREFIX=/usr \
     RELFLAGS="${CFLAGS} ${CPPFLAGS}" \
     PKG_LIBS="${LDFLAGS} ${pkg_libs}"
 }

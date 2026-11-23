@@ -339,4 +339,6 @@ build/locale/%/LC_MESSAGES/nuvashalauncher.mo: po/%.po
 	mkdir -p $(dir $@)
 	msgfmt -o $@ $<
 
+ifeq ($(NEEDS_BUILD),1)
 -include $(RELDEPS) $(DBGDEPS) $(TESTDEPS) $(TESTDBGDEPS) $(ANALYZER_DEPS)
+endif

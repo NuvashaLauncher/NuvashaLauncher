@@ -144,17 +144,20 @@ The main window owns a `NuvashaLauncherMainWindowModel`. The model groups the
 process-wide objects used by the UI:
 
 - `NuvashaLauncherInstanceManager`
-- `NuvashaLauncherDownloadService` and the `NuvashaLauncherDownloads` display manager
+- `NuvashaLauncherDownloadService`
 - `NuvashaLauncherSettings`
 - `NuvashaLauncherAccounts`
-- the users popover
 - launchers and instance dialogs, keyed by instance
 
 The window is the presentation boundary. `nuvashalauncher-main-window-*.c` files
-connect model signals to widgets, while page and dialog modules handle their
-own views. Widgets declared in `data/ui/*.ui` and the stylesheet are compiled
-into a GResource by the Makefile. The UI is therefore available from the
-installed binary; it is not read from the source tree at runtime.
+connect model signals and the process-wide `NuvashaLauncherDownloads` display
+manager (`nuvashalauncher_downloads_get_default()`) to widgets, create the
+header-bar `NuvashaLauncherUsersPopover`, and let page and dialog modules handle
+their own views. Widgets declared in `data/ui/*.ui`, `nuvashalauncher.css`,
+`pack.png`, and symbolic action icons (`export-symbolic.svg`,
+`external-link-symbolic.svg`) are compiled into a GResource by the Makefile. The
+UI is therefore available from the installed binary; it is not read from the
+source tree at runtime.
 
 The downloads display is separate from the dialog that started a
 download. `NuvashaLauncherDownloads` is process-wide, owns entries while they run, and
@@ -236,7 +239,9 @@ writes each accepted change. To support custom installation prefixes,
 distribution build environments, and development runs, schema lookup searches
 `GSETTINGS_SCHEMA_DIR`, the default system schema source,
 `PREFIX/share/glib-2.0/schemas`, `<exe_dir>/../share/glib-2.0/schemas`,
-`XDG_DATA_DIRS`, and the local `build/` directory. The settings include
+`XDG_DATA_DIRS`, and local `build/schemas` directories, falling back to compiling
+the bundled schema into `<user cache>/nuvashalauncher/schemas` via
+`glib-compile-schemas` when no installed schema is found. The settings include
 version-list filters, log retention, language, Modrinth API caching, export
 behavior, dependency delete behavior, and custom Java runtime paths. Window
 geometry is kept separately by the window code.
@@ -297,7 +302,9 @@ retries and `Retry-After` where appropriate. A 404 and other non-retryable
 statuses fail directly. Cancellation or failure discards the temporary file
 and never replaces a valid destination.
 
-JSON requests use the same transfer, in-flight deduplication, and retry machinery.
+JSON requests use the same transfer and retry machinery (with in-flight request
+deduplication implemented on top for Modrinth API queries in
+`nuvashalauncher-modrinth-requests.c`).
 API responses (including Mojang's version manifest) can be cached with their
 creation time and ETag. When enabled, an expired entry is revalidated without
 parsing the stale inner payload first; if the network is unavailable, a stale
@@ -394,14 +401,14 @@ cannot finish should leave the existing instance and metadata intact.
 
 ## Launch pipeline
 
-Nuvasha Launcher belongs to one instance and is the owner of that instance's
+`NuvashaLauncher` belongs to one instance and is the owner of that instance's
 launch state, log buffer, preparation scope, and child process. A launcher
 refuses a second start while its state is busy.
 
 ```mermaid
 sequenceDiagram
     participant UI
-    participant L as Nuvasha Launcher
+    participant L as NuvashaLauncher
     participant A as Accounts
     participant V as Version metadata
     participant R as Resolver
@@ -437,9 +444,12 @@ redacted form is the only form used in logs. Access tokens and values after
 the relevant password/token options are replaced before output is recorded.
 
 Java detection probes candidates asynchronously across `$JAVA_HOME`, `PATH`,
-standard Linux JVM roots (`/usr/lib/jvm`, `/usr/lib64/jvm`, `/usr/java`, `/opt`),
-`/nix/store` (`*-openjdk-*`, `*-temurin-*`, `*-zulu-*`, `*-graalvm-*`,
-`*-jetbrains-jdk-*`), and user-configured `custom-java-paths`. It parses
+standard Linux JVM roots (`/usr/lib/jvm`, `/usr/lib64/jvm`, `/usr/java`,
+`/usr/local/java`, `/opt`), user-home runtime managers (`~/.jdks`,
+`~/.sdkman/candidates/java`, `~/.asdf/installs/java`,
+`~/.local/share/mise/installs/java`), `/nix/store` (non-`.drv` entries matching
+JVM substrings such as `jdk`, `jre`, `java`, `temurin`, `zulu`, `graalvm`,
+`corretto`, `semeru`), and user-configured `custom-java-paths`. It parses
 `java -version` and related properties, including whether the runtime has AWT's
 X11 bridge. It prefers a window-capable compatible runtime and chooses the
 instance's explicit Java when one is configured. If an instance's saved custom
@@ -481,8 +491,9 @@ The main files are:
 | Account records | Desktop Secret Service, one item per account keyed by account ID |
 | Active account | Desktop Secret Service, separate active-account item |
 | Shared resolved content | `<user data>/nuvashalauncher/` shared client artifacts and assets |
-| Saved skins and cape textures | `<user data>/nuvashalauncher/skins/` |
+| Saved skins and cape textures | `<user data>/nuvashalauncher/skins/` (including `defaults/` and `capes/`) |
 | Version metadata | `<user cache>/nuvashalauncher/versions/` |
+| Cached icons and fallback schemas | `<user cache>/nuvashalauncher/icons/` and `<user cache>/nuvashalauncher/schemas/` |
 | API responses | `<user cache>/nuvashalauncher/` API cache tree |
 | GSettings | Installed schema and the user's GSettings backend |
 
@@ -507,8 +518,9 @@ and process boundaries:
   override backup) do not follow symlinks (`G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS`),
   and archive extraction (`tar`/`zip`) rejects symlinks and hardlinks and opens
   destination files with `O_NOFOLLOW`.
-- Manifest JSON loads (64 MiB), ZIP entry counts, per-entry `.mrpack` size
-  (512 MiB), and total unpacked `.mrpack` size (4 GiB) are bounded.
+- Remote JSON loads (64 MiB), native ZIP entry extraction (64 MiB),
+  `modrinth.index.json` reads (8 MiB), `.mrpack` ZIP entry counts (65,536
+  entries), and total unpacked `.mrpack` size (4 GiB) are bounded.
 - Modpack download URLs are restricted to hosts allowed by the format.
 - Complete account records and tokens are stored in the desktop Secret Service.
   This is intentional: the launcher must read the tokens to authenticate the
@@ -530,15 +542,21 @@ The repository uses a hand-written `Makefile`:
 - `make fast` builds the release target in parallel.
 - `make debug` builds a separate AddressSanitizer/UndefinedBehaviorSanitizer
   binary under `build-debug/`.
-- `make test` builds and runs each `tests/test-*.c` binary.
+- `make test` builds and runs each `tests/test-*.c` binary in parallel via
+  `build/test-runner` (`tests/runner.c`), giving each binary an isolated
+  `TMPDIR`/`XDG_*_HOME` directory, `GSETTINGS_BACKEND=memory`, an isolated
+  `secrets.json` test secret store, and `NUVASHALAUNCHER_TEST_FAST_TIMERS=1`.
 - `make test-display` repeats the suite under an existing Wayland session,
   and skips itself when there is no compositor.
 - `make test-flatpak-runtime` smoke-tests an installed Flatpak's CLI, sandbox
   data directory, host-data isolation, and network permission without starting
   Minecraft.
-- `make test-debug` and `make test-lsan` exercise the sanitizer build.
-- `make static-analysis` runs GCC's analyzer over source files.
-- `make check-potfiles` verifies that `po/POTFILES.in` matches translatable source files.
+- `make test-debug` (aliased as `make test-lsan`) builds both `build/nuvashalauncher`
+  and the `-O1` AddressSanitizer/UndefinedBehaviorSanitizer/LeakSanitizer binaries
+  in `build-debug/` and runs the test suite under LSan.
+- `make static-analysis` runs GCC's `-fanalyzer` in parallel across `src/*.c`.
+- `make check-potfiles` verifies that all `src/*.c` files and translatable
+  `data/ui/*.ui` files are listed in `po/POTFILES.in`.
 - `flatpak-builder` builds the manifest in
   `packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml` with the GNOME 51
   runtime.
@@ -547,16 +565,17 @@ Tests are layered. Parsers, path rules, argument builders,
 security checks, and state machines can run without a display, network, JVM,
 or live account. Download and Modrinth tests use local fixtures/servers. UI
 tests instantiate the compiled resource templates, and display-sensitive tests
-skip or use a virtual display when the environment does not provide one.
+skip (`exit 77`) when `gtk_init_check()` has no display.
 
 CI (`.github/workflows/build.yml` and `.github/workflows/flatpak.yml`) builds
-both x86_64 and ARM64 Ubuntu containers, treats compiler warnings as errors for
-the release build, runs the test suite, runs static analysis, and smoke-tests
-the Flatpak bundle. When `VERSION` is updated on `main`,
+`build.yml` on both `x86_64` and `ARM64` Ubuntu containers (with `-Werror` on
+both `src/` and `tests/`, sanitizer tests, parallel static analysis, and
+`check-potfiles`), and builds and smoke-tests the `x86_64` Flatpak bundle in
+`flatpak.yml`. When `VERSION` is updated on `main`,
 `.github/workflows/release.yml` builds `.deb` (`amd64`, `arm64`), `.rpm`
-(`x86_64`, `aarch64`), Arch Linux (`.pkg.tar.zst`), and Flatpak (`x86_64`,
-`aarch64`) packages and publishes them to GitHub Releases using the matching
-section from `CHANGELOG.md`.
+(`x86_64`, `aarch64`), Arch Linux (`x86_64` `.pkg.tar.zst`), and Flatpak
+(`x86_64`, `aarch64`) packages and publishes them to GitHub Releases using the
+matching section from `CHANGELOG.md`.
 
 ## Adding or changing a subsystem
 

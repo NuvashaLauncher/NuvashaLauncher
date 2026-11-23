@@ -108,6 +108,8 @@ zip_write (const char *path, const ZipEntry *entries, gsize count)
 
   g_assert_nonnull (archive);
   g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
+  g_assert_cmpint (archive_write_set_options (archive, "compression=store"),
+                   ==, ARCHIVE_OK);
   g_assert_cmpint (archive_write_open_filename (archive, path), ==,
                    ARCHIVE_OK);
 
@@ -204,6 +206,8 @@ zip_write_size_bomb (const char *path, const char *index_json,
 
   g_assert_nonnull (archive);
   g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
+  g_assert_cmpint (archive_write_set_options (archive, "compression=store"),
+                   ==, ARCHIVE_OK);
   g_assert_cmpint (archive_write_open_filename (archive, path), ==,
                    ARCHIVE_OK);
 
@@ -255,6 +259,8 @@ zip_write_index_bomb (const char *path, guint mebibytes)
 
   g_assert_nonnull (archive);
   g_assert_cmpint (archive_write_set_format_zip (archive), ==, ARCHIVE_OK);
+  g_assert_cmpint (archive_write_set_options (archive, "compression=store"),
+                   ==, ARCHIVE_OK);
   g_assert_cmpint (archive_write_open_filename (archive, path), ==,
                    ARCHIVE_OK);
 

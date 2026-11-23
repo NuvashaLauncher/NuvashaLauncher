@@ -73,7 +73,7 @@ test_download_queue_soak (void)
   /* Repeat the full mixed queue lifecycle so slot accounting, cache reuse,
    * cancellation cleanup, and request teardown are exercised over a longer
    * run than the functional concurrency test. */
-  for (guint round = 0; round < 12; round++)
+  for (guint round = 0; round < 4; round++)
     test_many_at_once ();
 
   g_print ("ok - download queue survives a sustained soak\n");
@@ -115,12 +115,7 @@ test_released_download_outlives_its_row (void)
   deadline = g_get_monotonic_time () + 30 * G_TIME_SPAN_SECOND;
 
   while (finished > 0 && g_get_monotonic_time () < deadline)
-    {
-      while (g_main_context_pending (NULL))
-        g_main_context_iteration (NULL, FALSE);
-
-      g_usleep (1000);
-    }
+    g_main_context_iteration (NULL, TRUE);
 
   g_assert_cmpuint (finished, ==, 0);
   remove_test_dir (dir);

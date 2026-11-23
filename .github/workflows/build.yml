@@ -15,6 +15,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  analyze:
+    name: Static analysis (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    container: ubuntu:26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-26.04
+          - arch: ARM64
+            runner: ubuntu-26.04-arm
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          apt-get update -o Acquire::Languages=none
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+             gcc make pkg-config \
+             libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
+             libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
+
+      - name: Run static analysis
+        run: make -j$(nproc) static-analysis
+
+      - name: Check POTFILES.in
+        run: make check-potfiles
+
   linux:
     name: Linux ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
@@ -28,9 +59,6 @@ jobs:
           - arch: ARM64
             runner: ubuntu-26.04-arm
 
-    env:
-      CCACHE_COMPRESS: "1"
-      CCACHE_MAXSIZE: 256M
     steps:
       - name: Check out source
         uses: actions/checkout@v7
@@ -39,30 +67,13 @@ jobs:
         run: |
           apt-get update -o Acquire::Languages=none
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-             gcc ccache make pkg-config gettext \
+             gcc make pkg-config gettext \
              libasan8 libubsan1 \
              libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
              libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
 
-      - name: Restore ccache
-        uses: actions/cache@v5
-        with:
-          path: /root/.ccache
-          key: ccache-${{ matrix.arch }}-${{ github.sha }}
-          restore-keys: |
-            ccache-${{ matrix.arch }}-
-
-      - name: Build
-        run: make fast CC="ccache gcc" CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
-
-      - name: Run tests
-        run: make -j$(nproc) test CC="ccache gcc" CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
+      - name: Build and run tests
+        run: make -j$(nproc) all test CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
 
       - name: Run sanitizer tests
-        run: make -j$(nproc) test-debug CC="ccache gcc"
-
-      - name: Run static analysis
-        run: make -j$(nproc) static-analysis
-
-      - name: Check POTFILES.in
-        run: make check-potfiles
+        run: make -j$(nproc) test-debug CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"

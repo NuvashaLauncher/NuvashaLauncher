@@ -229,7 +229,6 @@ priority_rank (const char *binary)
     "test-download-queue",
     "test-modpack-install",
     "test-versions-network",
-    "test-skin-service",
   };
   for (size_t i = 0; i < sizeof (heavy) / sizeof (heavy[0]); i++)
     {
