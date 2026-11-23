@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 extern char **environ;
@@ -23,6 +24,7 @@ typedef struct
   char *output;
   size_t output_len;
   int status;
+  double elapsed_sec;
 } TestResult;
 
 typedef struct
@@ -34,6 +36,21 @@ typedef struct
   int *order;
   TestResult *results;
 } RunnerCtx;
+
+static double
+monotonic_sec (void)
+{
+  struct timespec ts;
+  clock_gettime (CLOCK_MONOTONIC, &ts);
+  return (double) ts.tv_sec + (double) ts.tv_nsec * 1e-9;
+}
+
+static const char *
+base_name (const char *path)
+{
+  const char *slash = strrchr (path, '/');
+  return slash != NULL ? slash + 1 : path;
+}
 
 static int
 unlink_cb (const char *fpath, const struct stat *sb,
@@ -140,6 +157,7 @@ static void
 run_one (RunnerCtx *ctx, int idx)
 {
   TestResult *res = &ctx->results[idx];
+  double t0 = monotonic_sec ();
   char work[2048];
   char sub[2176];
   const char *subs[] = { "config", "data", "cache", "state", "runtime" };
@@ -215,13 +233,13 @@ run_one (RunnerCtx *ctx, int idx)
 
   res->output = buf;
   res->output_len = len;
+  res->elapsed_sec = monotonic_sec () - t0;
 }
 
 static int
 priority_rank (const char *binary)
 {
-  const char *base = strrchr (binary, '/');
-  const char *name = base != NULL ? base + 1 : binary;
+  const char *name = base_name (binary);
   static const char *const heavy[] = {
     "test-mrpack-security",
     "test-launcher-process",
@@ -282,22 +300,78 @@ count_tap (const char *output, bool *is_tap, int *tap_pass, int *tap_skip)
     }
 }
 
+static void
+extract_skip_reason (const char *output, char *out, size_t out_cap)
+{
+  out[0] = '\0';
+  const char *p = output;
+  while (*p != '\0')
+    {
+      const char *eol = strchr (p, '\n');
+      size_t linelen = eol != NULL ? (size_t) (eol - p) : strlen (p);
+      if (linelen >= 10 && strncmp (p, "skipped - ", 10) == 0)
+        {
+          size_t n = linelen - 10;
+          if (n >= out_cap)
+            n = out_cap - 1;
+          memcpy (out, p + 10, n);
+          out[n] = '\0';
+          return;
+        }
+      p = eol != NULL ? eol + 1 : p + linelen;
+    }
+}
+
+static void
+extract_tap_seed (const char *output, char *out, size_t out_cap)
+{
+  out[0] = '\0';
+  const char *needle = "# random seed: ";
+  const char *hit = strstr (output, needle);
+  if (hit == NULL)
+    return;
+  hit += strlen (needle);
+  const char *eol = strchr (hit, '\n');
+  size_t n = eol != NULL ? (size_t) (eol - hit) : strlen (hit);
+  if (n >= out_cap)
+    n = out_cap - 1;
+  memcpy (out, hit, n);
+  out[n] = '\0';
+}
+
 int
 main (int argc, char **argv)
 {
   const char *schema_dir = NULL;
-  int first_bin = 1;
+  bool verbose = getenv ("NUVASHALAUNCHER_TEST_VERBOSE") != NULL &&
+                 strcmp (getenv ("NUVASHALAUNCHER_TEST_VERBOSE"), "0") != 0 &&
+                 strcmp (getenv ("NUVASHALAUNCHER_TEST_VERBOSE"), "") != 0;
+  int i = 1;
 
-  if (argc >= 3 && strcmp (argv[1], "--schema-dir") == 0)
+  while (i < argc)
     {
-      schema_dir = argv[2];
-      first_bin = 3;
+      if (strcmp (argv[i], "--schema-dir") == 0 && i + 1 < argc)
+        {
+          schema_dir = argv[i + 1];
+          i += 2;
+        }
+      else if (strcmp (argv[i], "--verbose") == 0)
+        {
+          verbose = true;
+          i++;
+        }
+      else
+        break;
     }
-  if (schema_dir == NULL || first_bin >= argc)
+
+  if (schema_dir == NULL || i >= argc)
     {
-      fprintf (stderr, "usage: %s --schema-dir DIR TEST...\n", argv[0]);
+      fprintf (stderr, "usage: %s --schema-dir DIR [--verbose] TEST...\n", argv[0]);
       return 2;
     }
+
+  int first_bin = i;
+  double suite_t0 = monotonic_sec ();
 
   mkdir_p ("build", 0755);
   char cwd[1024];
@@ -326,17 +400,17 @@ main (int argc, char **argv)
   };
   if (ctx.order == NULL || ctx.results == NULL)
     abort ();
-  for (int i = 0; i < count; i++)
-    ctx.results[i].binary = argv[first_bin + i];
+  for (int j = 0; j < count; j++)
+    ctx.results[j].binary = argv[first_bin + j];
 
   int pos = 0;
   for (int pass = 0; pass <= 7; pass++)
     {
-      for (int i = 0; i < count; i++)
+      for (int j = 0; j < count; j++)
         {
-          int r = priority_rank (ctx.results[i].binary);
+          int r = priority_rank (ctx.results[j].binary);
           if ((pass < 7 && r == pass) || (pass == 7 && r >= 7))
-            ctx.order[pos++] = i;
+            ctx.order[pos++] = j;
         }
     }
 
@@ -348,29 +422,75 @@ main (int argc, char **argv)
   pthread_t *threads = calloc ((size_t) jobs, sizeof (pthread_t));
   if (threads == NULL)
     abort ();
-  for (int i = 0; i < jobs; i++)
-    pthread_create (&threads[i], NULL, worker_main, &ctx);
-  for (int i = 0; i < jobs; i++)
-    pthread_join (threads[i], NULL);
+  for (int j = 0; j < jobs; j++)
+    pthread_create (&threads[j], NULL, worker_main, &ctx);
+  for (int j = 0; j < jobs; j++)
+    pthread_join (threads[j], NULL);
   free (threads);
+
+  bool color = isatty (STDOUT_FILENO) && getenv ("NO_COLOR") == NULL;
+  const char *c_green = color ? "\033[32m" : "";
+  const char *c_yellow = color ? "\033[33m" : "";
+  const char *c_red = color ? "\033[31m" : "";
+  const char *c_dim = color ? "\033[2m" : "";
+  const char *c_reset = color ? "\033[0m" : "";
 
   int passed = 0;
   int skipped = 0;
+  int failed = 0;
   int exit_code = 0;
 
-  for (int i = 0; i < count; i++)
+  for (int j = 0; j < count; j++)
     {
-      TestResult *res = &ctx.results[i];
-      printf ("RUN  %s\n", res->binary);
-      if (res->output_len > 0)
-        fwrite (res->output, 1, res->output_len, stdout);
+      TestResult *res = &ctx.results[j];
+      const char *name = base_name (res->binary);
+
+      if (verbose)
+        {
+          printf ("RUN  %s\n", res->binary);
+          if (res->output_len > 0)
+            fwrite (res->output, 1, res->output_len, stdout);
+        }
 
       if (res->status == 77)
-        skipped++;
+        {
+          skipped++;
+          if (!verbose)
+            {
+              char reason[128];
+              extract_skip_reason (res->output, reason, sizeof (reason));
+              if (reason[0] != '\0')
+                printf ("%sSKIP%s  %-34s %s(%.2fs, %s)%s\n",
+                        c_yellow, c_reset, name, c_dim, res->elapsed_sec,
+                        reason, c_reset);
+              else
+                printf ("%sSKIP%s  %-34s %s(%.2fs)%s\n",
+                        c_yellow, c_reset, name, c_dim, res->elapsed_sec,
+                        c_reset);
+            }
+        }
       else if (res->status != 0)
         {
-          exit_code = res->status;
-          break;
+          failed++;
+          if (exit_code == 0)
+            exit_code = res->status;
+
+          if (!verbose)
+            {
+              printf ("%sFAIL%s  %-34s %s(exit %d, %.2fs)%s\n",
+                      c_red, c_reset, name, c_dim, res->status,
+                      res->elapsed_sec, c_reset);
+              if (res->output_len > 0)
+                fwrite (res->output, 1, res->output_len, stdout);
+            }
+
+          char seed[64];
+          extract_tap_seed (res->output, seed, sizeof (seed));
+          printf ("%sReproduce:%s GSETTINGS_SCHEMA_DIR=%s GSETTINGS_BACKEND=memory "
+                  "NUVASHALAUNCHER_TEST_SECRET_STORE=1 NUVASHALAUNCHER_TEST_FAST_TIMERS=1 "
+                  "./%s%s%s\n",
+                  c_dim, c_reset, schema_dir, res->binary,
+                  seed[0] != '\0' ? " --seed=" : "", seed);
         }
       else
         {
@@ -378,21 +498,35 @@ main (int argc, char **argv)
           int tap_pass = 0;
           int tap_skip = 0;
           count_tap (res->output, &is_tap, &tap_pass, &tap_skip);
-          if (is_tap)
+          int bin_pass = is_tap ? (tap_pass - tap_skip) : 1;
+          int bin_skip = is_tap ? tap_skip : 0;
+          passed += bin_pass;
+          skipped += bin_skip;
+
+          if (!verbose)
             {
-              passed += tap_pass - tap_skip;
-              skipped += tap_skip;
+              if (bin_skip > 0)
+                printf ("%sPASS%s  %-34s %s(%.2fs, %d passed, %d skipped)%s\n",
+                        c_green, c_reset, name, c_dim, res->elapsed_sec,
+                        bin_pass, bin_skip, c_reset);
+              else
+                printf ("%sPASS%s  %-34s %s(%.2fs)%s\n",
+                        c_green, c_reset, name, c_dim, res->elapsed_sec,
+                        c_reset);
             }
-          else
-            passed++;
         }
     }
 
+  double total_sec = monotonic_sec () - suite_t0;
   if (exit_code == 0)
-    printf ("PASS %d test(s), SKIP %d test(s)\n", passed, skipped);
+    printf ("%sPASS %d test(s), SKIP %d test(s)%s %s(%.2fs)%s\n",
+            c_green, passed, skipped, c_reset, c_dim, total_sec, c_reset);
+  else
+    printf ("%sFAIL %d binary(ies)%s, %d passed, %d skipped %s(%.2fs)%s\n",
+            c_red, failed, c_reset, passed, skipped, c_dim, total_sec, c_reset);
 
-  for (int i = 0; i < count; i++)
-    free (ctx.results[i].output);
+  for (int j = 0; j < count; j++)
+    free (ctx.results[j].output);
   free (ctx.order);
   free (ctx.results);
   rm_rf (root_tmp);
