@@ -311,6 +311,66 @@ unique_folder_in (const char *parent, const char *base_name)
   return g_strdup_printf ("%s_%ld", base_name, (long) g_get_real_time ());
 }
 
+typedef struct
+{
+  char *src_path;
+  char *dest_path;
+  char *copy_title;
+} DuplicateWorldOp;
+
+static void
+duplicate_world_op_free (DuplicateWorldOp *op)
+{
+  g_free (op->src_path);
+  g_free (op->dest_path);
+  g_free (op->copy_title);
+  g_free (op);
+}
+
+static void
+duplicate_world_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+                        gpointer task_data, GCancellable *cancellable G_GNUC_UNUSED)
+{
+  DuplicateWorldOp *op = task_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!copy_dir_recursive (op->src_path, op->dest_path, &error))
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_autofree char *dest_level = g_build_filename (op->dest_path, "level.dat", NULL);
+  g_autoptr (NuvashaLauncherNbtTag) root =
+    nuvashalauncher_nbt_parse_file (dest_level, NULL);
+  NuvashaLauncherNbtTag *data =
+    root != NULL ? nuvashalauncher_nbt_compound_get (root, "Data") : NULL;
+  if (data != NULL)
+    {
+      nuvashalauncher_nbt_compound_set (
+        data, nuvashalauncher_nbt_new_string ("LevelName", op->copy_title));
+      nuvashalauncher_nbt_write_file (root, dest_level, TRUE, NULL);
+    }
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+on_duplicate_world_done (GObject *source, GAsyncResult *result,
+                         gpointer user_data G_GNUC_UNUSED)
+{
+  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (source);
+  g_autoptr (GError) error = NULL;
+
+  if (!g_task_propagate_boolean (G_TASK (result), &error))
+    {
+      nuvashalauncher_ui_error_toast (GTK_WIDGET (self), GTK_WIDGET (self->toasts), error);
+      return;
+    }
+
+  nuvashalauncher_worlds_page_reload (self);
+}
+
 static void
 on_duplicate_world_clicked (GtkButton *button, gpointer user_data)
 {
@@ -325,29 +385,16 @@ on_duplicate_world_clicked (GtkButton *button, gpointer user_data)
 
   g_autofree char *copy_base = g_strdup_printf ("%s Copy", w->folder_name);
   g_autofree char *dest_folder = unique_folder_in (self->saves_dir, copy_base);
-  g_autofree char *dest_path = g_build_filename (self->saves_dir, dest_folder, NULL);
-  g_autoptr (GError) error = NULL;
+  DuplicateWorldOp *op = g_new0 (DuplicateWorldOp, 1);
+  g_autoptr (GTask) task = NULL;
 
-  if (!copy_dir_recursive (w->path, dest_path, &error))
-    {
-      nuvashalauncher_ui_error_toast (GTK_WIDGET (self), GTK_WIDGET (self->toasts), error);
-      return;
-    }
+  op->src_path = g_strdup (w->path);
+  op->dest_path = g_build_filename (self->saves_dir, dest_folder, NULL);
+  op->copy_title = g_strdup_printf ("%s (%s)", w->name, _("Copy"));
 
-  g_autofree char *dest_level = g_build_filename (dest_path, "level.dat", NULL);
-  g_autoptr (NuvashaLauncherNbtTag) root =
-    nuvashalauncher_nbt_parse_file (dest_level, NULL);
-  NuvashaLauncherNbtTag *data =
-    root != NULL ? nuvashalauncher_nbt_compound_get (root, "Data") : NULL;
-  if (data != NULL)
-    {
-      g_autofree char *copy_title = g_strdup_printf ("%s (%s)", w->name, _("Copy"));
-      nuvashalauncher_nbt_compound_set (
-        data, nuvashalauncher_nbt_new_string ("LevelName", copy_title));
-      nuvashalauncher_nbt_write_file (root, dest_level, TRUE, NULL);
-    }
-
-  nuvashalauncher_worlds_page_reload (self);
+  task = g_task_new (self, NULL, on_duplicate_world_done, NULL);
+  g_task_set_task_data (task, op, (GDestroyNotify) duplicate_world_op_free);
+  g_task_run_in_thread (task, duplicate_world_thread);
 }
 
 static void
@@ -886,6 +933,52 @@ extract_world_zip (const char *zip_path, const char *saves_dir, GError **error)
   return ok;
 }
 
+typedef struct
+{
+  char *zip_path;
+  char *saves_dir;
+} ExtractWorldOp;
+
+static void
+extract_world_op_free (ExtractWorldOp *op)
+{
+  g_free (op->zip_path);
+  g_free (op->saves_dir);
+  g_free (op);
+}
+
+static void
+extract_world_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+                      gpointer task_data, GCancellable *cancellable G_GNUC_UNUSED)
+{
+  ExtractWorldOp *op = task_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!extract_world_zip (op->zip_path, op->saves_dir, &error))
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+on_add_world_extracted (GObject *source, GAsyncResult *result,
+                        gpointer user_data G_GNUC_UNUSED)
+{
+  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (source);
+  g_autoptr (GError) error = NULL;
+
+  if (!g_task_propagate_boolean (G_TASK (result), &error))
+    {
+      nuvashalauncher_ui_error_toast (GTK_WIDGET (self), GTK_WIDGET (self->toasts), error);
+      return;
+    }
+
+  nuvashalauncher_worlds_page_reload (self);
+}
+
 static void
 on_add_world_file_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 {
@@ -897,17 +990,19 @@ on_add_world_file_chosen (GObject *source, GAsyncResult *result, gpointer user_d
   if (file == NULL)
     return;
 
-  g_autofree char *path = g_file_get_path (file);
+  char *path = g_file_get_path (file);
   if (path == NULL)
     return;
 
-  if (!extract_world_zip (path, self->saves_dir, &error))
-    {
-      nuvashalauncher_ui_error_toast (GTK_WIDGET (self), GTK_WIDGET (self->toasts), error);
-      return;
-    }
+  ExtractWorldOp *op = g_new0 (ExtractWorldOp, 1);
+  g_autoptr (GTask) task = NULL;
 
-  nuvashalauncher_worlds_page_reload (self);
+  op->zip_path = path;
+  op->saves_dir = g_strdup (self->saves_dir);
+
+  task = g_task_new (self, NULL, on_add_world_extracted, NULL);
+  g_task_set_task_data (task, op, (GDestroyNotify) extract_world_op_free);
+  g_task_run_in_thread (task, extract_world_thread);
 }
 
 static void

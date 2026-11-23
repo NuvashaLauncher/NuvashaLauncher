@@ -334,13 +334,16 @@ extract_entry (struct archive *archive,
   return TRUE;
 }
 
-/* One archive read for one of the two folder layers of a pack. */
+/* Single archive pass for icon.png, overrides/, and client-overrides/.
+ * client-overrides/ always wins over overrides/ regardless of entry order. */
 static gboolean
 extract_layers (const char *archive_path, const char *directory,
-                gboolean client_pass, guint64 *used, GError **error)
+                guint64 *used, GError **error)
 {
   struct archive *archive = NULL;
   struct archive_entry *header = NULL;
+  g_autoptr (GHashTable) client_overridden =
+    g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   int status = ARCHIVE_OK;
   guint paths = 0;
 
@@ -397,17 +400,21 @@ extract_layers (const char *archive_path, const char *directory,
       const char *name = archive_entry_pathname (header);
       const char *prefix = NULL;
 
-      if (!client_pass)
+      if (name != NULL && g_str_equal (name, "icon.png"))
+        prefix = "icon.png";
+      else if (name != NULL && g_str_has_prefix (name, "client-overrides/"))
         {
-          if (name != NULL && g_str_equal (name, "icon.png"))
-            prefix = "icon.png";
-          else if (name != NULL && g_str_has_prefix (name, "overrides/"))
-            prefix = "overrides/";
+          prefix = "client-overrides/";
+          if (archive_entry_filetype (header) == AE_IFREG)
+            g_hash_table_add (client_overridden,
+                              g_strdup (name + strlen ("client-overrides/")));
         }
-      else
+      else if (name != NULL && g_str_has_prefix (name, "overrides/"))
         {
-          if (name != NULL && g_str_has_prefix (name, "client-overrides/"))
-            prefix = "client-overrides/";
+          const char *rel = name + strlen ("overrides/");
+          if (archive_entry_filetype (header) != AE_IFREG ||
+              !g_hash_table_contains (client_overridden, rel))
+            prefix = "overrides/";
         }
 
       if (prefix != NULL &&
@@ -459,10 +466,7 @@ nuvashalauncher_modpack_extract_overrides (const char *archive_path,
 {
   guint64 used = 0;
 
-  if (!extract_layers (archive_path, directory, FALSE, &used, error))
-    return FALSE;
-
-  return extract_layers (archive_path, directory, TRUE, &used, error);
+  return extract_layers (archive_path, directory, &used, error);
 }
 
 static gboolean

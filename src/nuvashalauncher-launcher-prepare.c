@@ -350,10 +350,36 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   set_state (self, NUVASHALAUNCHER_LAUNCH_LAUNCHING, "choosing Java");
 
   {
+    g_autofree char *instance_java = NULL;
     JavaSearch *search = g_new0 (JavaSearch, 1);
 
     search->launcher = g_object_ref (self);
-    search->operation = nuvashalauncher_java_detect_async (on_java_detected, search);
+    g_object_get (self->instance, "java-path", &instance_java, NULL);
+
+    if (instance_java != NULL && *instance_java != '\0')
+      {
+        if (g_file_test (instance_java, G_FILE_TEST_IS_REGULAR) &&
+            g_file_test (instance_java, G_FILE_TEST_IS_EXECUTABLE))
+          {
+            search->javas = g_ptr_array_new_with_free_func (
+              (GDestroyNotify) nuvashalauncher_java_free);
+            search->operation = nuvashalauncher_java_probe_async (
+              instance_java, on_custom_java_probed, search);
+          }
+        else
+          {
+            nuvashalauncher_instance_set_string (self->instance, "java-path",
+                                                 NULL, NULL);
+            search->operation = nuvashalauncher_java_detect_async (
+              on_java_detected, search);
+          }
+      }
+    else
+      {
+        search->operation = nuvashalauncher_java_detect_async (
+          on_java_detected, search);
+      }
+
     nuvashalauncher_task_scope_follow_cancellable (search->operation,
                                        self->preparation.cancellable);
   }

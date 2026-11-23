@@ -125,41 +125,182 @@ queue_unpacked (InstallRequest *request, const char *entry)
 }
 
 
+#define LOADER_ARTIFACT_CONCURRENCY 6
+
+typedef struct
+{
+  InstallRequest *request;
+  GCancellable *outer_cancellable;
+  GCancellable *children_cancellable;
+  gulong cancel_handler;
+  guint in_flight;
+  GError *error;
+} ArtifactBatch;
+
+typedef struct
+{
+  ArtifactBatch *batch;
+  InstallFile *file;
+} ArtifactOp;
+
+static void batch_dispatch (ArtifactBatch *batch);
+
+static void
+artifact_batch_free (ArtifactBatch *batch)
+{
+  if (batch == NULL)
+    return;
+
+  if (batch->cancel_handler != 0 && batch->outer_cancellable != NULL)
+    g_cancellable_disconnect (batch->outer_cancellable, batch->cancel_handler);
+  g_clear_object (&batch->outer_cancellable);
+  g_clear_object (&batch->children_cancellable);
+  g_clear_error (&batch->error);
+  g_free (batch);
+}
+
+static void
+on_batch_outer_cancelled (GCancellable *cancellable G_GNUC_UNUSED,
+                          gpointer user_data)
+{
+  GCancellable *children = user_data;
+
+  g_cancellable_cancel (children);
+}
+
 static void
 file_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
             gpointer user_data)
 {
-  InstallRequest *request = user_data;
+  ArtifactOp *op = user_data;
+  ArtifactBatch *batch = op->batch;
+  InstallRequest *request = batch->request;
   g_autoptr (GError) error = NULL;
-  InstallFile *file = g_ptr_array_index (request->pending, 0);
+
+  batch->in_flight--;
 
   if (!nuvashalauncher_download_file_finish (result, &error))
     {
       /* A maven that does not hold an artifact a name of the profile says
          nothing about: only the processors know, and they are run next. */
-      if (file->optional && g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
-                                             NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP))
-        g_clear_error (&error);
-      else
+      if (op->file->optional &&
+          g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                           NUVASHALAUNCHER_DOWNLOAD_ERROR_HTTP))
         {
-          install_failed (request, g_steal_pointer (&error));
-          return;
+          g_clear_error (&error);
+        }
+      else if (batch->error == NULL)
+        {
+          batch->error = g_steal_pointer (&error);
+          g_cancellable_cancel (batch->children_cancellable);
         }
     }
 
-  g_ptr_array_remove_index (request->pending, 0);
-  request->done++;
+  g_free (op->file->url);
+  g_free (op->file->entry);
+  g_free (op->file->path);
+  g_free (op->file->sha1);
+  g_free (op->file);
+  g_free (op);
 
-  report_progress (request);
-  drain_pending (request);
+  if (batch->error == NULL)
+    {
+      request->done++;
+      report_progress (request);
+      batch_dispatch (batch);
+    }
+
+  if (batch->in_flight == 0 &&
+      (batch->error != NULL || request->pending->len == 0))
+    {
+      GError *err = g_steal_pointer (&batch->error);
+
+      artifact_batch_free (batch);
+      if (err != NULL)
+        install_failed (request, err);
+      else
+        install_step_done (request);
+    }
+}
+
+static void
+batch_dispatch (ArtifactBatch *batch)
+{
+  InstallRequest *request = batch->request;
+
+  while (batch->error == NULL &&
+         request->pending->len > 0 &&
+         batch->in_flight < LOADER_ARTIFACT_CONCURRENCY)
+    {
+      InstallFile *file = g_ptr_array_steal_index (request->pending,
+                                                   request->pending->len - 1);
+      g_autofree char *directory = g_path_get_dirname (file->path);
+      g_autoptr (GError) error = NULL;
+
+      if (!nuvashalauncher_loader_ensure_directory (directory, &error))
+        {
+          g_free (file->url);
+          g_free (file->entry);
+          g_free (file->path);
+          g_free (file->sha1);
+          g_free (file);
+          batch->error = g_steal_pointer (&error);
+          g_cancellable_cancel (batch->children_cancellable);
+          break;
+        }
+
+      if (file->kind == FILE_UNPACK)
+        {
+          g_autoptr (GBytes) bytes =
+            nuvashalauncher_loader_read_zip_entry (request->installer,
+                                                   file->entry, &error);
+          const char *data = NULL;
+          gsize size = 0;
+          gboolean ok = FALSE;
+
+          if (bytes != NULL)
+            {
+              data = g_bytes_get_data (bytes, &size);
+              ok = nuvashalauncher_loader_write_install_file (file->path, data,
+                                                              size, &error);
+            }
+
+          g_free (file->url);
+          g_free (file->entry);
+          g_free (file->path);
+          g_free (file->sha1);
+          g_free (file);
+
+          if (!ok)
+            {
+              batch->error = g_steal_pointer (&error);
+              g_cancellable_cancel (batch->children_cancellable);
+              break;
+            }
+
+          request->done++;
+          report_progress (request);
+          continue;
+        }
+
+      ArtifactOp *op = g_new0 (ArtifactOp, 1);
+      op->batch = batch;
+      op->file = file;
+      batch->in_flight++;
+
+      nuvashalauncher_task_scope_release_when_done (
+        nuvashalauncher_download_file_async (
+          nuvashalauncher_downloads_get_service (), file->url, file->path,
+          file->sha1, file->sha1 != NULL ? G_CHECKSUM_SHA1 : G_CHECKSUM_MD5,
+          NULL, file_ready, op),
+        batch->children_cancellable);
+    }
 }
 
 void
 drain_pending (InstallRequest *request)
 {
-  InstallFile *file = NULL;
-  g_autofree char *directory = NULL;
-  g_autoptr (GError) error = NULL;
+  ArtifactBatch *batch;
 
   if (request->pending->len == 0)
     {
@@ -167,48 +308,25 @@ drain_pending (InstallRequest *request)
       return;
     }
 
-  file = g_ptr_array_index (request->pending, 0);
-  directory = g_path_get_dirname (file->path);
+  batch = g_new0 (ArtifactBatch, 1);
+  batch->request = request;
+  batch->outer_cancellable = g_object_ref (g_task_get_cancellable (request->task));
+  batch->children_cancellable = g_cancellable_new ();
+  batch->cancel_handler = g_cancellable_connect (
+    batch->outer_cancellable, G_CALLBACK (on_batch_outer_cancelled),
+    g_object_ref (batch->children_cancellable), g_object_unref);
 
-  if (!nuvashalauncher_loader_ensure_directory (directory, &error))
+  batch_dispatch (batch);
+
+  if (batch->in_flight == 0 &&
+      (batch->error != NULL || request->pending->len == 0))
     {
-      install_failed (request, g_steal_pointer (&error));
-      return;
+      GError *err = g_steal_pointer (&batch->error);
+
+      artifact_batch_free (batch);
+      if (err != NULL)
+        install_failed (request, err);
+      else
+        install_step_done (request);
     }
-
-  if (file->kind == FILE_UNPACK)
-    {
-      g_autoptr (GBytes) bytes =
-        nuvashalauncher_loader_read_zip_entry (request->installer, file->entry, &error);
-      const char *data = NULL;
-      gsize size = 0;
-
-      if (bytes == NULL)
-        {
-          install_failed (request, g_steal_pointer (&error));
-          return;
-        }
-
-      data = g_bytes_get_data (bytes, &size);
-
-      if (!nuvashalauncher_loader_write_install_file (file->path, data, size, &error))
-        {
-          install_failed (request, g_steal_pointer (&error));
-          return;
-        }
-
-      g_ptr_array_remove_index (request->pending, 0);
-      request->done++;
-
-      report_progress (request);
-      drain_pending (request);
-      return;
-    }
-
-  nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), file->url, file->path, file->sha1,
-                             file->sha1 != NULL ? G_CHECKSUM_SHA1
-                                                : G_CHECKSUM_MD5,
-                             NULL, file_ready, request),
-    g_task_get_cancellable (request->task));
 }

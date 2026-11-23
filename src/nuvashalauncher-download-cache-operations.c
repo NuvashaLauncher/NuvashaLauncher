@@ -1,10 +1,16 @@
+#define _GNU_SOURCE
+
 /* File and API response cache flow for downloads. */
 #include "nuvashalauncher-download-private.h"
 #include "nuvashalauncher-cache.h"
 #include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-task-private.h"
+#include <fcntl.h>
+#include <linux/fs.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 static void cache_ready (GObject *, GAsyncResult *, gpointer);
 static void cache_info_ready (GObject *, GAsyncResult *, gpointer);
@@ -68,6 +74,35 @@ global_cache_restore (DownloadRequest *request)
       nuvashalauncher_download_request_fail (request, g_steal_pointer (&error));
       return;
     }
+
+  {
+    int src_fd = open (request->global_cache_path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+    if (src_fd >= 0)
+      {
+        int cloned = ioctl (request->fd, FICLONE, src_fd);
+        close (src_fd);
+        if (cloned == 0)
+          {
+            g_autofree char *destination_name = g_path_get_basename (request->dest_path);
+            g_autoptr (GError) rename_error = NULL;
+
+            nuvashalauncher_download_close_sink (request);
+            if (!nuvashalauncher_fs_rename_at (request->parent_fd, request->tmp_name,
+                                               destination_name, &rename_error))
+              {
+                nuvashalauncher_download_request_fail (
+                  request,
+                  g_error_new (NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                               NUVASHALAUNCHER_DOWNLOAD_ERROR_IO,
+                               "cannot restore \"%s\": %s", request->dest_path,
+                               rename_error->message));
+                return;
+              }
+            request_succeed (request);
+            return;
+          }
+      }
+  }
 
   destination = g_file_new_for_path (request->tmp_path);
   nuvashalauncher_download_close_sink (request);
