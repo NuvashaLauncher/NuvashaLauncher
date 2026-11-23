@@ -11,6 +11,8 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <glib/gstdio.h>
+#include <linux/fs.h>
+#include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -248,6 +250,51 @@ nuvashalauncher_fs_copy_file (GFile *source, GFile *destination, GFileCopyFlags 
 {
   return g_file_copy (source, destination, flags, cancellable, NULL, NULL,
                       error);
+}
+
+gboolean
+nuvashalauncher_fs_try_clone_fd (int src_fd, int dst_fd)
+{
+  if (src_fd < 0 || dst_fd < 0)
+    return FALSE;
+
+  return ioctl (dst_fd, FICLONE, src_fd) == 0;
+}
+
+gboolean
+nuvashalauncher_fs_try_clone_path (const char *source_path,
+                                   const char *target_path,
+                                   gboolean    exclusive)
+{
+  int src_fd = -1;
+  int dst_fd = -1;
+  int dst_flags = O_WRONLY | O_CREAT | O_CLOEXEC | O_NOFOLLOW |
+                  (exclusive ? O_EXCL : O_TRUNC);
+  gboolean cloned = FALSE;
+
+  if (source_path == NULL || target_path == NULL)
+    return FALSE;
+
+  src_fd = open (source_path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+  if (src_fd < 0)
+    return FALSE;
+
+  dst_fd = open (target_path, dst_flags, 0644);
+  if (dst_fd < 0)
+    {
+      close (src_fd);
+      return FALSE;
+    }
+
+  cloned = nuvashalauncher_fs_try_clone_fd (src_fd, dst_fd);
+  if (close (dst_fd) != 0)
+    cloned = FALSE;
+  close (src_fd);
+
+  if (!cloned)
+    g_unlink (target_path);
+
+  return cloned;
 }
 
 void

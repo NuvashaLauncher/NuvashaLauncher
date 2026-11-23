@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Parse modpack manifest JSON and file entries. */
 
 #include "nuvashalauncher-modpack.h"

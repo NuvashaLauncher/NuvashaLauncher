@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Settings page and editable instance controls. */
 #include "nuvashalauncher-instance-page-private.h"
 #include "nuvashalauncher-i18n.h"
@@ -8,7 +12,6 @@
 #include "nuvashalauncher-minecraft-versions.h"
 #include "nuvashalauncher-modpack.h"
 #include "nuvashalauncher-task.h"
-#include "nuvashalauncher-operation.h"
 #include "nuvashalauncher-ui-feedback.h"
 
 /* ---------------------------------------------------------- *
@@ -157,8 +160,8 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
    * warning again, using the manifest cache. */
   if (self->versions_operation != NULL)
     {
-      nuvashalauncher_operation_cancel (self->versions_operation);
-      nuvashalauncher_operation_unref (self->versions_operation);
+      nuvashalauncher_task_scope_cancel (self->versions_operation);
+      nuvashalauncher_task_scope_unref (self->versions_operation);
     }
   self->versions_operation = nuvashalauncher_version_manifest_fetch_async (
     NUVASHALAUNCHER_VERSION_MANIFEST_URL, on_manifest_loaded,
@@ -308,7 +311,7 @@ on_description_loaded (GObject *source G_GNUC_UNUSED,
     }
 
   /* The answer is in: the read that brought it is finished with. */
-  nuvashalauncher_operation_unref (self->versions_operation);
+  nuvashalauncher_task_scope_unref (self->versions_operation);
   self->versions_operation = NULL;
 
   if (description != NULL && description->java_version != NULL)
@@ -340,7 +343,7 @@ on_manifest_loaded (GObject *source G_GNUC_UNUSED,
     }
 
   /* The manifest is in: the read that brought it is finished with. */
-  nuvashalauncher_operation_unref (self->versions_operation);
+  nuvashalauncher_task_scope_unref (self->versions_operation);
   self->versions_operation = NULL;
 
   if (manifest == NULL)

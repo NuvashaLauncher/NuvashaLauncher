@@ -210,7 +210,7 @@ append_account_row (NuvashaLauncherUsersPopover *self, const NuvashaLauncherAcco
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *image = GTK_IMAGE (gtk_image_new ());
   GtkButton *skin = NULL;
-  GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
+  GtkButton *remove = GTK_BUTTON (gtk_button_new_from_icon_name ("edit-delete-symbolic"));
   g_autofree char *tooltip = NULL;
 
   /* The name and the kind are plain text: an account name may hold an

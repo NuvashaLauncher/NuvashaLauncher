@@ -5,7 +5,7 @@
 #ifndef NUVASHALAUNCHER_ICON_LOAD_PRIVATE_H
 #define NUVASHALAUNCHER_ICON_LOAD_PRIVATE_H
 
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 
 typedef struct
 {

@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* JSON serialization and parsing for NuvashaLauncherInstance. */
 #include "nuvashalauncher-instance-private.h"
 #include <string.h>
@@ -239,9 +243,9 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
     return NULL;
 
   g_object_set (self,
-                "loader_version", loader_version,
+                "loader-version", loader_version,
                 "icon", icon,
-                 "java_path", java_path,
+                 "java-path", java_path,
                  "jvm_args", jvm_args,
                  "memory-mib", memory_mib,
                  "play-seconds", play_seconds,

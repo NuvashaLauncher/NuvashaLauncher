@@ -25,7 +25,7 @@
 
 #include "nuvashalauncher-content-page-private.h"
 #include "nuvashalauncher-content-files-private.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherContentPage, nuvashalauncher_content_page, GTK_TYPE_BOX)
 
@@ -272,7 +272,7 @@ nuvashalauncher_content_page_dispose (GObject *object)
       /* Through the model, which is where this source is registered: a
          scope left holding the id would take down whatever source is
          given the same id next. */
-      nuvashalauncher_operation_remove (self->browse.model->scope,
+      nuvashalauncher_task_scope_remove_source (self->browse.model->scope,
                                     self->browse.model->debounce_source);
       self->browse.model->debounce_source = 0;
     }
@@ -359,7 +359,7 @@ page_watch_free (PageWatch *watch)
     return;
 
   if (watch->operation != NULL)
-    nuvashalauncher_operation_unref (watch->operation);
+    nuvashalauncher_task_scope_unref (watch->operation);
 
   if (watch->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (watch->page),

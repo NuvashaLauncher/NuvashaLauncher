@@ -238,24 +238,6 @@ background_quit_tick (gpointer user_data)
   return G_SOURCE_CONTINUE;
 }
 
-static GSettings *
-window_settings_new (void)
-{
-  GSettingsSchemaSource *source = g_settings_schema_source_get_default ();
-  GSettingsSchema *schema = source != NULL
-    ? g_settings_schema_source_lookup (source,
-                                       "com.github.NuvashaLauncher.NuvashaLauncher",
-                                       TRUE)
-    : NULL;
-
-  if (schema == NULL)
-    return NULL;
-
-  GSettings *settings = g_settings_new_full (schema, NULL, NULL);
-  g_settings_schema_unref (schema);
-  return settings;
-}
-
 static gboolean
 on_window_close_request (GtkWindow *window, gpointer user_data)
 {
@@ -315,7 +297,7 @@ nuvashalauncher_main_window_init (NuvashaLauncherMainWindow *self)
     nuvashalauncher_cache_prune_async (
       nuvashalauncher_settings_get_cache_expiration (self->model->settings),
       NULL, NULL));
-  self->window_settings = window_settings_new ();
+  self->window_settings = nuvashalauncher_settings_open_gsettings ();
   if (self->window_settings != NULL)
     {
       gtk_window_set_default_size (

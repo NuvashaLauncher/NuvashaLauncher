@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Account JSON serialization and parsing. */
 
 #include "nuvashalauncher-accounts-private.h"

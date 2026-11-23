@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 #ifndef NUVASHALAUNCHER_USERS_POPOVER_PRIVATE_H
 #define NUVASHALAUNCHER_USERS_POPOVER_PRIVATE_H
 

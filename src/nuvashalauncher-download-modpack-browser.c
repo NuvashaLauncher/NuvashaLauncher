@@ -1,10 +1,13 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Modrinth modpack browsing and search. */
 #include "nuvashalauncher-download-modpack-dialog-private.h"
 #include "nuvashalauncher-icon-load-private.h"
 #include "nuvashalauncher-content-format.h"
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-download.h"
-#include "nuvashalauncher-operation.h"
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-filter-entry.h"
 #include "nuvashalauncher-i18n.h"
@@ -65,7 +68,7 @@ on_version_catalog_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
     }
 
-  g_clear_pointer (&self->version_catalog, nuvashalauncher_operation_unref);
+  g_clear_pointer (&self->version_catalog, nuvashalauncher_task_scope_unref);
   version_catalog_ask_free (ask);
 }
 
@@ -152,7 +155,7 @@ on_search_timeout (gpointer user_data)
 {
   NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
-  nuvashalauncher_operation_forget_source (self->scope, self->debounce);
+  nuvashalauncher_task_scope_forget_source (self->scope, self->debounce);
   self->debounce = 0;
   run_search (self, FALSE);
 
@@ -165,11 +168,11 @@ on_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
   NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
 
   if (self->debounce != 0)
-    nuvashalauncher_operation_remove (self->scope, self->debounce);
+    nuvashalauncher_task_scope_remove_source (self->scope, self->debounce);
 
   self->debounce = g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
   g_source_set_name_by_id (self->debounce, "nuvashalauncher-modpack-search-debounce");
-  nuvashalauncher_operation_track (self->scope, self->debounce);
+  nuvashalauncher_task_scope_track_source (self->scope, self->debounce);
 }
 
 /* The list is scrolled to its end: ask for the next page. Only one page
@@ -474,7 +477,7 @@ run_search (NuvashaLauncherDownloadModpackDialog *self, gboolean append)
       /* The debounce source belongs to the dialog scope. Removing it
          through the scope also forgets its ID, so a later recycled GLib
          source ID cannot be removed during scope teardown. */
-      nuvashalauncher_operation_remove (self->scope, self->debounce);
+      nuvashalauncher_task_scope_remove_source (self->scope, self->debounce);
       self->debounce = 0;
     }
 
@@ -513,7 +516,7 @@ run_search (NuvashaLauncherDownloadModpackDialog *self, gboolean append)
   /* The callback holds a reference, so closing the dialog while a search
    * is in flight finalizes it, and a callback that then reads self would
    * be reading freed memory. */
-  nuvashalauncher_operation_release (
+  nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_download_json_cached_async (nuvashalauncher_downloads_get_service (), url, on_search_done, ask),
     self->search);
 }

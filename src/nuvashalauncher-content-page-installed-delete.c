@@ -5,7 +5,7 @@
 #include "nuvashalauncher-content-page-private.h"
 #include "nuvashalauncher-content-index.h"
 #include "nuvashalauncher-content-files-private.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-i18n.h"
 
@@ -22,7 +22,7 @@ remove_installed_file_by_path (NuvashaLauncherContentPage *self, const char *tar
       g_autofree char *directory = content_page_base_directory (self);
       g_autofree char *filename = g_path_get_basename (target_path);
       if (directory != NULL)
-        nuvashalauncher_operation_unref_when_done (
+        nuvashalauncher_task_scope_unref_when_done (
           nuvashalauncher_content_index_remove_async (directory, self->type,
                                                       filename, NULL, NULL));
     }

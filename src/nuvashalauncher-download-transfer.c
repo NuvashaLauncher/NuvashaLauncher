@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* HTTP streaming, verification, and retry handling. */
 #include "nuvashalauncher-download-private.h"
 #include "nuvashalauncher-cache.h"

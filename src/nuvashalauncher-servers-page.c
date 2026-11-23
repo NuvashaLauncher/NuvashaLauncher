@@ -12,11 +12,24 @@ typedef struct {
   char *name;
   char *ip;
   char *icon_b64;
+  char *search_key;
   gint8 accept_textures; /* 0=ask, 1=always, 2=never */
   gboolean has_accept_textures;
   gint8 hidden;
   gboolean has_hidden;
 } ServerEntry;
+
+static void
+server_entry_refresh_search_key (ServerEntry *s)
+{
+  g_autofree char *name_folded = s->name != NULL ? g_utf8_casefold (s->name, -1) : NULL;
+  g_autofree char *ip_folded = s->ip != NULL ? g_utf8_casefold (s->ip, -1) : NULL;
+
+  g_free (s->search_key);
+  s->search_key = g_strconcat (name_folded != NULL ? name_folded : "",
+                               " ", ip_folded != NULL ? ip_folded : "",
+                               NULL);
+}
 
 static void
 server_entry_free (ServerEntry *s)
@@ -26,6 +39,7 @@ server_entry_free (ServerEntry *s)
   g_free (s->name);
   g_free (s->ip);
   g_free (s->icon_b64);
+  g_free (s->search_key);
   g_free (s);
 }
 
@@ -162,14 +176,26 @@ typedef struct {
 } ServerDialogData;
 
 static void
-on_server_dialog_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
-                           const char *response,
-                           gpointer user_data)
+server_dialog_data_free (ServerDialogData *d)
+{
+  if (d == NULL)
+    return;
+  g_clear_object (&d->page);
+  g_free (d);
+}
+
+static void
+on_server_dialog_response (GObject      *source,
+                           GAsyncResult *result,
+                           gpointer      user_data)
 {
   ServerDialogData *d = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
   if (g_strcmp0 (response, "save") != 0)
     {
-      g_free (d);
+      server_dialog_data_free (d);
       return;
     }
 
@@ -180,7 +206,7 @@ on_server_dialog_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
 
   if (ip == NULL || *ip == '\0')
     {
-      g_free (d);
+      server_dialog_data_free (d);
       return;
     }
 
@@ -195,6 +221,7 @@ on_server_dialog_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
           s->ip = g_strdup (ip);
           s->accept_textures = policy;
           s->has_accept_textures = TRUE;
+          server_entry_refresh_search_key (s);
         }
     }
   else
@@ -204,11 +231,12 @@ on_server_dialog_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
       s->ip = g_strdup (ip);
       s->accept_textures = policy;
       s->has_accept_textures = TRUE;
+      server_entry_refresh_search_key (s);
       g_ptr_array_add (d->page->servers, s);
     }
 
   persist_and_reload (d->page);
-  g_free (d);
+  server_dialog_data_free (d);
 }
 
 static void
@@ -223,6 +251,8 @@ present_server_dialog (NuvashaLauncherServersPage *self,
 
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
     adw_alert_dialog_new (is_edit ? _("Edit Server") : _("Add Server"), NULL));
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
 
   AdwPreferencesGroup *form = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwEntryRow *name_row = ADW_ENTRY_ROW (adw_entry_row_new ());
@@ -263,17 +293,18 @@ present_server_dialog (NuvashaLauncherServersPage *self,
                                   NULL);
   adw_alert_dialog_set_response_appearance (alert, "save", ADW_RESPONSE_SUGGESTED);
   adw_alert_dialog_set_default_response (alert, "save");
+  adw_alert_dialog_set_close_response (alert, "cancel");
 
   ServerDialogData *d = g_new0 (ServerDialogData, 1);
-  d->page = self;
+  d->page = g_object_ref (self);
   d->is_edit = is_edit;
   d->index = index;
   d->name_row = name_row;
   d->ip_row = ip_row;
   d->policy_row = policy_row;
 
-  g_signal_connect (alert, "response", G_CALLBACK (on_server_dialog_response), d);
-  adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+                           on_server_dialog_response, d);
 }
 
 static void
@@ -290,17 +321,29 @@ typedef struct {
 } DeleteServerData;
 
 static void
-on_delete_server_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
-                           const char *response,
-                           gpointer user_data)
+delete_server_data_free (DeleteServerData *d)
+{
+  if (d == NULL)
+    return;
+  g_clear_object (&d->page);
+  g_free (d);
+}
+
+static void
+on_delete_server_response (GObject      *source,
+                           GAsyncResult *result,
+                           gpointer      user_data)
 {
   DeleteServerData *d = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
   if (g_strcmp0 (response, "delete") == 0 && d->index < d->page->servers->len)
     {
       g_ptr_array_remove_index (d->page->servers, d->index);
       persist_and_reload (d->page);
     }
-  g_free (d);
+  delete_server_data_free (d);
 }
 
 static void
@@ -316,18 +359,21 @@ on_delete_server_clicked (GtkButton *button, gpointer user_data)
     g_strdup_printf (_("Remove server \"%s\"?"), s->name != NULL ? s->name : s->ip);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
     adw_alert_dialog_new (_("Remove Server"), body));
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _("Cancel"),
                                   "delete", _("Delete"),
                                   NULL);
   adw_alert_dialog_set_response_appearance (alert, "delete", ADW_RESPONSE_DESTRUCTIVE);
   adw_alert_dialog_set_default_response (alert, "cancel");
+  adw_alert_dialog_set_close_response (alert, "cancel");
 
   DeleteServerData *d = g_new0 (DeleteServerData, 1);
-  d->page = self;
+  d->page = g_object_ref (self);
   d->index = index;
-  g_signal_connect (alert, "response", G_CALLBACK (on_delete_server_response), d);
-  adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+                           on_delete_server_response, d);
 }
 
 static GtkWidget *
@@ -371,9 +417,8 @@ server_action_button (const char *icon_name, const char *tooltip, guint index,
                       GCallback cb, NuvashaLauncherServersPage *self)
 {
   GtkWidget *btn = gtk_button_new_from_icon_name (icon_name);
-  gtk_widget_add_css_class (btn, "flat");
   gtk_widget_set_valign (btn, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (btn, tooltip);
+  nuvashalauncher_ui_prepare_icon_button (btn, tooltip);
   g_object_set_data (G_OBJECT (btn), "nuvashalauncher-idx", GUINT_TO_POINTER (index));
   g_signal_connect_object (btn, "clicked", cb, self, 0);
   return btn;
@@ -413,31 +458,10 @@ build_server_row (NuvashaLauncherServersPage *self, ServerEntry *s, guint index)
     row, server_action_button ("document-edit-symbolic", _("Edit"),
                                index, G_CALLBACK (on_edit_server_clicked), self));
   adw_action_row_add_suffix (
-    row, server_action_button ("user-trash-symbolic", _("Delete"),
+    row, server_action_button ("edit-delete-symbolic", _("Delete"),
                                index, G_CALLBACK (on_delete_server_clicked), self));
 
   return GTK_WIDGET (row);
-}
-
-static gboolean
-server_matches_query (const ServerEntry *s, const char *query)
-{
-  if (query == NULL || *query == '\0')
-    return TRUE;
-  g_autofree char *q = g_utf8_casefold (query, -1);
-  if (s->name != NULL)
-    {
-      g_autofree char *n = g_utf8_casefold (s->name, -1);
-      if (strstr (n, q) != NULL)
-        return TRUE;
-    }
-  if (s->ip != NULL)
-    {
-      g_autofree char *ip = g_utf8_casefold (s->ip, -1);
-      if (strstr (ip, q) != NULL)
-        return TRUE;
-    }
-  return FALSE;
 }
 
 static void
@@ -446,13 +470,19 @@ filter_server_rows (NuvashaLauncherServersPage *self)
   const char *query = self->search_bar != NULL
     ? gtk_editable_get_text (GTK_EDITABLE (self->search_bar))
     : "";
+  g_autofree char *needle = (query != NULL && *query != '\0')
+    ? g_utf8_casefold (query, -1)
+    : NULL;
 
   for (guint i = 0; i < self->rows->len && i < self->servers->len; i++)
     {
       GtkWidget *row = g_ptr_array_index (self->rows, i);
       ServerEntry *s = g_ptr_array_index (self->servers, i);
+      gboolean visible = needle == NULL || *needle == '\0' ||
+                         (s->search_key != NULL &&
+                          strstr (s->search_key, needle) != NULL);
 
-      gtk_widget_set_visible (row, server_matches_query (s, query));
+      gtk_widget_set_visible (row, visible);
     }
 }
 
@@ -537,6 +567,7 @@ nuvashalauncher_servers_page_reload (NuvashaLauncherServersPage *self)
                 nuvashalauncher_nbt_compound_get_byte (c, "acceptTextures", 0);
               s->has_hidden = nuvashalauncher_nbt_compound_get (c, "hidden") != NULL;
               s->hidden = nuvashalauncher_nbt_compound_get_byte (c, "hidden", 0);
+              server_entry_refresh_search_key (s);
               g_ptr_array_add (self->servers, s);
             }
         }

@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Modrinth request scheduling, deduplication, and error handling. */
 
 #include "nuvashalauncher-modrinth.h"

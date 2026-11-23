@@ -1,10 +1,14 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Content-folder scanning and Modrinth identification. */
 #include "nuvashalauncher-content-page-private.h"
 #include "nuvashalauncher-content-files-private.h"
 #include "nuvashalauncher-content-format.h"
 #include "nuvashalauncher-content-index.h"
 #include "nuvashalauncher-download.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-i18n.h"
@@ -81,7 +85,7 @@ identify_request_free (IdentifyRequest *request)
   IdentifyRun *run = request->run;
 
   if (request->operation != NULL)
-    nuvashalauncher_operation_unref (request->operation);
+    nuvashalauncher_task_scope_unref (request->operation);
 
   g_free (request);
   run->in_flight--;
@@ -124,7 +128,7 @@ persist_identified_file (NuvashaLauncherContentPage *self, NuvashaLauncherConten
   entry.required_dependencies = file->required_dependencies;
   entry.optional_dependencies = file->optional_dependencies;
   entry.incompatible_dependencies = file->incompatible_dependencies;
-  nuvashalauncher_operation_release (
+  nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_content_index_update_async (directory, self->type, &entry, NULL, NULL),
     self->installed.scan);
 }
@@ -180,7 +184,7 @@ project_title_request_free (ProjectTitleRequest *request)
     g_object_remove_weak_pointer (G_OBJECT (request->page),
                                   (gpointer *) &request->page);
   if (request->operation != NULL)
-    nuvashalauncher_operation_unref (request->operation);
+    nuvashalauncher_task_scope_unref (request->operation);
   g_free (request->project_id);
   g_free (request);
 }
@@ -636,7 +640,7 @@ identify_start (IdentifyRun *run)
           request->operation = nuvashalauncher_modrinth_versions_by_hashes_async (
             batch_hashes, identify_batch_ready, request);
           if (run->cancellable != NULL)
-            nuvashalauncher_operation_follow (request->operation,
+            nuvashalauncher_task_scope_follow_cancellable (request->operation,
                                                run->cancellable);
           return;
         }
@@ -680,7 +684,7 @@ identify_start (IdentifyRun *run)
                                               request);
 
       if (run->cancellable != NULL)
-        nuvashalauncher_operation_follow (request->operation,
+        nuvashalauncher_task_scope_follow_cancellable (request->operation,
                                            run->cancellable);
     }
 
@@ -771,7 +775,7 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     identify_start (run);
   }
 
-  nuvashalauncher_operation_release (
+  nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_content_metadata_async (self->installed.files, self->type,
                                 metadata_ready, g_object_ref (self)),
     self->installed.scan);
@@ -845,7 +849,7 @@ reload_installed (NuvashaLauncherContentPage *self)
 
     watch->operation = nuvashalauncher_content_scan_async (directory, self->type,
                                                scan_ready, watch);
-    nuvashalauncher_operation_follow (watch->operation,
+    nuvashalauncher_task_scope_follow_cancellable (watch->operation,
                                        self->installed.scan);
   }
 }

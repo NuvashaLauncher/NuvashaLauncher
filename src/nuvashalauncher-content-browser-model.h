@@ -10,6 +10,8 @@
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-task.h"
 
+G_BEGIN_DECLS
+
 typedef struct _NuvashaLauncherContentBrowserModel NuvashaLauncherContentBrowserModel;
 
 NuvashaLauncherContentBrowserModel *nuvashalauncher_content_browser_model_new (void);
@@ -61,5 +63,7 @@ void nuvashalauncher_content_browser_model_set_query (
   const char                         *query);
 GCancellable *nuvashalauncher_content_browser_model_reset_cancellable (
   NuvashaLauncherContentBrowserModel *model);
+
+G_END_DECLS
 
 #endif /* NUVASHALAUNCHER_CONTENT_BROWSER_MODEL_H */

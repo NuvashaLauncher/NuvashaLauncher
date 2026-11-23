@@ -7,6 +7,8 @@
 
 #include <glib.h>
 
+G_BEGIN_DECLS
+
 typedef struct _NuvashaLauncherContentInstallModel NuvashaLauncherContentInstallModel;
 
 NuvashaLauncherContentInstallModel *nuvashalauncher_content_install_model_new (void);
@@ -31,5 +33,7 @@ gpointer nuvashalauncher_content_install_model_next_update (
   guint                              *out_total);
 guint nuvashalauncher_content_install_model_finish_updates (
   NuvashaLauncherContentInstallModel *model);
+
+G_END_DECLS
 
 #endif /* NUVASHALAUNCHER_CONTENT_INSTALL_MODEL_H */

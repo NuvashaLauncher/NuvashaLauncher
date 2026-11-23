@@ -46,6 +46,10 @@ GQuark nuvashalauncher_settings_error_quark (void);
 #define NUVASHALAUNCHER_SETTINGS_DEFAULT_CACHE_EXPIRATION \
   NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_HOUR
 
+/* Looks up or compiles the application GSettings schema and opens a new
+ * GSettings instance, returning NULL when no schema source is available. */
+GSettings *nuvashalauncher_settings_open_gsettings (void);
+
 /* Reads the installed GSettings schema and defaults. Never returns NULL. */
 NuvashaLauncherSettings *nuvashalauncher_settings_new (void);
 

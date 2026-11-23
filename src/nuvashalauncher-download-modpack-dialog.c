@@ -16,7 +16,6 @@
 #include "nuvashalauncher-dialogs.h"
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-download.h"
-#include "nuvashalauncher-operation.h"
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-icons.h"
@@ -80,7 +79,7 @@ dialog_dispose (GObject *object)
     g_cancellable_cancel (self->fetch);
 
   if (self->version_catalog != NULL)
-    nuvashalauncher_operation_cancel (self->version_catalog);
+    nuvashalauncher_task_scope_cancel (self->version_catalog);
 
   if (self->import_idle != 0)
     {
@@ -90,7 +89,7 @@ dialog_dispose (GObject *object)
 
   if (self->scope != NULL)
     {
-      nuvashalauncher_operation_cancel (self->scope);
+      nuvashalauncher_task_scope_cancel (self->scope);
       /* The scope is also a GTask. Complete it after cancellation so a
        * local import does not leave an unreturned task behind when the
        * dialog is disposed. */
@@ -110,9 +109,9 @@ dialog_dispose (GObject *object)
   g_clear_object (&self->fetch);
   g_clear_object (&self->results_status);
   g_clear_object (&self->error_status);
-  nuvashalauncher_operation_unref (self->version_catalog);
+  nuvashalauncher_task_scope_unref (self->version_catalog);
   self->version_catalog = NULL;
-  nuvashalauncher_operation_unref (self->scope);
+  nuvashalauncher_task_scope_unref (self->scope);
   self->scope = NULL;
   g_clear_pointer (&self->project, nuvashalauncher_modrinth_project_free);
   g_clear_pointer (&self->version, nuvashalauncher_modrinth_version_free);
@@ -159,7 +158,7 @@ on_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
 {
   NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   if (self->import_idle != 0)
-    nuvashalauncher_operation_remove (self->scope, self->import_idle);
+    nuvashalauncher_task_scope_remove_source (self->scope, self->import_idle);
   self->import_idle = 0;
   self->closed = TRUE;
 
@@ -168,7 +167,7 @@ on_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
   if (!self->imported && self->fetch != NULL)
     g_cancellable_cancel (self->fetch);
   if (self->version_catalog != NULL)
-    nuvashalauncher_operation_cancel (self->version_catalog);
+    nuvashalauncher_task_scope_cancel (self->version_catalog);
 
   /* Closing does not stop the pack download: it is the manager's, it
      shows in the header, and the install that follows it runs without
@@ -182,7 +181,7 @@ nuvashalauncher_download_modpack_dialog_init (NuvashaLauncherDownloadModpackDial
   gtk_widget_init_template (GTK_WIDGET (self));
   self->search = g_cancellable_new ();
   self->fetch = g_cancellable_new ();
-  self->scope = nuvashalauncher_operation_new (NULL, self->search, NULL, NULL);
+  self->scope = nuvashalauncher_task_scope_new (NULL, self->search, NULL, NULL);
   self->rows = NULL;
   self->hits = NULL;
   self->seen_ids = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
@@ -228,12 +227,12 @@ static gboolean
 start_import_idle (gpointer user_data)
 {
   NuvashaLauncherDownloadModpackDialog *self = NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
-  nuvashalauncher_operation_forget_source (self->scope, self->import_idle);
+  nuvashalauncher_task_scope_forget_source (self->scope, self->import_idle);
   self->import_idle = 0;
 
   /* Reuse the same validation, optional-file selection and install flow as
    * a downloaded pack. The selected file is never deleted on failure. */
-  nuvashalauncher_operation_release (
+  nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_modpack_new_from_zip_async (self->pack_path, on_pack_parsed,
                                     g_object_ref (self)),
     self->imported ? self->fetch
@@ -265,7 +264,7 @@ nuvashalauncher_download_modpack_dialog_new_for_file (NuvashaLauncherInstanceMan
   build_import_page (self);
   self->import_idle = g_idle_add (start_import_idle, g_object_ref (self));
   g_source_set_name_by_id (self->import_idle, "nuvashalauncher-modpack-import-idle");
-  nuvashalauncher_operation_track (self->scope, self->import_idle);
+  nuvashalauncher_task_scope_track_source (self->scope, self->import_idle);
   return self;
 }
 

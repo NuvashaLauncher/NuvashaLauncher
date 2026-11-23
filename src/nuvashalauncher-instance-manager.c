@@ -561,7 +561,7 @@ nuvashalauncher_instance_manager_create (NuvashaLauncherInstanceManager *self,
     return NULL;
 
   if (loader_version != NULL)
-    g_object_set (instance, "loader_version", loader_version, NULL);
+    g_object_set (instance, "loader-version", loader_version, NULL);
   g_object_set (instance, "created-at", g_get_real_time () / G_USEC_PER_SEC, NULL);
 
   g_autoptr (GError) path_error = NULL;

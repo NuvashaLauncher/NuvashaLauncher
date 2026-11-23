@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Cancellation-to-main-loop source bridge. */
 
 #include "nuvashalauncher-task-private.h"

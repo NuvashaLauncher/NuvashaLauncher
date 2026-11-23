@@ -8,7 +8,7 @@
 #include "nuvashalauncher-icons.h"
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-modrinth.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 
 #define RESULTS_PER_PAGE 20
 #define MAX_RESULT_ROWS 400
@@ -357,7 +357,7 @@ nuvashalauncher_content_page_run_search (NuvashaLauncherContentPage *self, gbool
     PageWatch *watch = page_watch_new (self);
 
     watch->operation = nuvashalauncher_modrinth_search_async (search, search_ready, watch);
-    nuvashalauncher_operation_follow (watch->operation, cancellable);
+    nuvashalauncher_task_scope_follow_cancellable (watch->operation, cancellable);
   }
 }
 
@@ -369,7 +369,7 @@ on_search_timeout (gpointer user_data)
   gboolean filter_dirty = GPOINTER_TO_INT (
     g_object_get_data (G_OBJECT (self), "nuvashalauncher-filter-dirty"));
 
-  nuvashalauncher_operation_forget_source (self->browse.model->scope,
+  nuvashalauncher_task_scope_forget_source (self->browse.model->scope,
                                 self->browse.model->debounce_source);
   self->browse.model->debounce_source = 0;
   g_object_set_data (G_OBJECT (self), "nuvashalauncher-filter-dirty", NULL);
@@ -389,14 +389,14 @@ nuvashalauncher_content_page_on_search_changed (GtkEditable *editable G_GNUC_UNU
   NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
 
   if (self->browse.model->debounce_source != 0)
-    nuvashalauncher_operation_remove (self->browse.model->scope,
+    nuvashalauncher_task_scope_remove_source (self->browse.model->scope,
                                   self->browse.model->debounce_source);
 
   self->browse.model->debounce_source =
     g_timeout_add (SEARCH_DELAY_MS, on_search_timeout, self);
   g_source_set_name_by_id (self->browse.model->debounce_source,
                            "nuvashalauncher-content-search-debounce");
-  nuvashalauncher_operation_track (self->browse.model->scope,
+  nuvashalauncher_task_scope_track_source (self->browse.model->scope,
                                self->browse.model->debounce_source);
 }
 
@@ -495,7 +495,7 @@ load_categories (NuvashaLauncherContentPage *self)
 
     watch->operation = nuvashalauncher_modrinth_categories_async (project_type,
                                                       categories_ready, watch);
-    nuvashalauncher_operation_follow (watch->operation,
+    nuvashalauncher_task_scope_follow_cancellable (watch->operation,
                                        self->browse.model->cancellable);
   }
 }

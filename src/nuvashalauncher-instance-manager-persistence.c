@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Loading and saving instances.json. */
 #include "nuvashalauncher-instance-manager-private.h"
 #include "nuvashalauncher-i18n.h"

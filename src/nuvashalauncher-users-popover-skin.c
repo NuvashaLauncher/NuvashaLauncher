@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Avatar loading and the account skin manager. */
 #include "nuvashalauncher-users-popover-private.h"
 #include "nuvashalauncher-skin-service.h"
@@ -258,6 +262,8 @@ done:
           g_error_matches (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA)
             ? _("Skin images must be 64x64 or 64x32 PNG files")
             : nuvashalauncher_error_message (error)));
+      adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+      adw_alert_dialog_set_body_use_markup (alert, FALSE);
       adw_alert_dialog_set_extra_child (alert, nuvashalauncher_ui_error_details (error));
       adw_alert_dialog_add_response (alert, "ok", _("OK"));
       adw_alert_dialog_set_close_response (alert, "ok");
@@ -368,6 +374,8 @@ on_remove_skin_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
     AdwAlertDialog *alert = ADW_ALERT_DIALOG (
       adw_alert_dialog_new (_("Delete skin?"),
                             _("This skin will be removed from the skin library.")));
+    adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+    adw_alert_dialog_set_body_use_markup (alert, FALSE);
     adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
     adw_alert_dialog_add_response (alert, "remove", _("Delete"));
     adw_alert_dialog_set_response_appearance (alert, "remove",
@@ -382,9 +390,25 @@ on_remove_skin_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 static void
+on_open_skins_finished (GObject      *source G_GNUC_UNUSED,
+                        GAsyncResult *result,
+                        gpointer      user_data)
+{
+  SkinMenu *menu = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!g_app_info_launch_default_for_uri_finish (result, &error) &&
+      !menu->closed)
+    skin_menu_show_error (menu, error);
+
+  skin_menu_unref (menu);
+}
+
+static void
 on_open_skins_clicked (GtkButton *button G_GNUC_UNUSED,
                        gpointer user_data)
 {
+  SkinMenu *menu = user_data;
   g_autofree char *directory =
     g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", NULL);
   g_autofree char *uri = NULL;
@@ -392,14 +416,14 @@ on_open_skins_clicked (GtkButton *button G_GNUC_UNUSED,
 
   if (!nuvashalauncher_fs_make_directory (directory, 0755, &error))
     {
-      skin_menu_show_error (user_data, error);
+      skin_menu_show_error (menu, error);
       return;
     }
   uri = g_filename_to_uri (directory, NULL, NULL);
-  if (uri == NULL ||
-      !g_app_info_launch_default_for_uri (uri, NULL, &error))
-    if (error != NULL)
-      skin_menu_show_error (user_data, error);
+  if (uri != NULL)
+    g_app_info_launch_default_for_uri_async (uri, NULL, NULL,
+                                             on_open_skins_finished,
+                                             skin_menu_ref (menu));
 }
 
 static void

@@ -8,7 +8,7 @@
 #include "nuvashalauncher-i18n.h"
 
 #include "nuvashalauncher-auth-microsoft.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 
 /* Status messages shown while requesting and using the device code. */
 #define STEP_CODE _("asking Microsoft for a code")
@@ -121,13 +121,30 @@ is_safe_verification_uri (const char *address)
          (port == -1 || port == 443);
 }
 
+static void
+on_open_page_finished (GObject      *source G_GNUC_UNUSED,
+                       GAsyncResult *result,
+                       gpointer      user_data)
+{
+  g_autoptr (NuvashaLauncherSignInDialog) self =
+    NUVASHALAUNCHER_SIGN_IN_DIALOG (user_data);
+  g_autoptr (GError) error = NULL;
+
+  if (!g_app_info_launch_default_for_uri_finish (result, &error))
+    {
+      if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        return;
+      show_error (self, error,
+        _("Could not open the browser. Open the displayed address manually."));
+      gtk_widget_set_visible (GTK_WIDGET (self->uri_label), TRUE);
+    }
+}
+
 /* Open Microsoft's page through GIO, not through a command found on PATH.
    The dialog also displays the address for manual opening. */
 static gboolean
 open_the_page (NuvashaLauncherSignInDialog *self)
 {
-  g_autoptr (GError) error = NULL;
-
   if (self->code == NULL)
     return FALSE;
 
@@ -138,13 +155,9 @@ open_the_page (NuvashaLauncherSignInDialog *self)
       return FALSE;
     }
 
-  if (!g_app_info_launch_default_for_uri (self->code->verification_uri, NULL,
-                                          &error))
-    {
-      show_error (self, error,
-        _("Could not open the browser. Open the displayed address manually."));
-      gtk_widget_set_visible (GTK_WIDGET (self->uri_label), TRUE);
-    }
+  g_app_info_launch_default_for_uri_async (
+    self->code->verification_uri, NULL, self->cancellable,
+    on_open_page_finished, g_object_ref (self));
   return TRUE;
 }
 
@@ -188,7 +201,7 @@ on_code_ready (GObject      *source G_GNUC_UNUSED,
 
   set_step (self, STEP_SIGN_IN);
 
-  nuvashalauncher_operation_release (
+  nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_auth_sign_in_async (self->code, finish_sign_in, g_object_ref (self)),
     self->cancellable);
 }
@@ -236,7 +249,7 @@ begin_sign_in (NuvashaLauncherSignInDialog *self)
   gtk_widget_set_visible (GTK_WIDGET (self->open_button), FALSE);
   set_step (self, STEP_CODE);
 
-  nuvashalauncher_operation_release (
+  nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_auth_device_code_async (on_code_ready, g_object_ref (self)),
     self->cancellable);
 }

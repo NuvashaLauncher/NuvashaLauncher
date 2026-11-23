@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Parsing Java runtime version reports. */
 #define _GNU_SOURCE
 

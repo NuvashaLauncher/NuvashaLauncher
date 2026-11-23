@@ -6,7 +6,7 @@
 #include "nuvashalauncher-content-index.h"
 #include "nuvashalauncher-content-format.h"
 #include "nuvashalauncher-content-files-private.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 #include "nuvashalauncher-icons.h"
 #include "nuvashalauncher-icon-load-private.h"
 #include "nuvashalauncher-settings.h"
@@ -86,7 +86,7 @@ nuvashalauncher_content_page_toggle_file (NuvashaLauncherContentPage *self,
         directory = content_page_base_directory (self);
         if (directory != NULL)
           {
-            nuvashalauncher_operation_release (
+            nuvashalauncher_task_scope_release_when_done (
               nuvashalauncher_content_index_remove_async (directory, self->type,
                                                           old_base, NULL, NULL),
               self->installed.scan);
@@ -446,7 +446,7 @@ load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row, int scroller_he
       g_object_set_data (G_OBJECT (row), "nuvashalauncher-local-icon-loading",
                          GINT_TO_POINTER (1));
 
-      nuvashalauncher_operation_release (
+      nuvashalauncher_task_scope_release_when_done (
         nuvashalauncher_content_load_local_icon_async (file, local_icon_ready, load),
         self->installed.scan);
       return;

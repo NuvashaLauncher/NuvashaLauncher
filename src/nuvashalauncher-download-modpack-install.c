@@ -7,7 +7,7 @@
 #include "nuvashalauncher-download.h"
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-i18n.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 #include "nuvashalauncher-modpack.h"
 #include "nuvashalauncher-fs.h"
 
@@ -39,7 +39,7 @@ install_job_free (InstallJob *job)
   g_clear_object (&job->dialog);
   g_clear_object (&job->download);
   if (job->operation != NULL)
-    nuvashalauncher_operation_unref (job->operation);
+    nuvashalauncher_task_scope_unref (job->operation);
   g_free (job);
 }
 
@@ -83,7 +83,7 @@ on_install_done (GObject *source G_GNUC_UNUSED,
   /* The entry leaves the header's dropdown whether it worked or not, and
      the compressed pack it came from goes with it. */
   nuvashalauncher_download_finish (job->download);
-  nuvashalauncher_operation_unref (job->operation);
+  nuvashalauncher_task_scope_unref (job->operation);
   job->operation = NULL;
   remove_pack_file (self);
 
@@ -187,7 +187,7 @@ start_install (NuvashaLauncherDownloadModpackDialog *self)
 
     /* The × on the header entry is what the user reaches for to stop this,
        so the install follows that entry's cancellable. */
-    nuvashalauncher_operation_follow (job->operation,
+    nuvashalauncher_task_scope_follow_cancellable (job->operation,
                                        nuvashalauncher_download_get_cancellable (download));
   }
 }
@@ -346,7 +346,7 @@ on_pack_downloaded (GObject *source G_GNUC_UNUSED,
       return;
     }
 
-  nuvashalauncher_operation_release (
+  nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_modpack_new_from_zip_async (self->pack_path, on_pack_parsed,
                                     user_data),
     self->pack_download != NULL
@@ -520,7 +520,7 @@ dialog_start_features (NuvashaLauncherDownloadModpackDialog *self)
     g_free (self->pack_path);
     self->pack_path = g_steal_pointer (&template);
 
-    nuvashalauncher_operation_release (
+    nuvashalauncher_task_scope_release_when_done (
       nuvashalauncher_download_file_async (nuvashalauncher_downloads_get_service (), file->url, self->pack_path, file->sha1,
                                G_CHECKSUM_SHA1, on_pack_progress,
                                on_pack_downloaded, g_object_ref (self)),

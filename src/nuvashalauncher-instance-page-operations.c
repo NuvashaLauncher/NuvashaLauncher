@@ -9,7 +9,7 @@
 #include "nuvashalauncher-download.h"
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-modpack.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 #include "nuvashalauncher-ui-feedback.h"
 
 #include <gio/gio.h>
@@ -38,7 +38,7 @@ on_open_folder_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     instance_page_show_error (self, error);
 
   g_object_unref (self);
-  nuvashalauncher_operation_unref (operation);
+  nuvashalauncher_task_scope_unref (operation);
   g_free (wait);
 }
 
@@ -88,7 +88,7 @@ on_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
   if (self->export_operation != NULL)
     {
-      nuvashalauncher_operation_unref (self->export_operation);
+      nuvashalauncher_task_scope_unref (self->export_operation);
       self->export_operation = NULL;
     }
 
@@ -139,7 +139,7 @@ on_export_file_chosen (GObject *source, GAsyncResult *result,
 
         /* The entry's × is the cancel button the user can see, so the
            export follows that entry's cancellable. */
-        nuvashalauncher_operation_follow (
+        nuvashalauncher_task_scope_follow_cancellable (
           self->export_operation,
           nuvashalauncher_download_get_cancellable (self->export_download));
       }
@@ -193,7 +193,7 @@ export_metadata_free_idle (gpointer user_data)
 {
   ExportMetadata *data = user_data;
   if (data->page->scope != NULL)
-    nuvashalauncher_operation_forget_source (data->page->scope, data->page->export_idle);
+    nuvashalauncher_task_scope_forget_source (data->page->scope, data->page->export_idle);
   data->page->export_idle = 0;
   return G_SOURCE_REMOVE;
 }
@@ -210,7 +210,7 @@ on_export_metadata_closed (AdwDialog *dialog G_GNUC_UNUSED,
     (GDestroyNotify) export_metadata_free);
   g_source_set_name_by_id (data->page->export_idle,
                            "nuvashalauncher-instance-export-cleanup");
-  nuvashalauncher_operation_track (data->page->scope, data->page->export_idle);
+  nuvashalauncher_task_scope_track_source (data->page->scope, data->page->export_idle);
 }
 
 static void
@@ -364,6 +364,8 @@ show_export_policy (NuvashaLauncherInstancePage *self)
                           _("Logs, crash reports, screenshots, caches and "
                             "downloads are normally excluded.")));
 
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
   adw_alert_dialog_add_response (alert, "clean", _("Clean Export"));
   adw_alert_dialog_add_response (alert, "include", _("Include All Files"));
@@ -445,7 +447,7 @@ on_change_directory_ready (GObject *source, GAsyncResult *result,
   update_directory_row (self);
 
   g_object_unref (self);
-  nuvashalauncher_operation_unref (wait->operation);
+  nuvashalauncher_task_scope_unref (wait->operation);
   g_free (wait);
 }
 
@@ -548,7 +550,7 @@ on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     }
 
   g_object_unref (self);
-  nuvashalauncher_operation_unref (wait->operation);
+  nuvashalauncher_task_scope_unref (wait->operation);
   g_free (wait);
 }
 
@@ -576,7 +578,7 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
       /* The instance is still registered: stay on its page. */
       instance_page_show_error (self, error);
       g_object_unref (self);
-      nuvashalauncher_operation_unref (wait->operation);
+      nuvashalauncher_task_scope_unref (wait->operation);
       g_free (wait);
       return;
     }
@@ -586,7 +588,7 @@ on_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
      page to close itself would mean two places deciding the same thing. */
 
   g_object_unref (self);
-  nuvashalauncher_operation_unref (wait->operation);
+  nuvashalauncher_task_scope_unref (wait->operation);
   g_free (wait);
 }
 
@@ -674,7 +676,7 @@ nuvashalauncher_instance_page_export_to_path (NuvashaLauncherInstancePage *self,
   self->export_operation = nuvashalauncher_modpack_export_async (
     self->instance, path, NULL, NULL, NULL, FALSE,
     on_export_progress, self, on_export_done, g_object_ref (self));
-  nuvashalauncher_operation_follow (self->export_operation,
+  nuvashalauncher_task_scope_follow_cancellable (self->export_operation,
                             nuvashalauncher_download_get_cancellable (
                               self->export_download));
 }

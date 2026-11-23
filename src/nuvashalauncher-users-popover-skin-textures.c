@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Skin texture loading and cache management. */
 
 #include "nuvashalauncher-users-popover-private.h"

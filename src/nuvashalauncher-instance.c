@@ -477,7 +477,7 @@ nuvashalauncher_instance_new (const char  *id,
                   "id", id,
                   "name", normalized_name,
                   "directory", canonical,
-                  "minecraft_version", minecraft_version,
+                  "minecraft-version", minecraft_version,
                   "loader", loader,
                   NULL);
 

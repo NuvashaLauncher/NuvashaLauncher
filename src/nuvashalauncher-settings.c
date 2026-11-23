@@ -511,19 +511,24 @@ find_settings_schema (void)
   return NULL;
 }
 
+GSettings *
+nuvashalauncher_settings_open_gsettings (void)
+{
+  GSettingsSchema *schema = find_settings_schema ();
+  GSettings *settings = NULL;
+
+  if (schema == NULL)
+    return NULL;
+
+  settings = g_settings_new_full (schema, NULL, NULL);
+  g_settings_schema_unref (schema);
+  return settings;
+}
+
 static void
 nuvashalauncher_settings_init (NuvashaLauncherSettings *self)
 {
-  GSettingsSchema *schema = find_settings_schema ();
-  if (schema != NULL)
-    {
-      self->desktop_settings = g_settings_new_full (schema, NULL, NULL);
-      g_settings_schema_unref (schema);
-    }
-  else
-    {
-      self->desktop_settings = NULL;
-    }
+  self->desktop_settings = nuvashalauncher_settings_open_gsettings ();
 
   self->show_unstable_versions = FALSE;
   self->log_line_limit = NUVASHALAUNCHER_SETTINGS_DEFAULT_LOG_LINE_LIMIT;

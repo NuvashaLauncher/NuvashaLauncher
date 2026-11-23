@@ -11,6 +11,8 @@
 #include "nuvashalauncher-launcher.h"
 #include "nuvashalauncher-settings.h"
 
+G_BEGIN_DECLS
+
 typedef struct _NuvashaLauncherMainWindowModel NuvashaLauncherMainWindowModel;
 
 NuvashaLauncherMainWindowModel *nuvashalauncher_main_window_model_new (void);
@@ -33,5 +35,7 @@ struct _NuvashaLauncherMainWindowModel
   GHashTable *launchers;
   GHashTable *instance_dialogs;
 };
+
+G_END_DECLS
 
 #endif /* NUVASHALAUNCHER_MAIN_WINDOW_MODEL_H */

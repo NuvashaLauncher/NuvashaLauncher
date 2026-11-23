@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 #define _GNU_SOURCE
 
 /* File and API response cache flow for downloads. */
@@ -7,9 +11,7 @@
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-task-private.h"
 #include <fcntl.h>
-#include <linux/fs.h>
 #include <string.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
 
 static void cache_ready (GObject *, GAsyncResult *, gpointer);
@@ -78,9 +80,9 @@ global_cache_restore (DownloadRequest *request)
     int src_fd = open (request->global_cache_path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
     if (src_fd >= 0)
       {
-        int cloned = ioctl (request->fd, FICLONE, src_fd);
+        gboolean cloned = nuvashalauncher_fs_try_clone_fd (src_fd, request->fd);
         close (src_fd);
-        if (cloned == 0)
+        if (cloned)
           {
             g_autofree char *destination_name = g_path_get_basename (request->dest_path);
             g_autoptr (GError) rename_error = NULL;

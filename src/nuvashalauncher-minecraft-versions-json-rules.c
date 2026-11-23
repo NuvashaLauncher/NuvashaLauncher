@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Minecraft rule parsing and evaluation. */
 
 #include "nuvashalauncher-minecraft-versions-json-private.h"

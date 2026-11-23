@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Loader processor variables, classpaths, and execution. */
 #include "nuvashalauncher-loaders-private.h"
 #include "nuvashalauncher-download.h"

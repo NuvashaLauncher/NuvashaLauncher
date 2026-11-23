@@ -117,11 +117,11 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
   NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
 
   g_object_get (source_instance,
-                "minecraft_version", &minecraft_version,
+                "minecraft-version", &minecraft_version,
                 "loader", &loader,
-                "loader_version", &loader_version,
+                "loader-version", &loader_version,
                 "icon", &icon,
-                "java_path", &java_path,
+                "java-path", &java_path,
                 "jvm_args", &jvm_args,
                 "memory-mib", &memory_mib,
                 "modpack-name", &modpack_name,
@@ -166,9 +166,9 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
     }
 
   g_object_set (copy,
-                "loader_version", loader_version,
+                "loader-version", loader_version,
                 "icon", icon,
-                "java_path", java_path,
+                "java-path", java_path,
                 "jvm_args", jvm_args,
                 "memory-mib", memory_mib,
                 "created-at", g_get_real_time () / G_USEC_PER_SEC,

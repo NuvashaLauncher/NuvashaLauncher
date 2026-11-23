@@ -1,8 +1,13 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Java probing and installation discovery. */
 #define _GNU_SOURCE
 
 #include "nuvashalauncher-java.h"
 #include "nuvashalauncher-java-private.h"
+#include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-task.h"
 
 #include <gio/gio.h>
@@ -551,7 +556,9 @@ nuvashalauncher_java_register_custom_path (const char *executable)
   if (executable == NULL || *executable == '\0')
     return;
 
-  settings = g_settings_new ("com.github.NuvashaLauncher.NuvashaLauncher");
+  settings = nuvashalauncher_settings_open_gsettings ();
+  if (settings == NULL)
+    return;
   stored = g_settings_get_strv (settings, "custom-java-paths");
   for (guint i = 0; stored != NULL && stored[i] != NULL; i++)
     {
@@ -762,10 +769,10 @@ candidate_scan_ready (GObject *source G_GNUC_UNUSED,
 
   if (!scan->use_custom_roots && scan->pruned && scan->valid_custom != NULL)
     {
-      g_autoptr (GSettings) settings = g_settings_new (
-        "com.github.NuvashaLauncher.NuvashaLauncher");
-      g_settings_set_strv (settings, "custom-java-paths",
-                           (const char * const *) scan->valid_custom);
+      g_autoptr (GSettings) settings = nuvashalauncher_settings_open_gsettings ();
+      if (settings != NULL)
+        g_settings_set_strv (settings, "custom-java-paths",
+                             (const char * const *) scan->valid_custom);
     }
 
   detect = g_new0 (Detect, 1);
@@ -785,8 +792,7 @@ nuvashalauncher_java_detect_async (GAsyncReadyCallback callback, gpointer user_d
 {
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
-  g_autoptr (GSettings) settings = g_settings_new (
-    "com.github.NuvashaLauncher.NuvashaLauncher");
+  g_autoptr (GSettings) settings = nuvashalauncher_settings_open_gsettings ();
   CandidateScan *scan = g_new0 (CandidateScan, 1);
   g_autoptr (GTask) task = NULL;
 
@@ -797,7 +803,9 @@ nuvashalauncher_java_detect_async (GAsyncReadyCallback callback, gpointer user_d
   scan->roots = default_roots ();
   scan->java_home = g_strdup (g_getenv ("JAVA_HOME"));
   scan->on_path = g_find_program_in_path ("java");
-  scan->custom = g_settings_get_strv (settings, "custom-java-paths");
+  scan->custom = settings != NULL
+                   ? g_settings_get_strv (settings, "custom-java-paths")
+                   : NULL;
 
   task = g_task_new (NULL, nuvashalauncher_task_scope_get_cancellable (scope),
                      candidate_scan_ready, scan);

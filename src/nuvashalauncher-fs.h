@@ -42,6 +42,10 @@ gboolean nuvashalauncher_fs_move_file (GFile *source, GFile *destination,
 gboolean nuvashalauncher_fs_copy_file (GFile *source, GFile *destination,
                             GFileCopyFlags flags, GCancellable *cancellable,
                             GError **error);
+gboolean nuvashalauncher_fs_try_clone_fd (int src_fd, int dst_fd);
+gboolean nuvashalauncher_fs_try_clone_path (const char *source_path,
+                                            const char *target_path,
+                                            gboolean    exclusive);
 void nuvashalauncher_fs_make_directory_async (GFile *file, int io_priority,
                                   GCancellable *cancellable,
                                   GAsyncReadyCallback callback,

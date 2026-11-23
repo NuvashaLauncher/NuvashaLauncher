@@ -7,7 +7,6 @@
 #include "nuvashalauncher-icon-load-private.h"
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-download.h"
-#include "nuvashalauncher-operation.h"
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-icons.h"
@@ -122,7 +121,7 @@ project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   g_clear_object (&load->dialog);
   if (load->operation != NULL)
-    nuvashalauncher_operation_unref (load->operation);
+    nuvashalauncher_task_scope_unref (load->operation);
   g_free (load);
 }
 
@@ -148,7 +147,7 @@ start_modpack_install (NuvashaLauncherDownloadModpackDialog *self,
       load->operation = nuvashalauncher_icon_load_async (project->icon_url,
                                                          project_icon_ready, load);
       if (self->fetch != NULL)
-        nuvashalauncher_operation_follow (load->operation, self->fetch);
+        nuvashalauncher_task_scope_follow_cancellable (load->operation, self->fetch);
     }
 
   if (dialog_start_features (self))
@@ -246,7 +245,7 @@ modpack_quick_install_project (NuvashaLauncherDownloadModpackDialog *self,
   fetch->project = nuvashalauncher_modrinth_project_copy (project);
   fetch->cancellable = g_object_ref (self->fetch);
 
-  nuvashalauncher_operation_release (
+  nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_download_json_cached_async (
       nuvashalauncher_downloads_get_service (), url,
       on_modpack_quick_versions_ready, fetch),
@@ -500,7 +499,7 @@ modpack_choose_version (NuvashaLauncherDownloadModpackDialog *self,
   g_autofree char *url =
     g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/project/%s/version", escaped_id);
 
-  nuvashalauncher_operation_release (
+  nuvashalauncher_task_scope_release_when_done (
     nuvashalauncher_download_json_cached_async (
       nuvashalauncher_downloads_get_service (), url,
       on_modpack_choose_versions_ready, fetch),

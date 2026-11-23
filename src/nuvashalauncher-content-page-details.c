@@ -4,7 +4,7 @@
 
 #include "nuvashalauncher-content-page-private.h"
 #include "nuvashalauncher-i18n.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 #include "nuvashalauncher-ui-feedback.h"
 
 #define VERSION_PICKER_BATCH_SIZE 25
@@ -50,7 +50,7 @@ row_version_fetch_free (RowVersionFetch *fetch)
   if (fetch == NULL)
     return;
   if (fetch->operation != NULL)
-    nuvashalauncher_operation_unref (fetch->operation);
+    nuvashalauncher_task_scope_unref (fetch->operation);
   g_clear_object (&fetch->cancellable);
   g_clear_object (&fetch->dialog);
   g_free (fetch->project_title);
@@ -113,7 +113,7 @@ nuvashalauncher_content_page_quick_install_project (NuvashaLauncherContentPage *
   fetch->operation = nuvashalauncher_modrinth_versions_async (
     project->project_id, self->type, self->minecraft_version, self->loader,
     on_quick_install_versions_ready, fetch);
-  nuvashalauncher_operation_follow (fetch->operation,
+  nuvashalauncher_task_scope_follow_cancellable (fetch->operation,
                                      self->browse.model->cancellable);
 }
 
@@ -346,5 +346,5 @@ nuvashalauncher_content_page_choose_version (NuvashaLauncherContentPage *self,
   fetch->operation = nuvashalauncher_modrinth_versions_async (
     project->project_id, self->type, self->minecraft_version, self->loader,
     on_choose_versions_ready, fetch);
-  nuvashalauncher_operation_follow (fetch->operation, fetch->cancellable);
+  nuvashalauncher_task_scope_follow_cancellable (fetch->operation, fetch->cancellable);
 }

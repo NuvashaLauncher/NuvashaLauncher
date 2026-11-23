@@ -1,9 +1,13 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Update discovery and batch installation for the content page. */
 #include "nuvashalauncher-content-page-private.h"
 #include "nuvashalauncher-content-install-model.h"
 #include "nuvashalauncher-modrinth.h"
 #include "nuvashalauncher-i18n.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 
 #define UPDATE_CHECK_BATCH_SIZE 200
 
@@ -395,7 +399,7 @@ update_check_next (UpdateRun *run)
     watch->operation = nuvashalauncher_modrinth_updates_by_hashes_async (
       self->type, hashes, self->minecraft_version, self->loader,
       on_updates_ready, watch);
-    nuvashalauncher_operation_follow (watch->operation,
+    nuvashalauncher_task_scope_follow_cancellable (watch->operation,
                                        self->browse.model->cancellable);
   }
 }

@@ -21,7 +21,7 @@ nuvashalauncher_icon_load_free (NuvashaLauncherIconLoad *load)
 {
   g_clear_object (&load->icon);
   if (load->operation != NULL)
-    nuvashalauncher_operation_unref (load->operation);
+    nuvashalauncher_task_scope_unref (load->operation);
   g_free (load);
 }
 

@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Shared JSON field readers for Minecraft metadata. */
 
 #include "nuvashalauncher-minecraft-versions-json-private.h"

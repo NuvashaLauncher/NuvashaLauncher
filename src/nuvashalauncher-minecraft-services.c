@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 /* Minecraft Services HTTP policy shared by profile, skin and cape requests. */
 #include "nuvashalauncher-minecraft-services.h"
 #include "nuvashalauncher-i18n.h"

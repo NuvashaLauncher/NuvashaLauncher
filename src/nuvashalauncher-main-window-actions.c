@@ -8,7 +8,7 @@
 #include "nuvashalauncher-create-instance-dialog.h"
 #include "nuvashalauncher-download-modpack-dialog.h"
 #include "nuvashalauncher-i18n.h"
-#include "nuvashalauncher-operation.h"
+#include "nuvashalauncher-task.h"
 
 static void
 on_create_instance (GSimpleAction *action G_GNUC_UNUSED,
@@ -345,7 +345,7 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
     }
   g_object_unref (self);
-  nuvashalauncher_operation_unref (wait->operation);
+  nuvashalauncher_task_scope_unref (wait->operation);
   g_free (wait);
 }
 
@@ -549,7 +549,7 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (clear_cache_row),
                                    _("Clear Nuvasha Launcher Cache"));
   {
-    GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
+    GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name ("edit-delete-symbolic"));
      nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (button), _("Clear Nuvasha Launcher Cache"));
      g_signal_connect_object (button, "clicked", G_CALLBACK (on_clear_cache_clicked),
                               self, 0);

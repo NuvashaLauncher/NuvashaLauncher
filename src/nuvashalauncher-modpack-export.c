@@ -650,8 +650,8 @@ export_manifest (NuvashaLauncherInstance *instance, const char *pack_name,
   NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
   gsize length = 0;
 
-  g_object_get (instance, "name", &name, "minecraft_version", &version,
-                "loader", &loader, "loader_version", &loader_version,
+  g_object_get (instance, "name", &name, "minecraft-version", &version,
+                "loader", &loader, "loader-version", &loader_version,
                 "icon", &icon, "modpack-name", &stored_pack_name,
                 "modpack-summary", &stored_summary,
                 "modpack-version-id", &stored_version_id, NULL);
@@ -680,7 +680,7 @@ export_manifest (NuvashaLauncherInstance *instance, const char *pack_name,
   json_builder_set_member_name (builder, "name");
   json_builder_add_string_value (builder,
                                  effective_name != NULL && *effective_name != '\0'
-                                   ? effective_name : "nuvashalauncher Instance");
+                                   ? effective_name : "Nuvasha Launcher Instance");
   if (effective_summary != NULL && *effective_summary != '\0')
     {
       json_builder_set_member_name (builder, "summary");

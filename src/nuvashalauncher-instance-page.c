@@ -26,7 +26,6 @@
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-worlds-page.h"
 #include "nuvashalauncher-task.h"
-#include "nuvashalauncher-operation.h"
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherInstancePage, nuvashalauncher_instance_page,
                      GTK_TYPE_BOX)
@@ -743,16 +742,16 @@ nuvashalauncher_instance_page_dispose (GObject *object)
 
   if (self->scope != NULL)
     {
-      nuvashalauncher_operation_cancel (self->scope);
-      nuvashalauncher_operation_unref (self->scope);
+      nuvashalauncher_task_scope_cancel (self->scope);
+      nuvashalauncher_task_scope_unref (self->scope);
       self->scope = NULL;
     }
 
   /* The Java warning's manifest read is this page's: it stops with it. */
   if (self->versions_operation != NULL)
     {
-      nuvashalauncher_operation_cancel (self->versions_operation);
-      nuvashalauncher_operation_unref (self->versions_operation);
+      nuvashalauncher_task_scope_cancel (self->versions_operation);
+      nuvashalauncher_task_scope_unref (self->versions_operation);
       self->versions_operation = NULL;
     }
 
@@ -765,8 +764,8 @@ nuvashalauncher_instance_page_dispose (GObject *object)
 
   if (self->export_operation != NULL)
     {
-      nuvashalauncher_operation_cancel (self->export_operation);
-      nuvashalauncher_operation_unref (self->export_operation);
+      nuvashalauncher_task_scope_cancel (self->export_operation);
+      nuvashalauncher_task_scope_unref (self->export_operation);
       self->export_operation = NULL;
     }
 
@@ -809,5 +808,5 @@ nuvashalauncher_instance_page_init (NuvashaLauncherInstancePage *self)
 {
   /* Everything is built in nuvashalauncher_instance_page_new(), which knows the
    * instance the page is for. */
-  self->scope = nuvashalauncher_operation_new (NULL, NULL, NULL, NULL);
+  self->scope = nuvashalauncher_task_scope_new (NULL, NULL, NULL, NULL);
 }

@@ -1,3 +1,7 @@
+/* Copyright (C) 2026 Flia
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
 #ifndef NUVASHALAUNCHER_INSTANCE_PRIVATE_H
 #define NUVASHALAUNCHER_INSTANCE_PRIVATE_H
 #include "nuvashalauncher-instance.h"

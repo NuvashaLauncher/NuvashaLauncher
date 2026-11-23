@@ -11,9 +11,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <glib/gstdio.h>
-#include <linux/fs.h>
 #include <string.h>
-#include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -83,26 +81,8 @@ copy_file_with_ficlone (const char   *source,
                         GCancellable *cancellable,
                         GError      **error)
 {
-  int src_fd = open (source, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
-
-  if (src_fd >= 0)
-    {
-      int dst_fd = open (target, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0644);
-      if (dst_fd >= 0)
-        {
-          gboolean cloned = ioctl (dst_fd, FICLONE, src_fd) == 0;
-          if (close (dst_fd) != 0)
-            cloned = FALSE;
-          close (src_fd);
-          if (cloned)
-            return TRUE;
-          g_unlink (target);
-        }
-      else
-        {
-          close (src_fd);
-        }
-    }
+  if (nuvashalauncher_fs_try_clone_path (source, target, TRUE))
+    return TRUE;
 
   {
     g_autoptr (GFile) source_file = g_file_new_for_path (source);

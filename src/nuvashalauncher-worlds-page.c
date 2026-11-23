@@ -17,9 +17,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <glib/gstdio.h>
-#include <linux/fs.h>
 #include <string.h>
-#include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -29,6 +27,7 @@ typedef struct {
   char *level_dat_path;
   char *icon_path;
   char *name;
+  char *search_key;
   gint32 game_type;
   gint64 last_played;
   gint64 seed;
@@ -45,6 +44,7 @@ world_entry_free (WorldEntry *w)
   g_free (w->level_dat_path);
   g_free (w->icon_path);
   g_free (w->name);
+  g_free (w->search_key);
   g_free (w);
 }
 
@@ -151,6 +151,15 @@ read_world_entry (const char *saves_dir, const char *folder_name)
       w->name = g_strdup (folder_name);
     }
 
+  {
+    g_autofree char *name_folded = w->name != NULL ? g_utf8_casefold (w->name, -1) : NULL;
+    g_autofree char *folder_folded = w->folder_name != NULL ? g_utf8_casefold (w->folder_name, -1) : NULL;
+
+    w->search_key = g_strconcat (name_folded != NULL ? name_folded : "",
+                                 " ", folder_folded != NULL ? folder_folded : "",
+                                 NULL);
+  }
+
   return w;
 }
 
@@ -183,6 +192,9 @@ typedef struct {
 static void
 rename_world_data_free (RenameWorldData *d)
 {
+  if (d == NULL)
+    return;
+  g_clear_object (&d->page);
   g_free (d->world_path);
   g_free (d->level_dat_path);
   g_free (d);
@@ -255,11 +267,14 @@ on_rename_world_done (GObject *source, GAsyncResult *result,
 }
 
 static void
-on_rename_world_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
-                          const char *response,
-                          gpointer user_data)
+on_rename_world_response (GObject      *source,
+                          GAsyncResult *result,
+                          gpointer      user_data)
 {
   RenameWorldData *d = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
   if (g_strcmp0 (response, "rename") != 0)
     {
       rename_world_data_free (d);
@@ -295,6 +310,8 @@ on_rename_world_clicked (GtkButton *button, gpointer user_data)
 
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
     adw_alert_dialog_new (_("Rename World"), NULL));
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
   GtkWidget *entry = gtk_entry_new ();
   gtk_editable_set_text (GTK_EDITABLE (entry), w->name);
   adw_alert_dialog_set_extra_child (alert, entry);
@@ -304,15 +321,16 @@ on_rename_world_clicked (GtkButton *button, gpointer user_data)
                                   NULL);
   adw_alert_dialog_set_response_appearance (alert, "rename", ADW_RESPONSE_SUGGESTED);
   adw_alert_dialog_set_default_response (alert, "rename");
+  adw_alert_dialog_set_close_response (alert, "cancel");
 
   RenameWorldData *d = g_new0 (RenameWorldData, 1);
-  d->page = self;
+  d->page = g_object_ref (self);
   d->world_path = g_strdup (w->path);
   d->level_dat_path = g_strdup (w->level_dat_path);
   d->entry = GTK_ENTRY (entry);
 
-  g_signal_connect (alert, "response", G_CALLBACK (on_rename_world_response), d);
-  adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+                           on_rename_world_response, d);
 }
 
 static gboolean
@@ -348,23 +366,8 @@ copy_dir_recursive (const char *src, const char *dst, GError **error)
         }
       else if (S_ISREG (st.st_mode))
         {
-          gboolean cloned = FALSE;
-          int src_fd = open (s, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
-          if (src_fd >= 0)
+          if (!nuvashalauncher_fs_try_clone_path (s, d, FALSE))
             {
-              int dst_fd = open (d, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
-              if (dst_fd >= 0)
-                {
-                  if (ioctl (dst_fd, FICLONE, src_fd) == 0)
-                    cloned = TRUE;
-                  if (close (dst_fd) != 0 && cloned)
-                    cloned = FALSE;
-                }
-              close (src_fd);
-            }
-          if (!cloned)
-            {
-              g_unlink (d);
               g_autoptr (GFile) gf_src = g_file_new_for_path (s);
               g_autoptr (GFile) gf_dst = g_file_new_for_path (d);
               if (!g_file_copy (gf_src, gf_dst, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, error))
@@ -524,11 +527,24 @@ on_delete_world_done (GObject *source, GAsyncResult *result,
 }
 
 static void
-on_delete_world_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
-                          const char *response,
-                          gpointer user_data)
+delete_world_data_free (DeleteWorldData *d)
+{
+  if (d == NULL)
+    return;
+  g_clear_object (&d->page);
+  g_free (d->world_path);
+  g_free (d);
+}
+
+static void
+on_delete_world_response (GObject      *source,
+                          GAsyncResult *result,
+                          gpointer      user_data)
 {
   DeleteWorldData *d = user_data;
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
   if (g_strcmp0 (response, "delete") == 0 && d->world_path != NULL)
     {
       g_autoptr (GTask) task =
@@ -537,8 +553,7 @@ on_delete_world_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
       g_task_set_task_data (task, g_steal_pointer (&d->world_path), g_free);
       g_task_run_in_thread (task, delete_world_thread);
     }
-  g_free (d->world_path);
-  g_free (d);
+  delete_world_data_free (d);
 }
 
 static void
@@ -556,18 +571,21 @@ on_delete_world_clicked (GtkButton *button, gpointer user_data)
   g_autofree char *body = g_strdup_printf (_("Delete world \"%s\"? This cannot be undone."), w->name);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
     adw_alert_dialog_new (_("Delete World"), body));
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_responses (alert,
                                   "cancel", _("Cancel"),
                                   "delete", _("Delete"),
                                   NULL);
   adw_alert_dialog_set_response_appearance (alert, "delete", ADW_RESPONSE_DESTRUCTIVE);
   adw_alert_dialog_set_default_response (alert, "cancel");
+  adw_alert_dialog_set_close_response (alert, "cancel");
 
   DeleteWorldData *d = g_new0 (DeleteWorldData, 1);
-  d->page = self;
+  d->page = g_object_ref (self);
   d->world_path = g_strdup (w->path);
-  g_signal_connect (alert, "response", G_CALLBACK (on_delete_world_response), d);
-  adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+                           on_delete_world_response, d);
 }
 
 static GtkWidget *
@@ -613,9 +631,8 @@ build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w)
   adw_action_row_add_prefix (row, icon);
 
   GtkWidget *join_btn = gtk_button_new_from_icon_name ("media-playback-start-symbolic");
-  gtk_widget_add_css_class (join_btn, "flat");
   gtk_widget_set_valign (join_btn, GTK_ALIGN_CENTER);
-  gtk_widget_set_tooltip_text (join_btn, _("Play"));
+  nuvashalauncher_ui_prepare_icon_button (join_btn, _("Play"));
   g_object_set_data (G_OBJECT (join_btn), "nuvashalauncher-world", w);
   g_signal_connect_object (join_btn, "clicked",
                            G_CALLBACK (on_join_world_clicked), self, 0);
@@ -646,40 +663,25 @@ build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w)
   return GTK_WIDGET (row);
 }
 
-static gboolean
-world_matches_query (const WorldEntry *w, const char *query)
-{
-  if (query == NULL || *query == '\0')
-    return TRUE;
-  g_autofree char *q = g_utf8_casefold (query, -1);
-  if (w->name != NULL)
-    {
-      g_autofree char *n = g_utf8_casefold (w->name, -1);
-      if (strstr (n, q) != NULL)
-        return TRUE;
-    }
-  if (w->folder_name != NULL)
-    {
-      g_autofree char *f = g_utf8_casefold (w->folder_name, -1);
-      if (strstr (f, q) != NULL)
-        return TRUE;
-    }
-  return FALSE;
-}
-
 static void
 filter_world_rows (NuvashaLauncherWorldsPage *self)
 {
   const char *query = self->search_bar != NULL
     ? gtk_editable_get_text (GTK_EDITABLE (self->search_bar))
     : "";
+  g_autofree char *needle = (query != NULL && *query != '\0')
+    ? g_utf8_casefold (query, -1)
+    : NULL;
 
   for (guint i = 0; i < self->rows->len && i < self->worlds->len; i++)
     {
       GtkWidget *row = g_ptr_array_index (self->rows, i);
       WorldEntry *w = g_ptr_array_index (self->worlds, i);
+      gboolean visible = needle == NULL || *needle == '\0' ||
+                         (w->search_key != NULL &&
+                          strstr (w->search_key, needle) != NULL);
 
-      gtk_widget_set_visible (row, world_matches_query (w, query));
+      gtk_widget_set_visible (row, visible);
     }
 }
 
@@ -1075,15 +1077,40 @@ on_add_world_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 }
 
 static void
+on_open_folder_finished (GObject      *source G_GNUC_UNUSED,
+                         GAsyncResult *result,
+                         gpointer      user_data)
+{
+  g_autoptr (NuvashaLauncherWorldsPage) self = NUVASHALAUNCHER_WORLDS_PAGE (user_data);
+  g_autoptr (GError) error = NULL;
+
+  if (!g_app_info_launch_default_for_uri_finish (result, &error))
+    nuvashalauncher_ui_error_toast (GTK_WIDGET (self),
+                                    GTK_WIDGET (self->toasts), error);
+}
+
+static void
 on_open_folder_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (user_data);
+  g_autoptr (GError) error = NULL;
+  g_autofree char *uri = NULL;
+
   if (self->saves_dir == NULL)
     return;
-  g_mkdir_with_parents (self->saves_dir, 0755);
-  g_autofree char *uri = g_filename_to_uri (self->saves_dir, NULL, NULL);
+
+  if (!nuvashalauncher_fs_make_directory (self->saves_dir, 0755, &error))
+    {
+      nuvashalauncher_ui_error_toast (GTK_WIDGET (self),
+                                      GTK_WIDGET (self->toasts), error);
+      return;
+    }
+
+  uri = g_filename_to_uri (self->saves_dir, NULL, NULL);
   if (uri != NULL)
-    g_app_info_launch_default_for_uri_async (uri, NULL, NULL, NULL, NULL);
+    g_app_info_launch_default_for_uri_async (uri, NULL, NULL,
+                                             on_open_folder_finished,
+                                             g_object_ref (self));
 }
 
 static void
