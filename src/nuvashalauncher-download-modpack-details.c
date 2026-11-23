@@ -125,10 +125,25 @@ project_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_free (load);
 }
 
+typedef struct {
+  NuvashaLauncherModrinthProject *project;
+  NuvashaLauncherModrinthVersion *version;
+} ModpackInstallConfirm;
+
 static void
-start_modpack_install (NuvashaLauncherDownloadModpackDialog *self,
-                       NuvashaLauncherModrinthProject *project,
-                       NuvashaLauncherModrinthVersion *version)
+modpack_install_confirm_free (ModpackInstallConfirm *confirm)
+{
+  if (confirm == NULL)
+    return;
+  g_clear_pointer (&confirm->project, nuvashalauncher_modrinth_project_free);
+  g_clear_pointer (&confirm->version, nuvashalauncher_modrinth_version_free);
+  g_free (confirm);
+}
+
+static void
+do_start_modpack_install (NuvashaLauncherDownloadModpackDialog *self,
+                          NuvashaLauncherModrinthProject *project,
+                          NuvashaLauncherModrinthVersion *version)
 {
   g_clear_pointer (&self->project, nuvashalauncher_modrinth_project_free);
   self->project = nuvashalauncher_modrinth_project_copy (project);
@@ -155,6 +170,78 @@ start_modpack_install (NuvashaLauncherDownloadModpackDialog *self,
       self->closed = TRUE;
       adw_dialog_close (ADW_DIALOG (self));
     }
+}
+
+static void
+on_modpack_install_confirmed (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  NuvashaLauncherDownloadModpackDialog *self =
+    NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
+  ModpackInstallConfirm *confirm =
+    g_object_get_data (G_OBJECT (source), "nuvashalauncher-modpack-confirm");
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
+  if (confirm == NULL)
+    {
+      g_object_unref (self);
+      return;
+    }
+
+  if (g_strcmp0 (response, "install") == 0 && !self->closed)
+    {
+      do_start_modpack_install (self, confirm->project, confirm->version);
+    }
+
+  modpack_install_confirm_free (confirm);
+  g_object_unref (self);
+}
+
+static void
+start_modpack_install (NuvashaLauncherDownloadModpackDialog *self,
+                       NuvashaLauncherModrinthProject *project,
+                       NuvashaLauncherModrinthVersion *version)
+{
+  if (self == NULL || self->closed || project == NULL)
+    return;
+
+  const char *title = (project->title != NULL && *project->title != '\0')
+                        ? project->title
+                        : "";
+  g_autofree char *heading =
+    g_strdup_printf (_("%s \"%s\""), _("Install"), title);
+  const char *body = NULL;
+
+  if (version != NULL)
+    {
+      if (version->name != NULL && *version->name != '\0' &&
+          g_strcmp0 (version->name, project->title) != 0)
+        body = version->name;
+      else if (version->version_number != NULL && *version->version_number != '\0')
+        body = version->version_number;
+    }
+
+  AdwAlertDialog *alert =
+    ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body));
+
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
+  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+  adw_alert_dialog_add_response (alert, "install", _("Confirm"));
+  adw_alert_dialog_set_response_appearance (alert, "install",
+                                            ADW_RESPONSE_SUGGESTED);
+  adw_alert_dialog_set_default_response (alert, "cancel");
+  adw_alert_dialog_set_close_response (alert, "cancel");
+
+  ModpackInstallConfirm *confirm = g_new0 (ModpackInstallConfirm, 1);
+  confirm->project = nuvashalauncher_modrinth_project_copy (project);
+  confirm->version = version != NULL
+                       ? nuvashalauncher_modrinth_version_copy (version)
+                       : NULL;
+
+  g_object_set_data (G_OBJECT (alert), "nuvashalauncher-modpack-confirm", confirm);
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
+                           on_modpack_install_confirmed, g_object_ref (self));
 }
 
 typedef struct {
