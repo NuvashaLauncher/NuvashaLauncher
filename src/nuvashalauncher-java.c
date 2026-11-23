@@ -147,11 +147,18 @@ nuvashalauncher_java_best_compatible (GPtrArray *javas, int required_major)
  * entry matches. */
 static gboolean
 java_matches_real (NuvashaLauncherJava *java,
+                   const char          *raw_path,
                    const char          *path_real)
 {
-  g_autofree char *java_real = real_path (java->executable);
+  if (g_strcmp0 (java->executable, raw_path) == 0 ||
+      g_strcmp0 (java->executable, path_real) == 0)
+    return TRUE;
 
-  return g_strcmp0 (java_real, path_real) == 0;
+  {
+    g_autofree char *java_real = real_path (java->executable);
+
+    return g_strcmp0 (java_real, path_real) == 0;
+  }
 }
 
 const NuvashaLauncherJava *
@@ -169,7 +176,7 @@ nuvashalauncher_java_select (GPtrArray  *javas,
         {
           NuvashaLauncherJava *java = g_ptr_array_index (javas, i);
 
-          if (java_matches_real (java, path_real))
+          if (java_matches_real (java, instance_java_path, path_real))
             {
                /* An explicit path is preferred, but it must still satisfy
                 * the Java version named by Minecraft. A zero requirement

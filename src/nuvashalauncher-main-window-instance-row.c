@@ -2,12 +2,16 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#define _GNU_SOURCE
+
 #include "nuvashalauncher-main-window-private.h"
 #include "nuvashalauncher-instance-page.h"
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-ui-feedback.h"
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib/gstdio.h>
+#include <sys/stat.h>
 
 #define INSTANCE_ROW_ICON_PIXEL_SIZE 48
 
@@ -167,42 +171,117 @@ get_fallback_pack_texture (void)
   return texture;
 }
 
+typedef struct {
+  GdkTexture *texture;
+  gint64 mtime_sec;
+  gint64 mtime_nsec;
+  gint64 size;
+} CachedInstanceIcon;
+
+static void
+cached_instance_icon_free (CachedInstanceIcon *entry)
+{
+  if (entry == NULL)
+    return;
+
+  g_clear_object (&entry->texture);
+  g_free (entry);
+}
+
+static GHashTable *
+instance_icon_cache (void)
+{
+  GApplication *app = g_application_get_default ();
+  GHashTable *cache = NULL;
+
+  if (app == NULL)
+    return NULL;
+
+  cache = g_object_get_data (G_OBJECT (app), "nuvashalauncher-instance-icon-cache");
+  if (cache == NULL)
+    {
+      cache = g_hash_table_new_full (
+        g_str_hash, g_str_equal, g_free,
+        (GDestroyNotify) cached_instance_icon_free);
+      g_object_set_data_full (G_OBJECT (app), "nuvashalauncher-instance-icon-cache",
+                              cache, (GDestroyNotify) g_hash_table_unref);
+    }
+
+  return cache;
+}
+
 static void
 row_set_icon (GtkImage *image, NuvashaLauncherInstance *instance)
 {
   g_autofree char *path = NULL;
   g_autoptr (GdkTexture) texture = NULL;
+  GStatBuf st;
+  gboolean have_stat = FALSE;
 
   g_object_get (instance, "icon", &path, NULL);
 
-  if (path == NULL || !g_file_test (path, G_FILE_TEST_IS_REGULAR))
+  if (path == NULL || g_stat (path, &st) != 0 || !S_ISREG (st.st_mode))
     {
       g_free (path);
       path = nuvashalauncher_instance_default_icon_path ();
-      if (path != NULL && !g_file_test (path, G_FILE_TEST_IS_REGULAR))
+      if (path != NULL && g_stat (path, &st) == 0 && S_ISREG (st.st_mode))
+        have_stat = TRUE;
+      else
         g_clear_pointer (&path, g_free);
     }
-
-  if (path != NULL)
+  else
     {
-      g_autoptr (GdkPixbuf) pixbuf = gdk_pixbuf_new_from_file_at_scale (
-        path, INSTANCE_ROW_ICON_PIXEL_SIZE, INSTANCE_ROW_ICON_PIXEL_SIZE,
-        TRUE, NULL);
+      have_stat = TRUE;
+    }
 
-      if (pixbuf != NULL)
-        {
-          G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-          texture = gdk_texture_new_for_pixbuf (pixbuf);
-          G_GNUC_END_IGNORE_DEPRECATIONS
-        }
-      else
-        texture = gdk_texture_new_from_filename (path, NULL);
+  if (path != NULL && have_stat)
+    {
+      GHashTable *cache = instance_icon_cache ();
 
-      if (texture != NULL)
+      if (cache != NULL)
         {
-          gtk_image_set_from_paintable (image, GDK_PAINTABLE (texture));
-          return;
+          CachedInstanceIcon *cached = g_hash_table_lookup (cache, path);
+
+          if (cached != NULL &&
+              cached->mtime_sec == (gint64) st.st_mtime &&
+              cached->mtime_nsec == (gint64) st.st_mtim.tv_nsec &&
+              cached->size == (gint64) st.st_size &&
+              cached->texture != NULL)
+            {
+              gtk_image_set_from_paintable (image, GDK_PAINTABLE (cached->texture));
+              return;
+            }
         }
+
+      {
+        g_autoptr (GdkPixbuf) pixbuf = gdk_pixbuf_new_from_file_at_scale (
+          path, INSTANCE_ROW_ICON_PIXEL_SIZE, INSTANCE_ROW_ICON_PIXEL_SIZE,
+          TRUE, NULL);
+
+        if (pixbuf != NULL)
+          {
+            G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+            texture = gdk_texture_new_for_pixbuf (pixbuf);
+            G_GNUC_END_IGNORE_DEPRECATIONS
+          }
+        else
+          texture = gdk_texture_new_from_filename (path, NULL);
+
+        if (texture != NULL)
+          {
+            if (cache != NULL)
+              {
+                CachedInstanceIcon *entry = g_new0 (CachedInstanceIcon, 1);
+                entry->texture = g_object_ref (texture);
+                entry->mtime_sec = (gint64) st.st_mtime;
+                entry->mtime_nsec = (gint64) st.st_mtim.tv_nsec;
+                entry->size = (gint64) st.st_size;
+                g_hash_table_replace (cache, g_strdup (path), entry);
+              }
+            gtk_image_set_from_paintable (image, GDK_PAINTABLE (texture));
+            return;
+          }
+      }
     }
 
   texture = get_fallback_pack_texture ();

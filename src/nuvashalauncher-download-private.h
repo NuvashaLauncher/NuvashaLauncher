@@ -51,6 +51,7 @@ typedef struct _DownloadRequest
   NuvashaLauncherSettingsCacheExpiration cache_expiration;
   JsonParser *pending_parser;
   char *pending_cache_data;
+  gsize pending_cache_len;
 
   /* Start the cache check and transfer after acquiring a scheduler slot. */
   void (*begin) (struct _DownloadRequest *request);
@@ -97,6 +98,12 @@ GError *nuvashalauncher_download_cancelled_error (void);
 void nuvashalauncher_download_request_fail (DownloadRequest *request, GError *error);
 void nuvashalauncher_download_request_succeed_json (DownloadRequest *request,
                                         JsonParser *parser);
+char *nuvashalauncher_download_cache_encode (const char *response,
+                                             const char *etag,
+                                             gsize *out_length);
+void nuvashalauncher_download_cache_write_encoded (DownloadRequest *request,
+                                                   char *encoded_data,
+                                                   gsize encoded_length);
 void nuvashalauncher_download_cache_write (DownloadRequest *request, const char *response);
 
 void nuvashalauncher_download_destroy_source (DownloadRequest *request, guint *source_id);

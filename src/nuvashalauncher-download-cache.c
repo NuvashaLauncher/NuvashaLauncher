@@ -176,7 +176,7 @@ nuvashalauncher_download_cache_write_directory_done (GObject *source,
     }
 
   nuvashalauncher_fs_replace_contents_async (file, request->pending_cache_data,
-                                  strlen (request->pending_cache_data),
+                                  request->pending_cache_len,
                                   NULL, FALSE,
                                   G_FILE_CREATE_REPLACE_DESTINATION,
                                   g_task_get_cancellable (request->task),
@@ -261,39 +261,57 @@ nuvashalauncher_download_cache_write_cache_done (GObject *source, GAsyncResult *
                                nuvashalauncher_download_cache_write_parent_done, file);
 }
 
-void
-nuvashalauncher_download_cache_write (DownloadRequest *request, const char *response)
+char *
+nuvashalauncher_download_cache_encode (const char *response,
+                                     const char *etag,
+                                     gsize *out_length)
 {
   g_autoptr (JsonBuilder) builder = json_builder_new ();
   g_autoptr (JsonGenerator) generator = json_generator_new ();
   g_autoptr (JsonNode) root = NULL;
-  g_autofree char *data = NULL;
-  g_autoptr (GFile) file = g_file_new_for_path (request->cache_path);
-  gsize length = 0;
 
   json_builder_begin_object (builder);
   json_builder_set_member_name (builder, "created");
   json_builder_add_int_value (builder, g_get_real_time () / G_USEC_PER_SEC);
   json_builder_set_member_name (builder, "response");
-  json_builder_add_string_value (builder, response);
-  if (request->response_etag != NULL)
+  json_builder_add_string_value (builder, response != NULL ? response : "");
+  if (etag != NULL)
     {
       json_builder_set_member_name (builder, "etag");
-      json_builder_add_string_value (builder, request->response_etag);
+      json_builder_add_string_value (builder, etag);
     }
   json_builder_end_object (builder);
   root = json_builder_get_root (builder);
   json_generator_set_root (generator, root);
-  data = json_generator_to_data (generator, &length);
+  return json_generator_to_data (generator, out_length);
+}
 
-  /* Try replacing directly first; directories are only created if missing. */
-  request->pending_cache_data = g_steal_pointer (&data);
+void
+nuvashalauncher_download_cache_write_encoded (DownloadRequest *request,
+                                           char *encoded_data,
+                                           gsize encoded_length)
+{
+  g_autoptr (GFile) file = g_file_new_for_path (request->cache_path);
+
+  g_clear_pointer (&request->pending_cache_data, g_free);
+  request->pending_cache_data = encoded_data;
+  request->pending_cache_len = encoded_length;
   g_debug ("writing Modrinth API cache entry (%zu bytes)",
-           strlen (request->pending_cache_data));
+           request->pending_cache_len);
   nuvashalauncher_fs_replace_contents_async (file, request->pending_cache_data,
-                                  strlen (request->pending_cache_data),
+                                  request->pending_cache_len,
                                   NULL, FALSE,
                                   G_FILE_CREATE_REPLACE_DESTINATION,
                                   g_task_get_cancellable (request->task),
                                   nuvashalauncher_download_cache_write_done, request);
+}
+
+void
+nuvashalauncher_download_cache_write (DownloadRequest *request, const char *response)
+{
+  gsize length = 0;
+  char *data = nuvashalauncher_download_cache_encode (
+    response, request->response_etag, &length);
+
+  nuvashalauncher_download_cache_write_encoded (request, data, length);
 }

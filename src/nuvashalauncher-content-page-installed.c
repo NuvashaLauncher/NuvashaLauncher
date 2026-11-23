@@ -383,15 +383,9 @@ local_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
   g_object_set_data (G_OBJECT (load->row), "nuvashalauncher-local-icon-loading", NULL);
 
-  if (file != NULL && load->page->installed.files != NULL)
-    {
-      for (guint i = 0; i < load->page->installed.files->len; i++)
-        if (g_ptr_array_index (load->page->installed.files, i) == file)
-          {
-            file_valid = TRUE;
-            break;
-          }
-    }
+  file_valid = file != NULL && file->path != NULL &&
+               load->page->installed.rows != NULL &&
+               g_hash_table_lookup (load->page->installed.rows, file->path) == load->row;
 
   if (path != NULL && file_valid)
     {
@@ -414,7 +408,7 @@ local_icon_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 }
 
 static void
-load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row)
+load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row, int scroller_height)
 {
   NuvashaLauncherContentFile *file = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file");
   GtkWidget *icon =
@@ -422,7 +416,8 @@ load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row)
   GtkWidget *scroller = GTK_WIDGET (self->installed.scroller);
   graphene_rect_t bounds;
 
-  if (file == NULL || icon == NULL ||
+  if (file == NULL || icon == NULL || scroller == NULL ||
+      !gtk_widget_get_visible (row) ||
       (file->local_icon_path == NULL && file->local_icon_member == NULL &&
        (file->icon_url == NULL || *file->icon_url == '\0')) ||
       g_object_get_data (G_OBJECT (row), "nuvashalauncher-icon-loaded") != NULL ||
@@ -430,7 +425,7 @@ load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row)
     return;
 
   if (bounds.origin.y + bounds.size.height < 0 ||
-      bounds.origin.y > gtk_widget_get_height (scroller))
+      bounds.origin.y > scroller_height)
     return;
 
   if (file->local_icon_path != NULL &&
@@ -467,8 +462,15 @@ load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row)
 void
 load_visible_icons (NuvashaLauncherContentPage *self)
 {
+  int scroller_height = self->installed.scroller != NULL
+                          ? gtk_widget_get_height (GTK_WIDGET (self->installed.scroller))
+                          : 0;
+
+  if (scroller_height <= 0)
+    return;
+
   for (GList *item = self->installed.rows_list; item != NULL; item = item->next)
-    load_row_icon (self, item->data);
+    load_row_icon (self, item->data, scroller_height);
 }
 
 void

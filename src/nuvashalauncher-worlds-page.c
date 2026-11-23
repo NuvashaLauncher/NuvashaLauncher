@@ -2,6 +2,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#define _GNU_SOURCE
+
 #include "nuvashalauncher-worlds-page.h"
 #include "nuvashalauncher-dialogs.h"
 #include "nuvashalauncher-fs.h"
@@ -12,8 +14,14 @@
 
 #include <archive.h>
 #include <archive_entry.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <glib/gstdio.h>
+#include <linux/fs.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 typedef struct {
   char *folder_name;
@@ -180,6 +188,72 @@ rename_world_data_free (RenameWorldData *d)
   g_free (d);
 }
 
+typedef struct {
+  char *level_dat_path;
+  char *new_name;
+} RenameWorldOp;
+
+static void
+rename_world_op_free (RenameWorldOp *op)
+{
+  if (op == NULL)
+    return;
+  g_free (op->level_dat_path);
+  g_free (op->new_name);
+  g_free (op);
+}
+
+static void
+rename_world_thread (GTask        *task,
+                     gpointer      source_object G_GNUC_UNUSED,
+                     gpointer      task_data,
+                     GCancellable *cancellable G_GNUC_UNUSED)
+{
+  RenameWorldOp *op = task_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaLauncherNbtTag) root =
+    nuvashalauncher_nbt_parse_file (op->level_dat_path, &error);
+  NuvashaLauncherNbtTag *data =
+    root != NULL ? nuvashalauncher_nbt_compound_get (root, "Data") : NULL;
+
+  if (data == NULL)
+    {
+      if (error == NULL)
+        g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                             "World level.dat is missing Data tag");
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  nuvashalauncher_nbt_compound_set (
+    data, nuvashalauncher_nbt_new_string ("LevelName", op->new_name));
+  if (!nuvashalauncher_nbt_write_file (root, op->level_dat_path, TRUE, &error))
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+on_rename_world_done (GObject *source, GAsyncResult *result,
+                      gpointer user_data G_GNUC_UNUSED)
+{
+  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (source);
+  g_autoptr (GError) error = NULL;
+
+  if (!g_task_propagate_boolean (G_TASK (result), &error))
+    {
+      if (error != NULL)
+        nuvashalauncher_ui_error_toast (GTK_WIDGET (self),
+                                        GTK_WIDGET (self->toasts), error);
+      return;
+    }
+
+  nuvashalauncher_worlds_page_reload (self);
+}
+
 static void
 on_rename_world_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
                           const char *response,
@@ -195,26 +269,14 @@ on_rename_world_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
   const char *new_name = gtk_editable_get_text (GTK_EDITABLE (d->entry));
   if (new_name != NULL && *new_name != '\0')
     {
-      g_autoptr (GError) error = NULL;
-      g_autoptr (NuvashaLauncherNbtTag) root =
-        nuvashalauncher_nbt_parse_file (d->level_dat_path, &error);
-      NuvashaLauncherNbtTag *data =
-        root != NULL ? nuvashalauncher_nbt_compound_get (root, "Data") : NULL;
-      if (data != NULL)
-        {
-          nuvashalauncher_nbt_compound_set (
-            data, nuvashalauncher_nbt_new_string ("LevelName", new_name));
-          if (!nuvashalauncher_nbt_write_file (root, d->level_dat_path, TRUE, &error))
-            nuvashalauncher_ui_error_toast (GTK_WIDGET (d->page),
-                                            GTK_WIDGET (d->page->toasts), error);
-          else
-            nuvashalauncher_worlds_page_reload (d->page);
-        }
-      else if (error != NULL)
-        {
-          nuvashalauncher_ui_error_toast (GTK_WIDGET (d->page),
-                                          GTK_WIDGET (d->page->toasts), error);
-        }
+      RenameWorldOp *op = g_new0 (RenameWorldOp, 1);
+      g_autoptr (GTask) task = NULL;
+
+      op->level_dat_path = g_steal_pointer (&d->level_dat_path);
+      op->new_name = g_strdup (new_name);
+      task = g_task_new (d->page, NULL, on_rename_world_done, NULL);
+      g_task_set_task_data (task, op, (GDestroyNotify) rename_world_op_free);
+      g_task_run_in_thread (task, rename_world_thread);
     }
   rename_world_data_free (d);
 }
@@ -274,18 +336,40 @@ copy_dir_recursive (const char *src, const char *dst, GError **error)
         continue;
       g_autofree char *s = g_build_filename (src, name, NULL);
       g_autofree char *d = g_build_filename (dst, name, NULL);
+      GStatBuf st;
 
-      if (g_file_test (s, G_FILE_TEST_IS_DIR))
+      if (g_lstat (s, &st) != 0 || S_ISLNK (st.st_mode))
+        continue;
+
+      if (S_ISDIR (st.st_mode))
         {
           if (!copy_dir_recursive (s, d, error))
             return FALSE;
         }
-      else
+      else if (S_ISREG (st.st_mode))
         {
-          g_autoptr (GFile) gf_src = g_file_new_for_path (s);
-          g_autoptr (GFile) gf_dst = g_file_new_for_path (d);
-          if (!g_file_copy (gf_src, gf_dst, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, error))
-            return FALSE;
+          gboolean cloned = FALSE;
+          int src_fd = open (s, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+          if (src_fd >= 0)
+            {
+              int dst_fd = open (d, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
+              if (dst_fd >= 0)
+                {
+                  if (ioctl (dst_fd, FICLONE, src_fd) == 0)
+                    cloned = TRUE;
+                  if (close (dst_fd) != 0 && cloned)
+                    cloned = FALSE;
+                }
+              close (src_fd);
+            }
+          if (!cloned)
+            {
+              g_unlink (d);
+              g_autoptr (GFile) gf_src = g_file_new_for_path (s);
+              g_autoptr (GFile) gf_dst = g_file_new_for_path (d);
+              if (!g_file_copy (gf_src, gf_dst, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, error))
+                return FALSE;
+            }
         }
     }
   return TRUE;
@@ -418,15 +502,40 @@ typedef struct {
 } DeleteWorldData;
 
 static void
+delete_world_thread (GTask        *task,
+                     gpointer      source_object G_GNUC_UNUSED,
+                     gpointer      task_data,
+                     GCancellable *cancellable G_GNUC_UNUSED)
+{
+  const char *world_path = task_data;
+
+  nuvashalauncher_fs_remove_tree (world_path);
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+on_delete_world_done (GObject *source, GAsyncResult *result,
+                      gpointer user_data G_GNUC_UNUSED)
+{
+  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (source);
+
+  g_task_propagate_boolean (G_TASK (result), NULL);
+  nuvashalauncher_worlds_page_reload (self);
+}
+
+static void
 on_delete_world_response (AdwAlertDialog *dialog G_GNUC_UNUSED,
                           const char *response,
                           gpointer user_data)
 {
   DeleteWorldData *d = user_data;
-  if (g_strcmp0 (response, "delete") == 0)
+  if (g_strcmp0 (response, "delete") == 0 && d->world_path != NULL)
     {
-      nuvashalauncher_fs_remove_tree (d->world_path);
-      nuvashalauncher_worlds_page_reload (d->page);
+      g_autoptr (GTask) task =
+        g_task_new (d->page, NULL, on_delete_world_done, NULL);
+
+      g_task_set_task_data (task, g_steal_pointer (&d->world_path), g_free);
+      g_task_run_in_thread (task, delete_world_thread);
     }
   g_free (d->world_path);
   g_free (d);
@@ -704,6 +813,65 @@ nuvashalauncher_worlds_page_reload (NuvashaLauncherWorldsPage *self)
 }
 
 static gboolean
+write_archive_entry_to_path (struct archive *a, const char *target, GError **error)
+{
+  int fd = open (target, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW, 0644);
+  if (fd < 0)
+    {
+      int errsv = errno;
+      g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errsv),
+                   "Could not create world file \"%s\": %s",
+                   target, g_strerror (errsv));
+      return FALSE;
+    }
+
+  guint8 chunk[65536];
+  la_ssize_t n = 0;
+  while ((n = archive_read_data (a, chunk, sizeof chunk)) > 0)
+    {
+      gsize off = 0;
+      while (off < (gsize) n)
+        {
+          ssize_t w = write (fd, chunk + off, (gsize) n - off);
+          if (w < 0)
+            {
+              if (errno == EINTR)
+                continue;
+              int errsv = errno;
+              close (fd);
+              g_unlink (target);
+              g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errsv),
+                           "Could not write world file \"%s\": %s",
+                           target, g_strerror (errsv));
+              return FALSE;
+            }
+          off += (gsize) w;
+        }
+    }
+
+  if (n < 0)
+    {
+      close (fd);
+      g_unlink (target);
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                           archive_error_string (a));
+      return FALSE;
+    }
+
+  if (close (fd) != 0)
+    {
+      int errsv = errno;
+      g_unlink (target);
+      g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errsv),
+                   "Could not finalize world file \"%s\": %s",
+                   target, g_strerror (errsv));
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
+static gboolean
 extract_world_zip (const char *zip_path, const char *saves_dir, GError **error)
 {
   struct archive *a = archive_read_new ();
@@ -803,20 +971,7 @@ extract_world_zip (const char *zip_path, const char *saves_dir, GError **error)
       g_autofree char *parent = g_path_get_dirname (target);
       g_mkdir_with_parents (parent, 0755);
 
-      g_autoptr (GByteArray) buf = g_byte_array_new ();
-      guint8 chunk[8192];
-      la_ssize_t n = 0;
-      while ((n = archive_read_data (a, chunk, sizeof chunk)) > 0)
-        g_byte_array_append (buf, chunk, (guint) n);
-      if (n < 0)
-        {
-          g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
-                               archive_error_string (a));
-          ok = FALSE;
-          break;
-        }
-      if (!g_file_set_contents (target, (const char *) buf->data,
-                                (gssize) buf->len, error))
+      if (!write_archive_entry_to_path (a, target, error))
         {
           ok = FALSE;
           break;

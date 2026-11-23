@@ -2,11 +2,20 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#define _GNU_SOURCE
+
 #include "nuvashalauncher-minecraft-resolve-private.h"
 #include "nuvashalauncher-download.h"
 #include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-fs.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <glib/gstdio.h>
+#include <linux/fs.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define ASSET_BUCKET_LENGTH 2
 #define ASSET_RESOURCE_PREFIX "minecraft/"
@@ -15,12 +24,12 @@
 /* Asset-index planning, object downloads, and virtual asset copies. */
 
 static char *
-asset_object_path (ResolveRequest *request, const char *hash, char **bucket)
+asset_object_path (const char *objects_dir, const char *hash, char **bucket)
 {
   g_autofree char *name = NULL;
   g_autofree char *directory = NULL;
 
-  if (hash == NULL || strlen (hash) != ASSET_SHA1_LENGTH)
+  if (objects_dir == NULL || hash == NULL || strlen (hash) != ASSET_SHA1_LENGTH)
     return NULL;
 
   for (const char *p = hash; *p != '\0'; p++)
@@ -28,7 +37,7 @@ asset_object_path (ResolveRequest *request, const char *hash, char **bucket)
       return NULL;
 
   name = g_strndup (hash, ASSET_BUCKET_LENGTH);
-  directory = g_build_filename (request->objects_dir, name, NULL);
+  directory = g_build_filename (objects_dir, name, NULL);
 
   if (bucket != NULL)
     *bucket = g_strdup (name);
@@ -36,22 +45,129 @@ asset_object_path (ResolveRequest *request, const char *hash, char **bucket)
   return g_build_filename (directory, hash, NULL);
 }
 
-/* One object was copied into the virtual directory. */
+typedef struct {
+  char *source;
+  char *target;
+} VirtualCopyItem;
+
 static void
-asset_copied (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-              gpointer user_data)
+virtual_copy_item_free (VirtualCopyItem *item)
 {
-  ResolveRequest *request = user_data;
+  if (item == NULL)
+    return;
+
+  g_free (item->source);
+  g_free (item->target);
+  g_free (item);
+}
+
+typedef struct {
+  ResolveRequest *request;
+  GPtrArray *items;
+  guint copied;
+} VirtualCopiesOp;
+
+static void
+virtual_copies_op_free (VirtualCopiesOp *op)
+{
+  if (op == NULL)
+    return;
+
+  g_clear_pointer (&op->items, g_ptr_array_unref);
+  g_free (op);
+}
+
+static gboolean
+copy_file_with_ficlone (const char   *source,
+                        const char   *target,
+                        GCancellable *cancellable,
+                        GError      **error)
+{
+  int src_fd = open (source, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+
+  if (src_fd >= 0)
+    {
+      int dst_fd = open (target, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0644);
+      if (dst_fd >= 0)
+        {
+          gboolean cloned = ioctl (dst_fd, FICLONE, src_fd) == 0;
+          if (close (dst_fd) != 0)
+            cloned = FALSE;
+          close (src_fd);
+          if (cloned)
+            return TRUE;
+          g_unlink (target);
+        }
+      else
+        {
+          close (src_fd);
+        }
+    }
+
+  {
+    g_autoptr (GFile) source_file = g_file_new_for_path (source);
+    g_autoptr (GFile) target_file = g_file_new_for_path (target);
+
+    return g_file_copy (source_file, target_file, G_FILE_COPY_OVERWRITE,
+                        cancellable, NULL, NULL, error);
+  }
+}
+
+static void
+virtual_copies_thread (GTask        *task,
+                       gpointer      source_object G_GNUC_UNUSED,
+                       gpointer      task_data,
+                       GCancellable *cancellable)
+{
+  VirtualCopiesOp *op = task_data;
   g_autoptr (GError) error = NULL;
 
-  if (!nuvashalauncher_fs_copy_finish (G_FILE (source), result, &error))
+  for (guint i = 0; i < op->items->len; i++)
+    {
+      const VirtualCopyItem *item = g_ptr_array_index (op->items, i);
+      GStatBuf st;
+
+      if (g_task_return_error_if_cancelled (task))
+        return;
+
+      if (g_lstat (item->target, &st) == 0)
+        continue;
+
+      if (!nuvashalauncher_resolve_ensure_parent_directory (item->target, &error) ||
+          !copy_file_with_ficlone (item->source, item->target, cancellable, &error))
+        {
+          g_task_return_error (task, g_steal_pointer (&error));
+          return;
+        }
+
+      op->copied++;
+    }
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+virtual_copies_ready (GObject      *source G_GNUC_UNUSED,
+                      GAsyncResult *result,
+                      gpointer      user_data)
+{
+  VirtualCopiesOp *op = user_data;
+  ResolveRequest *request = op->request;
+  g_autoptr (GError) error = NULL;
+
+  if (!g_task_propagate_boolean (G_TASK (result), &error))
     {
       operation_finished (request, resolve_finish, g_steal_pointer (&error));
       return;
     }
 
-  request->done++;
-  report (request);
+  if (op->copied > 0)
+    {
+      request->total += op->copied;
+      request->done += op->copied;
+      report (request);
+    }
+
   operation_finished (request, resolve_finish, NULL);
 }
 
@@ -61,7 +177,7 @@ asset_copied (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 void
 resolve_copies (ResolveRequest *request)
 {
-  guint started = 0;
+  VirtualCopiesOp *op = NULL;
   GHashTableIter iter;
   gpointer key, value;
 
@@ -71,53 +187,47 @@ resolve_copies (ResolveRequest *request)
       return;
     }
 
+  op = g_new0 (VirtualCopiesOp, 1);
+  op->request = request;
+  op->items = g_ptr_array_new_with_free_func ((GDestroyNotify) virtual_copy_item_free);
+
   g_hash_table_iter_init (&iter, request->asset_paths);
   while (g_hash_table_iter_next (&iter, &key, &value))
     {
       const char *path = key;
       const char *hash = value;
       g_autofree char *source = NULL;
-      g_autofree char *target = NULL;
-      g_autoptr (GFile) source_file = NULL;
-      g_autoptr (GFile) target_file = NULL;
-      g_autoptr (GError) error = NULL;
+      VirtualCopyItem *item = NULL;
 
       if (path == NULL || hash == NULL)
         continue;
 
-      source = asset_object_path (request, hash, NULL);
-
+      source = asset_object_path (request->objects_dir, hash, NULL);
       if (source == NULL)
         continue;
 
-      target = g_build_filename (request->virtual_dir,
-                                 request->asset_index_name, path, NULL);
-      target_file = g_file_new_for_path (target);
-
-      if (g_file_query_exists (target_file, NULL))
-        continue;
-
-      if (!nuvashalauncher_resolve_ensure_parent_directory (target, &error))
-        {
-          request_fail_and_wait (request, g_steal_pointer (&error));
-          return;
-        }
-
-      source_file = g_file_new_for_path (source);
-
-      operation_started (request);
-      request->total++;
-      started++;
-
-      nuvashalauncher_fs_copy_async (source_file, target_file, G_FILE_COPY_OVERWRITE,
-                         G_PRIORITY_DEFAULT, request->cancellable, NULL, NULL,
-                         asset_copied, request);
+      item = g_new0 (VirtualCopyItem, 1);
+      item->source = g_steal_pointer (&source);
+      item->target = g_build_filename (request->virtual_dir,
+                                       request->asset_index_name, path, NULL);
+      g_ptr_array_add (op->items, item);
     }
 
-  report (request);
+  if (op->items->len == 0)
+    {
+      virtual_copies_op_free (op);
+      report (request);
+      resolve_finish (request);
+      return;
+    }
 
-  if (started == 0)
-    resolve_finish (request);
+  operation_started (request);
+  {
+    GTask *worker = g_task_new (NULL, request->cancellable, virtual_copies_ready, op);
+    g_task_set_task_data (worker, op, (GDestroyNotify) virtual_copies_op_free);
+    g_task_run_in_thread (worker, virtual_copies_thread);
+    g_object_unref (worker);
+  }
 }
 
 /* Every object of the index is on the disk now. */
@@ -162,13 +272,57 @@ typedef struct
 {
   ResolveRequest *request;
   char *path;
+  char *objects_dir;
+  GHashTable *verified_hashes;
+  GHashTable *ensured_buckets;
 } AssetIndexLoad;
 
 static void
 asset_index_load_free (AssetIndexLoad *load)
 {
+  if (load == NULL)
+    return;
+
   g_free (load->path);
+  g_free (load->objects_dir);
+  g_clear_pointer (&load->verified_hashes, g_hash_table_unref);
+  g_clear_pointer (&load->ensured_buckets, g_hash_table_unref);
   g_free (load);
+}
+
+static gboolean
+file_matches_sha1 (const char *path, const char *expected_hash, GChecksum *checksum)
+{
+  int fd = open (path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+  struct stat st;
+  guint8 buf[65536];
+
+  if (fd < 0)
+    return FALSE;
+
+  if (fstat (fd, &st) != 0 || !S_ISREG (st.st_mode))
+    {
+      close (fd);
+      return FALSE;
+    }
+
+  g_checksum_reset (checksum);
+  for (;;)
+    {
+      ssize_t n = read (fd, buf, sizeof buf);
+      if (n > 0)
+        g_checksum_update (checksum, buf, (gssize) n);
+      else if (n == 0)
+        break;
+      else if (errno != EINTR)
+        {
+          close (fd);
+          return FALSE;
+        }
+    }
+
+  close (fd);
+  return g_ascii_strcasecmp (g_checksum_get_string (checksum), expected_hash) == 0;
 }
 
 static void
@@ -199,6 +353,71 @@ asset_index_parse_thread (GTask *task,
                                              : "it is not a JSON object");
       return;
     }
+
+  {
+    JsonObject *root = json_node_get_object (json_parser_get_root (parser));
+    JsonNode *objects_node = json_object_has_member (root, "objects")
+                               ? json_object_get_member (root, "objects")
+                               : NULL;
+
+    if (objects_node != NULL && JSON_NODE_HOLDS_OBJECT (objects_node) &&
+        load->objects_dir != NULL)
+      {
+        JsonObject *objects = json_node_get_object (objects_node);
+        JsonObjectIter iter;
+        const char *name = NULL;
+        JsonNode *node = NULL;
+        g_autoptr (GHashTable) seen =
+          g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+        g_autoptr (GChecksum) checksum = g_checksum_new (G_CHECKSUM_SHA1);
+
+        load->verified_hashes =
+          g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+        load->ensured_buckets =
+          g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+        json_object_iter_init (&iter, objects);
+        while (json_object_iter_next (&iter, &name, &node))
+          {
+            const char *hash = name;
+            g_autofree char *bucket = NULL;
+            g_autofree char *destination = NULL;
+
+            if (g_task_return_error_if_cancelled (task))
+              return;
+
+            if (!JSON_NODE_HOLDS_OBJECT (node))
+              continue;
+
+            {
+              JsonObject *object = json_node_get_object (node);
+              if (json_object_has_member (object, "hash"))
+                {
+                  JsonNode *hash_node = json_object_get_member (object, "hash");
+                  if (!JSON_NODE_HOLDS_VALUE (hash_node) ||
+                      json_node_get_value_type (hash_node) != G_TYPE_STRING)
+                    continue;
+                  hash = json_node_get_string (hash_node);
+                }
+            }
+
+            if (hash == NULL || g_hash_table_contains (seen, hash))
+              continue;
+            g_hash_table_add (seen, g_strdup (hash));
+
+            destination = asset_object_path (load->objects_dir, hash, &bucket);
+            if (destination == NULL)
+              continue;
+
+            if (file_matches_sha1 (destination, hash, checksum))
+              g_hash_table_add (load->verified_hashes, g_strdup (hash));
+            else if (bucket != NULL &&
+                     !g_hash_table_contains (load->ensured_buckets, bucket) &&
+                     nuvashalauncher_resolve_ensure_parent_directory (destination, NULL))
+              g_hash_table_add (load->ensured_buckets, g_steal_pointer (&bucket));
+          }
+      }
+  }
 
   g_task_return_pointer (task, g_steal_pointer (&parser), g_object_unref);
 }
@@ -353,7 +572,7 @@ asset_index_parsed_ready (GObject *source G_GNUC_UNUSED,
           g_hash_table_add (seen_hashes, g_strdup (hash));
           g_ptr_array_add (request->asset_hashes, g_strdup (hash));
 
-          destination = asset_object_path (request, hash, &bucket);
+          destination = asset_object_path (request->objects_dir, hash, &bucket);
 
           if (destination == NULL)
             {
@@ -368,7 +587,16 @@ asset_index_parsed_ready (GObject *source G_GNUC_UNUSED,
               return;
             }
 
-          if (!g_hash_table_contains (ensured_buckets, bucket))
+          if (load->verified_hashes != NULL &&
+              g_hash_table_contains (load->verified_hashes, hash))
+            {
+              request->done++;
+              continue;
+            }
+
+          if ((load->ensured_buckets == NULL ||
+               !g_hash_table_contains (load->ensured_buckets, bucket)) &&
+              !g_hash_table_contains (ensured_buckets, bucket))
             {
               if (!nuvashalauncher_resolve_ensure_parent_directory (destination, &local))
                 {
@@ -399,6 +627,7 @@ asset_index_parsed_ready (GObject *source G_GNUC_UNUSED,
         }
     }
 
+  report (request);
   asset_index_load_free (load);
   operation_finished (request, assets_downloaded, NULL);
 }
@@ -417,6 +646,7 @@ resolve_objects (ResolveRequest *request)
   AssetIndexLoad *load = g_new0 (AssetIndexLoad, 1);
   load->request = request;
   load->path = g_build_filename (request->indexes_dir, request->asset_index_id, NULL);
+  load->objects_dir = g_strdup (request->objects_dir);
 
   operation_started (request);
   GTask *worker = g_task_new (NULL, request->cancellable, asset_index_parsed_ready, load);
