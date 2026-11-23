@@ -132,6 +132,8 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
       }
     }
 
+  GList *new_rows = NULL;
+
   for (guint i = 0; i < results->projects->len; i++)
     {
       NuvashaLauncherModrinthProject *project = g_ptr_array_index (results->projects, i);
@@ -145,11 +147,7 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
       if (stored == NULL)
         continue;
 
-      {
-        g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-          "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-result-row.ui");
-        row = GTK_WIDGET (g_object_ref (gtk_builder_get_object (builder, "row")));
-      }
+      row = GTK_WIDGET (g_object_ref_sink (adw_action_row_new ()));
       icon = nuvashalauncher_icon_widget_new (nuvashalauncher_content_type_icon (self->type));
 
       /* Show the icon, title, and short description. Details contain the
@@ -188,9 +186,13 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
 
       adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->browse.results_group),
                                  row);
-      self->browse.result_rows = g_list_append (self->browse.result_rows, row);
+      new_rows = g_list_prepend (new_rows, row);
       shown++;
     }
+
+  if (new_rows != NULL)
+    self->browse.result_rows =
+      g_list_concat (self->browse.result_rows, g_list_reverse (new_rows));
 
   /* The offset is where the next page starts, which is the end of what
      is listed now. */

@@ -521,10 +521,11 @@ server_action_button (const char *icon_name, const char *tooltip, guint index,
 static GtkWidget *
 build_server_row (NuvashaLauncherServersPage *self, ServerEntry *s, guint index)
 {
-  g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-file-row.ui");
-  AdwActionRow *row = ADW_ACTION_ROW (g_object_ref (
-    gtk_builder_get_object (builder, "row")));
+  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
+  adw_action_row_set_subtitle_lines (row, 2);
+  adw_action_row_set_subtitle_selectable (row, FALSE);
+  gtk_widget_add_css_class (GTK_WIDGET (row), "nuvashalauncher-content-file-row");
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
                                  s->name != NULL && *s->name != '\0' ? s->name : s->ip);
 

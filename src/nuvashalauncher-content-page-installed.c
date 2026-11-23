@@ -352,10 +352,8 @@ file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
   g_return_val_if_fail (NUVASHALAUNCHER_IS_CONTENT_PAGE (self), NULL);
   g_return_val_if_fail (file != NULL, NULL);
 
-  g_autoptr (GtkBuilder) builder = gtk_builder_new_from_resource (
-    "/com/github/NuvashaLauncher/NuvashaLauncher/ui/nuvashalauncher-content-file-row.ui");
-  AdwActionRow *row = ADW_ACTION_ROW (g_object_ref (
-    gtk_builder_get_object (builder, "row")));
+  AdwActionRow *row = ADW_ACTION_ROW (g_object_ref_sink (adw_action_row_new ()));
+  gtk_widget_add_css_class (GTK_WIDGET (row), "nuvashalauncher-content-file-row");
   GtkWidget *icon = nuvashalauncher_icon_widget_new (nuvashalauncher_content_type_icon (self->type));
   GtkCheckButton *check = GTK_CHECK_BUTTON (gtk_check_button_new ());
 

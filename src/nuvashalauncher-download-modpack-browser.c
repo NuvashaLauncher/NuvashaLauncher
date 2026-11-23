@@ -409,6 +409,31 @@ results_arrived (NuvashaLauncherDownloadModpackDialog *self, NuvashaLauncherModr
 
   self->offset += shown;
 
+  if (self->rows != NULL && self->rows->len > 400)
+    {
+      GtkWidget *scroller =
+        gtk_widget_get_ancestor (GTK_WIDGET (self->results_group),
+                                 GTK_TYPE_SCROLLED_WINDOW);
+      GtkAdjustment *adjustment = scroller != NULL
+        ? gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (scroller))
+        : NULL;
+      gdouble at = adjustment != NULL ? gtk_adjustment_get_value (adjustment) : 0;
+      gdouble removed = 0;
+
+      for (guint i = 0; i < 200; i++)
+        {
+          GtkWidget *row = g_ptr_array_index (self->rows, i);
+          gint height = gtk_widget_get_height (row);
+
+          removed += height > 0 ? height : 48;
+          adw_preferences_group_remove (
+            ADW_PREFERENCES_GROUP (self->results_group), row);
+        }
+      g_ptr_array_remove_range (self->rows, 0, 200);
+      if (adjustment != NULL)
+        gtk_adjustment_set_value (adjustment, MAX (0, at - removed));
+    }
+
   /* One state at a time: the list, the empty words, or the error. */
   if (self->results_group != NULL)
     {

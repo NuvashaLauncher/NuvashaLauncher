@@ -165,9 +165,9 @@ entry_from_object (JsonObject *object, GError **error)
 }
 
 static NuvashaLauncherContentIndexEntry *
-entry_from_json (const char *contents, gsize length, GError **error)
+entry_from_json (JsonParser *parser, const char *contents, gsize length,
+                 GError **error)
 {
-  g_autoptr (JsonParser) parser = json_parser_new ();
   g_autoptr (GError) parse_error = NULL;
   JsonNode *root = NULL;
 
@@ -198,11 +198,14 @@ load_entries_sync (const char *instance_directory, NuvashaLauncherContentType ty
 {
   g_autofree char *directory = index_directory (instance_directory, type);
   GDir *dir = g_dir_open (directory, 0, NULL);
+  g_autoptr (JsonParser) parser = NULL;
   GPtrArray *entries = g_ptr_array_new_with_free_func (
     (GDestroyNotify) nuvashalauncher_content_index_entry_free);
 
   if (dir == NULL)
     return entries;
+
+  parser = json_parser_new ();
 
   for (const char *name = g_dir_read_name (dir); name != NULL;
        name = g_dir_read_name (dir))
@@ -224,7 +227,7 @@ load_entries_sync (const char *instance_directory, NuvashaLauncherContentType ty
           g_ptr_array_unref (entries);
           return NULL;
         }
-      entry = entry_from_json (contents, length, &local_error);
+      entry = entry_from_json (parser, contents, length, &local_error);
       if (entry == NULL)
         {
           g_propagate_error (error, g_steal_pointer (&local_error));
