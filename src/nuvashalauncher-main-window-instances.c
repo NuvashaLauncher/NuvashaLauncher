@@ -211,279 +211,21 @@ close_dialogs_of_removed_instances (NuvashaLauncherMainWindow *self)
     adw_dialog_force_close (g_ptr_array_index (doomed, i));
 }
 
-void
-update_instance_selection_ui (NuvashaLauncherMainWindow *self)
-{
-  guint selected = g_hash_table_size (self->ui.selected_instances);
-  guint total = g_list_model_get_n_items (
-    G_LIST_MODEL (nuvashalauncher_instance_manager_get_instances (self->model->manager)));
-
-  if (self->ui.selection_label != NULL)
-    {
-      g_autofree char *text = g_strdup_printf (_("%u/%u selected"), selected, total);
-      gtk_label_set_text (self->ui.selection_label, text);
-    }
-
-  if (self->ui.selection_footer != NULL)
-    gtk_action_bar_set_revealed (self->ui.selection_footer, selected > 0);
-
-  if (self->ui.footer_delete != NULL)
-    {
-      gtk_widget_set_sensitive (GTK_WIDGET (self->ui.footer_delete), selected > 0);
-      gtk_widget_set_visible (GTK_WIDGET (self->ui.footer_delete), selected > 0);
-    }
-  if (self->ui.footer_export != NULL)
-    {
-      gtk_widget_set_sensitive (GTK_WIDGET (self->ui.footer_export), selected > 0);
-      gtk_widget_set_visible (GTK_WIDGET (self->ui.footer_export), selected > 0);
-    }
-}
-
-void
-clear_instance_selection (NuvashaLauncherMainWindow *self)
-{
-  g_hash_table_remove_all (self->ui.selected_instances);
-
-  if (self->ui.instances != NULL)
-    {
-      for (GtkWidget *row = gtk_widget_get_first_child (GTK_WIDGET (self->ui.instances));
-           row != NULL; row = gtk_widget_get_next_sibling (row))
-        {
-          GtkWidget *play = g_object_get_data (G_OBJECT (row), "nuvashalauncher-play");
-          GtkWidget *check = play != NULL
-            ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-check") : NULL;
-
-          if (check != NULL && gtk_check_button_get_active (GTK_CHECK_BUTTON (check)))
-            gtk_check_button_set_active (GTK_CHECK_BUTTON (check), FALSE);
-        }
-    }
-
-  update_instance_selection_ui (self);
-}
-
-typedef struct {
-  NuvashaLauncherMainWindow *window;
-  NuvashaLauncherTaskScope *operation;
-} BulkDeleteWait;
-
-static void
-bulk_delete_wait_free (BulkDeleteWait *wait)
-{
-  g_object_unref (wait->window);
-  nuvashalauncher_task_scope_unref (wait->operation);
-  g_free (wait);
-}
-
-static void
-on_bulk_delete_ready (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  BulkDeleteWait *wait = user_data;
-  g_autoptr (GError) error = NULL;
-
-  if (!nuvashalauncher_instance_manager_delete_finish (
-        NUVASHALAUNCHER_INSTANCE_MANAGER (source), result, &error) &&
-      !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-    {
-      nuvashalauncher_ui_error_banner (wait->window->ui.banner, error);
-    }
-
-  bulk_delete_wait_free (wait);
-}
-
-static void
-on_bulk_delete_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  NuvashaLauncherMainWindow *self = user_data;
-  const char *response = adw_alert_dialog_choose_finish (
-    ADW_ALERT_DIALOG (source), result);
-
-  if (g_strcmp0 (response, "delete") == 0)
-    {
-      g_autoptr (GPtrArray) selected = g_ptr_array_new_with_free_func (g_object_unref);
-      GHashTableIter iter;
-      gpointer key;
-
-      g_hash_table_iter_init (&iter, self->ui.selected_instances);
-      while (g_hash_table_iter_next (&iter, &key, NULL))
-        {
-          NuvashaLauncherInstance *instance =
-            nuvashalauncher_instance_manager_get_by_id (self->model->manager, key);
-          if (instance != NULL)
-            g_ptr_array_add (selected, g_object_ref (instance));
-        }
-
-      clear_instance_selection (self);
-      for (guint i = 0; i < selected->len; i++)
-        {
-          BulkDeleteWait *wait = g_new0 (BulkDeleteWait, 1);
-          wait->window = g_object_ref (self);
-          wait->operation = nuvashalauncher_instance_manager_delete_async (
-            self->model->manager, g_ptr_array_index (selected, i), TRUE,
-            on_bulk_delete_ready, wait);
-        }
-    }
-
-  g_object_unref (self);
-}
-
-static void
-on_bulk_export_folder_chosen (GObject *source, GAsyncResult *result,
-                              gpointer user_data)
-{
-  NuvashaLauncherMainWindow *self = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) folder = gtk_file_dialog_select_folder_finish (
-    GTK_FILE_DIALOG (source), result, &error);
-
-  if (folder != NULL)
-    {
-      g_autofree char *directory = g_file_get_path (folder);
-      if (directory == NULL)
-        {
-          nuvashalauncher_ui_error_banner (self->ui.banner, NULL);
-          adw_banner_set_title (self->ui.banner, _("The export location is not a local file"));
-          g_object_unref (self);
-          return;
-        }
-      g_autoptr (GPtrArray) selected = g_ptr_array_new_with_free_func (g_free);
-      GHashTableIter iter;
-      gpointer key;
-
-      g_hash_table_iter_init (&iter, self->ui.selected_instances);
-      while (g_hash_table_iter_next (&iter, &key, NULL))
-        g_ptr_array_add (selected, g_strdup (key));
-
-      clear_instance_selection (self);
-
-      for (guint i = 0; i < selected->len; i++)
-        {
-          const char *id = g_ptr_array_index (selected, i);
-          NuvashaLauncherInstance *instance =
-            nuvashalauncher_instance_manager_get_by_id (self->model->manager, id);
-          if (instance != NULL)
-            {
-              g_autofree char *name = NULL;
-              g_autofree char *filename = NULL;
-              g_autofree char *path = NULL;
-              NuvashaLauncherInstancePage *page;
-
-              g_object_get (instance, "name", &name, NULL);
-              filename = g_strdup_printf ("%s.mrpack",
-                                          name != NULL ? name : "instance");
-              path = g_build_filename (directory, filename, NULL);
-              page = nuvashalauncher_instance_page_new (
-                self->model->manager, instance, self->model->settings,
-                window_launcher (self, id));
-              g_object_ref_sink (page);
-              g_object_set_data (G_OBJECT (page), "nuvashalauncher-host-widget", self);
-              nuvashalauncher_instance_page_export_to_path (page, path);
-              g_object_unref (page);
-            }
-        }
-    }
-  else if (error != NULL &&
-           !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED) &&
-           !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED))
-    {
-      nuvashalauncher_ui_error_banner (self->ui.banner, error);
-    }
-
-  g_object_unref (self);
-}
-
-void
-bulk_export_instances (NuvashaLauncherMainWindow *self)
-{
-  g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
-  g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
-  gtk_file_dialog_set_initial_folder (dialog, home);
-  gtk_file_dialog_set_title (dialog, _("Choose a Directory"));
-  gtk_file_dialog_select_folder (dialog, GTK_WINDOW (self), NULL,
-                                 on_bulk_export_folder_chosen,
-                                 g_object_ref (self));
-}
-
-void
-bulk_delete_instances (NuvashaLauncherMainWindow *self)
-{
-  g_autofree char *heading = NULL;
-  g_autofree char *body = NULL;
-  guint selected = g_hash_table_size (self->ui.selected_instances);
-
-  if (selected > 1)
-    {
-      GString *names = g_string_new (NULL);
-      GHashTableIter iter;
-      gpointer key = NULL;
-
-      g_hash_table_iter_init (&iter, self->ui.selected_instances);
-      while (g_hash_table_iter_next (&iter, &key, NULL))
-        {
-          NuvashaLauncherInstance *instance =
-            nuvashalauncher_instance_manager_get_by_id (self->model->manager, key);
-          g_autofree char *name = NULL;
-
-          if (instance != NULL)
-            g_object_get (instance, "name", &name, NULL);
-          if (name == NULL || *name == '\0')
-            name = g_strdup ("Unnamed instance");
-          if (names->len > 0)
-            g_string_append_c (names, '\n');
-          g_string_append (names, name);
-        }
-
-      body = g_strdup_printf (_("The following instances will be deleted:\n%s"),
-                              names->str);
-      g_string_free (names, TRUE);
-    }
-
-  if (selected == 1)
-    {
-      GHashTableIter iter;
-      gpointer key = NULL;
-      g_hash_table_iter_init (&iter, self->ui.selected_instances);
-      if (g_hash_table_iter_next (&iter, &key, NULL))
-        {
-          NuvashaLauncherInstance *instance =
-            nuvashalauncher_instance_manager_get_by_id (self->model->manager, key);
-          g_autofree char *name = NULL;
-          if (instance != NULL)
-            g_object_get (instance, "name", &name, NULL);
-          heading = g_strdup_printf (_("Delete \"%s\"?"),
-                                     name != NULL ? name : "instance");
-        }
-    }
-
-  if (heading == NULL)
-    heading = g_strdup_printf (_("Delete \"%s\"?"), "selected instances");
-
-  /* Bulk deletion is confirmed by the same destructive Adwaita alert style
-   * used by the existing instance action. The actual removals remain the
-   * manager's asynchronous delete operation. */
-  AdwAlertDialog *alert = ADW_ALERT_DIALOG (adw_alert_dialog_new (
-    heading, body));
-  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
-  adw_alert_dialog_add_response (alert, "delete", _("Delete"));
-  adw_alert_dialog_set_response_appearance (alert, "delete", ADW_RESPONSE_DESTRUCTIVE);
-  adw_alert_dialog_set_close_response (alert, "cancel");
-  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
-                           on_bulk_delete_chosen, g_object_ref (self));
-}
-
-/* A row clicked anywhere outside its buttons toggles selection. */
+/* A row clicked anywhere outside its Play button opens the instance dialog. */
 void
 on_row_activate (GtkListBox *list G_GNUC_UNUSED, GtkListBoxRow *row,
-                 gpointer user_data G_GNUC_UNUSED)
+                 gpointer user_data)
 {
-  GtkWidget *play = g_object_get_data (G_OBJECT (row),
-                                       "nuvashalauncher-play");
-  GtkWidget *check = play != NULL
-    ? g_object_get_data (G_OBJECT (play), "nuvashalauncher-check") : NULL;
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  GListStore *instances = nuvashalauncher_instance_manager_get_instances (self->model->manager);
+  g_autoptr (NuvashaLauncherInstance) instance =
+    g_list_model_get_item (G_LIST_MODEL (instances),
+                           (guint) gtk_list_box_row_get_index (row));
 
-  if (check != NULL)
-    gtk_check_button_set_active (
-      GTK_CHECK_BUTTON (check),
-      !gtk_check_button_get_active (GTK_CHECK_BUTTON (check)));
+  if (instance == NULL)
+    return;
+
+  open_instance_dialog (self, instance);
 }
 
 void
@@ -491,11 +233,6 @@ update_visible_page (NuvashaLauncherMainWindow *self)
 {
   GListStore *instances = nuvashalauncher_instance_manager_get_instances (self->model->manager);
   guint n_items = g_list_model_get_n_items (G_LIST_MODEL (instances));
-
-  if (n_items == 0 &&
-      self->ui.selected_instances != NULL &&
-      g_hash_table_size (self->ui.selected_instances) > 0)
-    clear_instance_selection (self);
 
   adw_view_stack_set_visible_child_name (self->ui.stack,
                                          n_items > 0 ? "instances" : "empty");
@@ -540,5 +277,4 @@ on_instances_changed (NuvashaLauncherMainWindow *self,
      with it. This is how deleting an instance closes its dialog,
      whichever screen the delete was asked from. */
   close_dialogs_of_removed_instances (self);
-  update_instance_selection_ui (self);
 }

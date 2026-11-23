@@ -35,40 +35,6 @@ row_update (GtkWidget *play, NuvashaLauncher *launcher)
 }
 
 static void
-on_instance_check_toggled (GtkCheckButton *check, gpointer user_data)
-{
-  NuvashaLauncherMainWindow *self = user_data;
-  const char *id = g_object_get_data (G_OBJECT (check), "nuvashalauncher-instance-id");
-  GtkStack *stack = g_object_get_data (G_OBJECT (check), "nuvashalauncher-icon-stack");
-
-  if (stack != NULL)
-    gtk_stack_set_visible_child_name (stack,
-      gtk_check_button_get_active (check) ? "check" : "icon");
-
-  if (id == NULL)
-    return;
-
-  if (gtk_check_button_get_active (check))
-    g_hash_table_add (self->ui.selected_instances, g_strdup (id));
-  else
-    g_hash_table_remove (self->ui.selected_instances, id);
-
-  update_instance_selection_ui (self);
-}
-
-static void
-on_instance_settings_clicked (GtkButton *button, gpointer user_data)
-{
-  NuvashaLauncherMainWindow *self = user_data;
-  const char *id = g_object_get_data (G_OBJECT (button), "nuvashalauncher-instance-id");
-  NuvashaLauncherInstance *instance = nuvashalauncher_instance_manager_get_by_id (
-    self->model->manager, id);
-
-  if (instance != NULL)
-    open_instance_dialog (self, instance);
-}
-
-static void
 on_row_launcher_state (NuvashaLauncher *launcher, NuvashaLauncherLaunchState state G_GNUC_UNUSED,
                        const char *detail G_GNUC_UNUSED, gpointer user_data)
 {
@@ -243,10 +209,7 @@ create_instance_row (gpointer item, gpointer user_data)
   NuvashaLauncher *launcher = NULL;
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
-  GtkButton *settings_button = GTK_BUTTON (gtk_button_new_from_icon_name (
-    "emblem-system-symbolic"));
   GtkButton *play = GTK_BUTTON (gtk_button_new ());
-  GtkCheckButton *check = GTK_CHECK_BUTTON (gtk_check_button_new ());
   GtkBox *play_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
   GtkImage *play_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("media-playback-start-symbolic"));
   GtkLabel *play_label = GTK_LABEL (gtk_label_new (_("Play")));
@@ -282,39 +245,7 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (icon), "nuvashalauncher-instance-icon");
   gtk_widget_set_overflow (GTK_WIDGET (icon), GTK_OVERFLOW_HIDDEN);
-
-  GtkStack *icon_stack = GTK_STACK (gtk_stack_new ());
-  GtkBox *badge_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-  GtkImage *check_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("object-select-symbolic"));
-
-  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-instance-icon");
-  gtk_widget_add_css_class (GTK_WIDGET (badge_box), "nuvashalauncher-select-badge");
-  gtk_widget_set_size_request (GTK_WIDGET (badge_box), 48, 48);
-  gtk_widget_set_valign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (GTK_WIDGET (badge_box), GTK_ALIGN_CENTER);
-  gtk_widget_set_hexpand (GTK_WIDGET (badge_box), TRUE);
-  gtk_widget_set_vexpand (GTK_WIDGET (badge_box), TRUE);
-
-  gtk_image_set_pixel_size (check_icon, 24);
-  gtk_widget_set_valign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
-  gtk_widget_set_halign (GTK_WIDGET (check_icon), GTK_ALIGN_CENTER);
-  gtk_widget_set_hexpand (GTK_WIDGET (check_icon), TRUE);
-  gtk_widget_set_vexpand (GTK_WIDGET (check_icon), TRUE);
-  gtk_box_append (badge_box, GTK_WIDGET (check_icon));
-
-  gtk_stack_add_named (icon_stack, GTK_WIDGET (icon), "icon");
-  gtk_stack_add_named (icon_stack, GTK_WIDGET (badge_box), "check");
-  gtk_stack_set_visible_child_name (icon_stack, "icon");
-  gtk_widget_set_size_request (GTK_WIDGET (icon_stack), 48, 48);
-  gtk_widget_set_valign (GTK_WIDGET (icon_stack), GTK_ALIGN_CENTER);
-
-  gtk_check_button_set_child (check, GTK_WIDGET (icon_stack));
-  gtk_widget_add_css_class (GTK_WIDGET (check), "nuvashalauncher-select-checkbox");
-  gtk_widget_set_valign (GTK_WIDGET (check), GTK_ALIGN_CENTER);
-  g_object_set_data (G_OBJECT (check), "nuvashalauncher-icon-stack", icon_stack);
-
-  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (check));
-  gtk_widget_set_visible (GTK_WIDGET (check), TRUE);
+  adw_action_row_add_prefix (ADW_ACTION_ROW (row), GTK_WIDGET (icon));
 
   gtk_image_set_pixel_size (GTK_IMAGE (play_icon), 16);
   gtk_widget_set_size_request (GTK_WIDGET (play_icon), 16, 16);
@@ -325,38 +256,13 @@ create_instance_row (gpointer item, gpointer user_data)
   gtk_widget_add_css_class (GTK_WIDGET (play), "suggested-action");
   nuvashalauncher_ui_set_action_label (GTK_WIDGET (play), _("Play"));
 
-  /* The row controls need the ID before their signal handlers are wired. */
-  id = nuvashalauncher_instance_get_id (instance);
-
   /* The play state swaps the icon and the label, so they are known by
      the button itself rather than walked for. */
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-icon", play_icon);
   g_object_set_data (G_OBJECT (play), "nuvashalauncher-label", play_label);
-  g_object_set_data (G_OBJECT (play), "nuvashalauncher-check", check);
-  g_object_set_data_full (G_OBJECT (check), "nuvashalauncher-instance-id",
-                          g_strdup (id), g_free);
-  {
-    gboolean selected = id != NULL && self->ui.selected_instances != NULL &&
-      g_hash_table_contains (self->ui.selected_instances, id);
-    gtk_check_button_set_active (check, selected);
-    gtk_stack_set_visible_child_name (icon_stack, selected ? "check" : "icon");
-  }
-  g_signal_connect (check, "toggled",
-                    G_CALLBACK (on_instance_check_toggled), self);
-
-  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (settings_button),
-                                          _("Settings"));
-  gtk_widget_set_valign (GTK_WIDGET (settings_button), GTK_ALIGN_CENTER);
-  g_object_set_data_full (G_OBJECT (settings_button), "nuvashalauncher-instance-id",
-                          g_strdup (id), g_free);
-  g_signal_connect (settings_button, "clicked",
-                    G_CALLBACK (on_instance_settings_clicked), self);
-
-  adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (settings_button));
   adw_action_row_add_suffix (ADW_ACTION_ROW (row), GTK_WIDGET (play));
 
   g_signal_connect_object (play, "clicked", G_CALLBACK (on_play_clicked), self, 0);
-  g_object_set_data (G_OBJECT (row), "nuvashalauncher-play", play);
 
   /* Keep the row icon in sync with the instance while the row exists. */
   row_set_icon (GTK_IMAGE (icon), instance);
@@ -376,8 +282,8 @@ create_instance_row (gpointer item, gpointer user_data)
   if (launcher != NULL)
     row_update (GTK_WIDGET (play), launcher);
 
-  /* A click anywhere on the row, outside its buttons, toggles selection.
-     An AdwActionRow is not activatable by default. */
+  /* A click anywhere on the row, outside the Play button, opens the
+     instance dialog. An AdwActionRow is not activatable by default. */
   gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
 
   return GTK_WIDGET (row);

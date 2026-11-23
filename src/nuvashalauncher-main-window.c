@@ -24,43 +24,6 @@
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherMainWindow, nuvashalauncher_main_window, ADW_TYPE_APPLICATION_WINDOW)
 
-static gboolean
-on_main_window_key_pressed (GtkEventControllerKey *controller G_GNUC_UNUSED,
-                            guint keyval,
-                            guint keycode G_GNUC_UNUSED,
-                            GdkModifierType state,
-                            gpointer user_data)
-{
-  NuvashaLauncherMainWindow *self = user_data;
-  GtkWidget *focus = gtk_window_get_focus (GTK_WINDOW (self));
-
-  /* Let text fields and other controls keep their own Ctrl-key behavior. */
-  if (focus != NULL && GTK_IS_EDITABLE (focus))
-    return FALSE;
-
-  if (keyval == GDK_KEY_Escape &&
-      self->ui.selected_instances != NULL &&
-      g_hash_table_size (self->ui.selected_instances) > 0)
-    {
-      clear_instance_selection (self);
-      return TRUE;
-    }
-
-  if (g_strcmp0 (adw_view_stack_get_visible_child_name (self->ui.stack),
-                 "instances") != 0 || !(state & GDK_CONTROL_MASK))
-    return FALSE;
-
-  if (keyval == GDK_KEY_d &&
-      self->ui.selected_instances != NULL &&
-      g_hash_table_size (self->ui.selected_instances) > 0)
-    {
-      bulk_delete_instances (self);
-      return TRUE;
-    }
-
-  return FALSE;
-}
-
 gboolean
 nuvashalauncher_main_window_launch_instance (NuvashaLauncherMainWindow *self,
                                      const char *instance_id,
@@ -364,13 +327,6 @@ nuvashalauncher_main_window_init (NuvashaLauncherMainWindow *self)
     }
   g_signal_connect_object (self, "close-request",
                            G_CALLBACK (on_window_close_request), self, 0);
-  {
-    GtkEventController *keys = gtk_event_controller_key_new ();
-    gtk_event_controller_set_propagation_phase (keys, GTK_PHASE_CAPTURE);
-    g_signal_connect (keys, "key-pressed",
-                      G_CALLBACK (on_main_window_key_pressed), self);
-    gtk_widget_add_controller (GTK_WIDGET (self), keys);
-  }
   nuvashalauncher_main_window_build_ui (self);
 }
 
@@ -389,8 +345,6 @@ nuvashalauncher_main_window_new (AdwApplication *application, NuvashaLauncherIns
    GtkScrolledWindow *scroll = NULL;
 
   self->model->manager = g_object_ref (manager);
-  self->ui.selected_instances = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                        g_free, NULL);
 
   /* The standard shortcuts, registered on the application because the
      window is not the one that owns them. */
@@ -463,7 +417,6 @@ nuvashalauncher_main_window_dispose (GObject *object)
   nuvashalauncher_main_window_model_free (self->model);
   self->model = NULL;
   g_clear_object (&self->window_settings);
-  g_clear_pointer (&self->ui.selected_instances, g_hash_table_unref);
   g_clear_pointer (&self->downloads.rows, g_hash_table_unref);
 
   G_OBJECT_CLASS (nuvashalauncher_main_window_parent_class)->dispose (object);
