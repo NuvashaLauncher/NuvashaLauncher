@@ -29,7 +29,7 @@ All notable changes to Nuvasha Launcher are documented in this file.
 - **New Unit Test Coverage**: Added dedicated unit tests for kernel `FICLONE` reflink helpers in `tests/test-fs.c`, worker-thread JSON cache encoding and error handling in `tests/test-download-cache.c`, and worker-thread asset pre-verification in `tests/test-resolve-integration.c`.
 - **Zero Warnings & Sanitizer Clean**: Maintained strict zero compiler warnings (`-std=c17 -Wall -Wextra -Wpedantic -Werror`), full pass under GCC `-fanalyzer` static analysis, and clean AddressSanitizer/UBSan/LeakSanitizer test runs.
 
-**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.4...main
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.4...v1.5
 
 ## [1.4] - 2026-11-23
 
