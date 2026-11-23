@@ -174,19 +174,26 @@ jobs:
             flatpak \
             flatpak-builder \
             git \
-            make \
-            xvfb
-          flatpak remote-add --if-not-exists flathub \
+            make
+          flatpak remote-add --user --if-not-exists flathub \
             https://flathub.org/repo/flathub.flatpakrepo
 
-      - name: Build Flatpak bundle
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+      - name: Cache flatpak-builder state
+        uses: actions/cache@v4
         with:
-          bundle: nuvashalauncher-${{ matrix.arch }}.flatpak
-          manifest-path: packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml
-          arch: ${{ matrix.arch }}
-          cache: true
-          cache-key: flatpak-builder-${{ matrix.arch }}-${{ hashFiles('packaging/flatpak/**') }}
+          path: .flatpak-builder
+          key: flatpak-builder-${{ matrix.arch }}-${{ hashFiles('packaging/flatpak/**') }}
+          restore-keys: |
+            flatpak-builder-${{ matrix.arch }}-
+
+      - name: Build Flatpak bundle
+        run: |
+          flatpak-builder --user --arch=${{ matrix.arch }} --force-clean --disable-rofiles-fuse \
+            --install-deps-from=flathub --repo=flatpak-repo \
+            flatpak-build packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml
+          flatpak build-bundle --arch=${{ matrix.arch }} flatpak-repo \
+            "nuvashalauncher-${{ matrix.arch }}.flatpak" \
+            com.github.NuvashaLauncher.NuvashaLauncher
 
       - name: Install Flatpak bundle
         run: flatpak install --user --noninteractive nuvashalauncher-${{ matrix.arch }}.flatpak
