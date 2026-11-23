@@ -210,7 +210,7 @@ compare_waiting_requests (gconstpointer left, gconstpointer right,
  * Scheduler slot management
  * ---------------------------------------------------------- */
 
-static void
+void
 nuvashalauncher_download_start_transfer (DownloadRequest *request)
 {
   NuvashaLauncherDownloadService *service = request->service;
@@ -254,7 +254,7 @@ nuvashalauncher_download_start_transfer (DownloadRequest *request)
     nuvashalauncher_cancellable_watch (cancellable, queued_cancelled, request, NULL);
 }
 
-static void
+void
 nuvashalauncher_download_release_slot (DownloadRequest *request)
 {
   NuvashaLauncherDownloadService *service = request->service;

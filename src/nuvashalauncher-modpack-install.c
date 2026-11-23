@@ -329,11 +329,60 @@ install_run_unref (InstallRun *run)
     install_run_free (run);
 }
 
+typedef struct
+{
+  InstallRun *run;
+  GError *error;
+  char *temp;
+  char *target;
+} InstallFailCleanup;
+
+static void
+install_fail_cleanup_free (InstallFailCleanup *cleanup)
+{
+  g_clear_error (&cleanup->error);
+  g_free (cleanup->temp);
+  g_free (cleanup->target);
+  install_run_unref (cleanup->run);
+  g_free (cleanup);
+}
+
+static void
+install_fail_cleanup_thread (GTask *task,
+                             gpointer source_object G_GNUC_UNUSED,
+                             gpointer task_data,
+                             GCancellable *cancellable G_GNUC_UNUSED)
+{
+  InstallFailCleanup *cleanup = task_data;
+
+  if (cleanup->temp != NULL)
+    nuvashalauncher_fs_remove_tree (cleanup->temp);
+
+  if (cleanup->target != NULL)
+    nuvashalauncher_fs_remove_tree (cleanup->target);
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+install_fail_cleanup_done (GObject *source G_GNUC_UNUSED,
+                           GAsyncResult *result G_GNUC_UNUSED,
+                           gpointer user_data)
+{
+  InstallFailCleanup *cleanup = user_data;
+
+  nuvashalauncher_task_scope_return_error (cleanup->run->scope,
+                                           g_steal_pointer (&cleanup->error));
+}
+
 /* Everything of ours goes away; anything that was on disk before the
  * install is never touched. */
 static void
 install_fail (InstallRun *run, GError *error)
 {
+  char *temp = NULL;
+  char *target = NULL;
+
   if (run->failed)
     {
       g_error_free (error);
@@ -341,15 +390,34 @@ install_fail (InstallRun *run, GError *error)
     }
 
   run->failed = TRUE;
+  g_cancellable_cancel (run->children_cancellable);
 
-  if (run->temp != NULL)
-    nuvashalauncher_fs_remove_tree (run->temp);
-
+  temp = g_steal_pointer (&run->temp);
   if (run->moved)
-    nuvashalauncher_fs_remove_tree (run->target);
+    {
+      target = g_strdup (run->target);
+      run->moved = FALSE;
+    }
+
+  if (temp != NULL || target != NULL)
+    {
+      InstallFailCleanup *cleanup = g_new0 (InstallFailCleanup, 1);
+      GTask *worker = NULL;
+
+      cleanup->run = run;
+      cleanup->error = error;
+      cleanup->temp = temp;
+      cleanup->target = target;
+
+      worker = g_task_new (NULL, NULL, install_fail_cleanup_done, cleanup);
+      g_task_set_task_data (worker, cleanup,
+                            (GDestroyNotify) install_fail_cleanup_free);
+      g_task_run_in_thread (worker, install_fail_cleanup_thread);
+      g_object_unref (worker);
+      return;
+    }
 
   nuvashalauncher_task_scope_return_error (run->scope, error);
-  g_cancellable_cancel (run->children_cancellable);
   install_run_unref (run);
 }
 

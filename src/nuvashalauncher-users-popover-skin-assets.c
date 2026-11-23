@@ -141,9 +141,38 @@ nuvashalauncher_users_set_avatar_icon (GtkImage *image)
   gtk_image_set_from_icon_name (image, "avatar-default-symbolic");
 }
 
+static GHashTable *
+local_avatar_cache (void)
+{
+  GApplication *app = g_application_get_default ();
+  GHashTable *cache;
+
+  if (app == NULL)
+    return NULL;
+
+  cache = g_object_get_data (G_OBJECT (app), "nuvashalauncher-local-avatar-cache");
+  if (cache == NULL)
+    {
+      cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+      g_object_set_data_full (G_OBJECT (app), "nuvashalauncher-local-avatar-cache",
+                              cache, (GDestroyNotify) g_hash_table_unref);
+    }
+
+  return cache;
+}
+
 gboolean
 nuvashalauncher_users_set_local_avatar (GtkImage *image, const char *path)
 {
+  GHashTable *cache = path != NULL ? local_avatar_cache () : NULL;
+  GdkTexture *cached = cache != NULL ? g_hash_table_lookup (cache, path) : NULL;
+
+  if (cached != NULL)
+    {
+      gtk_image_set_from_paintable (image, GDK_PAINTABLE (cached));
+      return TRUE;
+    }
+
   g_autoptr (GFile) file = g_file_new_for_path (path);
   g_autoptr (GError) error = NULL;
   g_autoptr (GdkTexture) skin = gdk_texture_new_from_file (file, &error);
@@ -151,6 +180,8 @@ nuvashalauncher_users_set_local_avatar (GtkImage *image, const char *path)
 
   if (skin == NULL || (face = face_texture (skin)) == NULL)
     return FALSE;
+  if (cache != NULL)
+    g_hash_table_replace (cache, g_strdup (path), g_object_ref (face));
   gtk_image_set_from_paintable (image, GDK_PAINTABLE (face));
   return TRUE;
 }

@@ -17,7 +17,6 @@ static void cache_info_ready (GObject *, GAsyncResult *, gpointer);
 static void cache_load_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_copy_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_restore_ready (GObject *, GAsyncResult *, gpointer);
-static void global_cache_restore_hash_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_directory_ready (GObject *, GAsyncResult *, gpointer);
 static void global_cache_files_ready (GObject *, GAsyncResult *, gpointer);
 
@@ -134,40 +133,9 @@ global_cache_restore_ready (GObject *source, GAsyncResult *result,
       return;
     }
 
-  {
-    g_autoptr (GFile) file = g_file_new_for_path (request->tmp_path);
-    nuvashalauncher_task_scope_release_when_done (
-      nuvashalauncher_download_hash_file_async (
-        file, request->hash_type, global_cache_restore_hash_ready, request),
-      g_task_get_cancellable (request->task));
-  }
-}
-
-static void
-global_cache_restore_hash_ready (GObject *source G_GNUC_UNUSED,
-                                 GAsyncResult *result,
-                                 gpointer user_data)
-{
-  DownloadRequest *request = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autofree char *digest =
-    nuvashalauncher_download_file_hash_finish (result, &error);
-
-  if (request_was_cancelled (request, error))
-    {
-      nuvashalauncher_download_request_fail (
-        request, nuvashalauncher_download_cancelled_error ());
-      return;
-    }
-
-  if (digest == NULL ||
-      g_ascii_strcasecmp (digest, request->expected_hash) != 0)
-    {
-      nuvashalauncher_download_discard_temporary (request);
-      start_attempt (request);
-      return;
-    }
-
+  /* global_cache_hash_ready() already verified global_cache_path against
+   * expected_hash before copying into the exclusive tmp_path, so publish it
+   * directly just like the FICLONE fast path without a third full-file read. */
   {
     g_autofree char *destination_name = g_path_get_basename (request->dest_path);
     g_autoptr (GError) rename_error = NULL;

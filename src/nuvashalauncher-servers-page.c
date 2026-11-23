@@ -47,6 +47,7 @@ struct _NuvashaLauncherServersPage {
   AdwClamp *header_search_clamp;
   GPtrArray *rows;
   GPtrArray *servers;
+  GHashTable *icon_cache;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherServersPage, nuvashalauncher_servers_page, GTK_TYPE_BOX)
@@ -330,12 +331,22 @@ on_delete_server_clicked (GtkButton *button, gpointer user_data)
 }
 
 static GtkWidget *
-server_icon_widget (const char *icon_b64)
+server_icon_widget (NuvashaLauncherServersPage *self, const char *icon_b64)
 {
   GtkWidget *icon = nuvashalauncher_icon_widget_new ("network-server-symbolic");
 
   if (icon_b64 != NULL && *icon_b64 != '\0')
     {
+      GdkTexture *cached = self->icon_cache != NULL
+        ? g_hash_table_lookup (self->icon_cache, icon_b64)
+        : NULL;
+
+      if (cached != NULL)
+        {
+          nuvashalauncher_icon_widget_set_texture (icon, cached);
+          return icon;
+        }
+
       gsize raw_len = 0;
       g_autofree guchar *raw = g_base64_decode (icon_b64, &raw_len);
       if (raw != NULL && raw_len > 0)
@@ -343,7 +354,12 @@ server_icon_widget (const char *icon_b64)
           g_autoptr (GBytes) bytes = g_bytes_new (raw, raw_len);
           g_autoptr (GdkTexture) texture = gdk_texture_new_from_bytes (bytes, NULL);
           if (texture != NULL)
-            nuvashalauncher_icon_widget_set_texture (icon, texture);
+            {
+              if (self->icon_cache != NULL)
+                g_hash_table_replace (self->icon_cache, g_strdup (icon_b64),
+                                      g_object_ref (texture));
+              nuvashalauncher_icon_widget_set_texture (icon, texture);
+            }
         }
     }
 
@@ -376,7 +392,7 @@ build_server_row (NuvashaLauncherServersPage *self, ServerEntry *s, guint index)
 
   adw_action_row_set_subtitle (row, s->ip != NULL ? s->ip : "");
 
-  GtkWidget *icon = server_icon_widget (s->icon_b64);
+  GtkWidget *icon = server_icon_widget (self, s->icon_b64);
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (row, icon);
 
@@ -558,6 +574,7 @@ nuvashalauncher_servers_page_dispose (GObject *object)
   g_clear_pointer (&self->servers_dat_path, g_free);
   g_clear_pointer (&self->rows, g_ptr_array_unref);
   g_clear_pointer (&self->servers, g_ptr_array_unref);
+  g_clear_pointer (&self->icon_cache, g_hash_table_unref);
 
   G_OBJECT_CLASS (nuvashalauncher_servers_page_parent_class)->dispose (object);
 }
@@ -573,6 +590,7 @@ nuvashalauncher_servers_page_init (NuvashaLauncherServersPage *self)
 {
   self->rows = g_ptr_array_new ();
   self->servers = g_ptr_array_new_with_free_func ((GDestroyNotify) server_entry_free);
+  self->icon_cache = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (self), GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
 }

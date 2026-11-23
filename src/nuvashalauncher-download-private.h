@@ -105,6 +105,8 @@ void nuvashalauncher_download_discard_temporary (DownloadRequest *request);
 gboolean nuvashalauncher_download_open_temporary (DownloadRequest *request, GError **error);
 
 void start_attempt (DownloadRequest *request);
+void nuvashalauncher_download_start_transfer (DownloadRequest *request);
+void nuvashalauncher_download_release_slot (DownloadRequest *request);
 SoupSession *get_session (NuvashaLauncherDownloadService *service);
 char *url_for_message (const char *url);
 gboolean request_was_cancelled (DownloadRequest *request, GError *error);

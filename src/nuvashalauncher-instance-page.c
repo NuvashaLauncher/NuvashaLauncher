@@ -103,28 +103,6 @@ instance_page_show_toast (NuvashaLauncherInstancePage *self, const char *message
                                  GTK_WIDGET (self->toast_overlay), message);
 }
 
-/* The list binds an item when it enters the store, so a row that was
- * already bound keeps what it shows: the instance has to leave the store
- * and come back at the same place for the row to be bound again. The
- * order of the rows does not change. */
-void
-refresh_in_list (NuvashaLauncherInstancePage *self)
-{
-  GListStore *store = nuvashalauncher_instance_manager_get_instances (self->manager);
-  guint position = 0;
-  gpointer item = NULL;
-
-  if (!g_list_store_find (store, self->instance, &position))
-    return;
-
-  /* The instance leaves and comes back in one change, not two: a plain
-     remove emits items-changed while the instance is out of the store,
-     and the window closes the tab of an instance it cannot find, which
-     destroys this page while this function is still running. */
-  item = self->instance;
-  g_list_store_splice (store, position, 1, &item, 1);
-}
-
 static GtkWidget *
 settings_page_widget (GtkWidget *page)
 {

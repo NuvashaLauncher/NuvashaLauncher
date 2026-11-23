@@ -74,7 +74,6 @@ struct _NuvashaLauncherInstancePage
 char *instance_string (NuvashaLauncherInstance *instance, const char *property);
 char *loader_display_name (NuvashaLauncherInstance *instance);
 GtkWidget *instance_page_dialog_parent (NuvashaLauncherInstancePage *self);
-void refresh_in_list (NuvashaLauncherInstancePage *self);
 void rebuild_content_pages (NuvashaLauncherInstancePage *self);
 GtkWidget *create_settings_page (NuvashaLauncherInstancePage *self);
 GtkWidget *create_stats_page (NuvashaLauncherInstancePage *self);

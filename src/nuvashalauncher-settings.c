@@ -380,15 +380,43 @@ lookup_nuvashalauncher_schema (GSettingsSchemaSource *source)
   return g_settings_schema_source_lookup (source, "com.github.NuvashaLauncher.NuvashaLauncher", TRUE);
 }
 
+static GSettingsSchema *cached_settings_schema = NULL;
+static char *cached_schema_env_dir = NULL;
+static gboolean cached_schema_initialized = FALSE;
+
+__attribute__ ((destructor)) static void
+clear_cached_settings_schema (void)
+{
+  g_clear_pointer (&cached_settings_schema, g_settings_schema_unref);
+  g_clear_pointer (&cached_schema_env_dir, g_free);
+  cached_schema_initialized = FALSE;
+}
+
+static GSettingsSchema *
+cache_and_return_schema (GSettingsSchema *schema, const char *env_dir)
+{
+  g_clear_pointer (&cached_settings_schema, g_settings_schema_unref);
+  g_free (cached_schema_env_dir);
+  cached_schema_env_dir = g_strdup (env_dir);
+  cached_settings_schema = g_settings_schema_ref (schema);
+  cached_schema_initialized = TRUE;
+  return schema;
+}
+
 static GSettingsSchema *
 find_settings_schema (void)
 {
+  const char *env_dir = g_getenv ("GSETTINGS_SCHEMA_DIR");
+
+  if (cached_schema_initialized && cached_settings_schema != NULL &&
+      g_strcmp0 (env_dir, cached_schema_env_dir) == 0)
+    return g_settings_schema_ref (cached_settings_schema);
+
   GSettingsSchemaSource *default_source = g_settings_schema_source_get_default ();
   GSettingsSchema *schema = lookup_nuvashalauncher_schema (default_source);
   if (schema != NULL)
-    return schema;
+    return cache_and_return_schema (schema, env_dir);
 
-  const char *env_dir = g_getenv ("GSETTINGS_SCHEMA_DIR");
   if (env_dir != NULL && g_file_test (env_dir, G_FILE_TEST_IS_DIR))
     {
       GSettingsSchemaSource *src = g_settings_schema_source_new_from_directory (env_dir, default_source, FALSE, NULL);
@@ -397,7 +425,7 @@ find_settings_schema (void)
           schema = lookup_nuvashalauncher_schema (src);
           g_settings_schema_source_unref (src);
           if (schema != NULL)
-            return schema;
+            return cache_and_return_schema (schema, env_dir);
         }
     }
 
@@ -416,7 +444,7 @@ find_settings_schema (void)
               schema = lookup_nuvashalauncher_schema (src);
               g_settings_schema_source_unref (src);
               if (schema != NULL)
-                return schema;
+                return cache_and_return_schema (schema, env_dir);
             }
         }
     }
@@ -435,7 +463,7 @@ find_settings_schema (void)
               schema = lookup_nuvashalauncher_schema (src);
               g_settings_schema_source_unref (src);
               if (schema != NULL)
-                return schema;
+                return cache_and_return_schema (schema, env_dir);
             }
         }
     }
@@ -473,7 +501,7 @@ find_settings_schema (void)
                       schema = lookup_nuvashalauncher_schema (src);
                       g_settings_schema_source_unref (src);
                       if (schema != NULL)
-                        return schema;
+                        return cache_and_return_schema (schema, env_dir);
                     }
                 }
             }

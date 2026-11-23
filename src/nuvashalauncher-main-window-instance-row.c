@@ -7,6 +7,10 @@
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-ui-feedback.h"
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
+#define INSTANCE_ROW_ICON_PIXEL_SIZE 48
+
 /* Instance-list row rendering and row actions. */
 
 /* Play while the instance is idle, Stop while it is busy. */
@@ -145,10 +149,29 @@ on_play_clicked (GtkButton *button, gpointer user_data)
  * none or its file cannot be read. A row follows the icon of its
  * instance, so an icon chosen on the instance page and the icon a
  * modpack install gives an instance both land here. */
+static GdkTexture *
+get_fallback_pack_texture (void)
+{
+  GApplication *app = g_application_get_default ();
+  GdkTexture *cached = app != NULL
+    ? g_object_get_data (G_OBJECT (app), "nuvashalauncher-fallback-pack-texture")
+    : NULL;
+  if (cached != NULL)
+    return g_object_ref (cached);
+
+  GdkTexture *texture = gdk_texture_new_from_resource (
+    "/com/github/NuvashaLauncher/NuvashaLauncher/pack.png");
+  if (texture != NULL && app != NULL)
+    g_object_set_data_full (G_OBJECT (app), "nuvashalauncher-fallback-pack-texture",
+                            g_object_ref (texture), g_object_unref);
+  return texture;
+}
+
 static void
 row_set_icon (GtkImage *image, NuvashaLauncherInstance *instance)
 {
   g_autofree char *path = NULL;
+  g_autoptr (GdkTexture) texture = NULL;
 
   g_object_get (instance, "icon", &path, NULL);
 
@@ -156,12 +179,24 @@ row_set_icon (GtkImage *image, NuvashaLauncherInstance *instance)
     {
       g_free (path);
       path = nuvashalauncher_instance_default_icon_path ();
+      if (path != NULL && !g_file_test (path, G_FILE_TEST_IS_REGULAR))
+        g_clear_pointer (&path, g_free);
     }
 
-  if (path != NULL && g_file_test (path, G_FILE_TEST_IS_REGULAR))
+  if (path != NULL)
     {
-      g_autoptr (GFile) file = g_file_new_for_path (path);
-      g_autoptr (GdkTexture) texture = gdk_texture_new_from_file (file, NULL);
+      g_autoptr (GdkPixbuf) pixbuf = gdk_pixbuf_new_from_file_at_scale (
+        path, INSTANCE_ROW_ICON_PIXEL_SIZE, INSTANCE_ROW_ICON_PIXEL_SIZE,
+        TRUE, NULL);
+
+      if (pixbuf != NULL)
+        {
+          G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+          texture = gdk_texture_new_for_pixbuf (pixbuf);
+          G_GNUC_END_IGNORE_DEPRECATIONS
+        }
+      else
+        texture = gdk_texture_new_from_filename (path, NULL);
 
       if (texture != NULL)
         {
@@ -170,15 +205,12 @@ row_set_icon (GtkImage *image, NuvashaLauncherInstance *instance)
         }
     }
 
-  {
-    g_autoptr (GdkTexture) fallback = gdk_texture_new_from_resource (
-      "/com/github/NuvashaLauncher/NuvashaLauncher/pack.png");
-    if (fallback != NULL)
-      {
-        gtk_image_set_from_paintable (image, GDK_PAINTABLE (fallback));
-        return;
-      }
-  }
+  texture = get_fallback_pack_texture ();
+  if (texture != NULL)
+    {
+      gtk_image_set_from_paintable (image, GDK_PAINTABLE (texture));
+      return;
+    }
 
   gtk_image_set_from_icon_name (image, "applications-games-symbolic");
 }
@@ -190,29 +222,14 @@ on_row_icon_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   row_set_icon (GTK_IMAGE (user_data), NUVASHALAUNCHER_INSTANCE (object));
 }
 
-/* One row of the instance list: an AdwActionRow of the boxed list,
- * the same kind of row the content pages and the modpack browser use,
- * so the list is sized and margined exactly like theirs. Every button
- * is wired here and carries the instance id, which is what the click
- * handlers go by. */
-GtkWidget *
-create_instance_row (gpointer item, gpointer user_data)
+static void
+row_update_labels (AdwActionRow *row, NuvashaLauncherInstance *instance)
 {
-  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
-  NuvashaLauncherInstance *instance = NUVASHALAUNCHER_INSTANCE (item);
   g_autofree char *name = NULL;
   g_autofree char *minecraft_version = NULL;
   g_autofree char *subtitle = NULL;
   NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
-  const char *id = NULL;
   const char *loader_name = NULL;
-  NuvashaLauncher *launcher = NULL;
-  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
-  GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
-  GtkButton *play = GTK_BUTTON (gtk_button_new ());
-  GtkBox *play_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
-  GtkImage *play_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("media-playback-start-symbolic"));
-  GtkLabel *play_label = GTK_LABEL (gtk_label_new (_("Play")));
 
   g_object_get (instance,
                 "name", &name,
@@ -227,21 +244,61 @@ create_instance_row (gpointer item, gpointer user_data)
 
       /* "fabric" is written as "Fabric" in the row. */
       capitalized[0] = g_ascii_toupper (capitalized[0]);
-      subtitle = g_strdup_printf ("%s %s", minecraft_version, capitalized);
+      subtitle = g_strdup_printf ("%s %s",
+                                  minecraft_version != NULL ? minecraft_version : "",
+                                  capitalized);
     }
   else
-    subtitle = g_strdup (minecraft_version);
+    subtitle = g_strdup (minecraft_version != NULL ? minecraft_version : "");
+
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
+                                 name != NULL ? name : "");
+  adw_action_row_set_subtitle (row, subtitle);
+}
+
+static void
+on_row_labels_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                       gpointer user_data)
+{
+  row_update_labels (ADW_ACTION_ROW (user_data), NUVASHALAUNCHER_INSTANCE (object));
+}
+
+/* One row of the instance list: an AdwActionRow of the boxed list,
+ * the same kind of row the content pages and the modpack browser use,
+ * so the list is sized and margined exactly like theirs. Every button
+ * is wired here and carries the instance id, which is what the click
+ * handlers go by. */
+GtkWidget *
+create_instance_row (gpointer item, gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  NuvashaLauncherInstance *instance = NUVASHALAUNCHER_INSTANCE (item);
+  const char *id = NULL;
+  NuvashaLauncher *launcher = NULL;
+  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+  GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name ("applications-games-symbolic"));
+  GtkButton *play = GTK_BUTTON (gtk_button_new ());
+  GtkBox *play_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkImage *play_icon = GTK_IMAGE (gtk_image_new_from_icon_name ("media-playback-start-symbolic"));
+  GtkLabel *play_label = GTK_LABEL (gtk_label_new (_("Play")));
 
   /* Names and versions are plain text and may hold an "&". */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
   adw_action_row_set_title_lines (ADW_ACTION_ROW (row), 1);
   adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 1);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), name);
-  adw_action_row_set_subtitle (ADW_ACTION_ROW (row), subtitle);
-   gtk_widget_add_css_class (GTK_WIDGET (row), "nuvashalauncher-instance-row");
+  row_update_labels (row, instance);
+  g_signal_connect_object (instance, "notify::name",
+                           G_CALLBACK (on_row_labels_changed), row, 0);
+  g_signal_connect_object (instance, "notify::minecraft-version",
+                           G_CALLBACK (on_row_labels_changed), row, 0);
+  g_signal_connect_object (instance, "notify::loader",
+                           G_CALLBACK (on_row_labels_changed), row, 0);
+  gtk_widget_add_css_class (GTK_WIDGET (row), "nuvashalauncher-instance-row");
 
-  gtk_image_set_pixel_size (GTK_IMAGE (icon), 48);
-  gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
+  gtk_image_set_pixel_size (GTK_IMAGE (icon), INSTANCE_ROW_ICON_PIXEL_SIZE);
+  gtk_widget_set_size_request (GTK_WIDGET (icon),
+                               INSTANCE_ROW_ICON_PIXEL_SIZE,
+                               INSTANCE_ROW_ICON_PIXEL_SIZE);
   gtk_widget_set_valign (GTK_WIDGET (icon), GTK_ALIGN_CENTER);
   gtk_widget_add_css_class (GTK_WIDGET (icon), "nuvashalauncher-instance-icon");
   gtk_widget_set_overflow (GTK_WIDGET (icon), GTK_OVERFLOW_HIDDEN);

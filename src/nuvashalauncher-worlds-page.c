@@ -58,6 +58,7 @@ struct _NuvashaLauncherWorldsPage {
   AdwClamp *header_search_clamp;
   GPtrArray *rows;
   GPtrArray *worlds;
+  GCancellable *reload_cancellable;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherWorldsPage, nuvashalauncher_worlds_page, GTK_TYPE_BOX)
@@ -621,30 +622,85 @@ on_world_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
   return GDK_EVENT_PROPAGATE;
 }
 
+static void
+worlds_reload_thread (GTask *task,
+                      gpointer source_object G_GNUC_UNUSED,
+                      gpointer task_data,
+                      GCancellable *cancellable)
+{
+  const char *saves_dir = task_data;
+  g_autoptr (GPtrArray) worlds =
+    g_ptr_array_new_with_free_func ((GDestroyNotify) world_entry_free);
+
+  if (saves_dir != NULL && g_file_test (saves_dir, G_FILE_TEST_IS_DIR))
+    {
+      g_autoptr (GDir) dir = g_dir_open (saves_dir, 0, NULL);
+      if (dir != NULL)
+        {
+          const char *name = NULL;
+          while (!g_cancellable_is_cancelled (cancellable) &&
+                 (name = g_dir_read_name (dir)) != NULL)
+            {
+              WorldEntry *w = read_world_entry (saves_dir, name);
+              if (w != NULL)
+                g_ptr_array_add (worlds, w);
+            }
+        }
+    }
+
+  if (g_cancellable_is_cancelled (cancellable))
+    {
+      g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                               "cancelled");
+      return;
+    }
+
+  g_ptr_array_sort (worlds, compare_worlds);
+  g_task_return_pointer (task, g_steal_pointer (&worlds),
+                         (GDestroyNotify) g_ptr_array_unref);
+}
+
+static void
+on_worlds_reload_done (GObject *source,
+                       GAsyncResult *result,
+                       gpointer user_data G_GNUC_UNUSED)
+{
+  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (source);
+  g_autoptr (GPtrArray) worlds = g_task_propagate_pointer (G_TASK (result), NULL);
+
+  if (self->reload_cancellable != g_task_get_cancellable (G_TASK (result)) ||
+      g_cancellable_is_cancelled (self->reload_cancellable) ||
+      worlds == NULL)
+    return;
+
+  g_clear_pointer (&self->worlds, g_ptr_array_unref);
+  self->worlds = g_steal_pointer (&worlds);
+  rebuild_world_rows (self);
+}
+
 void
 nuvashalauncher_worlds_page_reload (NuvashaLauncherWorldsPage *self)
 {
   g_return_if_fail (NUVASHALAUNCHER_IS_WORLDS_PAGE (self));
 
-  g_ptr_array_set_size (self->worlds, 0);
-
-  if (self->saves_dir != NULL && g_file_test (self->saves_dir, G_FILE_TEST_IS_DIR))
+  if (self->reload_cancellable != NULL)
     {
-      g_autoptr (GDir) dir = g_dir_open (self->saves_dir, 0, NULL);
-      if (dir != NULL)
-        {
-          const char *name = NULL;
-          while ((name = g_dir_read_name (dir)) != NULL)
-            {
-              WorldEntry *w = read_world_entry (self->saves_dir, name);
-              if (w != NULL)
-                g_ptr_array_add (self->worlds, w);
-            }
-        }
+      g_cancellable_cancel (self->reload_cancellable);
+      g_clear_object (&self->reload_cancellable);
     }
 
-  g_ptr_array_sort (self->worlds, compare_worlds);
-  rebuild_world_rows (self);
+  if (self->saves_dir == NULL || !g_file_test (self->saves_dir, G_FILE_TEST_IS_DIR))
+    {
+      g_ptr_array_set_size (self->worlds, 0);
+      rebuild_world_rows (self);
+      return;
+    }
+
+  self->reload_cancellable = g_cancellable_new ();
+  g_autoptr (GTask) task =
+    g_task_new (self, self->reload_cancellable, on_worlds_reload_done, NULL);
+  g_task_set_task_data (task, g_strdup (self->saves_dir), g_free);
+  g_task_run_in_thread (task, worlds_reload_thread);
 }
 
 static gboolean
@@ -885,6 +941,12 @@ static void
 nuvashalauncher_worlds_page_dispose (GObject *object)
 {
   NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (object);
+
+  if (self->reload_cancellable != NULL)
+    {
+      g_cancellable_cancel (self->reload_cancellable);
+      g_clear_object (&self->reload_cancellable);
+    }
 
   if (self->header_bar != NULL)
     nuvashalauncher_worlds_page_detach_header (self, self->header_bar);

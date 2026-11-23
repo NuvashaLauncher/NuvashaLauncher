@@ -90,9 +90,12 @@ build_result (ResolveRequest *request, GError **error)
                                : request->client_jar;
 
     resolved->client_jar = g_strdup (client_jar);
-    resolved->classpath =
-      nuvashalauncher_resolve_classpath (request->description, request->context,
-                             request->libraries_dir, client_jar);
+    resolved->classpath = request->library_files != NULL
+                            ? nuvashalauncher_resolve_classpath_from_files (
+                                request->library_files, client_jar)
+                            : nuvashalauncher_resolve_classpath (
+                                request->description, request->context,
+                                request->libraries_dir, client_jar);
   }
 
   resolved->version_id = g_strdup (request->description->id);

@@ -158,47 +158,72 @@ objects_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_free (pending);
 }
 
-/* The index is on the disk: every object it names is fetched. The whole
-   list is handed to the download module at once, which is what caps how
-   many of them run at a time. */
-static void
-resolve_objects (ResolveRequest *request)
+typedef struct
 {
-  g_autofree char *path = NULL;
+  ResolveRequest *request;
+  char *path;
+} AssetIndexLoad;
+
+static void
+asset_index_load_free (AssetIndexLoad *load)
+{
+  g_free (load->path);
+  g_free (load);
+}
+
+static void
+asset_index_parse_thread (GTask *task,
+                          gpointer source_object G_GNUC_UNUSED,
+                          gpointer task_data,
+                          GCancellable *cancellable G_GNUC_UNUSED)
+{
+  AssetIndexLoad *load = task_data;
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = json_parser_new ();
   g_autofree char *text = NULL;
   gsize length = 0;
+
+  if (!nuvashalauncher_fs_get_contents_within (load->path, NUVASHALAUNCHER_FS_MAX_ASSET_INDEX_SIZE,
+                                               &text, &length, &error) ||
+      !json_parser_load_from_data (parser, text, (gssize) length, &error) ||
+      !JSON_NODE_HOLDS_OBJECT (json_parser_get_root (parser)))
+    {
+      g_autoptr (GError) local = g_steal_pointer (&error);
+
+      g_task_return_new_error (task,
+                               NUVASHALAUNCHER_RESOLVE_ERROR,
+                               NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
+                               "the asset index \"%s\" cannot be read: %s",
+                               load->path,
+                               local != NULL ? local->message
+                                             : "it is not a JSON object");
+      return;
+    }
+
+  g_task_return_pointer (task, g_steal_pointer (&parser), g_object_unref);
+}
+
+static void
+asset_index_parsed_ready (GObject *source G_GNUC_UNUSED,
+                          GAsyncResult *result,
+                          gpointer user_data)
+{
+  AssetIndexLoad *load = user_data;
+  ResolveRequest *request = load->request;
+  const char *path = load->path;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonParser) parser = g_task_propagate_pointer (G_TASK (result), &error);
   JsonNode *root_node = NULL;
   JsonObject *root = NULL;
   JsonObject *objects = NULL;
   JsonObjectIter iter;
   const char *name = NULL;
   JsonNode *node = NULL;
-  guint started = 0;
 
-  if (request->error != NULL)
+  if (parser == NULL)
     {
-      resolve_finish (request);
-      return;
-    }
-
-  path = g_build_filename (request->indexes_dir, request->asset_index_id, NULL);
-
-  if (!nuvashalauncher_fs_get_contents_within (path, NUVASHALAUNCHER_FS_MAX_ASSET_INDEX_SIZE,
-                                   &text, &length, &error) ||
-      !json_parser_load_from_data (parser, text, (gssize) length, &error) ||
-      !JSON_NODE_HOLDS_OBJECT (json_parser_get_root (parser)))
-    {
-      g_autoptr (GError) local = g_steal_pointer (&error);
-
-      request_fail (request,
-                    g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
-                                 "the asset index \"%s\" cannot be read: %s",
-                                 path,
-                                 local != NULL ? local->message
-                                               : "it is not a JSON object"));
-      resolve_finish (request);
+      asset_index_load_free (load);
+      operation_finished (request, assets_downloaded, g_steal_pointer (&error));
       return;
     }
 
@@ -208,11 +233,11 @@ resolve_objects (ResolveRequest *request)
   if (!json_object_has_member (root, "objects") ||
       !JSON_NODE_HOLDS_OBJECT (json_object_get_member (root, "objects")))
     {
-      request_fail (request,
-                    g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
-                                 "the asset index \"%s\" has no objects",
-                                 path));
-      resolve_finish (request);
+      GError *missing_err = g_error_new (
+        NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
+        "the asset index \"%s\" has no objects", path);
+      asset_index_load_free (load);
+      operation_finished (request, assets_downloaded, missing_err);
       return;
     }
 
@@ -245,11 +270,13 @@ resolve_objects (ResolveRequest *request)
 
       if (!JSON_NODE_HOLDS_OBJECT (node))
         {
-          request_fail_and_wait (
-              request,
-              g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
-                           "the asset \"%s\" of \"%s\" is not an object",
-                           name, path));
+          GError *bad_err = g_error_new (
+            NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
+            "the asset \"%s\" of \"%s\" is not an object", name, path);
+          asset_index_load_free (load);
+          request_fail (request, bad_err);
+          g_cancellable_cancel (request->cancellable);
+          operation_finished (request, assets_downloaded, NULL);
           return;
         }
 
@@ -263,11 +290,14 @@ resolve_objects (ResolveRequest *request)
             if (!JSON_NODE_HOLDS_VALUE (hash_node) ||
                 json_node_get_value_type (hash_node) != G_TYPE_STRING)
               {
-                request_fail_and_wait (
-                  request,
-                  g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR,
-                               NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
-                               "the asset \"%s\" has an invalid hash", name));
+                GError *hash_err = g_error_new (
+                  NUVASHALAUNCHER_RESOLVE_ERROR,
+                  NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
+                  "the asset \"%s\" has an invalid hash", name);
+                asset_index_load_free (load);
+                request_fail (request, hash_err);
+                g_cancellable_cancel (request->cancellable);
+                operation_finished (request, assets_downloaded, NULL);
                 return;
               }
 
@@ -290,12 +320,15 @@ resolve_objects (ResolveRequest *request)
 
       if (asset_path != NULL && !nuvashalauncher_resolve_entry_name_is_safe (asset_path))
         {
-          request_fail_and_wait (
-              request,
-              g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH,
-                           "the asset \"%s\" of \"%s\" would be copied to "
-                           "\"%s\", outside the assets directory",
-                           hash, path, asset_path));
+          GError *path_err = g_error_new (
+            NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH,
+            "the asset \"%s\" of \"%s\" would be copied to "
+            "\"%s\", outside the assets directory",
+            hash, path, asset_path);
+          asset_index_load_free (load);
+          request_fail (request, path_err);
+          g_cancellable_cancel (request->cancellable);
+          operation_finished (request, assets_downloaded, NULL);
           return;
         }
 
@@ -324,11 +357,14 @@ resolve_objects (ResolveRequest *request)
 
           if (destination == NULL)
             {
-              request_fail_and_wait (request,
-                                     g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR,
-                                                  NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
-                                                  "\"%s\" is not a usable asset name",
-                                                  hash));
+              GError *dest_err = g_error_new (
+                NUVASHALAUNCHER_RESOLVE_ERROR,
+                NUVASHALAUNCHER_RESOLVE_ERROR_ASSETS,
+                "\"%s\" is not a usable asset name", hash);
+              asset_index_load_free (load);
+              request_fail (request, dest_err);
+              g_cancellable_cancel (request->cancellable);
+              operation_finished (request, assets_downloaded, NULL);
               return;
             }
 
@@ -336,7 +372,10 @@ resolve_objects (ResolveRequest *request)
             {
               if (!nuvashalauncher_resolve_ensure_parent_directory (destination, &local))
                 {
-                  request_fail_and_wait (request, g_steal_pointer (&local));
+                  asset_index_load_free (load);
+                  request_fail (request, g_steal_pointer (&local));
+                  g_cancellable_cancel (request->cancellable);
+                  operation_finished (request, assets_downloaded, NULL);
                   return;
                 }
               g_hash_table_add (ensured_buckets, g_steal_pointer (&bucket));
@@ -350,7 +389,6 @@ resolve_objects (ResolveRequest *request)
           pending->next = assets_downloaded;
 
           operation_started (request);
-          started++;
 
           /* An object is named after its own hash, so the bytes can be
              checked against it. */
@@ -361,8 +399,30 @@ resolve_objects (ResolveRequest *request)
         }
     }
 
-  if (started == 0)
-    assets_downloaded (request);
+  asset_index_load_free (load);
+  operation_finished (request, assets_downloaded, NULL);
+}
+
+/* The index is on the disk: parse it in a worker thread and queue every
+   object it names. */
+static void
+resolve_objects (ResolveRequest *request)
+{
+  if (request->error != NULL)
+    {
+      resolve_finish (request);
+      return;
+    }
+
+  AssetIndexLoad *load = g_new0 (AssetIndexLoad, 1);
+  load->request = request;
+  load->path = g_build_filename (request->indexes_dir, request->asset_index_id, NULL);
+
+  operation_started (request);
+  GTask *worker = g_task_new (NULL, request->cancellable, asset_index_parsed_ready, load);
+  g_task_set_task_data (worker, load, NULL);
+  g_task_run_in_thread (worker, asset_index_parse_thread);
+  g_object_unref (worker);
 }
 
 void

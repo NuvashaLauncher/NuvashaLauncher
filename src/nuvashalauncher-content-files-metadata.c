@@ -212,17 +212,19 @@ nuvashalauncher_content_merge_dependencies (GPtrArray **destination, GPtrArray *
     return;
   if (*destination == NULL)
     *destination = g_ptr_array_new_with_free_func (g_free);
+
+  g_autoptr (GHashTable) seen = g_hash_table_new (g_str_hash, g_str_equal);
+  for (guint j = 0; j < (*destination)->len; j++)
+    {
+      const char *existing = g_ptr_array_index (*destination, j);
+      if (existing != NULL)
+        g_hash_table_add (seen, (gpointer) existing);
+    }
+
   for (guint i = 0; i < source->len; i++)
     {
       const char *value = g_ptr_array_index (source, i);
-      gboolean found = FALSE;
-      for (guint j = 0; j < (*destination)->len; j++)
-        if (g_strcmp0 (value, g_ptr_array_index (*destination, j)) == 0)
-          {
-            found = TRUE;
-            break;
-          }
-      if (!found)
+      if (value != NULL && g_hash_table_add (seen, (gpointer) value))
         g_ptr_array_add (*destination, g_strdup (value));
     }
 }
@@ -306,7 +308,8 @@ archive_entry_bytes (struct archive *archive, struct archive_entry *header,
 
 static void
 read_archive_members (const char *path, const char * const *members,
-                      gsize count, GByteArray **out_results)
+                      gsize count, gboolean stop_on_first,
+                      GByteArray **out_results)
 {
   struct archive *archive = archive_read_new ();
   struct archive_entry *header = NULL;
@@ -344,7 +347,12 @@ read_archive_members (const char *path, const char * const *members,
                 {
                   if (archive_entry_bytes (archive, header, &out_results[i]) &&
                       out_results[i] != NULL)
-                    remaining--;
+                    {
+                      if (stop_on_first)
+                        remaining = 0;
+                      else
+                        remaining--;
+                    }
                   matched = TRUE;
                   break;
                 }
@@ -620,7 +628,7 @@ apply_resource_metadata (NuvashaLauncherContentFile *file)
         }
     }
 
-  read_archive_members (file->path, members, query_count, results);
+  read_archive_members (file->path, members, query_count, FALSE, results);
   metadata = results[0];
   icon = results[1];
 
@@ -699,7 +707,7 @@ local_icon_extract_thread (GTask *task G_GNUC_UNUSED,
     }
 
   read_archive_members (extract->archive_path, (const char * const *) &extract->member,
-                        1, &icon);
+                        1, TRUE, &icon);
   if (icon == NULL)
     {
       nuvashalauncher_task_scope_return_error (scope,
@@ -785,8 +793,9 @@ nuvashalauncher_content_apply_local_metadata (NuvashaLauncherContentFile *file, 
   GByteArray *results[G_N_ELEMENTS (mod_members)] = { NULL };
   char *icon_member = NULL;
 
-  /* Read all declared metadata candidates in a single archive pass. */
-  read_archive_members (file->path, mod_members, G_N_ELEMENTS (mod_members), results);
+  /* Stop scanning as soon as one loader metadata file is matched. */
+  read_archive_members (file->path, mod_members, G_N_ELEMENTS (mod_members),
+                        TRUE, results);
 
   if (results[0] != NULL)
     apply_local_json (file, "fabric.mod.json", results[0]->data, results[0]->len,

@@ -524,6 +524,7 @@ attempt_failed (DownloadRequest *request, GError *error)
       if (delay_ms > 1 && g_getenv ("NUVASHALAUNCHER_TEST_FAST_TIMERS") != NULL)
         delay_ms = 1;
       nuvashalauncher_download_discard_temporary (request);
+      nuvashalauncher_download_release_slot (request);
       g_clear_error (&error);
       nuvashalauncher_task_scope_set_state (request->scope, NUVASHALAUNCHER_TASK_STATE_RETRYING);
       g_debug ("download operation=%" G_GUINT64_FORMAT " retry attempt=%u",
@@ -555,7 +556,8 @@ retry_when_due (gpointer user_data)
       return G_SOURCE_REMOVE;
     }
 
-  start_attempt (request);
+  request->begin = start_attempt;
+  nuvashalauncher_download_start_transfer (request);
 
   return G_SOURCE_REMOVE;
 }
@@ -608,6 +610,7 @@ start_attempt (DownloadRequest *request)
   g_clear_object (&request->message);
   g_clear_object (&request->source);
   g_clear_pointer (&request->chunk, g_bytes_unref);
+  g_clear_pointer (&request->json_body, g_byte_array_unref);
   g_clear_pointer (&request->checksum, g_checksum_free);
   g_clear_error (&request->pending_error);
   request->done = 0;

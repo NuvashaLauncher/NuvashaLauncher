@@ -401,16 +401,13 @@ nuvashalauncher_resolve_library_files (NuvashaLauncherVersionDescription *descri
 }
 
 char *
-nuvashalauncher_resolve_classpath (NuvashaLauncherVersionDescription *description,
-                       const NuvashaLauncherRuleContext   *context,
-                       const char             *libraries_dir,
-                       const char             *client_jar)
+nuvashalauncher_resolve_classpath_from_files (GPtrArray  *files,
+                                            const char *client_jar)
 {
-  g_autoptr (GPtrArray) files = NULL;
   GString *classpath = g_string_new (NULL);
   gboolean first = TRUE;
 
-  files = nuvashalauncher_resolve_library_files (description, context, libraries_dir);
+  g_return_val_if_fail (files != NULL, NULL);
 
   for (guint i = 0; i < files->len; i++)
     {
@@ -437,6 +434,18 @@ nuvashalauncher_resolve_classpath (NuvashaLauncherVersionDescription *descriptio
     }
 
   return g_string_free (classpath, FALSE);
+}
+
+char *
+nuvashalauncher_resolve_classpath (NuvashaLauncherVersionDescription *description,
+                       const NuvashaLauncherRuleContext   *context,
+                       const char             *libraries_dir,
+                       const char             *client_jar)
+{
+  g_autoptr (GPtrArray) files =
+    nuvashalauncher_resolve_library_files (description, context, libraries_dir);
+
+  return nuvashalauncher_resolve_classpath_from_files (files, client_jar);
 }
 
 /* ---------------------------------------------------------- *

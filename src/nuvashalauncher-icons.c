@@ -143,6 +143,81 @@ icon_load_free (IconLoad *load)
   g_free (load);
 }
 
+typedef struct
+{
+  IconLoad *load;
+  gboolean downloaded;
+} IconScaleRequest;
+
+static void
+icon_scale_worker_thread (GTask *task,
+                          gpointer source_object G_GNUC_UNUSED,
+                          gpointer task_data,
+                          GCancellable *cancellable G_GNUC_UNUSED)
+{
+  IconScaleRequest *req = task_data;
+  gboolean ok = nuvashalauncher_icon_scale_file (req->load->path);
+
+  if (!ok)
+    nuvashalauncher_fs_unlink (req->load->path, NULL);
+
+  g_task_return_boolean (task, ok);
+}
+
+static gboolean start_icon_download_enqueue (IconLoad *load);
+
+static void
+icon_scale_worker_done (GObject *source G_GNUC_UNUSED,
+                        GAsyncResult *result,
+                        gpointer user_data)
+{
+  IconScaleRequest *req = user_data;
+  IconLoad *load = req->load;
+  gboolean downloaded = req->downloaded;
+  gboolean scaled = g_task_propagate_boolean (G_TASK (result), NULL);
+
+  if (g_cancellable_is_cancelled (g_task_get_cancellable (load->task)))
+    {
+      nuvashalauncher_task_scope_return_error (
+        load->scope,
+        g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                             "the icon is no longer wanted"));
+      icon_load_free (load);
+      return;
+    }
+
+  if (scaled)
+    {
+      nuvashalauncher_task_scope_return_pointer (load->scope, g_strdup (load->path), g_free);
+      icon_load_free (load);
+      return;
+    }
+
+  if (!downloaded && start_icon_download_enqueue (load))
+    return;
+
+  if (downloaded)
+    nuvashalauncher_task_scope_return_error (
+      load->scope,
+      g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                           "the downloaded icon could not be decoded"));
+  icon_load_free (load);
+}
+
+static void
+run_icon_scale_worker (IconLoad *load, gboolean downloaded)
+{
+  IconScaleRequest *req = g_new0 (IconScaleRequest, 1);
+  GTask *worker = g_task_new (NULL, g_task_get_cancellable (load->task),
+                              icon_scale_worker_done, req);
+
+  req->load = load;
+  req->downloaded = downloaded;
+  g_task_set_task_data (worker, req, g_free);
+  g_task_run_in_thread (worker, icon_scale_worker_thread);
+  g_object_unref (worker);
+}
+
 static void
 icon_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                  gpointer user_data)
@@ -157,18 +232,13 @@ icon_downloaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       g_debug ("the icon \"%s\" could not be fetched: %s", load->url,
                nuvashalauncher_error_message (error));
       nuvashalauncher_task_scope_return_error (load->scope, g_steal_pointer (&error));
+      icon_load_free (load);
+      icon_pump ();
+      return;
     }
-  else if (!nuvashalauncher_icon_scale_file (load->path))
-    nuvashalauncher_task_scope_return_error (
-      load->scope,
-      g_error_new_literal (G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
-                           "the downloaded icon could not be decoded"));
-  else
-    nuvashalauncher_task_scope_return_pointer (load->scope, g_strdup (load->path), g_free);
-
-  icon_load_free (load);
 
   icon_pump ();
+  run_icon_scale_worker (load, TRUE);
 }
 
 /* Starts a queued load when there is room for it. */
@@ -203,6 +273,29 @@ icon_pump (void)
     }
 }
 
+static GHashTable *icon_texture_cache (void);
+
+static gboolean
+start_icon_download_enqueue (IconLoad *load)
+{
+  g_autofree char *directory = nuvashalauncher_icon_cache_directory ();
+
+  if (!nuvashalauncher_fs_make_directory (directory, 0755, NULL))
+    {
+      int saved_errno = errno;
+      nuvashalauncher_task_scope_return_error (
+        load->scope,
+        g_error_new (G_IO_ERROR, G_IO_ERROR_FAILED,
+                     "cannot create \"%s\": %s", directory,
+                     g_strerror (saved_errno)));
+      return FALSE;
+    }
+
+  g_queue_push_tail (&pending, load);
+  icon_pump ();
+  return TRUE;
+}
+
 NuvashaLauncherTaskScope *
 nuvashalauncher_icon_load_async (const char *url, GAsyncReadyCallback callback,
                      gpointer user_data)
@@ -210,8 +303,8 @@ nuvashalauncher_icon_load_async (const char *url, GAsyncReadyCallback callback,
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   GTask *task = nuvashalauncher_task_scope_task (scope);
-  g_autofree char *directory = NULL;
   IconLoad *load = NULL;
+  GHashTable *cache = NULL;
 
   g_task_set_check_cancellable (task, FALSE);
 
@@ -223,8 +316,6 @@ nuvashalauncher_icon_load_async (const char *url, GAsyncReadyCallback callback,
       return g_steal_pointer (&scope);
     }
 
-  directory = nuvashalauncher_icon_cache_directory ();
-
   load = g_new0 (IconLoad, 1);
   load->task = g_object_ref (task);
 
@@ -232,32 +323,37 @@ nuvashalauncher_icon_load_async (const char *url, GAsyncReadyCallback callback,
   load->scope = nuvashalauncher_task_scope_ref (scope);
   load->url = g_strdup (url);
   load->path = cache_path_for (url);
+  cache = icon_texture_cache ();
 
-  /* A file already in the cache is the answer: no request is made for
-     something that is already on disk. */
+  /* Fast path: texture already decoded in memory and file still exists on disk. */
   if (g_file_test (load->path, G_FILE_TEST_IS_REGULAR))
     {
-      if (nuvashalauncher_icon_scale_file (load->path))
+      if (cache != NULL && g_hash_table_contains (cache, load->path))
         {
           nuvashalauncher_task_scope_return_pointer_deferred (scope, g_strdup (load->path),
                                                   g_free);
           icon_load_free (load);
           return g_steal_pointer (&scope);
         }
-      nuvashalauncher_fs_unlink (load->path, NULL);
-    }
 
-  if (!nuvashalauncher_fs_make_directory (directory, 0755, NULL))
-    {
-      int saved_errno = errno;
-      nuvashalauncher_task_scope_return_error_deferred (
-        scope,
-        g_error_new (G_IO_ERROR, G_IO_ERROR_FAILED,
-                     "cannot create \"%s\": %s", directory,
-                     g_strerror (saved_errno)));
-      icon_load_free (load);
+      run_icon_scale_worker (load, FALSE);
       return g_steal_pointer (&scope);
     }
+
+  {
+    g_autofree char *directory = nuvashalauncher_icon_cache_directory ();
+    if (!nuvashalauncher_fs_make_directory (directory, 0755, NULL))
+      {
+        int saved_errno = errno;
+        nuvashalauncher_task_scope_return_error_deferred (
+          scope,
+          g_error_new (G_IO_ERROR, G_IO_ERROR_FAILED,
+                       "cannot create \"%s\": %s", directory,
+                       g_strerror (saved_errno)));
+        icon_load_free (load);
+        return g_steal_pointer (&scope);
+      }
+  }
 
   g_queue_push_tail (&pending, load);
   icon_pump ();

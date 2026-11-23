@@ -145,6 +145,7 @@ request_free (ResolveRequest *request)
   g_clear_object (&request->cancellable);
   g_clear_error (&request->error);
   g_clear_pointer (&request->natives, g_ptr_array_unref);
+  g_clear_pointer (&request->library_files, g_ptr_array_unref);
   g_clear_pointer (&request->asset_hashes, g_ptr_array_unref);
   g_clear_pointer (&request->asset_paths, g_hash_table_unref);
   g_free (request->version_id);
@@ -292,6 +293,8 @@ resolve_dependencies (ResolveRequest *request)
 
   files = nuvashalauncher_resolve_library_files (description, request->context,
                                      request->libraries_dir);
+  g_clear_pointer (&request->library_files, g_ptr_array_unref);
+  request->library_files = g_ptr_array_ref (files);
 
   /* Unpack the native JARs collected during planning. */
   for (guint i = 0; i < files->len; i++)

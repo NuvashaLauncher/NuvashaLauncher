@@ -265,9 +265,7 @@ export_directory (ExportRun *run, struct archive *archive, const char *root,
            * duplicate overrides/icon.png entries. */
            if (run->icon_path != NULL)
              {
-               g_autofree char *canonical_source =
-                 g_canonicalize_filename (source, NULL);
-               if (g_strcmp0 (canonical_source, run->icon_path) == 0)
+               if (g_strcmp0 (source, run->icon_path) == 0)
                  continue;
                /* An externally selected icon supersedes the stale default
                 * icon that may still be present in the instance directory. */
@@ -494,6 +492,13 @@ export_thread (GTask *task G_GNUC_UNUSED,
   g_autofree char *root_prefix =
     g_strconcat (canonical_root, G_DIR_SEPARATOR_S, NULL);
 
+  if (run->icon_path != NULL)
+    {
+      char *canonical_icon = g_canonicalize_filename (run->icon_path, NULL);
+      g_free (run->icon_path);
+      run->icon_path = canonical_icon;
+    }
+
   if (g_cancellable_is_cancelled (cancellable))
     {
       nuvashalauncher_task_scope_return_error (
@@ -550,6 +555,7 @@ export_thread (GTask *task G_GNUC_UNUSED,
 
   archive = archive_write_new ();
   archive_write_set_format_zip (archive);
+  archive_write_set_bytes_per_block (archive, 64 * 1024);
 
   if (archive_write_open_filename (archive, run->temporary_archive) != ARCHIVE_OK)
     {

@@ -14,20 +14,24 @@
 static char *
 censor_private_text (NuvashaLauncher *self, const char *text)
 {
-  g_autofree char *result = g_strdup (text != NULL ? text : "");
   const char *secrets[] = { self->log_access_token, self->log_session,
                             self->log_uuid };
+  g_autofree char *result = NULL;
+
+  if (text == NULL || *text == '\0')
+    return NULL;
 
   for (guint i = 0; i < G_N_ELEMENTS (secrets); i++)
     {
       g_auto (GStrv) parts = NULL;
       g_autofree char *joined = NULL;
+      const char *haystack = result != NULL ? result : text;
 
       if (secrets[i] == NULL || secrets[i][0] == '\0' ||
-          strstr (result, secrets[i]) == NULL)
+          strstr (haystack, secrets[i]) == NULL)
         continue;
 
-      parts = g_strsplit (result, secrets[i], -1);
+      parts = g_strsplit (haystack, secrets[i], -1);
       joined = g_strjoinv ("***", parts);
       g_free (g_steal_pointer (&result));
       result = g_steal_pointer (&joined);
@@ -67,9 +71,13 @@ log_line (NuvashaLauncher *self,
           const char  *format,
           ...)
 {
-  g_autoptr (GDateTime) now = g_date_time_new_now_local ();
-  g_autofree char *stamp = NULL;
+  static gint64 cached_second = -1;
+  static char cached_stamp[16] = "--:--:--";
+  gint64 current_second = g_get_real_time () / G_USEC_PER_SEC;
+  const char *stamp = cached_stamp;
   g_autofree char *body = NULL;
+  g_autofree char *censored = NULL;
+  const char *safe_body = NULL;
   g_autofree char *line = NULL;
   va_list args;
   guint limit;
@@ -78,17 +86,22 @@ log_line (NuvashaLauncher *self,
   body = g_strdup_vprintf (format, args);
   va_end (args);
 
-  {
-    g_autofree char *censored = censor_private_text (self, body);
-    g_free (g_steal_pointer (&body));
-    body = g_steal_pointer (&censored);
-  }
+  censored = censor_private_text (self, body);
+  safe_body = censored != NULL ? censored : body;
 
-  stamp = now != NULL ? g_date_time_format (now, "%H:%M:%S")
-                      : g_strdup ("--:--:--");
+  if (current_second != cached_second)
+    {
+      g_autoptr (GDateTime) now = g_date_time_new_from_unix_local (current_second);
+      g_autofree char *formatted = now != NULL
+        ? g_date_time_format (now, "%H:%M:%S")
+        : NULL;
+      g_strlcpy (cached_stamp, formatted != NULL ? formatted : "--:--:--",
+                 sizeof (cached_stamp));
+      cached_second = current_second;
+    }
 
   /* The time it happened, where it came from and the line itself. */
-  line = g_strdup_printf ("%s [%s] %s", stamp, tag, body);
+  line = g_strdup_printf ("%s [%s] %s", stamp, tag, safe_body);
 
   limit = nuvashalauncher_launcher_get_line_limit (self);
 

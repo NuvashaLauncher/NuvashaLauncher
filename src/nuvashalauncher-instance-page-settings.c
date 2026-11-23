@@ -39,10 +39,6 @@ on_name_apply (AdwEntryRow *row, gpointer user_data)
   g_autofree char *renamed = instance_string (self->instance, "name");
 
   gtk_editable_set_text (GTK_EDITABLE (row), renamed);
-
-  /* The tab follows the name: the window watches the instance for this,
-     because the tab is the window's and not the page's. */
-  refresh_in_list (self);
 }
 
 static void
@@ -147,9 +143,6 @@ on_version_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
       return;
     }
 
-  /* The row shows the version this instance runs. */
-  refresh_in_list (self);
-
   /* Resource Packs and Shader Packs are narrowed to the Minecraft
      version, so they are built again for the version that was picked. */
   rebuild_content_pages (self);
@@ -226,9 +219,6 @@ on_loader_changed (NuvashaLauncherLoaderRow *row, gpointer user_data)
   self->loader_version = g_strdup (loader == NUVASHALAUNCHER_LOADER_VANILLA
                                      ? NULL
                                      : version);
-
-  /* The row shows what the instance runs. */
-  refresh_in_list (self);
 
   /* A mod runs on a loader, and a resource pack or a shader pack is
      loaded by the game, so all three content pages depend on what was

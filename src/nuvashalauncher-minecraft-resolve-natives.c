@@ -130,62 +130,25 @@ make_parents (const char *root, const char *relative, GError **error)
 
 typedef struct
 {
-  GTask *task;
   NuvashaLauncherTaskScope *scope;
   GPtrArray *jars; /* NuvashaLauncherResolveFile*, a reference */
   char *directory;
-  guint index;
   guint64 extracted_bytes;
 } ExtractRequest;
 
-/* One jar, open, while its entries are written one at a time. The bytes
-   of the jar live as long as it does: libarchive reads out of them. */
-typedef struct
-{
-  ExtractRequest *request;
-  struct archive *archive;
-  GBytes *bytes;
-} ExtractStep;
-
-typedef struct
-{
-  char *directory;
-  char *relative;
-  GBytes *data;
-} NativeWrite;
-
-static void extract_write_ready (GObject *source, GAsyncResult *result,
-                                 gpointer user_data);
-
 static void
-native_write_free (NativeWrite *output)
+extract_request_free (ExtractRequest *request)
 {
-  g_free (output->directory);
-  g_free (output->relative);
-  g_clear_pointer (&output->data, g_bytes_unref);
-  g_free (output);
+  nuvashalauncher_task_scope_unref (request->scope);
+  g_clear_pointer (&request->jars, g_ptr_array_unref);
+  g_free (request->directory);
+  g_free (request);
 }
 
-static void
-native_write_thread (GTask *task,
-                     gpointer source_object G_GNUC_UNUSED,
-                     gpointer task_data,
-                     GCancellable *cancellable)
+static gboolean
+write_all_bytes (int fd, const guint8 *data, gsize length, const char *relative,
+                 GError **error)
 {
-  NativeWrite *output = task_data;
-  g_autoptr (GError) error = NULL;
-  gsize length = 0;
-  const guint8 *data = g_bytes_get_data (output->data, &length);
-  int fd = nuvashalauncher_fs_open_file_nofollow (
-    output->directory, output->relative,
-    O_WRONLY | O_CREAT | O_TRUNC, 0755, 0644, &error);
-
-  if (fd < 0)
-    {
-      g_task_return_error (task, g_steal_pointer (&error));
-      return;
-    }
-
   for (gsize written = 0; written < length;)
     {
       ssize_t count = write (fd, data + written, length - written);
@@ -194,156 +157,34 @@ native_write_thread (GTask *task,
         continue;
       if (count < 0)
         {
-          g_set_error (&error, G_IO_ERROR, g_io_error_from_errno (errno),
+          g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errno),
                        "cannot write native file \"%s\": %s",
-                       output->relative, g_strerror (errno));
-          close (fd);
-          g_task_return_error (task, g_steal_pointer (&error));
-          return;
+                       relative, g_strerror (errno));
+          return FALSE;
         }
       written += (gsize) count;
     }
 
-  if (close (fd) != 0)
-    {
-      g_set_error (&error, G_IO_ERROR, g_io_error_from_errno (errno),
-                   "cannot close native file \"%s\": %s",
-                   output->relative, g_strerror (errno));
-      g_task_return_error (task, g_steal_pointer (&error));
-      return;
-    }
-
-  if (g_cancellable_is_cancelled (cancellable))
-    {
-      g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
-                               "native extraction was cancelled");
-      return;
-    }
-
-  g_task_return_boolean (task, TRUE);
+  return TRUE;
 }
 
-static void
-native_write_async (ExtractStep *step, const char *relative, GBytes *data)
-{
-  NativeWrite *output = g_new0 (NativeWrite, 1);
-  GTask *task = g_task_new (NULL,
-                            g_task_get_cancellable (step->request->task),
-                            extract_write_ready, step);
-
-  output->directory = g_strdup (step->request->directory);
-  output->relative = g_strdup (relative);
-  output->data = g_bytes_ref (data);
-  g_task_set_task_data (task, output, (GDestroyNotify) native_write_free);
-  g_task_run_in_thread (task, native_write_thread);
-  g_object_unref (task);
-}
-
-static void
-extract_request_free (ExtractRequest *request)
-{
-  nuvashalauncher_task_scope_unref (request->scope);
-  g_clear_object (&request->task);
-  g_clear_pointer (&request->jars, g_ptr_array_unref);
-  g_free (request->directory);
-  g_free (request);
-}
-
-static void
-extract_step_free (ExtractStep *step)
-{
-  if (step->archive != NULL)
-    archive_read_free (step->archive);
-
-  g_clear_pointer (&step->bytes, g_bytes_unref);
-  g_free (step);
-}
-
-static void extract_next_jar (ExtractRequest *request);
-static void extract_entries (ExtractStep *step);
-static void extract_jar_info_ready (GObject *source, GAsyncResult *result,
-                                    gpointer user_data);
-
-/* Ends the whole request. Consumes @error, which may be NULL. */
-static void
-extract_finished (ExtractRequest *request, GError *error)
-{
-  if (error != NULL)
-    nuvashalauncher_task_scope_return_error (request->scope, error);
-  else
-    nuvashalauncher_task_scope_return_boolean (request->scope, TRUE);
-
-  extract_request_free (request);
-}
-
-static void
-extract_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  g_autoptr (GBytes) bytes = NULL;
-  g_autoptr (GError) error = NULL;
-
-  ExtractStep *step = user_data;
-  NuvashaLauncherResolveFile *jar =
-    g_ptr_array_index (step->request->jars, step->request->index);
-
-  bytes = g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
-
-  if (bytes == NULL)
-    {
-      extract_finished (step->request, g_steal_pointer (&error));
-      extract_step_free (step);
-      return;
-    }
-
-  /* The archive reads out of the bytes, so they stay until the jar is
-     done with them. */
-  step->bytes = g_steal_pointer (&bytes);
-  step->archive = archive_read_new ();
-
-  if (archive_read_support_format_zip (step->archive) != ARCHIVE_OK ||
-      archive_read_open_memory (step->archive,
-                                g_bytes_get_data (step->bytes, NULL),
-                                g_bytes_get_size (step->bytes)) != ARCHIVE_OK)
-    {
-      extract_finished (
-          step->request,
-          g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
-                       "\"%s\" is not a jar nuvashalauncher can read: %s", jar->path,
-                       archive_error_string (step->archive)));
-      extract_step_free (step);
-      return;
-    }
-
-  extract_entries (step);
-}
-
-/* One entry has been written: back into the jar for the next one. */
-static void
-extract_write_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
-                     gpointer user_data)
-{
-  g_autoptr (GError) error = NULL;
-  ExtractStep *step = user_data;
-
-  if (!g_task_propagate_boolean (G_TASK (result), &error))
-    {
-      extract_finished (step->request, g_steal_pointer (&error));
-      extract_step_free (step);
-      return;
-    }
-
-  extract_entries (step);
-}
-
-/* Reads the whole body of the current entry into @error on failure. */
 static gboolean
-read_entry (struct archive *archive, GBytes **data, GError **error)
+extract_single_entry (ExtractRequest *request, struct archive *archive,
+                      const char *relative, GError **error)
 {
-  g_autoptr (GByteArray) buffer = g_byte_array_new ();
+  g_autoptr (GError) local_error = NULL;
   const void *block = NULL;
-  gsize size = 0;
+  size_t size = 0;
   la_int64_t offset = 0;
+  guint64 entry_bytes = 0;
   int status;
+  int fd;
+
+  fd = nuvashalauncher_fs_open_file_nofollow (
+    request->directory, relative,
+    O_WRONLY | O_CREAT | O_TRUNC, 0755, 0644, error);
+  if (fd < 0)
+    return FALSE;
 
   for (;;)
     {
@@ -352,7 +193,6 @@ read_entry (struct archive *archive, GBytes **data, GError **error)
       offset = 0;
 
       status = archive_read_data_block (archive, &block, &size, &offset);
-
       if (status == ARCHIVE_EOF)
         break;
 
@@ -361,90 +201,145 @@ read_entry (struct archive *archive, GBytes **data, GError **error)
           g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                        "cannot read an entry of the jar: %s",
                        archive_error_string (archive));
+          close (fd);
           return FALSE;
         }
 
-      if (size > MAX_NATIVE_ENTRY_SIZE - buffer->len)
+      if (size > MAX_NATIVE_ENTRY_SIZE - entry_bytes)
         {
           g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR,
                        NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
                        "a native entry is larger than %u MiB",
                        MAX_NATIVE_ENTRY_SIZE / (1024 * 1024));
+          close (fd);
           return FALSE;
         }
 
-      if (size > 0)
-        g_byte_array_append (buffer, block, size);
+      if (size > MAX_NATIVE_TOTAL_SIZE - request->extracted_bytes)
+        {
+          g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR,
+                       NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
+                       "native libraries are larger than %u MiB",
+                       MAX_NATIVE_TOTAL_SIZE / (1024 * 1024));
+          close (fd);
+          return FALSE;
+        }
+
+      if (size > 0 &&
+          !write_all_bytes (fd, block, size, relative, &local_error))
+        {
+          g_propagate_error (error, g_steal_pointer (&local_error));
+          close (fd);
+          return FALSE;
+        }
+
+      entry_bytes += size;
+      request->extracted_bytes += size;
     }
 
-  if (buffer->len == 0)
+  if (close (fd) != 0)
     {
-      /* An empty entry is an empty file, not nothing at all. */
-      g_byte_array_unref (g_steal_pointer (&buffer));
-      *data = g_bytes_new_static ("", 0);
-      return TRUE;
+      g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errno),
+                   "cannot close native file \"%s\": %s",
+                   relative, g_strerror (errno));
+      return FALSE;
     }
-
-  gsize length = buffer->len;
-  *data = g_bytes_new_take (g_byte_array_free (g_steal_pointer (&buffer), FALSE),
-                            length);
 
   return TRUE;
 }
 
-/* Walks the entries of the jar of @step and starts one write at a time,
-   coming back here when it lands. */
-static void
-extract_entries (ExtractStep *step)
+static gboolean
+extract_single_jar (ExtractRequest *request, const NuvashaLauncherResolveFile *jar,
+                    GCancellable *cancellable, GError **error)
 {
-  ExtractRequest *request = step->request;
-  NuvashaLauncherResolveFile *jar = g_ptr_array_index (request->jars, request->index);
+  g_autoptr (GFile) file = g_file_new_for_path (jar->path);
+  g_autoptr (GFileInfo) info = NULL;
+  struct archive *archive = NULL;
   struct archive_entry *entry = NULL;
   int status;
 
-  while ((status = archive_read_next_header (step->archive, &entry)) == ARCHIVE_OK)
+  if (g_cancellable_is_cancelled (cancellable))
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                           "native extraction was cancelled");
+      return FALSE;
+    }
+
+  info = g_file_query_info (file,
+                            G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+                            G_FILE_ATTRIBUTE_STANDARD_SIZE,
+                            G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                            cancellable, error);
+  if (info == NULL)
+    return FALSE;
+
+  if (g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR ||
+      g_file_info_get_size (info) > MAX_NATIVE_TOTAL_SIZE)
+    {
+      g_set_error_literal (error, NUVASHALAUNCHER_RESOLVE_ERROR,
+                           NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
+                           "a native archive is too large or is not a regular file");
+      return FALSE;
+    }
+
+  archive = archive_read_new ();
+  if (archive_read_support_format_zip (archive) != ARCHIVE_OK ||
+      archive_read_open_filename (archive, jar->path, 64 * 1024) != ARCHIVE_OK)
+    {
+      g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
+                   "\"%s\" is not a jar nuvashalauncher can read: %s",
+                   jar->path, archive_error_string (archive));
+      archive_read_free (archive);
+      return FALSE;
+    }
+
+  while ((status = archive_read_next_header (archive, &entry)) == ARCHIVE_OK)
     {
       const char *name = archive_entry_pathname (entry);
       g_autofree char *relative = NULL;
-      g_autoptr (GBytes) data = NULL;
-      g_autoptr (GError) error = NULL;
       gsize length = 0;
       mode_t filetype = archive_entry_filetype (entry);
 
+      if (g_cancellable_is_cancelled (cancellable))
+        {
+          g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                               "native extraction was cancelled");
+          archive_read_free (archive);
+          return FALSE;
+        }
+
       if (name == NULL || entry_excluded (jar->exclude, name))
-        continue;
+        {
+          archive_read_data_skip (archive);
+          continue;
+        }
 
       /* A directory entry ends in a slash, which is not a component of
          its own to test. */
       length = strlen (name);
-
       while (length > 0 && name[length - 1] == '/')
         length--;
 
       relative = g_strndup (name, length);
-
       if (!nuvashalauncher_resolve_entry_name_is_safe (relative))
         {
-          extract_finished (
-              request,
-              g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH,
-                           "\"%s\" holds an entry that would be written "
-                           "outside the natives directory: \"%s\"",
-                           jar->path, name));
-          extract_step_free (step);
-          return;
+          g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR,
+                       NUVASHALAUNCHER_RESOLVE_ERROR_UNSAFE_PATH,
+                       "\"%s\" holds an entry that would be written "
+                       "outside the natives directory: \"%s\"",
+                       jar->path, name);
+          archive_read_free (archive);
+          return FALSE;
         }
 
       if (filetype == AE_IFDIR)
         {
           if (!nuvashalauncher_fs_make_directory_tree_nofollow (
-                request->directory, relative, 0755, &error))
+                request->directory, relative, 0755, error))
             {
-              extract_finished (request, g_steal_pointer (&error));
-              extract_step_free (step);
-              return;
+              archive_read_free (archive);
+              return FALSE;
             }
-
           continue;
         }
 
@@ -453,115 +348,68 @@ extract_entries (ExtractStep *step)
          put a name of the natives directory somewhere else on the
          disk, or run something that was never meant to be run. */
       if (filetype != AE_IFREG)
-        continue;
-
-      if (!make_parents (request->directory, relative, &error))
         {
-          extract_finished (request, g_steal_pointer (&error));
-          extract_step_free (step);
-          return;
+          archive_read_data_skip (archive);
+          continue;
         }
 
-      if (!read_entry (step->archive, &data, &error))
+      if (!make_parents (request->directory, relative, error) ||
+          !extract_single_entry (request, archive, relative, error))
         {
-          extract_finished (request, g_steal_pointer (&error));
-          extract_step_free (step);
-          return;
+          archive_read_free (archive);
+          return FALSE;
         }
-
-      if (request->extracted_bytes > MAX_NATIVE_TOTAL_SIZE ||
-          g_bytes_get_size (data) > MAX_NATIVE_TOTAL_SIZE - request->extracted_bytes)
-        {
-          extract_finished (
-              request,
-              g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR,
-                           NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
-                           "native libraries are larger than %u MiB",
-                           MAX_NATIVE_TOTAL_SIZE / (1024 * 1024)));
-          extract_step_free (step);
-          return;
-        }
-
-      request->extracted_bytes += g_bytes_get_size (data);
-      native_write_async (step, relative, data);
-      return;
     }
 
   if (status != ARCHIVE_EOF)
     {
-      extract_finished (
-          request,
-          g_error_new (NUVASHALAUNCHER_RESOLVE_ERROR,
-                       NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
-                       "cannot read native archive \"%s\": %s",
-                       jar->path, archive_error_string (step->archive)));
-      extract_step_free (step);
-      return;
+      g_set_error (error, NUVASHALAUNCHER_RESOLVE_ERROR, NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
+                   "cannot read native archive \"%s\": %s",
+                   jar->path, archive_error_string (archive));
+      archive_read_free (archive);
+      return FALSE;
     }
 
-  /* The jar is done: on to the next one. */
-  request->index++;
-  extract_step_free (step);
-  extract_next_jar (request);
+  archive_read_free (archive);
+  return TRUE;
 }
 
 static void
-extract_next_jar (ExtractRequest *request)
+extract_natives_worker_thread (GTask *task,
+                               gpointer source_object G_GNUC_UNUSED,
+                               gpointer task_data,
+                               GCancellable *cancellable)
 {
-  NuvashaLauncherResolveFile *jar;
-  ExtractStep *step;
-  g_autoptr (GFile) file = NULL;
-
-  if (request->index >= request->jars->len)
-    {
-      extract_finished (request, NULL);
-      return;
-    }
-
-  jar = g_ptr_array_index (request->jars, request->index);
-  file = g_file_new_for_path (jar->path);
-
-  step = g_new0 (ExtractStep, 1);
-  step->request = request;
-
-  g_file_query_info_async (file, G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-                           G_FILE_ATTRIBUTE_STANDARD_SIZE,
-                           G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-                           G_PRIORITY_DEFAULT,
-                           g_task_get_cancellable (request->task),
-                           extract_jar_info_ready, step);
-}
-
-static void
-extract_jar_info_ready (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  ExtractStep *step = user_data;
+  ExtractRequest *request = task_data;
   g_autoptr (GError) error = NULL;
-  g_autoptr (GFileInfo) info =
-    g_file_query_info_finish (G_FILE (source), result, &error);
 
-  if (info == NULL)
+  for (guint i = 0; i < request->jars->len; i++)
     {
-      extract_finished (step->request, g_steal_pointer (&error));
-      extract_step_free (step);
-      return;
+      const NuvashaLauncherResolveFile *jar = g_ptr_array_index (request->jars, i);
+
+      if (!extract_single_jar (request, jar, cancellable, &error))
+        {
+          g_task_return_error (task, g_steal_pointer (&error));
+          return;
+        }
     }
 
-  if (g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR ||
-      g_file_info_get_size (info) > MAX_NATIVE_TOTAL_SIZE)
-    {
-      extract_finished (
-          step->request,
-          g_error_new_literal (NUVASHALAUNCHER_RESOLVE_ERROR,
-                               NUVASHALAUNCHER_RESOLVE_ERROR_INVALID,
-                               "a native archive is too large or is not a regular file"));
-      extract_step_free (step);
-      return;
-    }
+  g_task_return_boolean (task, TRUE);
+}
 
-  g_file_load_bytes_async (G_FILE (source),
-                           g_task_get_cancellable (step->request->task),
-                           extract_read_ready, step);
+static void
+extract_natives_worker_done (GObject *source G_GNUC_UNUSED,
+                             GAsyncResult *result,
+                             gpointer user_data)
+{
+  ExtractRequest *request = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (g_task_propagate_boolean (G_TASK (result), &error))
+    nuvashalauncher_task_scope_return_boolean (request->scope, TRUE);
+  else
+    nuvashalauncher_task_scope_return_error (request->scope,
+                                             g_steal_pointer (&error));
 }
 
 NuvashaLauncherTaskScope *
@@ -573,23 +421,23 @@ nuvashalauncher_resolve_extract_natives_async (GPtrArray         *jars,
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
   ExtractRequest *request;
+  GTask *worker;
 
   g_return_val_if_fail (jars != NULL, NULL);
   g_return_val_if_fail (natives_directory != NULL, NULL);
   g_return_val_if_fail (g_path_is_absolute (natives_directory), NULL);
 
   request = g_new0 (ExtractRequest, 1);
-
-  /* Keep a reference separate from the handle returned to the caller. The
-     completion callback may release that handle before this request has
-     finished cleaning up its task state. */
-  request->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
   request->scope = nuvashalauncher_task_scope_ref (scope);
-  g_task_set_check_cancellable (request->task, FALSE);
   request->jars = g_ptr_array_ref (jars);
   request->directory = g_strdup (natives_directory);
 
-  extract_next_jar (request);
+  g_task_set_check_cancellable (nuvashalauncher_task_scope_task (scope), FALSE);
+  worker = g_task_new (NULL, nuvashalauncher_task_scope_get_cancellable (scope),
+                       extract_natives_worker_done, request);
+  g_task_set_task_data (worker, request, (GDestroyNotify) extract_request_free);
+  g_task_run_in_thread (worker, extract_natives_worker_thread);
+  g_object_unref (worker);
 
   return g_steal_pointer (&scope);
 }

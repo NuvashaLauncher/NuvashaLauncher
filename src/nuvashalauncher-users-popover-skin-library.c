@@ -204,24 +204,27 @@ append_default_skins (GtkListBox                   *skins,
     {
       const char *name = defaults[i];
       g_autofree char *filename = g_strconcat (name, ".png", NULL);
-      g_autofree char *source_path = g_build_filename (source_dir, filename, NULL);
-      g_autofree char *fallback_path = g_build_filename (source_fallback, filename, NULL);
       g_autofree char *target_path = g_build_filename (target_dir, filename, NULL);
       g_autofree char *uri = NULL;
-      g_autoptr (GFile) source = NULL;
-      g_autoptr (GFile) target = NULL;
 
-      if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
-        {
-          g_clear_pointer (&source_path, g_free);
-          source_path = g_strdup (fallback_path);
-        }
-      if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
-        continue;
-      source = g_file_new_for_path (source_path);
-      target = g_file_new_for_path (target_path);
       if (!g_file_test (target_path, G_FILE_TEST_IS_REGULAR))
-        nuvashalauncher_fs_copy_file (source, target, G_FILE_COPY_NONE, NULL, NULL);
+        {
+          g_autofree char *source_path = g_build_filename (source_dir, filename, NULL);
+          g_autofree char *fallback_path = g_build_filename (source_fallback, filename, NULL);
+          g_autoptr (GFile) source = NULL;
+          g_autoptr (GFile) target = NULL;
+
+          if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
+            {
+              g_clear_pointer (&source_path, g_free);
+              source_path = g_strdup (fallback_path);
+            }
+          if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
+            continue;
+          source = g_file_new_for_path (source_path);
+          target = g_file_new_for_path (target_path);
+          nuvashalauncher_fs_copy_file (source, target, G_FILE_COPY_NONE, NULL, NULL);
+        }
       uri = g_filename_to_uri (target_path, NULL, NULL);
       g_autofree char *identity = uri != NULL ? skin_name_for_url (uri) : NULL;
       if (uri != NULL && !g_hash_table_contains (skin_urls, identity) &&

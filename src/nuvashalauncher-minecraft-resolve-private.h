@@ -47,11 +47,15 @@ struct ResolveRequest
   guint done;
   guint total;
   GPtrArray *natives;
+  GPtrArray *library_files;
   GPtrArray *asset_hashes;
   GHashTable *asset_paths;
   gboolean asset_virtual;
   gboolean asset_map_to_resources;
 };
+
+char *nuvashalauncher_resolve_classpath_from_files (GPtrArray  *files,
+                                                    const char *client_jar);
 
 char *nuvashalauncher_resolve_safe_name (const char *id);
 gboolean nuvashalauncher_resolve_ensure_directory (const char *path, GError **error);
