@@ -43,11 +43,10 @@
 static void
 search_answer (GTask *task, JsonNode *root)
 {
-  g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
   NuvashaLauncherModrinthResults *results = NULL;
 
-  results = nuvashalauncher_modrinth_results_from_json (json, -1, &error);
+  results = nuvashalauncher_modrinth_results_from_node (root, &error);
 
   if (results == NULL)
     {
@@ -83,11 +82,10 @@ nuvashalauncher_modrinth_search_finish (GAsyncResult *result, GError **error)
 static void
 details_answer (GTask *task, JsonNode *root)
 {
-  g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
   NuvashaLauncherModrinthDetails *details = NULL;
 
-  details = nuvashalauncher_modrinth_details_from_json (json, -1, &error);
+  details = nuvashalauncher_modrinth_details_from_node (root, &error);
 
   if (details == NULL)
     {
@@ -163,11 +161,10 @@ versions_answer (GTask *task, JsonNode *root)
 {
   NuvashaLauncherModrinthRequest *request = g_task_get_task_data (task);
   InstanceAsk *asked = request->data;
-  g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
   GPtrArray *versions = NULL;
 
-  versions = nuvashalauncher_modrinth_versions_from_json (json, -1, asked->type,
+  versions = nuvashalauncher_modrinth_versions_from_node (root, asked->type,
                                               asked->minecraft_version,
                                               asked->loader, &error);
 
@@ -242,13 +239,12 @@ nuvashalauncher_modrinth_versions_finish (GAsyncResult *result, GError **error)
 static void
 categories_answer (GTask *task, JsonNode *root)
 {
-  g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
   NuvashaLauncherModrinthRequest *request = g_task_get_task_data (task);
   GPtrArray *categories = NULL;
 
-  categories = nuvashalauncher_modrinth_categories_from_json (
-      json, -1, (const char *) request->data, &error);
+  categories = nuvashalauncher_modrinth_categories_from_node (
+      root, (const char *) request->data, &error);
 
   if (categories == NULL)
     {
@@ -286,11 +282,10 @@ nuvashalauncher_modrinth_categories_finish (GAsyncResult *result, GError **error
 static void
 version_answer (GTask *task, JsonNode *root)
 {
-  g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
   NuvashaLauncherModrinthVersion *version = NULL;
 
-  version = nuvashalauncher_modrinth_version_from_json (json, -1, &error);
+  version = nuvashalauncher_modrinth_version_from_node (root, &error);
 
   if (version == NULL)
     {
@@ -352,11 +347,10 @@ update_answer (GTask *task, JsonNode *root)
 {
   NuvashaLauncherModrinthRequest *request = g_task_get_task_data (task);
   InstanceAsk *asked = request->data;
-  g_autofree char *json = json_to_string (root, FALSE);
   g_autoptr (GError) error = NULL;
   NuvashaLauncherModrinthVersion *version = NULL;
 
-  version = nuvashalauncher_modrinth_version_from_json (json, -1, &error);
+  version = nuvashalauncher_modrinth_version_from_node (root, &error);
 
   if (version == NULL)
     {

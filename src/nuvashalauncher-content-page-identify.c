@@ -501,9 +501,11 @@ scan_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
       adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->installed.group),
                                   row);
-      self->installed.rows_list = g_list_append (self->installed.rows_list, row);
+      self->installed.rows_list = g_list_prepend (self->installed.rows_list, row);
       g_hash_table_insert (self->installed.rows, g_strdup (file->path), row);
     }
+
+  self->installed.rows_list = g_list_reverse (self->installed.rows_list);
 
   installed_filter_rows (self);
 
@@ -554,8 +556,6 @@ metadata_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
            if (row != NULL)
              file_row_refresh (row);
-      if (file->icon_url != NULL && *file->icon_url != '\0')
-        load_visible_icons (self);
 
            if (file->metadata_dirty)
              {

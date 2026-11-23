@@ -137,7 +137,6 @@ manifest_downloaded (GObject *source G_GNUC_UNUSED,
   FetchRequest *request = user_data;
   g_autoptr (GError) error = NULL;
   g_autoptr (JsonParser) parser = NULL;
-  g_autofree char *contents = NULL;
   JsonNode *root;
   NuvashaLauncherVersionManifest *manifest;
 
@@ -150,8 +149,7 @@ manifest_downloaded (GObject *source G_GNUC_UNUSED,
     }
 
   root = json_parser_get_root (parser);
-  contents = root != NULL ? json_to_string (root, FALSE) : g_strdup ("");
-  manifest = nuvashalauncher_version_manifest_new_from_json (contents, -1, &error);
+  manifest = nuvashalauncher_version_manifest_new_from_node (root, &error);
 
   if (manifest == NULL)
     {

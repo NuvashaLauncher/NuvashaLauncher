@@ -11,48 +11,92 @@
 
 #include <gio/gio.h>
 
-#define HASH_CHUNK_SIZE (64 * 1024)
-
-static void cache_open_ready (GObject *, GAsyncResult *, gpointer);
-static void hash_read_ready (GObject *, GAsyncResult *, gpointer);
+#define HASH_CHUNK_SIZE (256 * 1024)
 
 /* ---------------------------------------------------------- *
  * Hashing a file already on disk
  *
- * GIO has no checksum helper, so the file is read asynchronously in
- * chunks and fed to a GChecksum. The caller gets the hex digest, or
- * the error of the read; G_IO_ERROR_NOT_FOUND simply means that
+ * GIO has no checksum helper, so the file is read on a worker thread
+ * in chunks and fed to a GChecksum. The caller gets the hex digest,
+ * or the error of the read; G_IO_ERROR_NOT_FOUND simply means that
  * nothing is cached yet.
  * ---------------------------------------------------------- */
 
 typedef struct
 {
-  GTask *task;
+  GFile *file;
+  GChecksumType type;
   NuvashaLauncherTaskScope *scope;
-  GInputStream *stream;
-  GChecksum *checksum;
 } HashFile;
-
-static void hash_read_next (HashFile *hash);
-
-static void
-hash_file_close (HashFile *hash)
-{
-  if (hash->stream != NULL)
-    {
-      g_input_stream_close (hash->stream, NULL, NULL);
-      g_clear_object (&hash->stream);
-    }
-}
 
 static void
 hash_file_free (HashFile *hash)
 {
-  hash_file_close (hash);
-  g_clear_pointer (&hash->checksum, g_checksum_free);
+  g_clear_object (&hash->file);
   g_clear_pointer (&hash->scope, nuvashalauncher_task_scope_unref);
-  g_clear_object (&hash->task);
   g_free (hash);
+}
+
+static void
+hash_file_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+                  gpointer task_data, GCancellable *cancellable)
+{
+  HashFile *hash = task_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFileInputStream) stream = NULL;
+  g_autoptr (GChecksum) checksum = NULL;
+  g_autofree guchar *buffer = NULL;
+
+  stream = g_file_read (hash->file, cancellable, &error);
+  if (stream == NULL)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  checksum = g_checksum_new (hash->type);
+  buffer = g_malloc (HASH_CHUNK_SIZE);
+
+  for (;;)
+    {
+      gssize read_bytes = g_input_stream_read (G_INPUT_STREAM (stream), buffer,
+                                               HASH_CHUNK_SIZE, cancellable,
+                                               &error);
+
+      if (read_bytes < 0)
+        {
+          g_input_stream_close (G_INPUT_STREAM (stream), NULL, NULL);
+          g_task_return_error (task, g_steal_pointer (&error));
+          return;
+        }
+
+      if (read_bytes == 0)
+        break;
+
+      g_checksum_update (checksum, buffer, (gsize) read_bytes);
+    }
+
+  g_input_stream_close (G_INPUT_STREAM (stream), NULL, NULL);
+  g_task_return_pointer (task, g_strdup (g_checksum_get_string (checksum)),
+                         g_free);
+}
+
+static void
+hash_file_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                gpointer user_data)
+{
+  HashFile *hash = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *digest = g_task_propagate_pointer (G_TASK (result), &error);
+
+  if (digest == NULL)
+    nuvashalauncher_task_scope_return_error (hash->scope, g_steal_pointer (&error));
+  else
+    nuvashalauncher_task_scope_return_pointer (hash->scope,
+                                               g_steal_pointer (&digest),
+                                               g_free);
+
+  hash_file_free (hash);
 }
 
 NuvashaLauncherTaskScope *
@@ -61,86 +105,19 @@ nuvashalauncher_download_hash_file_async (GFile *file, GChecksumType type,
 {
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
+  g_autoptr (GTask) worker = NULL;
   HashFile *hash = g_new0 (HashFile, 1);
 
-  /* Held: keeps the scope alive until hash computation is complete. */
+  hash->file = g_object_ref (file);
+  hash->type = type;
   hash->scope = nuvashalauncher_task_scope_ref (scope);
-  hash->task = g_object_ref (nuvashalauncher_task_scope_task (scope));
-  hash->checksum = g_checksum_new (type);
 
-  g_file_read_async (file, G_PRIORITY_DEFAULT,
-                     nuvashalauncher_task_scope_get_cancellable (scope), cache_open_ready,
-                     hash);
+  worker = g_task_new (NULL, nuvashalauncher_task_scope_get_cancellable (scope),
+                       hash_file_done, hash);
+  g_task_set_task_data (worker, hash, NULL);
+  g_task_run_in_thread (worker, hash_file_thread);
 
   return g_steal_pointer (&scope);
-}
-
-static void
-cache_open_ready (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  HashFile *hash = user_data;
-  g_autoptr (GError) error = NULL;
-
-  hash->stream = G_INPUT_STREAM (
-    g_file_read_finish (G_FILE (source), result, &error));
-
-  if (hash->stream == NULL)
-    {
-      nuvashalauncher_task_scope_return_error (hash->scope, g_steal_pointer (&error));
-      hash_file_free (hash);
-      return;
-    }
-
-  hash_read_next (hash);
-}
-
-static void
-hash_read_next (HashFile *hash)
-{
-  g_input_stream_read_bytes_async (hash->stream, HASH_CHUNK_SIZE,
-                                   G_PRIORITY_DEFAULT,
-                                    nuvashalauncher_task_scope_get_cancellable (hash->scope),
-                                   hash_read_ready, hash);
-}
-
-static void
-hash_read_ready (GObject *source, GAsyncResult *result, gpointer user_data)
-{
-  HashFile *hash = user_data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GBytes) bytes =
-    g_input_stream_read_bytes_finish (G_INPUT_STREAM (source), result, &error);
-
-  if (bytes == NULL)
-    {
-      nuvashalauncher_task_scope_return_error (hash->scope, g_steal_pointer (&error));
-      hash_file_free (hash);
-      return;
-    }
-
-  gsize size = 0;
-  const char *data = g_bytes_get_data (bytes, &size);
-
-  if (g_cancellable_is_cancelled (nuvashalauncher_task_scope_get_cancellable (hash->scope)))
-    {
-      nuvashalauncher_task_scope_return_error (
-        hash->scope,
-        g_error_new_literal (G_IO_ERROR, G_IO_ERROR_CANCELLED,
-                             "the operation was cancelled"));
-      hash_file_free (hash);
-      return;
-    }
-
-  if (size == 0)
-    {
-      nuvashalauncher_task_scope_return_pointer (
-        hash->scope, g_strdup (g_checksum_get_string (hash->checksum)), g_free);
-      hash_file_free (hash);
-      return;
-    }
-
-  g_checksum_update (hash->checksum, (const guchar *) data, size);
-  hash_read_next (hash);
 }
 
 char *

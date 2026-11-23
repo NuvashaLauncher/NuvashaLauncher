@@ -187,6 +187,7 @@ struct _NuvashaLauncherVersionManifest
   char *latest_release;
   char *latest_snapshot;
   GPtrArray *entries;
+  GHashTable *entries_by_id; /* id -> NuvashaLauncherVersionEntry*, borrowed from entries */
 };
 
 /* Parses a manifest. @length may be -1 for a nul terminated document.
@@ -195,6 +196,9 @@ struct _NuvashaLauncherVersionManifest
 NuvashaLauncherVersionManifest *nuvashalauncher_version_manifest_new_from_json (const char *json,
                                                         gssize      length,
                                                         GError    **error);
+
+NuvashaLauncherVersionManifest *nuvashalauncher_version_manifest_new_from_node (JsonNode *root,
+                                                        GError  **error);
 
 /* The entry with this id, or NULL. Borrowed from the manifest. */
 const NuvashaLauncherVersionEntry *nuvashalauncher_version_manifest_find (NuvashaLauncherVersionManifest *self,
@@ -238,6 +242,9 @@ struct _NuvashaLauncherVersionDescription
 NuvashaLauncherVersionDescription *nuvashalauncher_version_description_new_from_json (const char *json,
                                                               gssize      length,
                                                               GError    **error);
+
+NuvashaLauncherVersionDescription *nuvashalauncher_version_description_new_from_node (JsonNode *root,
+                                                              GError  **error);
 
 /* A new description holding @child on top of @parent: libraries and
  * arguments are concatenated with the parent first, every other field

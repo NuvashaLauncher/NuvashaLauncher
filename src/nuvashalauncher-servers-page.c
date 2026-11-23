@@ -595,12 +595,24 @@ server_matches_query (const ServerEntry *s, const char *query)
 }
 
 static void
-rebuild_server_rows (NuvashaLauncherServersPage *self)
+filter_server_rows (NuvashaLauncherServersPage *self)
 {
   const char *query = self->search_bar != NULL
     ? gtk_editable_get_text (GTK_EDITABLE (self->search_bar))
     : "";
 
+  for (guint i = 0; i < self->rows->len && i < self->servers->len; i++)
+    {
+      GtkWidget *row = g_ptr_array_index (self->rows, i);
+      ServerEntry *s = g_ptr_array_index (self->servers, i);
+
+      gtk_widget_set_visible (row, server_matches_query (s, query));
+    }
+}
+
+static void
+rebuild_server_rows (NuvashaLauncherServersPage *self)
+{
   for (guint i = 0; i < self->rows->len; i++)
     adw_preferences_group_remove (self->group, g_ptr_array_index (self->rows, i));
   g_ptr_array_set_size (self->rows, 0);
@@ -608,13 +620,12 @@ rebuild_server_rows (NuvashaLauncherServersPage *self)
   for (guint i = 0; i < self->servers->len; i++)
     {
       ServerEntry *s = g_ptr_array_index (self->servers, i);
-      if (!server_matches_query (s, query))
-        continue;
       GtkWidget *row = build_server_row (self, s, i);
       g_ptr_array_add (self->rows, row);
       adw_preferences_group_add (self->group, row);
     }
 
+  filter_server_rows (self);
   adw_view_stack_set_visible_child_name (
     self->stack, self->servers->len > 0 ? "list" : "empty");
   servers_page_update_selection (self);
@@ -623,7 +634,7 @@ rebuild_server_rows (NuvashaLauncherServersPage *self)
 static void
 on_server_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 {
-  rebuild_server_rows (NUVASHALAUNCHER_SERVERS_PAGE (user_data));
+  filter_server_rows (NUVASHALAUNCHER_SERVERS_PAGE (user_data));
 }
 
 static gboolean

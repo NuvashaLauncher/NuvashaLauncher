@@ -378,6 +378,14 @@ nuvashalauncher_icon_widget_set_texture (GtkWidget *widget, GdkTexture *texture)
   if (widget == NULL || !GTK_IS_STACK (widget) || texture == NULL)
     return FALSE;
 
+  old_icon = gtk_stack_get_child_by_name (GTK_STACK (widget), "icon");
+  if (old_icon != NULL && GTK_IS_IMAGE (old_icon))
+    {
+      gtk_image_set_from_paintable (GTK_IMAGE (old_icon), GDK_PAINTABLE (texture));
+      gtk_stack_set_visible_child_name (GTK_STACK (widget), "icon");
+      return TRUE;
+    }
+
   /* An image of the square and no more: a picture reports the size of
      its source as its natural size, so a 512 by 512 icon made its row
      taller than the one next to it. The pixel size pins the icon to the
@@ -388,7 +396,6 @@ nuvashalauncher_icon_widget_set_texture (GtkWidget *widget, GdkTexture *texture)
   gtk_widget_set_size_request (icon, NUVASHALAUNCHER_ICON_SIZE, NUVASHALAUNCHER_ICON_SIZE);
   gtk_widget_set_overflow (icon, GTK_OVERFLOW_HIDDEN);
 
-  old_icon = gtk_stack_get_child_by_name (GTK_STACK (widget), "icon");
   if (old_icon != NULL)
     gtk_stack_remove (GTK_STACK (widget), old_icon);
   gtk_stack_add_named (GTK_STACK (widget), icon, "icon");

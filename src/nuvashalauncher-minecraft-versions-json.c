@@ -114,6 +114,7 @@ fill_manifest (JsonObject *root, NuvashaLauncherVersionManifest *self, GError **
     return nuvashalauncher_mc_missing_field ("versions", error);
 
   self->entries = g_ptr_array_new_with_free_func (nuvashalauncher_mc_free_entry);
+  self->entries_by_id = g_hash_table_new (g_str_hash, g_str_equal);
 
   for (guint i = 0; i < json_array_get_length (versions); i++)
     {
@@ -133,9 +134,37 @@ fill_manifest (JsonObject *root, NuvashaLauncherVersionManifest *self, GError **
         return FALSE;
 
       g_ptr_array_add (self->entries, entry);
+      if (!g_hash_table_contains (self->entries_by_id, entry->id))
+        g_hash_table_insert (self->entries_by_id, entry->id, entry);
     }
 
   return TRUE;
+}
+
+NuvashaLauncherVersionManifest *
+nuvashalauncher_version_manifest_new_from_node (JsonNode *root,
+                                                GError  **error)
+{
+  NuvashaLauncherVersionManifest *self;
+
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
+    {
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
+                   "expected a JSON object");
+      return NULL;
+    }
+
+  self = g_object_new (NUVASHALAUNCHER_TYPE_VERSION_MANIFEST, NULL);
+
+  if (!fill_manifest (json_node_get_object (root), self, error))
+    {
+      g_object_unref (self);
+      return NULL;
+    }
+
+  return self;
 }
 
 NuvashaLauncherVersionManifest *
@@ -172,18 +201,10 @@ nuvashalauncher_version_manifest_find (NuvashaLauncherVersionManifest *self, con
   g_return_val_if_fail (NUVASHALAUNCHER_IS_VERSION_MANIFEST (self), NULL);
   g_return_val_if_fail (id != NULL, NULL);
 
-  if (self->entries == NULL)
+  if (self->entries_by_id == NULL)
     return NULL;
 
-  for (guint i = 0; i < self->entries->len; i++)
-    {
-      NuvashaLauncherVersionEntry *entry = g_ptr_array_index (self->entries, i);
-
-      if (g_str_equal (entry->id, id))
-        return entry;
-    }
-
-  return NULL;
+  return g_hash_table_lookup (self->entries_by_id, id);
 }
 
 static void
@@ -193,6 +214,7 @@ nuvashalauncher_version_manifest_finalize (GObject *object)
 
   g_free (self->latest_release);
   g_free (self->latest_snapshot);
+  g_clear_pointer (&self->entries_by_id, g_hash_table_unref);
   g_clear_pointer (&self->entries, g_ptr_array_unref);
 
   G_OBJECT_CLASS (nuvashalauncher_version_manifest_parent_class)->finalize (object);

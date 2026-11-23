@@ -321,29 +321,13 @@ library_file_path (const NuvashaLauncherLibrary *library, const char *classifier
   return g_build_filename (libraries_dir, from_coordinates, NULL);
 }
 
-/* TRUE when a jar for @path is already on the list. Mojang repeats a
-   library in a few documents and the same bytes must not be fetched
-   twice nor unpacked twice. */
-static gboolean
-file_already_listed (GPtrArray *files, const char *path)
-{
-  for (guint i = 0; i < files->len; i++)
-    {
-      const NuvashaLauncherResolveFile *file = g_ptr_array_index (files, i);
-
-      if (g_str_equal (file->path, path))
-        return TRUE;
-    }
-
-  return FALSE;
-}
-
 /* Adds @info to @files when there is something to fetch and it is not
    there yet. A library that names no jar is skipped: the document does
    not say where it comes from, and that is not worth failing a whole
    version over. */
 static void
-add_file (GPtrArray *files, const NuvashaLauncherLibrary *library,
+add_file (GPtrArray *files, GHashTable *seen_paths,
+          const NuvashaLauncherLibrary *library,
           const NuvashaLauncherDownloadInfo *info, const char *classifier,
           const char *libraries_dir, gboolean natives)
 {
@@ -360,11 +344,14 @@ add_file (GPtrArray *files, const NuvashaLauncherLibrary *library,
   else
     path = library_file_path (library, classifier, libraries_dir);
 
-  if (path == NULL || file_already_listed (files, path))
+  if (path == NULL || g_hash_table_contains (seen_paths, path))
     return;
 
-  g_ptr_array_add (files, nuvashalauncher_resolve_file_new (path, info->url, info->sha1,
-                                                natives, library->exclude));
+  NuvashaLauncherResolveFile *entry =
+    nuvashalauncher_resolve_file_new (path, info->url, info->sha1,
+                                      natives, library->exclude);
+  g_hash_table_add (seen_paths, entry->path);
+  g_ptr_array_add (files, entry);
 }
 
 GPtrArray *
@@ -374,6 +361,7 @@ nuvashalauncher_resolve_library_files (NuvashaLauncherVersionDescription *descri
 {
   g_autoptr (GPtrArray) files =
     g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_resolve_file_free);
+  g_autoptr (GHashTable) seen_paths = g_hash_table_new (g_str_hash, g_str_equal);
 
   g_return_val_if_fail (description != NULL, NULL);
   g_return_val_if_fail (context != NULL, NULL);
@@ -394,7 +382,7 @@ nuvashalauncher_resolve_library_files (NuvashaLauncherVersionDescription *descri
          LWJGL, JNA and netty at the directories where they unpack
          themselves out of the jars they find there. */
       if (library->artifact != NULL)
-        add_file (files, library, library->artifact, NULL, libraries_dir,
+        add_file (files, seen_paths, library, library->artifact, NULL, libraries_dir,
                   FALSE);
 
       /* The older spelling: the library keeps its own jar in
@@ -404,7 +392,7 @@ nuvashalauncher_resolve_library_files (NuvashaLauncherVersionDescription *descri
       classifier = nuvashalauncher_resolve_native_classifier (library, context);
 
       if (classifier != NULL)
-        add_file (files, library,
+        add_file (files, seen_paths, library,
                   g_hash_table_lookup (library->classifiers, classifier),
                   classifier, libraries_dir, TRUE);
     }

@@ -180,7 +180,8 @@ export_file (ExportRun *run, struct archive *archive, const char *source,
   run->done++;
   if (run->done > run->total)
     run->total = run->done;
-  export_progress (run, run->done, run->total, _("Writing archive"));
+  if (run->done == 1 || run->done == run->total || (run->done % 16) == 0)
+    export_progress (run, run->done, run->total, _("Writing archive"));
   return TRUE;
 }
 
@@ -376,7 +377,9 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
           source = g_build_filename (run->instance_directory, folders[folder_index],
                                      filename, NULL);
 
-          if (g_lstat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
+          gboolean have_reg =
+            g_lstat (source, &stat_buf) == 0 && S_ISREG (stat_buf.st_mode);
+          if (!have_reg)
             {
               disabled_source = g_strconcat (source, ".disabled", NULL);
               if (g_lstat (disabled_source, &stat_buf) == 0 &&
@@ -385,13 +388,14 @@ export_indexed_files (ExportRun *run, GCancellable *cancellable, GError **error)
                   g_free (source);
                   source = g_steal_pointer (&disabled_source);
                   disabled = TRUE;
+                  have_reg = TRUE;
                 }
             }
 
           if (sha1 == NULL || *sha1 == '\0' || sha512 == NULL || *sha512 == '\0' ||
               url == NULL || *url == '\0' ||
               !nuvashalauncher_modpack_download_url_allowed (url) ||
-              g_lstat (source, &stat_buf) != 0 || !S_ISREG (stat_buf.st_mode))
+              !have_reg)
             continue;
 
           file = json_object_new ();

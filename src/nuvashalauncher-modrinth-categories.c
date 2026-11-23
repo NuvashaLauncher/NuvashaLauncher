@@ -139,23 +139,12 @@ compare_by_name (gconstpointer a, gconstpointer b)
 }
 
 GPtrArray *
-nuvashalauncher_modrinth_categories_from_json (const char *json, gssize length,
-                                   const char *project_type, GError **error)
+nuvashalauncher_modrinth_categories_from_node (JsonNode *root,
+                                               const char *project_type,
+                                               GError **error)
 {
-  g_autoptr (JsonParser) parser = json_parser_new ();
-  g_autoptr (GError) parse_error = NULL;
   GPtrArray *categories = NULL;
-  JsonNode *root = NULL;
   JsonArray *array = NULL;
-
-  if (!json_parser_load_from_data (parser, json != NULL ? json : "",
-                                   json != NULL ? length : 0, &parse_error))
-    {
-      g_propagate_error (error, g_steal_pointer (&parse_error));
-      return NULL;
-    }
-
-  root = json_parser_get_root (parser);
 
   if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
     {
@@ -198,4 +187,22 @@ nuvashalauncher_modrinth_categories_from_json (const char *json, gssize length,
   g_ptr_array_sort (categories, compare_by_name);
 
   return categories;
+}
+
+GPtrArray *
+nuvashalauncher_modrinth_categories_from_json (const char *json, gssize length,
+                                   const char *project_type, GError **error)
+{
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  g_autoptr (GError) parse_error = NULL;
+
+  if (!json_parser_load_from_data (parser, json != NULL ? json : "",
+                                   json != NULL ? length : 0, &parse_error))
+    {
+      g_propagate_error (error, g_steal_pointer (&parse_error));
+      return NULL;
+    }
+
+  return nuvashalauncher_modrinth_categories_from_node (
+      json_parser_get_root (parser), project_type, error);
 }

@@ -141,10 +141,6 @@ profile_request_free (gpointer data)
 static NuvashaLauncherVersionDescription *
 profile_from_root (JsonNode *root, GError **error)
 {
-  g_autoptr (JsonGenerator) generator = NULL;
-  g_autofree char *data = NULL;
-  gsize length = 0;
-
   if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
     {
       g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_INSTALLER,
@@ -155,11 +151,7 @@ profile_from_root (JsonNode *root, GError **error)
   if (!give_libraries_their_downloads (root, error))
     return NULL;
 
-  generator = json_generator_new ();
-  json_generator_set_root (generator, root);
-  data = json_generator_to_data (generator, &length);
-
-  return nuvashalauncher_version_description_new_from_json (data, length, error);
+  return nuvashalauncher_version_description_new_from_node (root, error);
 }
 
 NuvashaLauncherVersionDescription *

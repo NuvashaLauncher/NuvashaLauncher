@@ -61,18 +61,40 @@ emit_line (NuvashaLauncherLineReader *reader)
 static void
 consume_bytes (NuvashaLauncherLineReader *reader, const guint8 *data, gsize size)
 {
-  for (gsize i = 0; i < size; i++)
+  gsize pos = 0;
+
+  while (pos < size)
     {
-      if (data[i] == '\n')
+      const guint8 *nl = memchr (data + pos, '\n', size - pos);
+      gsize chunk_len = nl != NULL ? (gsize) (nl - (data + pos)) : (size - pos);
+
+      if (chunk_len > 0)
         {
-          emit_line (reader);
-          continue;
+          if (reader->line_buffer->len < MAX_LINE_SIZE)
+            {
+              gsize room = MAX_LINE_SIZE - reader->line_buffer->len;
+              gsize copy_len = chunk_len < room ? chunk_len : room;
+
+              g_byte_array_append (reader->line_buffer, data + pos,
+                                   (guint) copy_len);
+              if (copy_len < chunk_len)
+                reader->truncated = TRUE;
+            }
+          else
+            {
+              reader->truncated = TRUE;
+            }
         }
 
-      if (reader->line_buffer->len < MAX_LINE_SIZE)
-        g_byte_array_append (reader->line_buffer, &data[i], 1);
+      if (nl != NULL)
+        {
+          emit_line (reader);
+          pos += chunk_len + 1;
+        }
       else
-        reader->truncated = TRUE;
+        {
+          pos = size;
+        }
     }
 }
 

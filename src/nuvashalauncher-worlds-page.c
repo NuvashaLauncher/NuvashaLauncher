@@ -665,12 +665,24 @@ world_matches_query (const WorldEntry *w, const char *query)
 }
 
 static void
-rebuild_world_rows (NuvashaLauncherWorldsPage *self)
+filter_world_rows (NuvashaLauncherWorldsPage *self)
 {
   const char *query = self->search_bar != NULL
     ? gtk_editable_get_text (GTK_EDITABLE (self->search_bar))
     : "";
 
+  for (guint i = 0; i < self->rows->len && i < self->worlds->len; i++)
+    {
+      GtkWidget *row = g_ptr_array_index (self->rows, i);
+      WorldEntry *w = g_ptr_array_index (self->worlds, i);
+
+      gtk_widget_set_visible (row, world_matches_query (w, query));
+    }
+}
+
+static void
+rebuild_world_rows (NuvashaLauncherWorldsPage *self)
+{
   for (guint i = 0; i < self->rows->len; i++)
     adw_preferences_group_remove (self->group, g_ptr_array_index (self->rows, i));
   g_ptr_array_set_size (self->rows, 0);
@@ -678,13 +690,12 @@ rebuild_world_rows (NuvashaLauncherWorldsPage *self)
   for (guint i = 0; i < self->worlds->len; i++)
     {
       WorldEntry *w = g_ptr_array_index (self->worlds, i);
-      if (!world_matches_query (w, query))
-        continue;
       GtkWidget *row = build_world_row (self, w);
       g_ptr_array_add (self->rows, row);
       adw_preferences_group_add (self->group, row);
     }
 
+  filter_world_rows (self);
   adw_view_stack_set_visible_child_name (
     self->stack, self->worlds->len > 0 ? "list" : "empty");
   worlds_page_update_selection (self);
@@ -693,7 +704,7 @@ rebuild_world_rows (NuvashaLauncherWorldsPage *self)
 static void
 on_world_search_changed (GtkEditable *editable G_GNUC_UNUSED, gpointer user_data)
 {
-  rebuild_world_rows (NUVASHALAUNCHER_WORLDS_PAGE (user_data));
+  filter_world_rows (NUVASHALAUNCHER_WORLDS_PAGE (user_data));
 }
 
 static gboolean

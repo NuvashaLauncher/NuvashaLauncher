@@ -26,8 +26,6 @@ typedef struct
   char *path;
   char *sha1;
   char *sha512;
-  guint stage; /* 0: checking sha1, 1: checking sha512 */
-  GTask *task; /* owned */
   NuvashaLauncherTaskScope *scope;
 } VerifyRun;
 
@@ -40,59 +38,88 @@ verify_run_free (VerifyRun *run)
   g_free (run->path);
   g_free (run->sha1);
   g_free (run->sha512);
-  g_clear_object (&run->task);
-  nuvashalauncher_task_scope_unref (run->scope);
+  g_clear_pointer (&run->scope, nuvashalauncher_task_scope_unref);
   g_free (run);
 }
 
 static void
-verify_hash_ready (GObject *source G_GNUC_UNUSED,
-                   GAsyncResult *result,
-                   gpointer user_data)
+verify_file_thread (GTask *task, gpointer source_object G_GNUC_UNUSED,
+                    gpointer task_data, GCancellable *cancellable)
+{
+  VerifyRun *run = task_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GFile) file = g_file_new_for_path (run->path);
+  g_autoptr (GFileInputStream) stream = NULL;
+  g_autoptr (GChecksum) sha1 = NULL;
+  g_autoptr (GChecksum) sha512 = NULL;
+  g_autofree guchar *buffer = NULL;
+
+  stream = g_file_read (file, cancellable, &error);
+  if (stream == NULL)
+    {
+      g_task_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  sha1 = g_checksum_new (G_CHECKSUM_SHA1);
+  sha512 = g_checksum_new (G_CHECKSUM_SHA512);
+  buffer = g_malloc (256 * 1024);
+
+  for (;;)
+    {
+      gssize read_bytes = g_input_stream_read (G_INPUT_STREAM (stream), buffer,
+                                               256 * 1024, cancellable, &error);
+
+      if (read_bytes < 0)
+        {
+          g_input_stream_close (G_INPUT_STREAM (stream), NULL, NULL);
+          g_task_return_error (task, g_steal_pointer (&error));
+          return;
+        }
+
+      if (read_bytes == 0)
+        break;
+
+      g_checksum_update (sha1, buffer, (gsize) read_bytes);
+      g_checksum_update (sha512, buffer, (gsize) read_bytes);
+    }
+
+  g_input_stream_close (G_INPUT_STREAM (stream), NULL, NULL);
+
+  if (g_ascii_strcasecmp (run->sha1, g_checksum_get_string (sha1)) != 0)
+    {
+      g_task_return_new_error (task, NUVASHALAUNCHER_MODPACK_ERROR,
+                               NUVASHALAUNCHER_MODPACK_ERROR_HASH,
+                               "\"%s\" arrived with a different %s than the index says",
+                               run->path, "sha1");
+      return;
+    }
+
+  if (g_ascii_strcasecmp (run->sha512, g_checksum_get_string (sha512)) != 0)
+    {
+      g_task_return_new_error (task, NUVASHALAUNCHER_MODPACK_ERROR,
+                               NUVASHALAUNCHER_MODPACK_ERROR_HASH,
+                               "\"%s\" arrived with a different %s than the index says",
+                               run->path, "sha512");
+      return;
+    }
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+verify_file_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                  gpointer user_data)
 {
   VerifyRun *run = user_data;
   g_autoptr (GError) error = NULL;
-  g_autofree char *digest = NULL;
-  const char *expect = NULL;
 
-  digest = nuvashalauncher_download_file_hash_finish (result, &error);
+  if (g_task_propagate_boolean (G_TASK (result), &error))
+    nuvashalauncher_task_scope_return_boolean (run->scope, TRUE);
+  else
+    nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
 
-  if (digest == NULL)
-    {
-      nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
-      verify_run_free (run);
-      return;
-    }
-
-  expect = run->stage == 0 ? run->sha1 : run->sha512;
-
-  if (g_ascii_strcasecmp (expect, digest) != 0)
-    {
-      g_set_error (&error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_HASH,
-                   "\"%s\" arrived with a different %s than the index says",
-                   run->path, run->stage == 0 ? "sha1" : "sha512");
-      nuvashalauncher_task_scope_return_error (run->scope, g_steal_pointer (&error));
-      verify_run_free (run);
-      return;
-    }
-
-  run->stage++;
-
-  if (run->stage > 1)
-    {
-      nuvashalauncher_task_scope_return_boolean (run->scope, TRUE);
-      verify_run_free (run);
-      return;
-    }
-
-  {
-    g_autoptr (GFile) file = g_file_new_for_path (run->path);
-
-    nuvashalauncher_task_scope_release_when_done (
-      nuvashalauncher_download_file_hash_async (file, G_CHECKSUM_SHA512,
-                                    verify_hash_ready, run),
-      nuvashalauncher_task_scope_get_cancellable (run->scope));
-  }
+  verify_run_free (run);
 }
 
 /* Both hashes of the manifest, out of the bytes on the disk. */
@@ -104,8 +131,7 @@ nuvashalauncher_modpack_verify_file_async (const NuvashaLauncherModpackFile *fil
 {
   g_autoptr (NuvashaLauncherTaskScope) scope =
     nuvashalauncher_task_scope_new (NULL, NULL, callback, user_data);
-  GTask *task = nuvashalauncher_task_scope_task (scope);
-  g_autoptr (GFile) job_file = g_file_new_for_path (path);
+  g_autoptr (GTask) worker = NULL;
   VerifyRun *run = NULL;
 
   g_return_val_if_fail (file != NULL, NULL);
@@ -125,14 +151,12 @@ nuvashalauncher_modpack_verify_file_async (const NuvashaLauncherModpackFile *fil
   run->path = g_strdup (path);
   run->sha1 = g_strdup (file->sha1);
   run->sha512 = g_strdup (file->sha512);
-  run->stage = 0;
-  run->task = g_object_ref (task);
   run->scope = nuvashalauncher_task_scope_ref (scope);
 
-  nuvashalauncher_task_scope_release_when_done (
-    nuvashalauncher_download_file_hash_async (job_file, G_CHECKSUM_SHA1, verify_hash_ready,
-                                  run),
-    nuvashalauncher_task_scope_get_cancellable (scope));
+  worker = g_task_new (NULL, nuvashalauncher_task_scope_get_cancellable (scope),
+                       verify_file_done, run);
+  g_task_set_task_data (worker, run, NULL);
+  g_task_run_in_thread (worker, verify_file_thread);
 
   return g_steal_pointer (&scope);
 }

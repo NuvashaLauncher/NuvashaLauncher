@@ -182,6 +182,7 @@ typedef struct
   char *extension;
   GPtrArray *files; /* NuvashaLauncherContentFile* */
   GPtrArray *index_entries; /* NuvashaLauncherContentIndexEntry* */
+  GHashTable *index_by_name; /* filename -> NuvashaLauncherContentIndexEntry*, borrowed */
   guint index;
   guint hash_pending;
   guint hash_next_index;
@@ -351,6 +352,7 @@ scan_free (ScanRun *run)
   if (run->index_operation != NULL)
     nuvashalauncher_task_scope_unref (run->index_operation);
   g_clear_pointer (&run->files, g_ptr_array_unref);
+  g_clear_pointer (&run->index_by_name, g_hash_table_unref);
   g_clear_pointer (&run->index_entries, g_ptr_array_unref);
   g_free (run->instance_directory);
   g_free (run->extension);
@@ -360,21 +362,21 @@ scan_free (ScanRun *run)
 static NuvashaLauncherContentIndexEntry *
 scan_index_entry (ScanRun *run, NuvashaLauncherContentFile *file)
 {
-  g_autofree char *name = g_path_get_basename (file->path);
+  const char *slash;
+  const char *name;
+  NuvashaLauncherContentIndexEntry *entry;
 
-  for (guint i = 0; run->index_entries != NULL &&
-                     i < run->index_entries->len; i++)
-    {
-      NuvashaLauncherContentIndexEntry *entry = g_ptr_array_index (run->index_entries, i);
-      if (g_strcmp0 (entry->filename, name) == 0)
-        {
-          if (entry->size == file->size &&
-              entry->mtime_usec == file->mtime_usec &&
-              entry->hash != NULL && *entry->hash != '\0')
-            return entry;
-          return NULL;
-        }
-    }
+  if (run->index_by_name == NULL)
+    return NULL;
+
+  slash = strrchr (file->path, G_DIR_SEPARATOR);
+  name = slash != NULL ? slash + 1 : file->path;
+  entry = g_hash_table_lookup (run->index_by_name, name);
+  if (entry != NULL &&
+      entry->size == file->size &&
+      entry->mtime_usec == file->mtime_usec &&
+      entry->hash != NULL && *entry->hash != '\0')
+    return entry;
   return NULL;
 }
 
@@ -541,6 +543,16 @@ scan_index_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
         (GDestroyNotify) nuvashalauncher_content_index_entry_free);
     }
   run->index_entries = g_steal_pointer (&entries);
+  run->index_by_name = g_hash_table_new (g_str_hash, g_str_equal);
+  for (guint i = 0; i < run->index_entries->len; i++)
+    {
+      NuvashaLauncherContentIndexEntry *entry =
+        g_ptr_array_index (run->index_entries, i);
+
+      if (entry->filename != NULL &&
+          !g_hash_table_contains (run->index_by_name, entry->filename))
+        g_hash_table_insert (run->index_by_name, entry->filename, entry);
+    }
 
   g_file_enumerate_children_async (
     run->folder,

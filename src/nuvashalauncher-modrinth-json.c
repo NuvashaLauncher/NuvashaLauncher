@@ -287,15 +287,19 @@ nuvashalauncher_modrinth_details_free (NuvashaLauncherModrinthDetails *details)
 }
 
 NuvashaLauncherModrinthDetails *
-nuvashalauncher_modrinth_details_from_json (const char *json, gssize length,
-                                GError **error)
+nuvashalauncher_modrinth_details_from_node (JsonNode *root,
+                                            GError  **error)
 {
-  g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
   JsonNode *team = NULL; /* borrowed from @root */
   NuvashaLauncherModrinthDetails *details = NULL;
 
-  if (root == NULL)
-    return NULL;
+  if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
+    {
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
+                           "the project answer is not an object");
+      return NULL;
+    }
 
   details = g_new0 (NuvashaLauncherModrinthDetails, 1);
   details->project_id = nuvashalauncher_json_string (root, "id");
@@ -355,6 +359,18 @@ nuvashalauncher_modrinth_details_from_json (const char *json, gssize length,
     details->author = g_strdup ("");
 
   return details;
+}
+
+NuvashaLauncherModrinthDetails *
+nuvashalauncher_modrinth_details_from_json (const char *json, gssize length,
+                                GError **error)
+{
+  g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
+
+  if (root == NULL)
+    return NULL;
+
+  return nuvashalauncher_modrinth_details_from_node (root, error);
 }
 
 /* ---------------------------------------------------------- *

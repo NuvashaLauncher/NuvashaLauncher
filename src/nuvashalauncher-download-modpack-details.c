@@ -64,9 +64,8 @@ versions_of_answer (JsonNode *root, GError **error)
   for (guint i = 0; i < json_array_get_length (array); i++)
     {
       JsonNode *element = json_array_get_element (array, i);
-      g_autofree char *json = nuvashalauncher_modrinth_json_node_to_string (element);
       NuvashaLauncherModrinthVersion *version =
-        nuvashalauncher_modrinth_version_from_json (json, -1, NULL);
+        nuvashalauncher_modrinth_version_from_node (element, NULL);
 
       if (version == NULL)
         continue;

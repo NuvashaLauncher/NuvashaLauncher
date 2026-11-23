@@ -218,6 +218,8 @@ NuvashaLauncherModrinthDetails *nuvashalauncher_modrinth_details_finish (GAsyncR
 NuvashaLauncherModrinthDetails *nuvashalauncher_modrinth_details_from_json (const char *json,
                                                    gssize      length,
                                                    GError     **error);
+NuvashaLauncherModrinthDetails *nuvashalauncher_modrinth_details_from_node (JsonNode   *root,
+                                                                            GError     **error);
 
 /* ---------------------------------------------------------- *
  * What a version answers
@@ -372,6 +374,9 @@ GPtrArray *nuvashalauncher_modrinth_categories_from_json (const char     *json,
                                               gssize          length,
                                               const char     *project_type,
                                               GError        **error);
+GPtrArray *nuvashalauncher_modrinth_categories_from_node (JsonNode       *root,
+                                                          const char     *project_type,
+                                                          GError        **error);
 
 /* The same, out of what /project/<id>/version answered: what fits, and
  * only that, newest first. (transfer full) */
@@ -381,6 +386,11 @@ GPtrArray *nuvashalauncher_modrinth_versions_from_json (const char  *json,
                                             const char  *minecraft_version,
                                             const char  *loader,
                                             GError      **error);
+GPtrArray *nuvashalauncher_modrinth_versions_from_node (JsonNode    *root,
+                                                        NuvashaLauncherContentType type,
+                                                        const char  *minecraft_version,
+                                                        const char  *loader,
+                                                        GError      **error);
 
 /* One version out of one version object. NULL when the answer is not a
  * version with a file to install. What a hash lookup and an update check
@@ -388,6 +398,8 @@ GPtrArray *nuvashalauncher_modrinth_versions_from_json (const char  *json,
 NuvashaLauncherModrinthVersion *nuvashalauncher_modrinth_version_from_json (const char  *json,
                                                    gssize       length,
                                                    GError     **error);
+NuvashaLauncherModrinthVersion *nuvashalauncher_modrinth_version_from_node (JsonNode    *root,
+                                                                            GError     **error);
 
 /* The one rule of compatibility, and the reason nothing incompatible is
  * ever listed.

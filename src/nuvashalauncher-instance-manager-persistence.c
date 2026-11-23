@@ -151,6 +151,9 @@ parse_instances_json (NuvashaLauncherInstanceManager *self,
 
   JsonArray *array = json_node_get_array (array_node);
   guint n_items = json_array_get_length (array);
+  g_autoptr (GHashTable) seen_ids = g_hash_table_new (g_str_hash, g_str_equal);
+  g_autoptr (GHashTable) seen_keys =
+    g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
   GList *list = NULL;
 
   for (guint i = 0; i < n_items; i++)
@@ -190,36 +193,30 @@ parse_instances_json (NuvashaLauncherInstanceManager *self,
       g_autofree char *instance_key =
         instance_name_key (instance_name_value);
 
-      for (GList *l = list; l != NULL; l = l->next)
+      if (g_hash_table_contains (seen_ids, id))
         {
-          NuvashaLauncherInstance *seen = l->data;
-          g_autofree char *seen_name = instance_name (seen);
-          g_autofree char *seen_key =
-            instance_name_key (seen_name);
-
-          if (g_str_equal (nuvashalauncher_instance_get_id (seen), id))
-            {
-              g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
-                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
-                           "instances.json lists the id \"%s\" twice", id);
-              g_object_unref (instance);
-              g_list_free_full (list, g_object_unref);
-              return NULL;
-            }
-
-          if (g_str_equal (seen_key, instance_key))
-            {
-              g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
-                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
-                           "instances.json lists the normalized name \"%s\" "
-                           "more than once",
-                           instance_name_value);
-              g_object_unref (instance);
-              g_list_free_full (list, g_object_unref);
-              return NULL;
-            }
+          g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                       NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
+                       "instances.json lists the id \"%s\" twice", id);
+          g_object_unref (instance);
+          g_list_free_full (list, g_object_unref);
+          return NULL;
         }
 
+      if (g_hash_table_contains (seen_keys, instance_key))
+        {
+          g_set_error (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                       NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_CORRUPT,
+                       "instances.json lists the normalized name \"%s\" "
+                       "more than once",
+                       instance_name_value);
+          g_object_unref (instance);
+          g_list_free_full (list, g_object_unref);
+          return NULL;
+        }
+
+      g_hash_table_add (seen_ids, (gpointer) id);
+      g_hash_table_add (seen_keys, g_steal_pointer (&instance_key));
       list = g_list_prepend (list, instance);
     }
 

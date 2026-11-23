@@ -222,10 +222,7 @@ document_with_install_libraries (InstallRequest *request, const char *json,
                                  gssize length, GError **error)
 {
   g_autoptr (JsonParser) parser = NULL;
-  g_autoptr (JsonGenerator) generator = NULL;
   g_autoptr (NuvashaLauncherVersionDescription) document = NULL;
-  g_autofree char *data = NULL;
-  gsize written = 0;
   JsonNode *root = NULL;
   JsonObject *object = NULL;
   JsonNode *libraries = NULL;
@@ -315,11 +312,7 @@ document_with_install_libraries (InstallRequest *request, const char *json,
   if (!give_libraries_their_downloads (root, error))
     return NULL;
 
-  generator = json_generator_new ();
-  json_generator_set_root (generator, root);
-  data = json_generator_to_data (generator, &written);
-
-  document = nuvashalauncher_version_description_new_from_json (data, written, error);
+  document = nuvashalauncher_version_description_new_from_node (root, error);
 
   return g_steal_pointer (&document);
 }

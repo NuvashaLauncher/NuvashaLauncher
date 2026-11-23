@@ -507,6 +507,32 @@ fill_version (JsonObject *root, NuvashaLauncherVersionDescription *self, GError 
 }
 
 NuvashaLauncherVersionDescription *
+nuvashalauncher_version_description_new_from_node (JsonNode *root,
+                                                   GError  **error)
+{
+  NuvashaLauncherVersionDescription *self;
+
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
+
+  if (root == NULL || !JSON_NODE_HOLDS_OBJECT (root))
+    {
+      g_set_error (error, NUVASHALAUNCHER_MC_ERROR, NUVASHALAUNCHER_MC_ERROR_INVALID,
+                   "expected a JSON object");
+      return NULL;
+    }
+
+  self = g_object_new (NUVASHALAUNCHER_TYPE_VERSION_DESCRIPTION, NULL);
+
+  if (!fill_version (json_node_get_object (root), self, error))
+    {
+      g_object_unref (self);
+      return NULL;
+    }
+
+  return self;
+}
+
+NuvashaLauncherVersionDescription *
 nuvashalauncher_version_description_new_from_json (const char *json,
                                        gssize      length,
                                        GError    **error)

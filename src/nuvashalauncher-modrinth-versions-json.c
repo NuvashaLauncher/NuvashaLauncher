@@ -381,14 +381,17 @@ version_from_node (JsonNode *node)
 }
 
 NuvashaLauncherModrinthVersion *
-nuvashalauncher_modrinth_version_from_json (const char *json, gssize length,
-                                GError **error)
+nuvashalauncher_modrinth_version_from_node (JsonNode *root, GError **error)
 {
-  g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
   NuvashaLauncherModrinthVersion *version = NULL;
 
   if (root == NULL)
-    return NULL;
+    {
+      g_set_error_literal (error, NUVASHALAUNCHER_MODRINTH_ERROR,
+                           NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
+                           "the answer is not a version with a file");
+      return NULL;
+    }
 
   version = version_from_node (root);
 
@@ -401,6 +404,18 @@ nuvashalauncher_modrinth_version_from_json (const char *json, gssize length,
     }
 
   return version;
+}
+
+NuvashaLauncherModrinthVersion *
+nuvashalauncher_modrinth_version_from_json (const char *json, gssize length,
+                                GError **error)
+{
+  g_autoptr (JsonNode) root = nuvashalauncher_modrinth_root_node (json, length, error);
+
+  if (root == NULL)
+    return NULL;
+
+  return nuvashalauncher_modrinth_version_from_node (root, error);
 }
 
 GHashTable *
@@ -500,27 +515,15 @@ compare_by_date (gconstpointer a, gconstpointer b)
 }
 
 GPtrArray *
-nuvashalauncher_modrinth_versions_from_json (const char *json, gssize length,
-                                 NuvashaLauncherContentType type,
-                                 const char *minecraft_version,
-                                 const char *loader, GError **error)
+nuvashalauncher_modrinth_versions_from_node (JsonNode *root,
+                                             NuvashaLauncherContentType type,
+                                             const char *minecraft_version,
+                                             const char *loader, GError **error)
 {
-  g_autoptr (JsonParser) parser = json_parser_new ();
-  g_autoptr (GError) parse_error = NULL;
   GPtrArray *versions = NULL;
-  JsonNode *root = NULL;
   JsonArray *array = NULL;
   guint count = 0;
   guint compatible = 0;
-
-  if (!json_parser_load_from_data (parser, json != NULL ? json : "",
-                                   json != NULL ? length : 0, &parse_error))
-    {
-      g_propagate_error (error, g_steal_pointer (&parse_error));
-      return NULL;
-    }
-
-  root = json_parser_get_root (parser);
 
   if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
     {
@@ -570,4 +573,24 @@ nuvashalauncher_modrinth_versions_from_json (const char *json, gssize length,
   g_ptr_array_sort (versions, compare_by_date);
 
   return versions;
+}
+
+GPtrArray *
+nuvashalauncher_modrinth_versions_from_json (const char *json, gssize length,
+                                 NuvashaLauncherContentType type,
+                                 const char *minecraft_version,
+                                 const char *loader, GError **error)
+{
+  g_autoptr (JsonParser) parser = json_parser_new ();
+  g_autoptr (GError) parse_error = NULL;
+
+  if (!json_parser_load_from_data (parser, json != NULL ? json : "",
+                                   json != NULL ? length : 0, &parse_error))
+    {
+      g_propagate_error (error, g_steal_pointer (&parse_error));
+      return NULL;
+    }
+
+  return nuvashalauncher_modrinth_versions_from_node (
+      json_parser_get_root (parser), type, minecraft_version, loader, error);
 }

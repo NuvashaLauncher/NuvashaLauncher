@@ -271,16 +271,21 @@ nuvashalauncher_accounts_new_for_path (const char *filename)
 
     if (nuvashalauncher_secret_store_load (&loaded, &active, &error))
       {
+        g_autoptr (GHashTable) seen = g_hash_table_new (g_str_hash, g_str_equal);
+
         for (guint i = 0; i < loaded->len; i++)
           {
             NuvashaLauncherAccount *account = g_ptr_array_index (loaded, i);
 
-            if (nuvashalauncher_accounts_find (self, account->id) == NULL)
-              g_ptr_array_add (self->accounts,
-                               nuvashalauncher_account_copy (account));
+            if (account->id != NULL && !g_hash_table_contains (seen, account->id))
+              {
+                NuvashaLauncherAccount *copy = nuvashalauncher_account_copy (account);
+                g_hash_table_add (seen, copy->id);
+                g_ptr_array_add (self->accounts, copy);
+              }
           }
 
-        if (active != NULL && nuvashalauncher_accounts_find (self, active) != NULL)
+        if (active != NULL && g_hash_table_contains (seen, active))
           self->active_id = g_steal_pointer (&active);
       }
     else if (error != NULL)
