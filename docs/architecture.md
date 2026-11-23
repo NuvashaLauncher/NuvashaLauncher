@@ -539,13 +539,16 @@ boundary.
 The repository uses a hand-written `Makefile`:
 
 - `make` builds the release binary, compiled resources, schemas, and locales.
-- `make fast` builds the release target in parallel.
+- `make -j$(nproc)` builds the release target in parallel.
 - `make debug` builds a separate AddressSanitizer/UndefinedBehaviorSanitizer
   binary under `build-debug/`.
-- `make test` builds and runs each `tests/test-*.c` binary in parallel via
-  `build/test-runner` (`tests/runner.c`), giving each binary an isolated
-  `TMPDIR`/`XDG_*_HOME` directory, `GSETTINGS_BACKEND=memory`, an isolated
-  `secrets.json` test secret store, and `NUVASHALAUNCHER_TEST_FAST_TIMERS=1`.
+- `make test` links `tests/test-*.c` against `build/libnuvashalauncher.so`
+  (all `src/*.c` except `src/main.c`, plus compiled resources) and runs them in
+  parallel via `build/test-runner` (`tests/runner.c`), giving each binary an
+  isolated `TMPDIR`/`XDG_*_HOME` directory, `GSETTINGS_BACKEND=memory`, an
+  isolated `secrets.json` test secret store, and `NUVASHALAUNCHER_TEST_FAST_TIMERS=1`.
+  Supports `TESTS=`, `CASE=`, `V=1`, `FAIL_FAST=1`, `KEEP_TMP=1`, `TIMEOUT=`,
+  and `REPEAT=` flags (`make test-list` lists test binaries).
 - `make test-display` repeats the suite under an existing Wayland session,
   and skips itself when there is no compositor.
 - `make test-flatpak-runtime` smoke-tests an installed Flatpak's CLI, sandbox

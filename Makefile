@@ -57,8 +57,8 @@ LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvashalauncher.mo)
 SCHEMA_XML := data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml
 SCHEMA_COMPILED := build/schemas/gschemas.compiled
 
-CFLAGS     ?= -std=c17 -Wall -Wextra -Wpedantic -MMD -MP
-RELFLAGS   := -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE
+CFLAGS     ?= -std=c17 -Wall -Wextra -Wpedantic -MMD -MP -pipe
+RELFLAGS   := -O2 -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIC
 RELLDFLAGS := -pie -Wl,-z,relro,-z,now
 DBGFLAGS   := -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all
 
@@ -81,7 +81,7 @@ DBGDEPS := $(DBGOBJS:.o=.d)
 TESTLIBSRCS := $(filter-out src/main.c,$(SRCS))
 TESTLIBOBJS := $(patsubst src/%.c,build/%.o,$(TESTLIBSRCS))
 TESTLIBDBGOBJS := $(patsubst src/%.c,build-debug/%.o,$(TESTLIBSRCS))
-TESTLIBA    := build/libnuvashalauncher.a
+TESTLIBSO   := build/libnuvashalauncher.so
 TESTLIBDBGA := build-debug/libnuvashalauncher.a
 TESTSRCS    := $(wildcard tests/test-*.c)
 TESTBINS    := $(patsubst tests/%.c,build/tests/%,$(TESTSRCS))
@@ -113,14 +113,9 @@ RUNNER_FLAGS := $(if $(filter 1,$(V)),--verbose,) \
 	$(if $(filter-out 1,$(REPEAT)),--repeat $(REPEAT),) \
 	$(if $(strip $(CASE)),--case "$(CASE)",)
 
-.PHONY: all fast debug test test-list test-display test-flatpak-runtime test-debug test-lsan static-analysis pot check-potfiles clean install uninstall help
+.PHONY: all debug test test-list test-display test-flatpak-runtime test-debug test-lsan static-analysis pot check-potfiles clean install uninstall help
 
 all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
-
-# Convenience target for local development. Keep parallelism opt-in so normal
-# `make` remains predictable for packaging and CI.
-fast:
-	+$(MAKE) -j$$(nproc) all
 
 debug: $(if $(SRCS),$(DBGBIN))
 
@@ -145,9 +140,8 @@ build-debug/%.o: src/%.c | build-debug
 $(RESOURCE_DBG_O): $(RESOURCE_C) | build-debug
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $(RESOURCE_C)
 
-$(TESTLIBA): $(TESTLIBOBJS) | build
-	rm -f $@
-	$(AR) rcs $@ $(TESTLIBOBJS)
+$(TESTLIBSO): $(TESTLIBOBJS) $(RESOURCE_O) | build
+	$(CC) $(RELFLAGS) -shared -o $@ $(TESTLIBOBJS) $(RESOURCE_O) $(PKG_LIBS)
 
 TEST_CPPFLAGS := -DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" \
 	-DNUVASHALAUNCHER_BIN=\"$(CURDIR)/$(BIN)\" \
@@ -156,9 +150,11 @@ TEST_CPPFLAGS := -DNUVASHALAUNCHER_DATA_DIR=\"$(CURDIR)/data\" \
 	-DNUVASHALAUNCHER_SRC_DIR=\"$(CURDIR)/src\" \
 	-DNUVASHALAUNCHER_PO_DIR=\"$(CURDIR)/po\"
 
-build/tests/%: tests/%.c $(TESTLIBA) $(RESOURCE_O) | build/tests
-	$(CC) $(CFLAGS) $(RELFLAGS) $(RELLDFLAGS) -Wl,--as-needed -Isrc $(PKG_CFLAGS) \
-		$(TEST_CPPFLAGS) -o $@ $< $(RESOURCE_O) $(TESTLIBA) $(PKG_LIBS)
+# Link against libnuvashalauncher.so as an order-only prerequisite so editing
+# a src/*.c implementation only relinks the shared library, not all 54 tests.
+build/tests/%: tests/%.c | build/tests $(TESTLIBSO)
+	$(CC) $(CFLAGS) $(RELFLAGS) $(RELLDFLAGS) -Wl,--as-needed -Wl,-rpath,"$(CURDIR)/build" \
+		-Isrc $(PKG_CFLAGS) $(TEST_CPPFLAGS) -o $@ $< $(TESTLIBSO) $(PKG_LIBS)
 
 TESTRUNNER  := build/test-runner
 
@@ -169,10 +165,12 @@ define run_test_suite
 	@$(2) ./$(TESTRUNNER) --schema-dir "$(CURDIR)/build/schemas" $(3) $(RUNNER_FLAGS) $(1)
 endef
 
+NEEDED_BIN := $(if $(filter build/tests/test-cli build/tests/test-display-guard,$(SELECTED_TESTBINS)),$(BIN),)
+
 # Tests never write to the real data directory and never touch the network.
 # Display-backed tests use invisible windows so they can exercise GTK without
 # covering the developer's desktop; they skip when no display is available.
-test: $(if $(SRCS),$(BIN)) $(TESTRUNNER) $(SELECTED_TESTBINS) $(SCHEMA_COMPILED)
+test: $(if $(SRCS),$(NEEDED_BIN) $(TESTLIBSO)) $(TESTRUNNER) $(SELECTED_TESTBINS) $(SCHEMA_COMPILED)
 	$(call run_test_suite,$(SELECTED_TESTBINS),,)
 
 test-list:
@@ -352,7 +350,7 @@ uninstall:
 
 help:
 	@echo "Nuvasha Launcher build targets:"
-	@echo "  make fast                     Build release binary, locales, and schemas in parallel"
+	@echo "  make -j\$$(nproc)               Build release binary, locales, and schemas in parallel"
 	@echo "  make test [FLAGS]             Run unit/integration tests (compact & live-streamed)"
 	@echo "  make test-debug [FLAGS]       Run tests with ASan + UBSan + LSan"
 	@echo "  make test-list [TESTS=...]    List available test binaries"
