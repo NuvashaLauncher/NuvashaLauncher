@@ -21,7 +21,7 @@ PKGS := gtk4 libadwaita-1 json-glib-1.0 libsoup-3.0 libarchive gio-unix-2.0 epox
 # Goals that compile nothing and so must keep working on hosts without the
 # development packages. test-flatpak-runtime only drives the flatpak CLI to
 # smoke-test an already-installed bundle; clean only deletes build output.
-NO_BUILD_GOALS := test-flatpak-runtime check-potfiles pot uninstall clean help
+NO_BUILD_GOALS := test-flatpak-runtime test-list check-potfiles pot uninstall clean help
 ifneq ($(filter-out $(NO_BUILD_GOALS),$(MAKECMDGOALS)),)
 NEEDS_BUILD := 1
 else ifeq ($(MAKECMDGOALS),)
@@ -90,20 +90,30 @@ TESTDBGBINS := $(patsubst tests/%.c,build-debug/tests/%,$(TESTSRCS))
 TESTDBGDEPS := $(addsuffix .d,$(TESTDBGBINS))
 
 TESTS ?=
+CASE ?=
 V ?= 0
+FAIL_FAST ?= 0
+KEEP_TMP ?= 0
+TIMEOUT ?= 0
+REPEAT ?= 1
 ifneq ($(strip $(TESTS)),)
 SELECTED_TESTBINS := $(sort $(foreach t,$(TESTS),$(foreach b,$(TESTBINS),$(if $(findstring $(t),$(b)),$(b),))))
 SELECTED_TESTDBGBINS := $(sort $(foreach t,$(TESTS),$(foreach b,$(TESTDBGBINS),$(if $(findstring $(t),$(b)),$(b),))))
 ifeq ($(strip $(SELECTED_TESTBINS)),)
-$(error No tests matched TESTS="$(TESTS)")
+$(error No tests matched TESTS="$(TESTS)". Run 'make test-list' to see available tests)
 endif
 else
 SELECTED_TESTBINS := $(TESTBINS)
 SELECTED_TESTDBGBINS := $(TESTDBGBINS)
 endif
-RUNNER_FLAGS := $(if $(filter 1,$(V)),--verbose,)
+RUNNER_FLAGS := $(if $(filter 1,$(V)),--verbose,) \
+	$(if $(filter 1,$(FAIL_FAST)),--fail-fast,) \
+	$(if $(filter 1,$(KEEP_TMP)),--keep-tmp,) \
+	$(if $(filter-out 0,$(TIMEOUT)),--timeout $(TIMEOUT),) \
+	$(if $(filter-out 1,$(REPEAT)),--repeat $(REPEAT),) \
+	$(if $(strip $(CASE)),--case "$(CASE)",)
 
-.PHONY: all fast debug test test-display test-flatpak-runtime test-debug test-lsan static-analysis pot check-potfiles clean install uninstall help
+.PHONY: all fast debug test test-list test-display test-flatpak-runtime test-debug test-lsan static-analysis pot check-potfiles clean install uninstall help
 
 all: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 
@@ -156,14 +166,17 @@ $(TESTRUNNER): tests/runner.c | build
 	$(CC) -std=c17 -Wall -Wextra -Wpedantic -O2 -pthread -o $@ $<
 
 define run_test_suite
-	@$(2) ./$(TESTRUNNER) --schema-dir "$(CURDIR)/build/schemas" $(RUNNER_FLAGS) $(1)
+	@$(2) ./$(TESTRUNNER) --schema-dir "$(CURDIR)/build/schemas" $(3) $(RUNNER_FLAGS) $(1)
 endef
 
 # Tests never write to the real data directory and never touch the network.
 # Display-backed tests use invisible windows so they can exercise GTK without
 # covering the developer's desktop; they skip when no display is available.
 test: $(if $(SRCS),$(BIN)) $(TESTRUNNER) $(SELECTED_TESTBINS) $(SCHEMA_COMPILED)
-	$(call run_test_suite,$(SELECTED_TESTBINS),)
+	$(call run_test_suite,$(SELECTED_TESTBINS),,)
+
+test-list:
+	@printf '%s\n' $(notdir $(SELECTED_TESTBINS))
 
 # Run the same suite with an existing Wayland session. Display-backed GTK
 # coverage is intentionally skipped when no Wayland compositor is available.
@@ -214,7 +227,7 @@ build-debug/tests/%: tests/%.c $(TESTLIBDBGA) $(RESOURCE_DBG_O) | build-debug/te
 # The display guard test runs the release launcher, so test-debug builds both
 # binaries.
 test-debug: $(if $(SRCS),$(DBGBIN) $(BIN)) $(TESTRUNNER) $(SELECTED_TESTDBGBINS) $(SCHEMA_COMPILED)
-	$(call run_test_suite,$(SELECTED_TESTDBGBINS),ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 LSAN_OPTIONS=detect_leaks=1:exitcode=1:suppressions="$(CURDIR)/tests/gtk-lsan.supp")
+	$(call run_test_suite,$(SELECTED_TESTDBGBINS),ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 LSAN_OPTIONS=detect_leaks=1:exitcode=1:suppressions="$(CURDIR)/tests/gtk-lsan.supp",--debug)
 
 # LeakSanitizer is included with the Linux AddressSanitizer runtime and is
 # enabled explicitly in test-debug above. Keep test-lsan as an alias so
@@ -340,12 +353,22 @@ uninstall:
 help:
 	@echo "Nuvasha Launcher build targets:"
 	@echo "  make fast                     Build release binary, locales, and schemas in parallel"
-	@echo "  make test [TESTS=...] [V=1]   Run unit/integration tests (compact by default; V=1 for raw output)"
-	@echo "  make test-debug [TESTS=...]   Run tests with ASan + UBSan + LSan"
+	@echo "  make test [FLAGS]             Run unit/integration tests (compact & live-streamed)"
+	@echo "  make test-debug [FLAGS]       Run tests with ASan + UBSan + LSan"
+	@echo "  make test-list [TESTS=...]    List available test binaries"
 	@echo "  make test-display             Run tests against an active Wayland session"
 	@echo "  make static-analysis          Run GCC -fanalyzer across src/*.c"
 	@echo "  make check-potfiles           Verify po/POTFILES.in matches translatable files"
 	@echo "  make clean                    Remove build artifacts"
+	@echo ""
+	@echo "Test flags:"
+	@echo "  TESTS=\"unit cli\"              Filter test binaries by substring"
+	@echo "  CASE=/unit/json/int-range     Filter GTest subtests (-p pattern)"
+	@echo "  V=1                           Show raw test output"
+	@echo "  FAIL_FAST=1                   Stop launching tests after the first failure"
+	@echo "  KEEP_TMP=1                    Preserve isolated test temp directories"
+	@echo "  TIMEOUT=10                    Kill any test binary running longer than N seconds"
+	@echo "  REPEAT=5                      Repeat selected tests N times"
 
 clean:
 	rm -rf build build-debug *.flatpak *.rpm *.deb *.tar.gz
