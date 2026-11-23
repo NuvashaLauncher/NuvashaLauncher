@@ -571,6 +571,185 @@ nuvashalauncher_modrinth_updates_by_hashes_finish (GAsyncResult *result, GError 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 
+static char *
+build_batch_hashes_body (GPtrArray *hashes)
+{
+  g_autoptr (JsonBuilder) builder = json_builder_new ();
+  JsonNode *root = NULL;
+
+  json_builder_begin_object (builder);
+  json_builder_set_member_name (builder, "hashes");
+  json_builder_begin_array (builder);
+  for (guint i = 0; i < hashes->len; i++)
+    {
+      const char *hash = g_ptr_array_index (hashes, i);
+
+      if (hash != NULL && *hash != '\0')
+        json_builder_add_string_value (builder, hash);
+    }
+  json_builder_end_array (builder);
+  json_builder_set_member_name (builder, "algorithm");
+  json_builder_add_string_value (builder, "sha1");
+  json_builder_end_object (builder);
+
+  root = json_builder_get_root (builder);
+  return json_to_string (root, FALSE);
+}
+
+static void
+versions_by_hashes_answer (GTask *task, JsonNode *root)
+{
+  g_autoptr (GError) error = NULL;
+  GHashTable *versions = nuvashalauncher_modrinth_updates_from_node (root, &error);
+
+  if (versions == NULL)
+    {
+      nuvashalauncher_modrinth_request_return_error (task, g_steal_pointer (&error));
+      return;
+    }
+
+  nuvashalauncher_modrinth_request_return_pointer (
+    task, versions, (GDestroyNotify) g_hash_table_unref);
+}
+
+NuvashaLauncherTaskScope *
+nuvashalauncher_modrinth_versions_by_hashes_async (GPtrArray          *hashes,
+                                                   GAsyncReadyCallback callback,
+                                                   gpointer            user_data)
+{
+  g_autoptr (NuvashaLauncherTaskScope) scope =
+    nuvashalauncher_modrinth_request_new (callback, user_data,
+                                          versions_by_hashes_answer,
+                                          NUVASHALAUNCHER_NOT_FOUND_IS_ABSENT,
+                                          NULL, NULL);
+  g_autofree char *body = NULL;
+
+  if (hashes == NULL || hashes->len == 0)
+    {
+      GHashTable *empty = g_hash_table_new_full (
+        g_str_hash, g_str_equal, g_free,
+        (GDestroyNotify) nuvashalauncher_modrinth_version_free);
+
+      nuvashalauncher_task_scope_return_pointer (scope, empty,
+                                                 (GDestroyNotify) g_hash_table_unref);
+      return g_steal_pointer (&scope);
+    }
+
+  body = build_batch_hashes_body (hashes);
+
+  nuvashalauncher_task_scope_release_when_done (
+    nuvashalauncher_download_json_post_cached_async (
+      nuvashalauncher_downloads_get_service (),
+      NUVASHALAUNCHER_MODRINTH_URL "/version_files", body,
+      NUVASHALAUNCHER_MODRINTH_USER_AGENT,
+      nuvashalauncher_modrinth_json_ready,
+      nuvashalauncher_task_scope_task (scope)),
+    nuvashalauncher_task_scope_get_cancellable (scope));
+
+  return g_steal_pointer (&scope);
+}
+
+GHashTable *
+nuvashalauncher_modrinth_versions_by_hashes_finish (GAsyncResult *result,
+                                                    GError      **error)
+{
+  g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+static void
+projects_by_ids_answer (GTask *task, JsonNode *root)
+{
+  GHashTable *projects = NULL;
+  JsonArray *array = NULL;
+
+  if (root == NULL || !JSON_NODE_HOLDS_ARRAY (root))
+    {
+      nuvashalauncher_modrinth_request_return_error (
+        task, g_error_new_literal (NUVASHALAUNCHER_MODRINTH_ERROR,
+                                   NUVASHALAUNCHER_MODRINTH_ERROR_PARSE,
+                                   "the projects answer is not a list"));
+      return;
+    }
+
+  projects = g_hash_table_new_full (
+    g_str_hash, g_str_equal, g_free,
+    (GDestroyNotify) nuvashalauncher_modrinth_details_free);
+  array = json_node_get_array (root);
+
+  for (guint i = 0; i < json_array_get_length (array); i++)
+    {
+      JsonNode *element = json_array_get_element (array, i);
+      NuvashaLauncherModrinthDetails *details =
+        nuvashalauncher_modrinth_details_from_node (element, NULL);
+
+      if (details != NULL && details->project_id != NULL)
+        g_hash_table_replace (projects, g_strdup (details->project_id), details);
+      else if (details != NULL)
+        nuvashalauncher_modrinth_details_free (details);
+    }
+
+  nuvashalauncher_modrinth_request_return_pointer (
+    task, projects, (GDestroyNotify) g_hash_table_unref);
+}
+
+NuvashaLauncherTaskScope *
+nuvashalauncher_modrinth_projects_by_ids_async (GPtrArray          *project_ids,
+                                                GAsyncReadyCallback callback,
+                                                gpointer            user_data)
+{
+  g_autoptr (JsonBuilder) builder = NULL;
+  g_autofree char *ids_json = NULL;
+  g_autofree char *escaped = NULL;
+  g_autofree char *url = NULL;
+  JsonNode *root = NULL;
+
+  if (project_ids == NULL || project_ids->len == 0)
+    {
+      g_autoptr (NuvashaLauncherTaskScope) scope =
+        nuvashalauncher_modrinth_request_new (callback, user_data,
+                                              projects_by_ids_answer,
+                                              NUVASHALAUNCHER_NOT_FOUND_IS_ABSENT,
+                                              NULL, NULL);
+      GHashTable *empty = g_hash_table_new_full (
+        g_str_hash, g_str_equal, g_free,
+        (GDestroyNotify) nuvashalauncher_modrinth_details_free);
+
+      nuvashalauncher_task_scope_return_pointer (scope, empty,
+                                                 (GDestroyNotify) g_hash_table_unref);
+      return g_steal_pointer (&scope);
+    }
+
+  builder = json_builder_new ();
+  json_builder_begin_array (builder);
+  for (guint i = 0; i < project_ids->len; i++)
+    {
+      const char *id = g_ptr_array_index (project_ids, i);
+
+      if (id != NULL && *id != '\0')
+        json_builder_add_string_value (builder, id);
+    }
+  json_builder_end_array (builder);
+  root = json_builder_get_root (builder);
+  ids_json = json_to_string (root, FALSE);
+  escaped = g_uri_escape_string (ids_json, NULL, FALSE);
+  url = g_strdup_printf (NUVASHALAUNCHER_MODRINTH_URL "/projects?ids=%s", escaped);
+
+  return nuvashalauncher_modrinth_get_async (url, callback, user_data,
+                                             projects_by_ids_answer,
+                                             NUVASHALAUNCHER_NOT_FOUND_IS_ABSENT);
+}
+
+GHashTable *
+nuvashalauncher_modrinth_projects_by_ids_finish (GAsyncResult *result,
+                                                 GError      **error)
+{
+  g_return_val_if_fail (nuvashalauncher_task_result_is_valid (result, "nuvashalauncher-task-scope"), NULL);
+
+  return g_task_propagate_pointer (G_TASK (result), error);
+}
+
 /* ---------------------------------------------------------- *
  * Dependencies required to install a version
  * ---------------------------------------------------------- */

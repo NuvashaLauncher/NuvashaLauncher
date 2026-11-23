@@ -476,6 +476,30 @@ NuvashaLauncherTaskScope *nuvashalauncher_modrinth_updates_by_hashes_async (
 GHashTable *nuvashalauncher_modrinth_updates_by_hashes_finish (GAsyncResult  *result,
                                                                GError       **error);
 
+/* Batch version lookup using Modrinth's POST /v2/version_files endpoint for
+ * @hashes (GPtrArray of const char* sha1 strings). */
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_versions_by_hashes_async (
+  GPtrArray           *hashes,
+  GAsyncReadyCallback  callback,
+  gpointer             user_data);
+
+/* (transfer full) GHashTable* mapping char* sha1 -> NuvashaLauncherModrinthVersion*.
+ * NULL on error. */
+GHashTable *nuvashalauncher_modrinth_versions_by_hashes_finish (GAsyncResult  *result,
+                                                                GError       **error);
+
+/* Batch project details lookup using Modrinth's GET /v2/projects?ids=[...] endpoint
+ * for @project_ids (GPtrArray of const char* IDs). */
+NuvashaLauncherTaskScope *nuvashalauncher_modrinth_projects_by_ids_async (
+  GPtrArray           *project_ids,
+  GAsyncReadyCallback  callback,
+  gpointer             user_data);
+
+/* (transfer full) GHashTable* mapping char* project_id -> NuvashaLauncherModrinthDetails*.
+ * NULL on error. */
+GHashTable *nuvashalauncher_modrinth_projects_by_ids_finish (GAsyncResult  *result,
+                                                              GError       **error);
+
 /* ---------------------------------------------------------- *
  * What an install of a version needs
  * ---------------------------------------------------------- */

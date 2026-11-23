@@ -39,10 +39,13 @@ struct _IdentifyRun {
   GCancellable *cancellable;
   guint next_index;
   guint in_flight;
+  gboolean batch_done;
   gboolean finished;
 };
 
 static void identify_start (IdentifyRun *run);
+static void request_missing_project_titles (NuvashaLauncherContentPage *self,
+                                          GPtrArray                  *project_ids);
 
 static void
 identify_run_maybe_free (IdentifyRun *run)
@@ -64,7 +67,10 @@ identify_complete (IdentifyRun *run)
     {
       run->finished = TRUE;
       if (run->page != NULL)
-        run->page->installed.identifying = FALSE;
+        {
+          run->page->installed.identifying = FALSE;
+          load_visible_icons (run->page);
+        }
     }
   identify_run_maybe_free (run);
 }
@@ -280,6 +286,263 @@ add_remote_dependency (GPtrArray **destination, const char *value)
   g_ptr_array_add (*destination, g_strdup (value));
 }
 
+typedef struct {
+  NuvashaLauncherContentPage *page; /* weakly held */
+  GPtrArray *project_ids;
+  NuvashaLauncherTaskScope *operation;
+} ProjectTitlesBatchRequest;
+
+static void
+project_titles_batch_free (ProjectTitlesBatchRequest *request)
+{
+  if (request == NULL)
+    return;
+  if (request->page != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (request->page),
+                                  (gpointer *) &request->page);
+  if (request->operation != NULL)
+    nuvashalauncher_task_scope_unref (request->operation);
+  g_clear_pointer (&request->project_ids, g_ptr_array_unref);
+  g_free (request);
+}
+
+static void
+on_project_titles_batch_ready (GObject *source G_GNUC_UNUSED,
+                               GAsyncResult *result, gpointer user_data)
+{
+  ProjectTitlesBatchRequest *request = user_data;
+  NuvashaLauncherContentPage *self = request->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GHashTable) details_map =
+    nuvashalauncher_modrinth_projects_by_ids_finish (result, &error);
+
+  if (self != NULL && details_map != NULL)
+    {
+      gboolean icons_updated = FALSE;
+      GHashTableIter iter;
+      gpointer key = NULL;
+      gpointer val = NULL;
+
+      g_hash_table_iter_init (&iter, details_map);
+      while (g_hash_table_iter_next (&iter, &key, &val))
+        {
+          NuvashaLauncherModrinthDetails *details = val;
+
+          if (details->title != NULL && *details->title != '\0')
+            g_hash_table_replace (self->browse.model->project_titles,
+                                  g_strdup (details->project_id),
+                                  g_strdup (details->title));
+          if (details->icon_url != NULL && *details->icon_url != '\0')
+            g_hash_table_replace (self->browse.model->project_icons,
+                                  g_strdup (details->project_id),
+                                  g_strdup (details->icon_url));
+        }
+
+      for (guint i = 0; self->installed.files != NULL &&
+                        i < self->installed.files->len; i++)
+        {
+          NuvashaLauncherContentFile *file =
+            g_ptr_array_index (self->installed.files, i);
+          NuvashaLauncherModrinthDetails *details =
+            file->project_id != NULL
+              ? g_hash_table_lookup (details_map, file->project_id)
+              : NULL;
+
+          if (details == NULL)
+            continue;
+
+          gboolean changed = FALSE;
+          if ((!file->local_metadata || file->project_name == NULL ||
+               *file->project_name == '\0' ||
+               g_strcmp0 (file->project_name, file->project_id) == 0) &&
+              details->title != NULL && *details->title != '\0')
+            {
+              g_free (file->project_name);
+              file->project_name = g_strdup (details->title);
+              changed = TRUE;
+            }
+          if ((file->icon_url == NULL || *file->icon_url == '\0') &&
+              details->icon_url != NULL && *details->icon_url != '\0')
+            {
+              g_free (file->icon_url);
+              file->icon_url = g_strdup (details->icon_url);
+              changed = TRUE;
+              icons_updated = TRUE;
+            }
+          if (changed)
+            {
+              GtkWidget *row =
+                g_hash_table_lookup (self->installed.rows, file->path);
+              if (row != NULL)
+                file_row_refresh (row);
+              queue_persist_identified_file (self, file);
+            }
+        }
+
+      if (icons_updated)
+        load_visible_icons (self);
+    }
+
+  project_titles_batch_free (request);
+}
+
+static void
+request_missing_project_titles (NuvashaLauncherContentPage *self,
+                              GPtrArray                  *project_ids)
+{
+  if (self == NULL || project_ids == NULL || project_ids->len == 0)
+    return;
+
+  if (project_ids->len == 1)
+    {
+      request_project_title (self, g_ptr_array_index (project_ids, 0));
+      return;
+    }
+
+  ProjectTitlesBatchRequest *request = g_new0 (ProjectTitlesBatchRequest, 1);
+  request->page = self;
+  request->project_ids = g_ptr_array_ref (project_ids);
+  g_object_add_weak_pointer (G_OBJECT (self),
+                             (gpointer *) &request->page);
+  request->operation = nuvashalauncher_modrinth_projects_by_ids_async (
+    project_ids, on_project_titles_batch_ready, request);
+  if (request->operation == NULL)
+    project_titles_batch_free (request);
+}
+
+static void
+apply_identified_version (NuvashaLauncherContentPage     *self,
+                          NuvashaLauncherContentFile     *file,
+                          GtkWidget                      *row,
+                          NuvashaLauncherModrinthVersion *version,
+                          GPtrArray                      *missing_projects)
+{
+  file->project_id = g_strdup (version->project_id);
+  {
+    const char *known_name = g_hash_table_lookup (self->browse.model->project_titles,
+                                                  version->project_id);
+    const char *known_icon = g_hash_table_lookup (self->browse.model->project_icons,
+                                                  version->project_id);
+    gboolean needs_details = known_name == NULL;
+
+    if (!file->local_metadata || file->project_name == NULL ||
+        *file->project_name == '\0' ||
+        g_strcmp0 (file->project_name, version->project_id) == 0)
+      {
+        g_free (file->project_name);
+        file->project_name = g_strdup (known_name);
+      }
+    if ((file->icon_url == NULL || *file->icon_url == '\0') &&
+        known_icon != NULL && *known_icon != '\0')
+      {
+        g_free (file->icon_url);
+        file->icon_url = g_strdup (known_icon);
+      }
+    if ((file->icon_url == NULL || *file->icon_url == '\0') &&
+        file->local_icon_path == NULL && file->local_icon_member == NULL)
+      needs_details = TRUE;
+    if (needs_details && version->project_id != NULL &&
+        *version->project_id != '\0')
+      {
+        if (missing_projects != NULL)
+          add_remote_dependency (&missing_projects, version->project_id);
+        else
+          request_project_title (self, version->project_id);
+      }
+  }
+  file->version_id = g_strdup (version->version_id);
+  file->version_name = g_strdup (version->name);
+  file->version_number = g_strdup (version->version_number);
+  {
+    NuvashaLauncherModrinthFile *primary =
+      nuvashalauncher_modrinth_version_primary_file (version);
+
+    g_free (file->sha512);
+    g_free (file->download_url);
+    file->sha512 = primary != NULL ? g_strdup (primary->sha512) : NULL;
+    file->download_url = primary != NULL ? g_strdup (primary->url) : NULL;
+  }
+  for (guint i = 0; version->dependencies != NULL &&
+                   i < version->dependencies->len; i++)
+    {
+      NuvashaLauncherModrinthDependency *dependency =
+        g_ptr_array_index (version->dependencies, i);
+
+      if (dependency->project_id == NULL)
+        continue;
+      if (dependency->type == NUVASHALAUNCHER_DEPENDENCY_REQUIRED)
+        add_remote_dependency (&file->required_dependencies,
+                               dependency->project_id);
+      else if (dependency->type == NUVASHALAUNCHER_DEPENDENCY_OPTIONAL)
+        add_remote_dependency (&file->optional_dependencies,
+                               dependency->project_id);
+      else if (dependency->type == NUVASHALAUNCHER_DEPENDENCY_INCOMPATIBLE)
+        add_remote_dependency (&file->incompatible_dependencies,
+                               dependency->project_id);
+    }
+
+  /* Persist the hash lookup immediately. Project details and the icon
+   * are a second request; a failure there must not lose the metadata we
+   * already obtained from the version-by-hash response. */
+  queue_persist_identified_file (self, file);
+
+  if (file->project_id != NULL && *file->project_id != '\0')
+    g_hash_table_add (self->browse.model->projects, g_strdup (file->project_id));
+
+  file_row_refresh (row);
+}
+
+static void
+identify_batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                      gpointer user_data)
+{
+  IdentifyRequest *request = user_data;
+  IdentifyRun *run = request->run;
+  NuvashaLauncherContentPage *self = run->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GHashTable) versions_map =
+    nuvashalauncher_modrinth_versions_by_hashes_finish (result, &error);
+
+  if (run->cancellable != NULL &&
+      g_cancellable_is_cancelled (run->cancellable))
+    {
+      run->finished = TRUE;
+      identify_request_free (request);
+      return;
+    }
+
+  if (self != NULL && versions_map != NULL)
+    {
+      g_autoptr (GPtrArray) missing_projects =
+        g_ptr_array_new_with_free_func (g_free);
+
+      for (guint i = 0; self->installed.files != NULL &&
+                        i < self->installed.files->len; i++)
+        {
+          NuvashaLauncherContentFile *file =
+            g_ptr_array_index (self->installed.files, i);
+          GtkWidget *row =
+            g_hash_table_lookup (self->installed.rows, file->path);
+          NuvashaLauncherModrinthVersion *version = NULL;
+
+          if (row == NULL || file->sha1 == NULL ||
+              (file->version_id != NULL && *file->version_id != '\0'))
+            continue;
+
+          version = g_hash_table_lookup (versions_map, file->sha1);
+          if (version != NULL)
+            apply_identified_version (self, file, row, version,
+                                      missing_projects);
+        }
+
+      request_missing_project_titles (self, missing_projects);
+    }
+
+  g_clear_error (&error);
+  identify_request_free (request);
+  identify_start (run);
+}
+
 static void
 identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                 gpointer user_data)
@@ -312,80 +575,7 @@ identify_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
 
   if (version != NULL)
-    {
-      file->project_id = g_strdup (version->project_id);
-      {
-        const char *known_name = g_hash_table_lookup (self->browse.model->project_titles,
-                                                      version->project_id);
-        const char *known_icon = g_hash_table_lookup (self->browse.model->project_icons,
-                                                      version->project_id);
-        gboolean needs_details = known_name == NULL;
-
-        if (!file->local_metadata || file->project_name == NULL ||
-            *file->project_name == '\0' ||
-            g_strcmp0 (file->project_name, version->project_id) == 0)
-          {
-            g_free (file->project_name);
-            file->project_name = g_strdup (known_name);
-          }
-        if ((file->icon_url == NULL || *file->icon_url == '\0') &&
-            known_icon != NULL && *known_icon != '\0')
-          {
-            g_free (file->icon_url);
-            file->icon_url = g_strdup (known_icon);
-          }
-        if ((file->icon_url == NULL || *file->icon_url == '\0') &&
-            file->local_icon_path == NULL && file->local_icon_member == NULL)
-          needs_details = TRUE;
-        if (needs_details)
-          request_project_title (self, version->project_id);
-      }
-      file->version_id = g_strdup (version->version_id);
-      file->version_name = g_strdup (version->name);
-      file->version_number = g_strdup (version->version_number);
-      {
-        NuvashaLauncherModrinthFile *primary =
-          nuvashalauncher_modrinth_version_primary_file (version);
-
-        g_free (file->sha512);
-        g_free (file->download_url);
-        file->sha512 = primary != NULL ? g_strdup (primary->sha512) : NULL;
-        file->download_url = primary != NULL ? g_strdup (primary->url) : NULL;
-      }
-      for (guint i = 0; version->dependencies != NULL &&
-                       i < version->dependencies->len; i++)
-        {
-          NuvashaLauncherModrinthDependency *dependency =
-            g_ptr_array_index (version->dependencies, i);
-
-          if (dependency->project_id == NULL)
-            continue;
-          if (dependency->type == NUVASHALAUNCHER_DEPENDENCY_REQUIRED)
-            add_remote_dependency (&file->required_dependencies,
-                                   dependency->project_id);
-          else if (dependency->type == NUVASHALAUNCHER_DEPENDENCY_OPTIONAL)
-            add_remote_dependency (&file->optional_dependencies,
-                                   dependency->project_id);
-          else if (dependency->type == NUVASHALAUNCHER_DEPENDENCY_INCOMPATIBLE)
-            add_remote_dependency (&file->incompatible_dependencies,
-                                   dependency->project_id);
-        }
-
-      /* Persist the hash lookup immediately. Project details and the icon
-       * are a second request; a failure there must not lose the metadata we
-       * already obtained from the version-by-hash response. */
-      queue_persist_identified_file (self, file);
-
-      if (file->project_id != NULL && *file->project_id != '\0')
-        g_hash_table_add (self->browse.model->projects, g_strdup (file->project_id));
-
-      file_row_refresh (row);
-      if (file->icon_url != NULL && *file->icon_url != '\0')
-        load_visible_icons (self);
-
-      /* The browser's icon of the project the file belongs to, which the
-         row carries from here on. */
-    }
+    apply_identified_version (self, file, row, version, NULL);
 
   /* Modrinth does not know this file, or the network is not there: it
    * keeps its own name and the page works all the same. */
@@ -406,6 +596,42 @@ identify_start (IdentifyRun *run)
       return;
     }
 
+  if (!run->batch_done)
+    {
+      g_autoptr (GPtrArray) batch_hashes =
+        g_ptr_array_new_with_free_func (g_free);
+
+      run->batch_done = TRUE;
+
+      for (guint i = 0; i < self->installed.files->len; i++)
+        {
+          NuvashaLauncherContentFile *file =
+            g_ptr_array_index (self->installed.files, i);
+          GtkWidget *row =
+            g_hash_table_lookup (self->installed.rows, file->path);
+
+          if (row == NULL || file->sha1 == NULL ||
+              (file->version_id != NULL && *file->version_id != '\0'))
+            continue;
+
+          g_ptr_array_add (batch_hashes, g_strdup (file->sha1));
+        }
+
+      if (batch_hashes->len > 1)
+        {
+          IdentifyRequest *request = g_new0 (IdentifyRequest, 1);
+
+          request->run = run;
+          run->in_flight++;
+          request->operation = nuvashalauncher_modrinth_versions_by_hashes_async (
+            batch_hashes, identify_batch_ready, request);
+          if (run->cancellable != NULL)
+            nuvashalauncher_operation_follow (request->operation,
+                                               run->cancellable);
+          return;
+        }
+    }
+
   while (run->next_index < self->installed.files->len &&
          run->in_flight < IDENTIFY_CONCURRENCY)
     {
@@ -421,6 +647,12 @@ identify_start (IdentifyRun *run)
        * ready from disk and reopening an instance must not ask Modrinth just
        * to rediscover metadata already stored in the index. */
       if (row == NULL || file->sha1 == NULL)
+        continue;
+
+      /* Already identified by the bulk hash request above. */
+      if (file->version_id == NULL && file->project_id != NULL)
+        continue;
+      if (file->version_id != NULL && file->project_id != NULL)
         continue;
 
       IdentifyRequest *request = g_new0 (IdentifyRequest, 1);
