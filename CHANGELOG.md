@@ -2,6 +2,23 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [1.4] - 2026-11-23
+
+### Instance Management & UI
+- **Sidebar Groups & Stats Tab**: Added instance grouping in the sidebar (`nuvashalauncher-instance-manager.c`, `nuvashalauncher-main-window.c`) and a new **Stats** tab (`nuvashalauncher-instance-page-stats.c`) in the instance view, with updated translations across all 26 `po/*.po` files.
+
+### Reliability & Bug Fixes
+- **Task Scope & Download Cache**: Fixed a race between worker completion and `unref_when_done` in `nuvashalauncher-task.c`, and fell back to network downloads when a cached file disappears during restore in `nuvashalauncher-download-cache.c`.
+- **Isolated Test Secret Store**: Implemented `NUVASHALAUNCHER_TEST_SECRET_STORE_FILE` JSON storage in `nuvashalauncher-secret-store.c` when `NUVASHALAUNCHER_TEST_SECRET_STORE=1`, preventing parallel test runs from racing on the host Secret Service.
+- **Display Test Fixes**: Added `adw_init ()` in `tests/test-filter-entry.c` for `AdwHeaderBar` UI loading, and fixed `gdk_frame_clock_get_frame_time` teardown criticals and slow polling in `tests/test-window.c`.
+
+### Build, Tests & CI
+- **Pure C17 Parallel Test Runner & UX**: Replaced the Python test runner with `tests/runner.c` featuring live `[done/total]` progress, TTY colors, skip-reason extraction, failure highlighting/filtering, preserved failing workdirs, `Reproduce:` hints, and `TESTS=`, `CASE=`, `V=1`, `FAIL_FAST=1`, `KEEP_TMP=1`, `TIMEOUT=`, `REPEAT=`, `make test-list`, and `make help`.
+- **Faster Builds & Test Execution**: Linked `make test` against `build/libnuvashalauncher.so` (preserving `-fPIC` on `RELFLAGS` overrides), skipped building `build/nuvashalauncher` when filtered tests don't invoke it, removed `make fast`, parallelized stateless CLI checks in `tests/test-cli.c`, lowered `NUVASHALAUNCHER_TEST_FAST_TIMERS` stop-timeout to `100 ms`, lowered the `test_archive_size_bomb_is_refused` fixture cap, and consolidated tiny unit tests (`tests/test-common.h`).
+- **CI & Packaging**: Parallelized `static-analysis` across `x86_64` and `ARM64`, added `ccache` and `-Werror` on tests in `build.yml`, switched `flatpak.yml` and `release.yml` to direct `flatpak-builder` + `actions/cache@v4` (dropping `xvfb`, adding `elfutils`), and streamlined DEB/RPM/Arch release packaging (`--nocheck`, `debug_package %{nil}`, `nodocs`).
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.3...v1.4
+
 ## [1.3] - 2026-11-15
 
 ### Main Window & Instance Selection

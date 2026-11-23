@@ -577,8 +577,9 @@ both `src/` and `tests/`, sanitizer tests, parallel static analysis, and
 `flatpak.yml`. When `VERSION` is updated on `main`,
 `.github/workflows/release.yml` builds `.deb` (`amd64`, `arm64`), `.rpm`
 (`x86_64`, `aarch64`), Arch Linux (`x86_64` `.pkg.tar.zst`), and Flatpak
-(`x86_64`, `aarch64`) packages and publishes them to GitHub Releases using the
-matching section from `CHANGELOG.md`.
+(`x86_64`, `aarch64`, via direct `flatpak-builder` + `actions/cache`) packages
+and publishes them to GitHub Releases using the matching section from
+`CHANGELOG.md`.
 
 ## Adding or changing a subsystem
 
