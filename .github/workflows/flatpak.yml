@@ -51,13 +51,10 @@ jobs:
             flatpak-build packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml
           flatpak build-bundle flatpak-repo nuvashalauncher.flatpak \
             com.github.NuvashaLauncher.NuvashaLauncher
-          flatpak build-bundle --runtime flatpak-repo nuvashalauncher-locale.flatpak \
-            com.github.NuvashaLauncher.NuvashaLauncher.Locale
 
       - name: Install Flatpak bundle
         run: |
           flatpak install --user --noninteractive nuvashalauncher.flatpak
-          flatpak install --user --noninteractive nuvashalauncher-locale.flatpak
 
       - name: Run Flatpak smoke test
         run: make test-flatpak-runtime
@@ -66,7 +63,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: nuvashalauncher.flatpak
-          path: |
-            nuvashalauncher.flatpak
-            nuvashalauncher-locale.flatpak
+          path: nuvashalauncher.flatpak
           if-no-files-found: error

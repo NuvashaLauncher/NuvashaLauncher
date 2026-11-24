@@ -143,21 +143,13 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
   adw_header_bar_pack_end (ADW_HEADER_BAR (header), GTK_WIDGET (app_menu_button));
   adw_header_bar_pack_end (ADW_HEADER_BAR (header), GTK_WIDGET (users_button));
 
-  /* Empty state with primary call-to-action button conforming to GNOME HIG */
+  /* Empty state conforming to GNOME HIG */
   adw_status_page_set_title (ADW_STATUS_PAGE (empty_page), _("No instances yet"));
   adw_status_page_set_description (ADW_STATUS_PAGE (empty_page),
                                    _("Create an instance to start playing."));
   gtk_widget_set_hexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (empty_page), "nuvashalauncher-empty-state");
-
-  {
-    GtkWidget *create_btn = gtk_button_new_with_label (_("Create instance"));
-    gtk_widget_add_css_class (create_btn, "suggested-action");
-    gtk_widget_add_css_class (create_btn, "pill");
-    gtk_actionable_set_action_name (GTK_ACTIONABLE (create_btn), "win.create-instance");
-    adw_status_page_set_child (ADW_STATUS_PAGE (empty_page), create_btn);
-  }
 
   self->ui.toast_overlay = ADW_TOAST_OVERLAY (gtk_builder_get_object (shell_builder, "toast_overlay"));
   self->ui.stack = ADW_VIEW_STACK (gtk_builder_get_object (shell_builder, "stack"));

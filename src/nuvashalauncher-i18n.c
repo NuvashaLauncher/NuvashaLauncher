@@ -93,21 +93,38 @@ nuvashalauncher_i18n_init (const char *override_code)
   g_autofree char *development_locale_dir = NULL;
   const char *locale_dir = NUVASHALAUNCHER_LOCALE_DIR;
 
+  setlocale (LC_ALL, "");
+
   if (override_code != NULL &&
       *override_code != '\0' &&
       g_strcmp0 (override_code, "system") != 0)
     {
-      g_setenv ("LANGUAGE", override_code, TRUE);
+      if (g_str_has_prefix (override_code, "es_"))
+        {
+          g_autofree char *compound = g_strdup_printf ("%s:es", override_code);
+          g_setenv ("LANGUAGE", compound, TRUE);
+        }
+      else if (g_str_has_prefix (override_code, "pt_"))
+        {
+          g_autofree char *compound = g_strdup_printf ("%s:pt", override_code);
+          g_setenv ("LANGUAGE", compound, TRUE);
+        }
+      else
+        {
+          g_setenv ("LANGUAGE", override_code, TRUE);
+        }
       g_setenv ("LC_MESSAGES", override_code, TRUE);
     }
   else
     {
-      /* An explicit system-default choice must not keep an old LANGUAGE
-       * environment override from a previous launch. */
-      g_unsetenv ("LANGUAGE");
+      const char * const *langs = g_get_language_names ();
+      if (langs != NULL && langs[0] != NULL)
+        {
+          g_autofree char *lang_list = g_strjoinv (":", (char **) langs);
+          g_setenv ("LANGUAGE", lang_list, TRUE);
+        }
     }
 
-  setlocale (LC_ALL, "");
   cwd = g_get_current_dir ();
   local_locale_dir = g_build_filename (cwd, "build", "locale", NULL);
   if (g_file_test (local_locale_dir, G_FILE_TEST_IS_DIR))

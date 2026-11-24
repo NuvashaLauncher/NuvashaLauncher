@@ -194,14 +194,10 @@ jobs:
           flatpak build-bundle --arch=${{ matrix.arch }} flatpak-repo \
             "nuvashalauncher-${{ matrix.arch }}.flatpak" \
             com.github.NuvashaLauncher.NuvashaLauncher
-          flatpak build-bundle --runtime --arch=${{ matrix.arch }} flatpak-repo \
-            "nuvashalauncher-${{ matrix.arch }}-locale.flatpak" \
-            com.github.NuvashaLauncher.NuvashaLauncher.Locale
 
       - name: Install Flatpak bundle
         run: |
           flatpak install --user --noninteractive "nuvashalauncher-${{ matrix.arch }}.flatpak"
-          flatpak install --user --noninteractive "nuvashalauncher-${{ matrix.arch }}-locale.flatpak"
 
       - name: Run Flatpak smoke test
         run: make test-flatpak-runtime
@@ -211,8 +207,6 @@ jobs:
           mkdir -p dist
           mv "nuvashalauncher-${{ matrix.arch }}.flatpak" \
             "dist/nuvashalauncher-${{ matrix.arch }}.flatpak"
-          mv "nuvashalauncher-${{ matrix.arch }}-locale.flatpak" \
-            "dist/nuvashalauncher-${{ matrix.arch }}-locale.flatpak"
 
       - name: Upload Flatpak artifact
         uses: actions/upload-artifact@v7

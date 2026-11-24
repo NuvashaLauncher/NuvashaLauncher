@@ -205,6 +205,7 @@ test-flatpak-runtime:
 	flatpak run com.github.NuvashaLauncher.NuvashaLauncher --list-accounts >/dev/null; \
 	flatpak run --command=sh com.github.NuvashaLauncher.NuvashaLauncher -c '\
 		set -eu; \
+		test -f /app/share/locale/es_AR/LC_MESSAGES/nuvashalauncher.mo; \
 		test -w "$$XDG_DATA_HOME"; \
 		probe="$$XDG_DATA_HOME/.runtime-smoke"; \
 		printf flatpak-runtime > "$$probe"; \
