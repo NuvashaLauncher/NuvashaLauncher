@@ -81,7 +81,7 @@ update_selection_ui (NuvashaLauncherContentPage *self)
 
   if (count == 0)
     {
-      gtk_widget_set_visible (GTK_WIDGET (self->browse.selection_bar), FALSE);
+      gtk_action_bar_set_revealed (self->browse.selection_bar, FALSE);
       return;
     }
 
@@ -104,7 +104,7 @@ update_selection_ui (NuvashaLauncherContentPage *self)
 
   g_autofree char *text = g_strdup_printf (format, count);
   gtk_label_set_text (self->browse.selection_label, text);
-  gtk_widget_set_visible (GTK_WIDGET (self->browse.selection_bar), TRUE);
+  gtk_action_bar_set_revealed (self->browse.selection_bar, TRUE);
 }
 
 static void
@@ -288,7 +288,7 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
 
         adw_action_row_add_suffix (ADW_ACTION_ROW (row), check);
         adw_action_row_add_suffix (ADW_ACTION_ROW (row), button);
-        adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), button);
+        adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), check);
       }
 
       adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->browse.results_group),

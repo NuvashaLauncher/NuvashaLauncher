@@ -697,7 +697,7 @@ modpack_dialog_install_batch (NuvashaLauncherDownloadModpackDialog *self,
   for (guint i = 0; i < projects->len; i++)
     {
       NuvashaLauncherModrinthProject *p = g_ptr_array_index (projects, i);
-      g_string_append_printf (body, "• %s\n", p->title != NULL ? p->title : p->project_id);
+      g_string_append_printf (body, "%s\n", p->title != NULL ? p->title : p->project_id);
     }
   while (body->len > 0 && body->str[body->len - 1] == '\n')
     g_string_truncate (body, body->len - 1);

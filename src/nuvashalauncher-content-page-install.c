@@ -606,7 +606,7 @@ show_plan (NuvashaLauncherContentPage *self, PlanRun *plan)
     }
 
   {
-    const char *action = plan->replaces != NULL ? _("Update") : _("Install");
+    const char *action = _("Install");
     /* The name Modrinth writes already holds the version: "Xaero's
        Minimap 26.6.0". */
     const char *title = plan->title != NULL ? plan->title : "the file";
@@ -1054,7 +1054,7 @@ show_batch_plan (NuvashaLauncherContentPage *self, BatchPlanRun *batch)
   for (guint i = 0; i < batch->selected_titles->len; i++)
     {
       const char *title = g_ptr_array_index (batch->selected_titles, i);
-      g_string_append_printf (body, "• %s\n", title);
+      g_string_append_printf (body, "%s\n", title);
     }
 
   if (batch->dependency_titles->len > 0)
@@ -1063,7 +1063,7 @@ show_batch_plan (NuvashaLauncherContentPage *self, BatchPlanRun *batch)
       for (guint i = 0; i < batch->dependency_titles->len; i++)
         {
           const char *title = g_ptr_array_index (batch->dependency_titles, i);
-          g_string_append_printf (body, "• %s\n", title);
+          g_string_append_printf (body, "%s\n", title);
         }
     }
 

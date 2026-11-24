@@ -95,7 +95,7 @@ struct _NuvashaLauncherDownloadModpackDialog
   char *icon_path;     /* the fetched icon of the pack, NULL when it has
                           none; the new instance is given it */
 
-  GtkBox *selection_bar;
+  GtkActionBar *selection_bar;
   GtkLabel *selection_label;
   GtkButton *selection_button;
   GHashTable *selected_projects;

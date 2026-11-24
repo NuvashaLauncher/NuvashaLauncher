@@ -112,7 +112,7 @@ struct _NuvashaLauncherContentPage
 
     GList *result_rows;
     NuvashaLauncherContentBrowserModel *model;
-    GtkBox *selection_bar;
+    GtkActionBar *selection_bar;
     GtkLabel *selection_label;
     GtkButton *selection_button;
     GHashTable *selected_projects;
