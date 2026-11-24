@@ -123,13 +123,13 @@ test_category_labels (void)
   g_assert_null (non_array_cats);
   g_assert_error (cat_err, NUVASHALAUNCHER_MODRINTH_ERROR, NUVASHALAUNCHER_MODRINTH_ERROR_PARSE);
 
-  g_assert_cmpstr (one, ==, "Colored Lighting");
+  g_assert_cmpstr (one, ==, "Colored lighting");
   g_assert_cmpstr (two, ==, "512x+");
   g_assert_cmpstr (three, ==, "Kitchen Sink");
   g_assert_cmpstr (resolution, ==, "8x-");
   g_assert_cmpstr (acronym, ==, "PBR");
-  g_assert_cmpstr (heading, ==, "Performance Impact");
-  g_assert_cmpstr (worldgen, ==, "World Generation");
+  g_assert_cmpstr (heading, ==, "Performance impact");
+  g_assert_cmpstr (worldgen, ==, "World generation");
 
   g_print ("ok - category labels are readable\n");
 }
