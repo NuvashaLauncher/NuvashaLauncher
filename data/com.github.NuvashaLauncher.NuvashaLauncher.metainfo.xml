@@ -82,6 +82,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.6" date="2026-11-24">
+      <description>
+        <p>Release 1.6 modernizes dialogs and the main window according to GNOME Human Interface Guidelines (HIG), introduces in-app toast feedback, strengthens secret store persistence for accounts, and synchronizes translation catalogs.</p>
+      </description>
+    </release>
     <release version="1.5" date="2026-11-23">
       <description>
         <p>Release 1.5 streamlines UI interactions by removing multi-selection overhead, offloads JSON parsing and asset pre-verification to background threads, adds FICLONE copy-on-write acceleration, normalizes codebase patterns, and hardens tests.</p>
