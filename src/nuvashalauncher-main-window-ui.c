@@ -37,7 +37,6 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
   AdwStatusPage *empty_page = ADW_STATUS_PAGE (adw_status_page_new ());
   AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (gtk_builder_get_object (
     shell_builder, "toolbar"));
-  GtkWidget *add_popover = NULL;
 
   self->ui.toolbar = toolbar;
 

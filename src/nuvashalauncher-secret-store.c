@@ -238,7 +238,6 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
   const char *store_file = test_secret_store_file ();
   g_autoptr (GError) local_error = NULL;
   g_autofree char *active = NULL;
-  g_autoptr (GHashTable) attributes = NULL;
   const SecretSchema *accounts_schema = account_schema_for_store ();
   const SecretSchema *active_account_schema = active_schema_for_store ();
   GList *items = NULL;
@@ -253,10 +252,10 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
 
   loaded = g_ptr_array_new_with_free_func (
     (GDestroyNotify) nuvashalauncher_account_free);
-  attributes = g_hash_table_new (g_str_hash, g_str_equal);
-  items = secret_password_search_sync (accounts_schema, attributes,
+  items = secret_password_search_sync (accounts_schema,
                                        SECRET_SEARCH_ALL | SECRET_SEARCH_UNLOCK | SECRET_SEARCH_LOAD_SECRETS,
-                                       NULL, &local_error);
+                                       NULL, &local_error,
+                                       NULL);
   if (local_error != NULL)
     {
       g_ptr_array_unref (loaded);
