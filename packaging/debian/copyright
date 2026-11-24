@@ -1,14 +1,14 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: nuvashalauncher
-Upstream-Contact: Flia <nuvashalauncher@gmail.com>
+Upstream-Contact: aKpobzwviq <nuvashalauncher@gmail.com>
 Source: https://github.com/NuvashaLauncher/NuvashaLauncher
 
 Files: *
-Copyright: 2026 Flia
+Copyright: 2026 aKpobzwviq
 License: GPL-3.0-only
 
 Files: data/com.github.NuvashaLauncher.NuvashaLauncher.metainfo.xml
-Copyright: 2026 Flia
+Copyright: 2026 aKpobzwviq
 License: CC0-1.0
 
 License: GPL-3.0-only

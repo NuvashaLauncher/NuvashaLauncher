@@ -79,26 +79,26 @@ appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/com.githu
 %{_datadir}/mime/packages/com.github.NuvashaLauncher.NuvashaLauncher.xml
 
 %changelog
-* Tue Nov 24 2026 Flia <nuvashalauncher@gmail.com> - 1.7-1
+* Tue Nov 24 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.7-1
 - Release Nuvasha Launcher 1.7
 
-* Tue Nov 24 2026 Flia <nuvashalauncher@gmail.com> - 1.6-1
+* Tue Nov 24 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.6-1
 - Release Nuvasha Launcher 1.6
 
-* Mon Nov 23 2026 Flia <nuvashalauncher@gmail.com> - 1.5-1
+* Mon Nov 23 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.5-1
 - Release Nuvasha Launcher 1.5
 
-* Mon Nov 23 2026 Flia <nuvashalauncher@gmail.com> - 1.4-1
+* Mon Nov 23 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.4-1
 - Release Nuvasha Launcher 1.4
 
-* Sun Nov 15 2026 Flia <nuvashalauncher@gmail.com> - 1.3-1
+* Sun Nov 15 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.3-1
 - Release Nuvasha Launcher 1.3
 
-* Sat Nov 14 2026 Flia <nuvashalauncher@gmail.com> - 1.2-1
+* Sat Nov 14 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.2-1
 - Release Nuvasha Launcher 1.2
 
-* Sat Nov 14 2026 Flia <nuvashalauncher@gmail.com> - 1.1-1
+* Sat Nov 14 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.1-1
 - Release Nuvasha Launcher 1.1
 
-* Sat Nov 07 2026 Flia <nuvashalauncher@gmail.com> - 1.0-1
+* Sat Nov 07 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.0-1
 - Initial RPM package for Nuvasha Launcher

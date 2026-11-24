@@ -1,4 +1,4 @@
-/* Copyright (C) 2026 Flia
+/* Copyright (C) 2026 aKpobzwviq
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
@@ -584,7 +584,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
 {
   NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
   AdwDialog *dialog = adw_about_dialog_new ();
-  const char *authors[] = { "Flia", NULL };
+  const char *authors[] = { "aKpobzwviq", NULL };
   const char *services[] = {
     "Modrinth API",
     "Mojang & Microsoft Services",
@@ -600,7 +600,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
   adw_about_dialog_set_application_icon (ADW_ABOUT_DIALOG (dialog),
                                          "com.github.NuvashaLauncher.NuvashaLauncher");
   adw_about_dialog_set_version (ADW_ABOUT_DIALOG (dialog), NUVASHALAUNCHER_VERSION);
-  adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "Flia");
+  adw_about_dialog_set_developer_name (ADW_ABOUT_DIALOG (dialog), "aKpobzwviq");
   adw_about_dialog_set_developers (ADW_ABOUT_DIALOG (dialog), authors);
   adw_about_dialog_set_designers (ADW_ABOUT_DIALOG (dialog), authors);
   adw_about_dialog_set_artists (ADW_ABOUT_DIALOG (dialog), authors);
@@ -614,7 +614,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
   adw_about_dialog_set_support_url (ADW_ABOUT_DIALOG (dialog),
                                    "https://github.com/NuvashaLauncher/NuvashaLauncher#readme");
   adw_about_dialog_set_copyright (ADW_ABOUT_DIALOG (dialog),
-                                  "© 2026 Flia");
+                                  "© 2026 aKpobzwviq");
   adw_about_dialog_set_license_type (ADW_ABOUT_DIALOG (dialog),
                                      GTK_LICENSE_GPL_3_0_ONLY);
 
@@ -640,7 +640,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
   adw_about_dialog_add_legal_section (
     ADW_ABOUT_DIALOG (dialog),
     _("AppStream metadata"),
-    "© 2026 Flia",
+    "© 2026 aKpobzwviq",
     GTK_LICENSE_CUSTOM,
     _("The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."));
 

@@ -1474,7 +1474,7 @@ msgstr "Nuvasha Launcher"
 
 #: src/nuvashalauncher-main-window-actions.c:607
 msgid "translator-credits"
-msgstr "Flia"
+msgstr "aKpobzwviq"
 
 #: src/nuvashalauncher-main-window-actions.c:609
 msgid "Minecraft launcher for Linux"
