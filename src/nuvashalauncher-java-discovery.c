@@ -448,40 +448,12 @@ add_jvm_home (GPtrArray  *candidates,
   add_candidate (candidates, jre_java);
 }
 
-static gboolean
-nix_store_entry_is_jvm_candidate (const char *name)
-{
-  static const char * const keywords[] = {
-    "jdk",
-    "jre",
-    "java",
-    "temurin",
-    "zulu",
-    "graalvm",
-    "corretto",
-    "semeru",
-    NULL
-  };
-
-  if (name == NULL || g_str_has_suffix (name, ".drv"))
-    return FALSE;
-
-  for (guint i = 0; keywords[i] != NULL; i++)
-    {
-      if (strstr (name, keywords[i]) != NULL)
-        return TRUE;
-    }
-
-  return FALSE;
-}
-
 static void
 add_root_scandir (GPtrArray  *candidates,
                   const char *root)
 {
   g_autoptr (GError) error = NULL;
   g_autoptr (GDir) dir = g_dir_open (root, 0, &error);
-  gboolean is_nix_store = (g_strcmp0 (root, "/nix/store") == 0);
 
   if (dir == NULL)
     return;
@@ -489,9 +461,6 @@ add_root_scandir (GPtrArray  *candidates,
   for (const char *name = g_dir_read_name (dir); name != NULL;
        name = g_dir_read_name (dir))
     {
-      if (is_nix_store && !nix_store_entry_is_jvm_candidate (name))
-        continue;
-
       g_autofree char *home = g_build_filename (root, name, NULL);
 
       add_jvm_home (candidates, home);
@@ -509,7 +478,6 @@ default_roots (void)
     "/usr/java",
     "/usr/local/java",
     "/opt",
-    "/nix/store",
     NULL
   };
   g_autofree char *jdks = g_build_filename (home, ".jdks", NULL);

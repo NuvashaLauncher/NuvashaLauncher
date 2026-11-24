@@ -457,9 +457,7 @@ Java directory (`<user data>/nuvashalauncher/java`, created on startup),
 `$JAVA_HOME`, `PATH`, standard Linux JVM roots (`/usr/lib/jvm`, `/usr/lib64/jvm`,
 `/usr/java`, `/usr/local/java`, `/opt`), user-home runtime managers (`~/.jdks`,
 `~/.sdkman/candidates/java`, `~/.asdf/installs/java`,
-`~/.local/share/mise/installs/java`), `/nix/store` (non-`.drv` entries matching
-JVM substrings such as `jdk`, `jre`, `java`, `temurin`, `zulu`, `graalvm`,
-`corretto`, `semeru`), and user-configured `custom-java-paths`. It parses
+`~/.local/share/mise/installs/java`), and user-configured `custom-java-paths`. It parses
 `java -version` and related properties, including whether the runtime has AWT's
 X11 bridge. It prefers a window-capable compatible runtime and chooses the
 instance's explicit Java when one is configured. If an instance's saved custom
@@ -486,8 +484,7 @@ native Linux distribution packaging:
   shared `custom-java-paths` setting and probed before acceptance.
 - **Native distribution packages**: Build recipes are maintained for
   Fedora/RHEL (`packaging/rpm/nuvashalauncher.spec`), Debian/Ubuntu
-  (`packaging/debian/`), Arch Linux (`packaging/arch/PKGBUILD`), and NixOS
-  (`flake.nix`).
+  (`packaging/debian/`), and Arch Linux (`packaging/arch/PKGBUILD`).
 
 ## Persistence and filesystem layout
 

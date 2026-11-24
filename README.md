@@ -72,12 +72,6 @@ sudo apt install ./nuvashalauncher-$(dpkg --print-architecture).deb
 sudo pacman -U "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/latest/download/nuvashalauncher-x86_64.pkg.tar.zst"
 ```
 
-### NixOS
-
-```sh
-nix profile install github:NuvashaLauncher/NuvashaLauncher
-```
-
 ## License
 
 Nuvasha Launcher is free software released under the GNU General Public License,

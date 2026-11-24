@@ -12,6 +12,7 @@
 G_BEGIN_DECLS
 
 #define _(message) gettext (message)
+#define N_(message) (message)
 
 typedef struct {
   const char *code;
