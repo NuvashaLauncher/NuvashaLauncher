@@ -82,6 +82,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.7" date="2026-11-24">
+      <description>
+        <p>Release 1.7 adds multi-selection checkboxes and batch installation with dependency resolution for mods, resource packs, shaders, and modpacks, fixes modpack instance icon downloads, simplifies browser row interactions, and adds automatic Java runtime discovery in the launcher data directory.</p>
+      </description>
+    </release>
     <release version="1.6" date="2026-11-24">
       <description>
         <p>Release 1.6 modernizes dialogs and the main window according to GNOME Human Interface Guidelines (HIG), introduces in-app toast feedback, strengthens secret store persistence for accounts, and synchronizes translation catalogs.</p>

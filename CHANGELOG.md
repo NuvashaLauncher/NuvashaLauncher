@@ -2,6 +2,25 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [1.7] - 2026-11-24
+
+### Multi-Selection & Batch Installation
+- **Browser Checkboxes & Selection Footer**: Added a `GtkCheckButton` to each Modrinth result row for mods, resource packs, shaders, and modpacks (`nuvashalauncher-content-page-browser.c`, `nuvashalauncher-download-modpack-browser.c`), paired with a bottom selection footer showing the active selection count and an **Install** action button.
+- **Batch Content Install with Dependencies**: Selecting multiple mods, resource packs, or shaders resolves compatible versions and required dependencies in advance, presenting a unified confirmation dialog listing selected items and their dependencies before downloading (`nuvashalauncher-content-page-install.c`).
+- **Batch Modpack Install**: Selecting multiple modpacks displays a confirmation dialog listing the chosen modpacks and installs each one asynchronously in the background (`nuvashalauncher-download-modpack-details.c`).
+
+### Download UI & Modpack Fixes
+- **Modpack Instance Icon Fix**: Decoupled modpack icon fetching from dialog close cancellation and preserved `icon_url`/`icon_path` inside background `InstallJob` tasks (`nuvashalauncher-download-modpack-details.c`, `nuvashalauncher-download-modpack-install.c`, `nuvashalauncher-download-modpack-dialog.c`), ensuring downloaded modpacks properly copy and display their project icon.
+- **Streamlined Row & Version Picker UX**: Removed the separate versions dropdown button on browser rows, routed both row click and the download button directly to the version picker, removed redundant download icons from version selector rows, and removed the version subtitle description from single-modpack install confirmation dialogs.
+
+### Java & Runtime Discovery
+- **Launcher Java Directory**: Automatically creates and scans `$XDG_DATA_HOME/nuvashalauncher/java` (and its Flatpak data directory equivalent) for installed Java runtimes (`nuvashalauncher-java.c`, `nuvashalauncher-java-discovery.c`, `main.c`).
+
+### Localization
+- **Translation Updates**: Added full plural-aware (`ngettext`) translations for all new multi-selection and batch install strings across all 28 gettext catalogs (`po/*.po`).
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.6...v1.7
+
 ## [1.6] - 2026-11-24
 
 ### GNOME HIG Alignment & UI Polish
