@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/github/NuvashaLauncher/NuvashaLauncher">
-    <file compressed="true">nuvashalauncher.css</file>
+    <file>nuvashalauncher.css</file>
     <file>pack.png</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-sign-in.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-offline-account.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-create-instance.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-modpack-import.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-modpack-dialog.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-modpack-browser-toolbar.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-modpack-browser-states.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-modpack-optional.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-modpack-error.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-content-result-row.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-content-file-row.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-download-row.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-skin-row.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-main-shell.ui</file>
-    <file preprocess="xml-stripblanks" compressed="true">ui/nuvashalauncher-skin-content.ui</file>
-    <file preprocess="xml-stripblanks" alias="icons/scalable/actions/export-symbolic.svg">icons/scalable/actions/export-symbolic.svg</file>
-    <file preprocess="xml-stripblanks" alias="icons/scalable/actions/external-link-symbolic.svg">icons/scalable/actions/external-link-symbolic.svg</file>
+    <file>ui/nuvashalauncher-sign-in.ui</file>
+    <file>ui/nuvashalauncher-offline-account.ui</file>
+    <file>ui/nuvashalauncher-create-instance.ui</file>
+    <file>ui/nuvashalauncher-modpack-import.ui</file>
+    <file>ui/nuvashalauncher-modpack-dialog.ui</file>
+    <file>ui/nuvashalauncher-modpack-browser-toolbar.ui</file>
+    <file>ui/nuvashalauncher-modpack-browser-states.ui</file>
+    <file>ui/nuvashalauncher-modpack-optional.ui</file>
+    <file>ui/nuvashalauncher-modpack-error.ui</file>
+    <file>ui/nuvashalauncher-content-result-row.ui</file>
+    <file>ui/nuvashalauncher-content-file-row.ui</file>
+    <file>ui/nuvashalauncher-download-row.ui</file>
+    <file>ui/nuvashalauncher-skin-row.ui</file>
+    <file>ui/nuvashalauncher-main-shell.ui</file>
+    <file>ui/nuvashalauncher-skin-content.ui</file>
+    <file alias="icons/scalable/actions/export-symbolic.svg">icons/scalable/actions/export-symbolic.svg</file>
+    <file alias="icons/scalable/actions/external-link-symbolic.svg">icons/scalable/actions/external-link-symbolic.svg</file>
   </gresource>
 </gresources>

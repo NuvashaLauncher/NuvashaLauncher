@@ -58,6 +58,7 @@ SCHEMA_XML := data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml
 SCHEMA_COMPILED := build/schemas/gschemas.compiled
 
 CFLAGS     ?= -std=c17 -Wall -Wextra -Wpedantic -Wno-overlength-strings -MMD -MP -pipe
+override CFLAGS += -Wno-overlength-strings
 RELFLAGS   := -O2 -flto=auto -D_FORTIFY_SOURCE=2 -fstack-protector-strong -ffunction-sections -fdata-sections -fPIC
 RELLDFLAGS := -pie -flto=auto -Wl,-z,relro,-z,now -Wl,--gc-sections -Wl,--as-needed -Wl,-Bsymbolic-functions
 DBGFLAGS   := -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all
@@ -132,13 +133,13 @@ $(RESOURCE_C): data/nuvashalauncher.gresource.xml data/nuvashalauncher.css $(wil
 	glib-compile-resources --generate-source --target=$@ --sourcedir=data $<
 
 $(RESOURCE_O): $(RESOURCE_C) | build
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $<
 
 build-debug/%.o: src/%.c | build-debug
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -c -o $@ $<
 
 $(RESOURCE_DBG_O): $(RESOURCE_C) | build-debug
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -c -o $@ $(RESOURCE_C)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $(RESOURCE_C)
 
 $(TESTLIBSO): $(TESTLIBOBJS) $(RESOURCE_O) | build
 	$(CC) $(RELFLAGS) -shared -o $@ $(TESTLIBOBJS) $(RESOURCE_O) $(PKG_LIBS)
