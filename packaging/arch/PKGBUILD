@@ -1,7 +1,7 @@
 # Maintainer: aKpobzwviq <nuvashalauncher@gmail.com>
 
 pkgname=nuvashalauncher
-pkgver=${_pkgver:-1.7}
+pkgver=${_pkgver:-1.8}
 pkgrel=1
 pkgdesc='Minecraft launcher for Linux'
 arch=('x86_64' 'aarch64')

@@ -2,6 +2,21 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [1.8] - 2026-11-24
+
+### Flatpak & Display Compatibility
+- **X11/XWayland Socket Access**: Replaced `--socket=fallback-x11` with `--socket=x11` in `packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml` so XWayland (`DISPLAY`) remains accessible inside the Flatpak sandbox on Wayland desktop sessions when Minecraft/LWJGL initializes GLFW over X11.
+
+### Content Identification & Modpack Metadata
+- **Automatic Modpack Content Metadata Fetch**: Updated `identify_start()` in `nuvashalauncher-content-page-identify.c` so installed files that already carry a Modrinth `project_id` from modpack indexing (`seed_manifest_indexes`) automatically resolve missing project titles (`project_name`) and icons (`icon_url`) from the browser cache or Modrinth API without requiring a separate content download.
+- **Chunked Project Metadata Requests**: Batched `request_missing_project_titles()` requests in `nuvashalauncher-content-page-identify.c` into chunks of up to 50 project IDs (`PROJECT_TITLES_BATCH_SIZE`) to safely handle large modpacks.
+
+### Instance Settings & Skin Dialog UI
+- **Default RAM Display**: Added `output` and `input` handlers on the `RAM (MiB)` `AdwSpinRow` (`nuvashalauncher-instance-page-settings.c`) so instances with `0` configured memory display `Default` instead of `0`.
+- **Skin Dialog Action Icons**: Added `data/icons/scalable/actions/import-symbolic.svg`, converted the **Import skin…** and **Export skin…** buttons in `data/ui/nuvashalauncher-skin-content.ui` and `nuvashalauncher-users-popover-skin.c` into icon buttons (`import-symbolic` and `export-symbolic`), and aligned all four action buttons to the right (`import`, `export`, `open-skins`, `remove`).
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.7...v1.8
+
 ## [1.7] - 2026-11-24
 
 ### Multi-Selection & Batch Installation

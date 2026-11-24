@@ -288,6 +288,8 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.NuvashaLauncher.NuvashaLauncher.svg"
 	install -Dm644 data/icons/scalable/actions/export-symbolic.svg \
 		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/export-symbolic.svg"
+	install -Dm644 data/icons/scalable/actions/import-symbolic.svg \
+		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/import-symbolic.svg"
 	install -Dm644 data/icons/scalable/actions/external-link-symbolic.svg \
 		"$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/external-link-symbolic.svg"
 	install -Dm644 data/com.github.NuvashaLauncher.NuvashaLauncher.metainfo.xml \
@@ -327,6 +329,7 @@ uninstall:
 	rm -f "$(DESTDIR)$(PREFIX)/share/mime/packages/com.github.NuvashaLauncher.NuvashaLauncher.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/apps/com.github.NuvashaLauncher.NuvashaLauncher.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/export-symbolic.svg"
+	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/import-symbolic.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/icons/hicolor/scalable/actions/external-link-symbolic.svg"
 	rm -f "$(DESTDIR)$(PREFIX)/share/metainfo/com.github.NuvashaLauncher.NuvashaLauncher.metainfo.xml"
 	rm -f "$(DESTDIR)$(PREFIX)/share/glib-2.0/schemas/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml"

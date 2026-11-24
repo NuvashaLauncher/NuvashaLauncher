@@ -987,6 +987,8 @@ nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImag
     nuvashalauncher_skin_view_set_slim (preview, is_slim);
   }
   data->applying_profile = FALSE;
+  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (import), _("Import skin…"));
+  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (export), _("Export skin…"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (open_skins), _("Open folder"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (remove), _("Delete"));
   gtk_widget_set_hexpand (GTK_WIDGET (export), FALSE);
@@ -994,6 +996,12 @@ nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImag
   gtk_widget_set_hexpand (GTK_WIDGET (remove), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (open_skins), FALSE);
   gtk_widget_set_halign (GTK_WIDGET (remove), GTK_ALIGN_END);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (import),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  _("Import skin…"), -1);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (export),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  _("Export skin…"), -1);
   gtk_accessible_update_property (GTK_ACCESSIBLE (open_skins),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
                                   _("Open folder"), -1);
