@@ -664,37 +664,14 @@ test_probing_caches_and_invalidates (void)
 }
 
 static void
-test_java_dir_and_copy (void)
+test_java_dir (void)
 {
   g_autofree char *java_dir = nuvashalauncher_java_get_dir ();
   g_autofree char *expected_parent = g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "java", NULL);
-  g_autofree char *source_home = NULL;
-  g_autofree char *rel_exec = NULL;
 
   g_assert_nonnull (java_dir);
   g_assert_cmpstr (java_dir, ==, expected_parent);
   g_assert_true (g_file_test (java_dir, G_FILE_TEST_IS_DIR));
-
-  /* System Java paths should not be copied */
-  g_assert_false (nuvashalauncher_java_should_copy ("/usr/bin/java", NULL, NULL));
-  g_assert_false (nuvashalauncher_java_should_copy ("/usr/lib/jvm/java-21/bin/java", NULL, NULL));
-  g_assert_false (nuvashalauncher_java_should_copy ("/app/bin/java", NULL, NULL));
-
-  /* Path already inside launcher Java directory should not be copied */
-  {
-    g_autofree char *launcher_java = g_build_filename (java_dir, "myjdk", "bin", "java", NULL);
-    g_assert_false (nuvashalauncher_java_should_copy (launcher_java, NULL, NULL));
-  }
-
-  /* User path outside system and launcher should be copied */
-  {
-    g_autofree char *custom_java = g_build_filename (g_get_tmp_dir (), "test-custom-jdk", "bin", "java", NULL);
-    g_assert_true (nuvashalauncher_java_should_copy (custom_java, &source_home, &rel_exec));
-    g_assert_nonnull (source_home);
-    g_assert_nonnull (rel_exec);
-    g_assert_true (g_str_has_suffix (source_home, "test-custom-jdk"));
-    g_assert_cmpstr (rel_exec, ==, "bin/java");
-  }
 }
 
 int
@@ -702,8 +679,8 @@ main (void)
 {
   g_print ("# Java detection tests\n");
 
-  test_java_dir_and_copy ();
-  g_print ("ok - launcher java dir is created and should_copy detects user jdks\n");
+  test_java_dir ();
+  g_print ("ok - launcher java dir is created under user data directory\n");
 
   test_parse_banner_modern ();
   g_print ("ok - modern banners parse like 25, 21 and 17\n");

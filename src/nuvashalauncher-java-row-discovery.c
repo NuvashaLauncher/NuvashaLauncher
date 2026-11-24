@@ -8,9 +8,6 @@
 #include "nuvashalauncher-java-row-private.h"
 #include "nuvashalauncher-ui-feedback.h"
 #include "nuvashalauncher-i18n.h"
-#include "nuvashalauncher-fs.h"
-
-#include <sys/stat.h>
 
 void
 nuvashalauncher_java_row_detect_finished (GObject      *source G_GNUC_UNUSED,
@@ -108,71 +105,6 @@ nuvashalauncher_java_row_on_retry_clicked (GtkButton *button G_GNUC_UNUSED,
  * is what tells the caller which Java the user wants.
  * ---------------------------------------------------------- */
 
-typedef struct
-{
-  NuvashaLauncherJavaRow *row;
-  NuvashaLauncherTaskScope *operation;
-  char *dest_home;
-  char *rel_exec;
-} JavaCopyTask;
-
-static void probe_custom_path (NuvashaLauncherJavaRow *self, const char *path);
-
-static void
-on_java_copy_finished (GObject      *source G_GNUC_UNUSED,
-                       GAsyncResult *result,
-                       gpointer      user_data)
-{
-  JavaCopyTask *task = user_data;
-  NuvashaLauncherJavaRow *self = task->row;
-  g_autoptr (GError) error = NULL;
-  gboolean ok = nuvashalauncher_fs_copy_tree_finish (result, &error);
-
-  if (self == NULL || self->disposed || self->operation != task->operation)
-    {
-      if (!ok)
-        nuvashalauncher_fs_remove_tree (task->dest_home);
-      g_clear_object (&task->row);
-      if (task->operation != NULL)
-        nuvashalauncher_task_scope_unref (task->operation);
-      g_free (task->dest_home);
-      g_free (task->rel_exec);
-      g_free (task);
-      return;
-    }
-
-  if (!ok)
-    {
-      nuvashalauncher_fs_remove_tree (task->dest_home);
-      adw_action_row_set_subtitle (
-        ADW_ACTION_ROW (self),
-        error != NULL ? nuvashalauncher_error_message (error)
-                      : _("The Java executable could not be used. Select a working Java runtime."));
-      gtk_widget_set_tooltip_text (GTK_WIDGET (self),
-                                   error != NULL ? nuvashalauncher_error_message (error) : NULL);
-      g_clear_object (&task->row);
-      if (task->operation != NULL)
-        nuvashalauncher_task_scope_unref (task->operation);
-      g_free (task->dest_home);
-      g_free (task->rel_exec);
-      g_free (task);
-      return;
-    }
-
-  {
-    g_autofree char *new_executable = g_build_filename (task->dest_home, task->rel_exec, NULL);
-    chmod (new_executable, 0755);
-    probe_custom_path (self, new_executable);
-  }
-
-  g_clear_object (&task->row);
-  if (task->operation != NULL)
-    nuvashalauncher_task_scope_unref (task->operation);
-  g_free (task->dest_home);
-  g_free (task->rel_exec);
-  g_free (task);
-}
-
 static void
 add_probed (GObject      *source G_GNUC_UNUSED,
             GAsyncResult *result,
@@ -201,76 +133,6 @@ add_probed (GObject      *source G_GNUC_UNUSED,
       nuvashalauncher_java_row_ask_free (ask);
       return;
     }
-
-  {
-    g_autofree char *source_home = NULL;
-    g_autofree char *rel_exec = NULL;
-
-    if (nuvashalauncher_java_should_copy (probe->executable, &source_home, &rel_exec))
-      {
-        g_autofree char *base_name = g_path_get_basename (source_home);
-        g_autofree char *launcher_dir = nuvashalauncher_java_get_dir ();
-        g_autofree char *safe_name = NULL;
-        char *dest_home = NULL;
-        guint counter = 1;
-
-        if (base_name == NULL || *base_name == '\0' ||
-            g_strcmp0 (base_name, ".") == 0 || g_strcmp0 (base_name, "/") == 0)
-          safe_name = g_strdup_printf ("java-%d", probe->major_version > 0 ? probe->major_version : 21);
-        else
-          safe_name = g_strdup (base_name);
-
-        dest_home = g_build_filename (launcher_dir, safe_name, NULL);
-
-        while (g_file_test (dest_home, G_FILE_TEST_EXISTS))
-          {
-            g_autofree char *real_src = realpath (source_home, NULL);
-            g_autofree char *real_dst = realpath (dest_home, NULL);
-
-            if (real_src != NULL && real_dst != NULL && g_strcmp0 (real_src, real_dst) == 0)
-              break;
-
-            g_free (dest_home);
-            dest_home = g_strdup_printf ("%s/%s-%u", launcher_dir, safe_name, counter++);
-          }
-
-        {
-          g_autofree char *real_src = realpath (source_home, NULL);
-          g_autofree char *real_dst = realpath (dest_home, NULL);
-
-          if (real_src != NULL && real_dst != NULL && g_strcmp0 (real_src, real_dst) == 0)
-            {
-              g_free (dest_home);
-              const char *executable = probe->executable;
-              nuvashalauncher_java_register_custom_path (executable);
-              nuvashalauncher_java_row_set_custom (self, executable, g_steal_pointer (&probe));
-              g_object_notify (G_OBJECT (self), "selected");
-              nuvashalauncher_java_row_ask_free (ask);
-              return;
-            }
-        }
-
-        adw_action_row_set_subtitle (ADW_ACTION_ROW (self), _("Loading…"));
-        gtk_widget_set_tooltip_text (GTK_WIDGET (self), NULL);
-
-        JavaCopyTask *copy_task = g_new0 (JavaCopyTask, 1);
-        copy_task->row = g_object_ref (self);
-        copy_task->dest_home = dest_home;
-        copy_task->rel_exec = g_steal_pointer (&rel_exec);
-
-        g_autoptr (GFile) src_file = g_file_new_for_path (source_home);
-        g_autoptr (GFile) dst_file = g_file_new_for_path (dest_home);
-
-        nuvashalauncher_java_free (probe);
-        nuvashalauncher_java_row_ask_free (ask);
-
-        copy_task->operation = nuvashalauncher_fs_copy_tree_async (
-          src_file, dst_file, on_java_copy_finished, copy_task);
-        nuvashalauncher_task_scope_follow_cancellable (copy_task->operation, self->cancellable);
-        self->operation = copy_task->operation;
-        return;
-      }
-  }
 
   {
     const char *executable = probe->executable;
@@ -343,19 +205,7 @@ add_chosen (GObject *dialog, GAsyncResult *result, gpointer user_data)
         ADW_ACTION_ROW (self),
         _("the chosen file does not report a Java version"));
     else
-      {
-        g_autofree char *resolved_exec = NULL;
-
-        if (!g_str_has_suffix (path, "/java") && g_strcmp0 (g_path_get_basename (path), "java") != 0)
-          {
-            g_autofree char *dir = g_file_test (path, G_FILE_TEST_IS_DIR) ? g_strdup (path) : g_path_get_dirname (path);
-            g_autofree char *bin_java = g_build_filename (dir, "bin", "java", NULL);
-            if (g_file_test (bin_java, G_FILE_TEST_IS_REGULAR))
-              resolved_exec = g_steal_pointer (&bin_java);
-          }
-
-        probe_custom_path (self, resolved_exec != NULL ? resolved_exec : path);
-      }
+      probe_custom_path (self, path);
   }
 
   g_object_unref (self);
