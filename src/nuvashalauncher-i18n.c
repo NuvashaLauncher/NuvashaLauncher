@@ -34,8 +34,6 @@ nuvashalauncher_i18n_template_strings (void)
 
 #include <locale.h>
 
-#define N_(string) string
-
 #ifndef NUVASHALAUNCHER_LOCALE_DIR
 #define NUVASHALAUNCHER_LOCALE_DIR "/usr/local/share/locale"
 #endif
