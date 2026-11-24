@@ -5,19 +5,22 @@ All notable changes to Nuvasha Launcher are documented in this file.
 ## [1.7] - 2026-11-24
 
 ### Multi-Selection & Batch Installation
-- **Browser Checkboxes & Selection Footer**: Added a `GtkCheckButton` to each Modrinth result row for mods, resource packs, shaders, and modpacks (`nuvashalauncher-content-page-browser.c`, `nuvashalauncher-download-modpack-browser.c`), paired with a bottom selection footer showing the active selection count and an **Install** action button.
-- **Batch Content Install with Dependencies**: Selecting multiple mods, resource packs, or shaders resolves compatible versions and required dependencies in advance, presenting a unified confirmation dialog listing selected items and their dependencies before downloading (`nuvashalauncher-content-page-install.c`).
+- **Browser Checkboxes & `GtkActionBar` Selection Footer**: Added a `GtkCheckButton` to each Modrinth result row for mods, resource packs, shaders, and modpacks (`nuvashalauncher-content-page-browser.c`, `nuvashalauncher-download-modpack-browser.c`), paired with a native `GtkActionBar` bottom selection footer showing the active selection count and an **Install** action button. Clicking anywhere on a result row toggles its selection checkbox.
+- **Batch Content Install with Dependencies**: Selecting multiple mods, resource packs, or shaders resolves compatible versions and required dependencies in advance, presenting a unified confirmation dialog listing selected items and their dependencies cleanly before downloading (`nuvashalauncher-content-page-install.c`).
 - **Batch Modpack Install**: Selecting multiple modpacks displays a confirmation dialog listing the chosen modpacks and installs each one asynchronously in the background (`nuvashalauncher-download-modpack-details.c`).
 
-### Download UI & Modpack Fixes
+### Download UI, Instance Sidebar & Modpack Fixes
 - **Modpack Instance Icon Fix**: Decoupled modpack icon fetching from dialog close cancellation and preserved `icon_url`/`icon_path` inside background `InstallJob` tasks (`nuvashalauncher-download-modpack-details.c`, `nuvashalauncher-download-modpack-install.c`, `nuvashalauncher-download-modpack-dialog.c`), ensuring downloaded modpacks properly copy and display their project icon.
-- **Streamlined Row & Version Picker UX**: Removed the separate versions dropdown button on browser rows, routed both row click and the download button directly to the version picker, removed redundant download icons from version selector rows, and removed the version subtitle description from single-modpack install confirmation dialogs.
+- **Streamlined Row & Version Picker UX**: Removed the separate versions dropdown button on browser rows, routed the download button directly to the version picker, removed redundant download icons from version selector rows, unified confirmation prompts to always display **Install** even when replacing an existing file, and removed the version subtitle description from single-modpack install confirmation dialogs.
+- **Instance Sidebar Ellipsization**: Added GNOME-standard `PANGO_ELLIPSIZE_END` truncation (with a 18-character max width and hover tooltip) to instance sidebar tabs (`nuvashalauncher-instance-page.c`) so long translated tab names truncate cleanly with `…`.
 
 ### Java & Runtime Discovery
 - **Launcher Java Directory**: Automatically creates and scans `$XDG_DATA_HOME/nuvashalauncher/java` (and its Flatpak data directory equivalent) for installed Java runtimes (`nuvashalauncher-java.c`, `nuvashalauncher-java-discovery.c`, `main.c`).
 
-### Localization
+### Localization & Documentation
+- **Instance Sidebar Tab Translations**: Fixed missing `N_()` markers and sentence-case keys (`Resource packs`, `Shader packs`) in `nuvashalauncher-instance-page.c` so all instance sidebar tabs translate properly.
 - **Translation Updates**: Added full plural-aware (`ngettext`) translations for all new multi-selection and batch install strings across all 28 gettext catalogs (`po/*.po`).
+- **Architecture Documentation**: Updated `docs/architecture.md` to reflect `gtk_show_uri()` URI handling, multi-selection browser rows with `GtkActionBar` footers, and the dedicated launcher Java directory.
 
 **Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.6...v1.7
 

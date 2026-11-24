@@ -336,11 +336,11 @@ rebuild_content_pages (NuvashaLauncherInstancePage *self)
     const char *title;
     const char *icon;
   } pages[] = {
-    { NUVASHALAUNCHER_CONTENT_RESOURCE_PACK, "resource-packs", "Resource Packs",
+    { NUVASHALAUNCHER_CONTENT_RESOURCE_PACK, "resource-packs", N_("Resource packs"),
       "image-x-generic-symbolic" },
-    { NUVASHALAUNCHER_CONTENT_SHADER_PACK, "shader-packs", "Shader Packs",
+    { NUVASHALAUNCHER_CONTENT_SHADER_PACK, "shader-packs", N_("Shader packs"),
       "applications-graphics-symbolic" },
-    { NUVASHALAUNCHER_CONTENT_MOD, "mods", "Mods", "package-x-generic-symbolic" },
+    { NUVASHALAUNCHER_CONTENT_MOD, "mods", N_("Mods"), "package-x-generic-symbolic" },
   };
   g_autofree char *visible = NULL;
 
@@ -394,17 +394,17 @@ typedef struct {
 /* Settings, then the content, then the saves, then the logs; Stats is
  * pinned under the list. */
 static const InstanceSidebarSection instance_sections[] = {
-  { "settings", "Settings", "emblem-system-symbolic", FALSE },
-  { "resource-packs", "Resource Packs", "image-x-generic-symbolic", TRUE },
-  { "shader-packs", "Shader Packs", "applications-graphics-symbolic", FALSE },
-  { "mods", "Mods", "package-x-generic-symbolic", FALSE },
-  { "worlds", "Worlds", "checkbox-symbolic", TRUE },
-  { "servers", "Servers", "network-server-symbolic", FALSE },
-  { "logs", "Logs", "utilities-terminal-symbolic", TRUE },
+  { "settings", N_("Settings"), "emblem-system-symbolic", FALSE },
+  { "resource-packs", N_("Resource packs"), "image-x-generic-symbolic", TRUE },
+  { "shader-packs", N_("Shader packs"), "applications-graphics-symbolic", FALSE },
+  { "mods", N_("Mods"), "package-x-generic-symbolic", FALSE },
+  { "worlds", N_("Worlds"), "checkbox-symbolic", TRUE },
+  { "servers", N_("Servers"), "network-server-symbolic", FALSE },
+  { "logs", N_("Logs"), "utilities-terminal-symbolic", TRUE },
 };
 
 static const InstanceSidebarSection stats_section =
-  { "stats", "Stats", "power-profile-performance-symbolic", FALSE };
+  { "stats", N_("Stats"), "power-profile-performance-symbolic", FALSE };
 
 /* The line between two groups of rows. */
 static void
@@ -489,6 +489,11 @@ create_sidebar_row (const InstanceSidebarSection *section)
   gtk_widget_set_margin_start (box, 6);
   gtk_widget_set_margin_end (box, 6);
   gtk_label_set_xalign (GTK_LABEL (label), 0.0f);
+  gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_END);
+  gtk_label_set_single_line_mode (GTK_LABEL (label), TRUE);
+  gtk_label_set_max_width_chars (GTK_LABEL (label), 18);
+  gtk_widget_set_hexpand (label, TRUE);
+  gtk_widget_set_tooltip_text (row, _(section->title));
   gtk_box_append (GTK_BOX (box), icon);
   gtk_box_append (GTK_BOX (box), label);
   gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (row), box);

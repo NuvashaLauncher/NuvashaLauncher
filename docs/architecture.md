@@ -72,7 +72,7 @@ External services are used directly by their owning modules:
 - Account records and the active-account selection are stored through the
   desktop Secret Service by `nuvashalauncher-secret-store.c`. The launcher
   requires a Secret Service provider for account persistence.
-- `GAppInfo` opens URIs through the desktop.
+- `gtk_show_uri()` / desktop URI handlers open external links and instance folders.
 
 ## Static structure
 
@@ -374,11 +374,14 @@ reaches the UI:
 Content pages use models and rows, not raw API JSON. Details are converted from
 Modrinth Markdown to the restricted GTK markup the UI expects. Main-window
 instance rows open the instance dialog directly when activated alongside their
-Play/Stop action button; installed content pages, Worlds, and Servers use
-single-row actions (such as toggle, update, or delete, with content deletion
-honoring the `delete-dependents` policy). Update All uses that page's
-asynchronous operation state and exposes its scan/install progress and
-cancellation through a downloads-style popover.
+Play/Stop action button; Modrinth content and modpack browser rows provide
+multi-select checkboxes (toggled on row click) with a `GtkActionBar` selection
+footer for batch installation (resolving dependencies for content items) plus
+a per-row download button that opens the version selector; installed content
+pages, Worlds, and Servers use single-row actions (such as toggle, update, or
+delete, with content deletion honoring the `delete-dependents` policy). Update
+All uses that page's asynchronous operation state and exposes its scan/install
+progress and cancellation through a downloads-style popover.
 
 `nuvashalauncher-content-index.c` maintains local metadata for installed content. The
 index records hashes, file sizes, modification timestamps (`mtime_usec`),
@@ -449,9 +452,10 @@ placeholders, the main class, and game arguments into an argv array. The
 redacted form is the only form used in logs. Access tokens and values after
 the relevant password/token options are replaced before output is recorded.
 
-Java detection probes candidates asynchronously across `$JAVA_HOME`, `PATH`,
-standard Linux JVM roots (`/usr/lib/jvm`, `/usr/lib64/jvm`, `/usr/java`,
-`/usr/local/java`, `/opt`), user-home runtime managers (`~/.jdks`,
+Java detection probes candidates asynchronously across the launcher's dedicated
+Java directory (`<user data>/nuvashalauncher/java`, created on startup),
+`$JAVA_HOME`, `PATH`, standard Linux JVM roots (`/usr/lib/jvm`, `/usr/lib64/jvm`,
+`/usr/java`, `/usr/local/java`, `/opt`), user-home runtime managers (`~/.jdks`,
 `~/.sdkman/candidates/java`, `~/.asdf/installs/java`,
 `~/.local/share/mise/installs/java`), `/nix/store` (non-`.drv` entries matching
 JVM substrings such as `jdk`, `jre`, `java`, `temurin`, `zulu`, `graalvm`,
@@ -497,6 +501,7 @@ The main files are:
 | Account records | Desktop Secret Service, one item per account keyed by account ID |
 | Active account | Desktop Secret Service, separate active-account item |
 | Shared resolved content | `<user data>/nuvashalauncher/` shared client artifacts and assets |
+| Launcher Java runtimes | `<user data>/nuvashalauncher/java/` (auto-created and scanned for custom JDKs) |
 | Saved skins and cape textures | `<user data>/nuvashalauncher/skins/` (including `defaults/` and `capes/`) |
 | Version metadata | `<user cache>/nuvashalauncher/versions/` |
 | Cached icons and fallback schemas | `<user cache>/nuvashalauncher/icons/` and `<user cache>/nuvashalauncher/schemas/` |
