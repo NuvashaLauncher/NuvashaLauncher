@@ -109,7 +109,7 @@ name_is_a_player_name (const char *name, const char **why)
 
   if (name == NULL || *name == '\0')
     {
-      *why = _("a name cannot be empty");
+      *why = _("A name cannot be empty.");
       return FALSE;
     }
 
@@ -117,7 +117,7 @@ name_is_a_player_name (const char *name, const char **why)
 
   if (length < 3 || length > 16)
     {
-      *why = _("a name has to be 3 to 16 characters long");
+      *why = _("A name has to be 3 to 16 characters long.");
       return FALSE;
     }
 
@@ -126,7 +126,7 @@ name_is_a_player_name (const char *name, const char **why)
       if (g_ascii_isalnum (name[i]) || name[i] == '_')
         continue;
 
-      *why = _("a name can only hold letters, digits and underscores");
+      *why = _("A name can only hold letters, digits and underscores.");
       return FALSE;
     }
 

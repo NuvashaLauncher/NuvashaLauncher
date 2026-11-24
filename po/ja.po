@@ -1418,3 +1418,240 @@ msgstr "安定"
 
 msgid "%u%% crash rate"
 msgstr "クラッシュ率 %u%%"
+
+msgid "A name cannot be empty."
+msgstr "名前を空にすることはできません."
+
+msgid "Remove server"
+msgstr "サーバーを削除"
+
+msgid "Download modpack"
+msgstr "Modpack をダウンロード"
+
+msgid "%s “%s”"
+msgstr "%s「%s」"
+
+msgid "Delete instance"
+msgstr "インスタンスの削除。"
+
+msgid "No worlds"
+msgstr "ワールドがありません"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "ブラウザでサインインを待っています…"
+
+msgid "Choose files"
+msgstr "ファイルを選択"
+
+msgid "Cannot create “%s”: %s"
+msgstr "「%s」を作成できません: %s"
+
+msgid "Cache cleanup failed"
+msgstr "キャッシュの消去に失敗しました"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "ModrinthとModローダー"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "ワールド「%s」を削除しますか？この操作は取り消せません。"
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "プレイを開始するにはインスタンスを作成してください。"
+
+msgid "Duplicated to “%s”"
+msgstr "「%s」に複製しました"
+
+msgid "Downloading modpack"
+msgstr "Modpack をダウンロード中"
+
+msgid "Try again"
+msgstr "もう一度お試しください"
+
+msgid "Performance impact"
+msgstr "パフォーマンスへの影響"
+
+msgid "Add world"
+msgstr "ワールドを追加"
+
+msgid "Create instance"
+msgstr "インスタンスを作成"
+
+msgid "Browse modpacks"
+msgstr "Modパックを閲覧する"
+
+msgid "Remove server “%s”?"
+msgstr "サーバー「%s」を削除しますか？"
+
+msgid "Path tracing"
+msgstr "パストレーシング"
+
+msgid "Clean export"
+msgstr "クリーンエクスポート"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "ゲームの仕組み"
+
+msgid "Minecraft version"
+msgstr "Minecraftバージョン"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "フォルダーを開く"
+
+msgid "AppStream metadata"
+msgstr "AppStreamメタデータ"
+
+msgid "Add Java runtime"
+msgstr "Java ランタイムを追加"
+
+msgid "World generation"
+msgstr "ワールド生成"
+
+msgid "Keyboard shortcuts"
+msgstr "キーボードショートカット"
+
+msgid "Resource packs"
+msgstr "リソースパック"
+
+msgid "Edit server"
+msgstr "サーバーを編集"
+
+msgid "Keep playing"
+msgstr "プレイを続ける"
+
+msgid "Technical details"
+msgstr "技術的な詳細"
+
+msgid "Pack name"
+msgstr "パック名"
+
+msgid "Colored lighting"
+msgstr "カラーライティング"
+
+msgid "Rename world"
+msgstr "ワールド名を変更"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "名前には英字、数字、アンダースコアのみ使用できます."
+
+msgid "Preferences"
+msgstr "設定"
+
+msgid "Delete world"
+msgstr "ワールドを削除"
+
+msgid "Asking Microsoft for a code…"
+msgstr "マイクロソフトにコードを尋ねる…"
+
+msgid "Show unstable mod loader versions"
+msgstr "不安定なMod ローダーのバージョンを表示"
+
+msgid "Move down"
+msgstr "下へ移動"
+
+msgid "Clear cache"
+msgstr "Nuvasha Launcherのキャッシュをクリアする"
+
+msgid "Delete “%s”?"
+msgstr "「%s」を削除しますか？"
+
+msgid "Import modpack…"
+msgstr "Modpack をインポート…"
+
+msgid "Delete selected"
+msgstr "選択した項目を削除"
+
+msgid "Java runtime"
+msgstr "Java ランタイム"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "名前は3文字以上16文字以下にしてください."
+
+msgid "Import modpack"
+msgstr "Modpack をインポート"
+
+msgid "Core shaders"
+msgstr "コアシェーダー"
+
+msgid "Sign in"
+msgstr "サインイン"
+
+msgid "Cache cleared"
+msgstr "キャッシュを消去しました"
+
+msgid "No instances yet"
+msgstr "インスタンスはまだありません"
+
+msgid "Add offline account"
+msgstr "オフラインアカウントを追加"
+
+msgid "Copy seed"
+msgstr "シード値をコピー"
+
+msgid "Services & ecosystem"
+msgstr "サービスとエコシステム"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "ご指定の内容に一致するモッドパックはありません。別のキーワードをお試しください。."
+
+msgid "Line limit"
+msgstr "行数の上限"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth Modpack (*.mrpack)"
+
+msgid "Add server"
+msgstr "サーバーを追加"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "すべてのバージョン"
+
+msgid "No servers"
+msgstr "サーバーがありません"
+
+msgid "Clear cache?"
+msgstr "Nuvasha Launcherのキャッシュを消去しますか？"
+
+msgid "Loader version"
+msgstr "Mod ローダーのバージョン"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "すべてのファイルを含める"
+
+msgid "Export modpack"
+msgstr "Modpack をエクスポート"
+
+msgid "Add world…"
+msgstr "ワールドを追加…"
+
+msgid "Update all"
+msgstr "すべて更新"
+
+msgid "Add Microsoft account"
+msgstr "Microsoft アカウントを追加"
+
+msgid "Move up"
+msgstr "上へ移動"
+
+msgid "Minecraft disclaimer"
+msgstr "Minecraft免責事項"
+
+msgid "Shader packs"
+msgstr "シェーダーパック"

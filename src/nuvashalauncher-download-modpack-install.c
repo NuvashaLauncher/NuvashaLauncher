@@ -486,7 +486,7 @@ dialog_start_features (NuvashaLauncherDownloadModpackDialog *self)
     self->pack_download = nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_MODPACK, name);
   }
 
-  nuvashalauncher_download_set_detail (self->pack_download, _("Downloading Modpack"));
+  nuvashalauncher_download_set_detail (self->pack_download, _("Downloading modpack"));
   g_object_add_weak_pointer (G_OBJECT (self->pack_download),
                              (gpointer *) &self->pack_download);
 

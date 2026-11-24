@@ -9,8 +9,6 @@
 
 #include <string.h>
 
-#define NUVASHALAUNCHER_MODPACK_FORMAT_VERSION 1
-
 static JsonNode *
 parse_json (const char *json, gssize length, GError **error)
 {

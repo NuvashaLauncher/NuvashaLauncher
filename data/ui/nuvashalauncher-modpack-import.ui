@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <object class="AdwNavigationPage" id="page">
-    <property name="title" translatable="yes">Import Modpack</property>
+    <property name="title" translatable="yes">Import modpack</property>
     <property name="child">
       <object class="GtkBox">
         <property name="orientation">vertical</property>

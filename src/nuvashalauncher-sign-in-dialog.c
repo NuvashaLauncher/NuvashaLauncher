@@ -11,8 +11,8 @@
 #include "nuvashalauncher-task.h"
 
 /* Status messages shown while requesting and using the device code. */
-#define STEP_CODE _("asking Microsoft for a code")
-#define STEP_SIGN_IN _("waiting for the sign-in in the browser")
+#define STEP_CODE _("Asking Microsoft for a code…")
+#define STEP_SIGN_IN _("Waiting for sign-in in browser…")
 
 struct _NuvashaLauncherSignInDialog
 {
@@ -346,8 +346,8 @@ nuvashalauncher_sign_in_dialog_init (NuvashaLauncherSignInDialog *self)
   gtk_box_append (GTK_BOX (open_box), open_label);
   gtk_box_append (GTK_BOX (open_box), open_icon);
   gtk_button_set_child (self->open_button, open_box);
-  gtk_button_set_label (self->retry_button, _("Try Again"));
-  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (self->retry_button), _("Try Again"));
+  gtk_button_set_label (self->retry_button, _("Try again"));
+  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (self->retry_button), _("Try again"));
   g_signal_connect_object (self->open_button, "clicked", G_CALLBACK (on_open_clicked), self, 0);
   g_signal_connect_object (self->retry_button, "clicked", G_CALLBACK (on_retry_clicked), self, 0);
 }

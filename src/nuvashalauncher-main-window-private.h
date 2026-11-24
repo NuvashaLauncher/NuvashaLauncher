@@ -26,6 +26,7 @@ struct _NuvashaLauncherMainWindow
     AdwViewStack *stack; /* empty state or instance list */
     AdwBanner *banner;  /* launch failures and crash details */
     AdwToolbarView *toolbar;
+    AdwToastOverlay *toast_overlay;
     GtkListBox *instances;
   } ui;
 

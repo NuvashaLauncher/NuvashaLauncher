@@ -1384,3 +1384,240 @@ msgstr "Stabil"
 
 msgid "%u%% crash rate"
 msgstr "%u%% tingkat crash"
+
+msgid "A name cannot be empty."
+msgstr "sebuah nama tidak boleh kosong."
+
+msgid "Remove server"
+msgstr "Hapus Server"
+
+msgid "Download modpack"
+msgstr "Unduh Modpack"
+
+msgid "%s “%s”"
+msgstr "%s “%s”"
+
+msgid "Delete instance"
+msgstr "Hapus Instans"
+
+msgid "No worlds"
+msgstr "Tidak Ada Dunia"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "menunggu masuk di browser…"
+
+msgid "Choose files"
+msgstr "Pilih Berkas"
+
+msgid "Cannot create “%s”: %s"
+msgstr "Tidak dapat membuat “%s”: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Pembersihan Cache Gagal"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth & Pemuat Mod"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Hapus dunia “%s”? Tindakan ini tidak dapat dibatalkan."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Buat instans untuk mulai bermain."
+
+msgid "Duplicated to “%s”"
+msgstr "Digandakan menjadi “%s”"
+
+msgid "Downloading modpack"
+msgstr "Mengunduh Modpack"
+
+msgid "Try again"
+msgstr "Coba Lagi"
+
+msgid "Performance impact"
+msgstr "Dampak kinerja"
+
+msgid "Add world"
+msgstr "Tambah Dunia"
+
+msgid "Create instance"
+msgstr "Buat Contoh"
+
+msgid "Browse modpacks"
+msgstr "Jelajahi Modpack"
+
+msgid "Remove server “%s”?"
+msgstr "Hapus server “%s”?"
+
+msgid "Path tracing"
+msgstr "Pelacakan jalur"
+
+msgid "Clean export"
+msgstr "Ekspor Bersih"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Mekanika permainan"
+
+msgid "Minecraft version"
+msgstr "Versi Minecraft"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Buka Folder"
+
+msgid "AppStream metadata"
+msgstr "Metadata AppStream"
+
+msgid "Add Java runtime"
+msgstr "Tambahkan Waktu Proses Java"
+
+msgid "World generation"
+msgstr "Pembuatan dunia"
+
+msgid "Keyboard shortcuts"
+msgstr "Pintasan Papan Ketik"
+
+msgid "Resource packs"
+msgstr "Paket Sumber Daya"
+
+msgid "Edit server"
+msgstr "Sunting Server"
+
+msgid "Keep playing"
+msgstr "Terus Bermain"
+
+msgid "Technical details"
+msgstr "Rincian teknis"
+
+msgid "Pack name"
+msgstr "Nama Paket"
+
+msgid "Colored lighting"
+msgstr "Pencahayaan berwarna"
+
+msgid "Rename world"
+msgstr "Ubah Nama Dunia"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "sebuah nama hanya dapat memuat huruf, angka, dan garis bawah."
+
+msgid "Preferences"
+msgstr "Pengaturan"
+
+msgid "Delete world"
+msgstr "Hapus Dunia"
+
+msgid "Asking Microsoft for a code…"
+msgstr "meminta kode kepada Microsoft…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Tampilkan versi Mod Loader yang tidak stabil"
+
+msgid "Move down"
+msgstr "Pindah ke Bawah"
+
+msgid "Clear cache"
+msgstr "Hapus Cache Nuvasha Launcher"
+
+msgid "Delete “%s”?"
+msgstr "Hapus “%s”?"
+
+msgid "Import modpack…"
+msgstr "Impor Modpack…"
+
+msgid "Delete selected"
+msgstr "Hapus yang Dipilih"
+
+msgid "Java runtime"
+msgstr "Waktu Proses Java"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "sebuah nama harus terdiri dari 3 hingga 16 karakter."
+
+msgid "Import modpack"
+msgstr "Impor Modpack"
+
+msgid "Core shaders"
+msgstr "Shader inti"
+
+msgid "Sign in"
+msgstr "Masuk"
+
+msgid "Cache cleared"
+msgstr "Tembolok Dihapus"
+
+msgid "No instances yet"
+msgstr "Belum Ada Contoh"
+
+msgid "Add offline account"
+msgstr "Tambahkan Akun Offline"
+
+msgid "Copy seed"
+msgstr "Salin Seed"
+
+msgid "Services & ecosystem"
+msgstr "Layanan & Ekosistem"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Tidak ada modpack yang sesuai dengan yang diminta. Coba gunakan kata lain."
+
+msgid "Line limit"
+msgstr "Batas Garis"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modpack Modrinth (*.mrpack)"
+
+msgid "Add server"
+msgstr "Tambah Server"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Semua versi"
+
+msgid "No servers"
+msgstr "Tidak Ada Server"
+
+msgid "Clear cache?"
+msgstr "Hapus Cache Nuvasha Launcher?"
+
+msgid "Loader version"
+msgstr "Versi Pemuat"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Sertakan Semua File"
+
+msgid "Export modpack"
+msgstr "Ekspor Modpack"
+
+msgid "Add world…"
+msgstr "Tambah Dunia…"
+
+msgid "Update all"
+msgstr "Perbarui Semua"
+
+msgid "Add Microsoft account"
+msgstr "Tambahkan Akun Microsoft"
+
+msgid "Move up"
+msgstr "Pindah ke Atas"
+
+msgid "Minecraft disclaimer"
+msgstr "Pernyataan Penyangkalan Minecraft"
+
+msgid "Shader packs"
+msgstr "Paket Shader"

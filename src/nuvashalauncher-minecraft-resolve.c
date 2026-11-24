@@ -33,18 +33,9 @@
 
 /* Required fields in a version document. */
 #define NO_CLIENT_MESSAGE "this version document has no client jar"
-#define NO_MAIN_CLASS_MESSAGE "this version document names no main class"
-
-/* The objects of an asset index are named after their own hash and live
-   in a directory named after its first characters, the way Mojang lays
-   them out. */
-#define ASSET_BUCKET_LENGTH 2
 
 /* The directory the game reads a virtual asset index out of. */
 #define ASSET_VIRTUAL_SUBDIR "virtual"
-
-/* The prefix the resources of the game have in a map_to_resources index. */
-#define ASSET_RESOURCE_PREFIX "minecraft/"
 
 GQuark
 nuvashalauncher_resolve_error_quark (void)

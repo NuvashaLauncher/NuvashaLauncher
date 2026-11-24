@@ -173,6 +173,7 @@ typedef struct {
   AdwEntryRow *name_row;
   AdwEntryRow *ip_row;
   AdwComboRow *policy_row;
+  AdwDialog *dialog;
 } ServerDialogData;
 
 static void
@@ -185,57 +186,51 @@ server_dialog_data_free (ServerDialogData *d)
 }
 
 static void
-on_server_dialog_response (GObject      *source,
-                           GAsyncResult *result,
-                           gpointer      user_data)
+on_server_dialog_save (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   ServerDialogData *d = user_data;
-  const char *response =
-    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
-
-  if (g_strcmp0 (response, "save") != 0)
-    {
-      server_dialog_data_free (d);
-      return;
-    }
-
   const char *name = gtk_editable_get_text (GTK_EDITABLE (d->name_row));
   const char *ip = gtk_editable_get_text (GTK_EDITABLE (d->ip_row));
   guint policy_idx = adw_combo_row_get_selected (d->policy_row);
   gint8 policy = policy_idx == 1 ? 1 : (policy_idx == 2 ? 2 : 0);
 
-  if (ip == NULL || *ip == '\0')
+  if (ip != NULL && *ip != '\0')
     {
-      server_dialog_data_free (d);
-      return;
-    }
-
-  if (d->is_edit)
-    {
-      if (d->index < d->page->servers->len)
+      if (d->is_edit)
         {
-          ServerEntry *s = g_ptr_array_index (d->page->servers, d->index);
-          g_free (s->name);
+          if (d->index < d->page->servers->len)
+            {
+              ServerEntry *s = g_ptr_array_index (d->page->servers, d->index);
+              g_free (s->name);
+              s->name = g_strdup (name != NULL && *name != '\0' ? name : ip);
+              g_free (s->ip);
+              s->ip = g_strdup (ip);
+              s->accept_textures = policy;
+              s->has_accept_textures = TRUE;
+              server_entry_refresh_search_key (s);
+            }
+        }
+      else
+        {
+          ServerEntry *s = g_new0 (ServerEntry, 1);
           s->name = g_strdup (name != NULL && *name != '\0' ? name : ip);
-          g_free (s->ip);
           s->ip = g_strdup (ip);
           s->accept_textures = policy;
           s->has_accept_textures = TRUE;
           server_entry_refresh_search_key (s);
+          g_ptr_array_add (d->page->servers, s);
         }
-    }
-  else
-    {
-      ServerEntry *s = g_new0 (ServerEntry, 1);
-      s->name = g_strdup (name != NULL && *name != '\0' ? name : ip);
-      s->ip = g_strdup (ip);
-      s->accept_textures = policy;
-      s->has_accept_textures = TRUE;
-      server_entry_refresh_search_key (s);
-      g_ptr_array_add (d->page->servers, s);
+
+      persist_and_reload (d->page);
     }
 
-  persist_and_reload (d->page);
+  adw_dialog_close (d->dialog);
+}
+
+static void
+on_server_dialog_closed (AdwDialog *dialog G_GNUC_UNUSED, gpointer user_data)
+{
+  ServerDialogData *d = user_data;
   server_dialog_data_free (d);
 }
 
@@ -249,11 +244,25 @@ present_server_dialog (NuvashaLauncherServersPage *self,
       ? g_ptr_array_index (self->servers, index)
       : NULL;
 
-  AdwAlertDialog *alert = ADW_ALERT_DIALOG (
-    adw_alert_dialog_new (is_edit ? _("Edit Server") : _("Add Server"), NULL));
-  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
-  adw_alert_dialog_set_body_use_markup (alert, FALSE);
+  AdwDialog *dialog = adw_dialog_new ();
+  adw_dialog_set_title (dialog, is_edit ? _("Edit server") : _("Add server"));
+  adw_dialog_set_content_width (dialog, 440);
+  adw_dialog_set_follows_content_size (dialog, TRUE);
 
+  AdwToolbarView *toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new ());
+
+  GtkWidget *cancel_btn = gtk_button_new_with_label (_("Cancel"));
+  g_signal_connect_swapped (cancel_btn, "clicked", G_CALLBACK (adw_dialog_close), dialog);
+  adw_header_bar_pack_start (header, cancel_btn);
+
+  GtkWidget *save_btn = gtk_button_new_with_label (_("Save"));
+  gtk_widget_add_css_class (save_btn, "suggested-action");
+  adw_header_bar_pack_end (header, save_btn);
+
+  adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
+
+  AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
   AdwPreferencesGroup *form = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwEntryRow *name_row = ADW_ENTRY_ROW (adw_entry_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (name_row), _("Name"));
@@ -273,7 +282,7 @@ present_server_dialog (NuvashaLauncherServersPage *self,
   };
   GtkStringList *model = gtk_string_list_new (policies);
   AdwComboRow *policy_row = ADW_COMBO_ROW (adw_combo_row_new ());
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (policy_row), _("Resource Packs"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (policy_row), _("Resource packs"));
   adw_combo_row_set_model (policy_row, G_LIST_MODEL (model));
   g_object_unref (model);
 
@@ -285,15 +294,11 @@ present_server_dialog (NuvashaLauncherServersPage *self,
   adw_preferences_group_add (form, GTK_WIDGET (name_row));
   adw_preferences_group_add (form, GTK_WIDGET (ip_row));
   adw_preferences_group_add (form, GTK_WIDGET (policy_row));
+  adw_preferences_page_add (page, form);
 
-  adw_alert_dialog_set_extra_child (alert, GTK_WIDGET (form));
-  adw_alert_dialog_add_responses (alert,
-                                  "cancel", _("Cancel"),
-                                  "save", _("Save"),
-                                  NULL);
-  adw_alert_dialog_set_response_appearance (alert, "save", ADW_RESPONSE_SUGGESTED);
-  adw_alert_dialog_set_default_response (alert, "save");
-  adw_alert_dialog_set_close_response (alert, "cancel");
+  adw_toolbar_view_set_content (toolbar, GTK_WIDGET (page));
+  adw_dialog_set_child (dialog, GTK_WIDGET (toolbar));
+  adw_dialog_set_default_widget (dialog, save_btn);
 
   ServerDialogData *d = g_new0 (ServerDialogData, 1);
   d->page = g_object_ref (self);
@@ -302,9 +307,12 @@ present_server_dialog (NuvashaLauncherServersPage *self,
   d->name_row = name_row;
   d->ip_row = ip_row;
   d->policy_row = policy_row;
+  d->dialog = dialog;
 
-  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL,
-                           on_server_dialog_response, d);
+  g_signal_connect (save_btn, "clicked", G_CALLBACK (on_server_dialog_save), d);
+  g_signal_connect (dialog, "closed", G_CALLBACK (on_server_dialog_closed), d);
+
+  adw_dialog_present (dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -356,9 +364,9 @@ on_delete_server_clicked (GtkButton *button, gpointer user_data)
 
   ServerEntry *s = g_ptr_array_index (self->servers, index);
   g_autofree char *body =
-    g_strdup_printf (_("Remove server \"%s\"?"), s->name != NULL ? s->name : s->ip);
+    g_strdup_printf (_("Remove server “%s”?"), s->name != NULL ? s->name : s->ip);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
-    adw_alert_dialog_new (_("Remove Server"), body));
+    adw_alert_dialog_new (_("Remove server"), body));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_responses (alert,
@@ -444,12 +452,12 @@ build_server_row (NuvashaLauncherServersPage *self, ServerEntry *s, guint index)
   adw_action_row_add_suffix (
     row, server_action_button ("media-playback-start-symbolic", _("Play"),
                                index, G_CALLBACK (on_join_server_clicked), self));
-  GtkWidget *up = server_action_button ("go-up-symbolic", _("Move Up"),
+  GtkWidget *up = server_action_button ("go-up-symbolic", _("Move up"),
                                         index, G_CALLBACK (on_move_up_clicked), self);
   gtk_widget_set_sensitive (up, index > 0);
   adw_action_row_add_suffix (row, up);
 
-  GtkWidget *down = server_action_button ("go-down-symbolic", _("Move Down"),
+  GtkWidget *down = server_action_button ("go-down-symbolic", _("Move down"),
                                           index, G_CALLBACK (on_move_down_clicked), self);
   gtk_widget_set_sensitive (down, index + 1 < self->servers->len);
   adw_action_row_add_suffix (row, down);
@@ -652,7 +660,7 @@ nuvashalauncher_servers_page_new (NuvashaLauncherInstance *instance,
 
   GtkWidget *add_btn = gtk_button_new_from_icon_name ("list-add-symbolic");
   gtk_widget_set_valign (add_btn, GTK_ALIGN_CENTER);
-  nuvashalauncher_ui_prepare_icon_button (add_btn, _("Add Server"));
+  nuvashalauncher_ui_prepare_icon_button (add_btn, _("Add server"));
   g_signal_connect_object (add_btn, "clicked", G_CALLBACK (on_add_server_clicked), self, 0);
 
   GtkWidget *spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -691,8 +699,15 @@ nuvashalauncher_servers_page_new (NuvashaLauncherInstance *instance,
   gtk_widget_set_hexpand (GTK_WIDGET (empty), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (empty), TRUE);
   adw_status_page_set_icon_name (empty, "network-server-symbolic");
-  adw_status_page_set_title (empty, _("No Servers"));
+  adw_status_page_set_title (empty, _("No servers"));
   adw_status_page_set_description (empty, _("Servers added here are saved to servers.dat for this instance."));
+
+  GtkWidget *empty_add = gtk_button_new_with_label (_("Add server"));
+  gtk_widget_add_css_class (empty_add, "suggested-action");
+  gtk_widget_add_css_class (empty_add, "pill");
+  gtk_widget_set_halign (empty_add, GTK_ALIGN_CENTER);
+  g_signal_connect_object (empty_add, "clicked", G_CALLBACK (on_add_server_clicked), self, 0);
+  adw_status_page_set_child (empty, empty_add);
 
   adw_view_stack_add_named (self->stack, GTK_WIDGET (scroller), "list");
   adw_view_stack_add_named (self->stack, GTK_WIDGET (empty), "empty");

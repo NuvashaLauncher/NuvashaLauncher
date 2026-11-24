@@ -1386,3 +1386,240 @@ msgstr "Stabilă"
 
 msgid "%u%% crash rate"
 msgstr "%u%% rată de blocare"
+
+msgid "A name cannot be empty."
+msgstr "un nume nu poate fi gol."
+
+msgid "Remove server"
+msgstr "Elimină serverul"
+
+msgid "Download modpack"
+msgstr "Descărcați Modpack"
+
+msgid "%s “%s”"
+msgstr "%s „%s”"
+
+msgid "Delete instance"
+msgstr "Ștergeți instanța"
+
+msgid "No worlds"
+msgstr "Nicio lume"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "așteptând conectarea în browser…"
+
+msgid "Choose files"
+msgstr "Alegeți fișierele"
+
+msgid "Cannot create “%s”: %s"
+msgstr "Nu se poate crea „%s”: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Curățarea cache a eșuat"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth și încărcătoare de moduri"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Ștergi lumea „%s”? Această acțiune nu poate fi anulată."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Creați o instanță pentru a începe să jucați."
+
+msgid "Duplicated to “%s”"
+msgstr "Duplicat la „%s”"
+
+msgid "Downloading modpack"
+msgstr "Descărcarea Modpack"
+
+msgid "Try again"
+msgstr "Încearcă din nou"
+
+msgid "Performance impact"
+msgstr "Impact asupra performanței"
+
+msgid "Add world"
+msgstr "Adaugă lume"
+
+msgid "Create instance"
+msgstr "Creați o instanță"
+
+msgid "Browse modpacks"
+msgstr "Răsfoiește pachetele de moduri"
+
+msgid "Remove server “%s”?"
+msgstr "Elimini serverul „%s”?"
+
+msgid "Path tracing"
+msgstr "Urmărirea traseelor"
+
+msgid "Clean export"
+msgstr "Export curat"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Mecanici de joc"
+
+msgid "Minecraft version"
+msgstr "Versiunea Minecraft"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Deschideți folderul"
+
+msgid "AppStream metadata"
+msgstr "Metadate AppStream"
+
+msgid "Add Java runtime"
+msgstr "Adăugați Java Runtime"
+
+msgid "World generation"
+msgstr "Generarea lumii"
+
+msgid "Keyboard shortcuts"
+msgstr "Comenzi rapide de la tastatură"
+
+msgid "Resource packs"
+msgstr "Pachete de resurse"
+
+msgid "Edit server"
+msgstr "Editează serverul"
+
+msgid "Keep playing"
+msgstr "Continuați să jucați"
+
+msgid "Technical details"
+msgstr "Detalii tehnice"
+
+msgid "Pack name"
+msgstr "Numele pachetului"
+
+msgid "Colored lighting"
+msgstr "Iluminare colorată"
+
+msgid "Rename world"
+msgstr "Redenumește lumea"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "un nume poate conține doar litere, cifre și litere de subliniere."
+
+msgid "Preferences"
+msgstr "Setări"
+
+msgid "Delete world"
+msgstr "Șterge lumea"
+
+msgid "Asking Microsoft for a code…"
+msgstr "cerând Microsoft un cod…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Afișați versiunile instabile ale modului de încărcare"
+
+msgid "Move down"
+msgstr "Mută în jos"
+
+msgid "Clear cache"
+msgstr "Șterge cache-ul Nuvasha Launcher"
+
+msgid "Delete “%s”?"
+msgstr "Ștergeți „%s”?"
+
+msgid "Import modpack…"
+msgstr "Import Modpack…"
+
+msgid "Delete selected"
+msgstr "Șterge selecția"
+
+msgid "Java runtime"
+msgstr "Mediul de execuție Java"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "un nume trebuie să aibă între 3 și 16 caractere."
+
+msgid "Import modpack"
+msgstr "Import Modpack"
+
+msgid "Core shaders"
+msgstr "Shadere ale jocului de bază"
+
+msgid "Sign in"
+msgstr "Conectare"
+
+msgid "Cache cleared"
+msgstr "Cache golit"
+
+msgid "No instances yet"
+msgstr "Nicio instanță încă"
+
+msgid "Add offline account"
+msgstr "Adăugați un cont offline"
+
+msgid "Copy seed"
+msgstr "Copiază seed-ul"
+
+msgid "Services & ecosystem"
+msgstr "Servicii și ecosistem"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Nu există niciun modpack care să corespundă cerințelor. Încearcă un alt cuvânt."
+
+msgid "Line limit"
+msgstr "Limită de linie"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth Modpack-uri (*.mrpack)"
+
+msgid "Add server"
+msgstr "Adaugă server"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Toate versiunile"
+
+msgid "No servers"
+msgstr "Niciun server"
+
+msgid "Clear cache?"
+msgstr "Să ștergi memoria cache a Nuvasha Launcher?"
+
+msgid "Loader version"
+msgstr "Versiune de încărcare"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Includeți toate fișierele"
+
+msgid "Export modpack"
+msgstr "Exportare Modpack"
+
+msgid "Add world…"
+msgstr "Adaugă lume…"
+
+msgid "Update all"
+msgstr "Actualizați toate"
+
+msgid "Add Microsoft account"
+msgstr "Adăugați un cont Microsoft"
+
+msgid "Move up"
+msgstr "Mută în sus"
+
+msgid "Minecraft disclaimer"
+msgstr "Declinare de responsabilitate Minecraft"
+
+msgid "Shader packs"
+msgstr "Pachete Shader"

@@ -1423,3 +1423,240 @@ msgstr "Stabile"
 
 msgid "%u%% crash rate"
 msgstr "%u%% di crash"
+
+msgid "A name cannot be empty."
+msgstr "il nome non può essere vuoto."
+
+msgid "Remove server"
+msgstr "Rimuovi server"
+
+msgid "Download modpack"
+msgstr "Scarica Modpack"
+
+msgid "%s “%s”"
+msgstr "%s «%s»"
+
+msgid "Delete instance"
+msgstr "Elimina istanza"
+
+msgid "No worlds"
+msgstr "Nessun mondo"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "in attesa dell'accesso nel browser…"
+
+msgid "Choose files"
+msgstr "Seleziona i file"
+
+msgid "Cannot create “%s”: %s"
+msgstr "Impossibile creare «%s»: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Pulizia della cache non riuscita"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth e caricatori di mod"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Eliminare il mondo “%s”? Questa azione non può essere annullata."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Crea un'istanza per iniziare a giocare."
+
+msgid "Duplicated to “%s”"
+msgstr "Duplicato in “%s”"
+
+msgid "Downloading modpack"
+msgstr "Download del modpack"
+
+msgid "Try again"
+msgstr "Riprovare"
+
+msgid "Performance impact"
+msgstr "Impatto sulle prestazioni"
+
+msgid "Add world"
+msgstr "Aggiungi mondo"
+
+msgid "Create instance"
+msgstr "Crea instanza"
+
+msgid "Browse modpacks"
+msgstr "Sfoglia i modpack"
+
+msgid "Remove server “%s”?"
+msgstr "Rimuovere il server “%s”?"
+
+msgid "Path tracing"
+msgstr "Tracciamento dei percorsi"
+
+msgid "Clean export"
+msgstr "Esportazione pulita"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Meccaniche di gioco"
+
+msgid "Minecraft version"
+msgstr "Versione Minecraft"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Apri cartella"
+
+msgid "AppStream metadata"
+msgstr "Metadati AppStream"
+
+msgid "Add Java runtime"
+msgstr "Aggiungi ambiente di esecuzione Java"
+
+msgid "World generation"
+msgstr "Generazione del mondo"
+
+msgid "Keyboard shortcuts"
+msgstr "Scorciatoie da tastiera"
+
+msgid "Resource packs"
+msgstr "Pacchetti di risorse"
+
+msgid "Edit server"
+msgstr "Modifica server"
+
+msgid "Keep playing"
+msgstr "Continua a giocare"
+
+msgid "Technical details"
+msgstr "Dettagli tecnici"
+
+msgid "Pack name"
+msgstr "Nome del pacchetto"
+
+msgid "Colored lighting"
+msgstr "Illuminazione colorata"
+
+msgid "Rename world"
+msgstr "Rinomina mondo"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "un nome può contenere solo lettere, numeri e trattini bassi."
+
+msgid "Preferences"
+msgstr "Impostazioni"
+
+msgid "Delete world"
+msgstr "Elimina mondo"
+
+msgid "Asking Microsoft for a code…"
+msgstr "chiedere a Microsoft un codice…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Mostra le versioni di caricatore di mod instabili"
+
+msgid "Move down"
+msgstr "Sposta giù"
+
+msgid "Clear cache"
+msgstr "Svuota la cache di Nuvasha Launcher"
+
+msgid "Delete “%s”?"
+msgstr "Elimina “%s”"
+
+msgid "Import modpack…"
+msgstr "Importa modpack…"
+
+msgid "Delete selected"
+msgstr "Elimina selezionati"
+
+msgid "Java runtime"
+msgstr "Ambiente di esecuzione Java"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "il nome deve contenere da 3 a 16 caratteri."
+
+msgid "Import modpack"
+msgstr "Importa modpack"
+
+msgid "Core shaders"
+msgstr "Shader del gioco base"
+
+msgid "Sign in"
+msgstr "Accedi"
+
+msgid "Cache cleared"
+msgstr "Cache svuotata"
+
+msgid "No instances yet"
+msgstr "Nessuna istanza"
+
+msgid "Add offline account"
+msgstr "Aggiungi account offline"
+
+msgid "Copy seed"
+msgstr "Copia seme"
+
+msgid "Services & ecosystem"
+msgstr "Servizi ed ecosistema"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Non ci sono modpack che corrispondono alla ricerca. Prova con un'altra parola."
+
+msgid "Line limit"
+msgstr "Limite di righe"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modpack Modrinth (*.mrpack)"
+
+msgid "Add server"
+msgstr "Aggiungi server"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Tutte le versioni"
+
+msgid "No servers"
+msgstr "Nessun server"
+
+msgid "Clear cache?"
+msgstr "Svuotare la cache di Nuvasha Launcher?"
+
+msgid "Loader version"
+msgstr "Versione del caricatore di mod"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Includi tutti i file"
+
+msgid "Export modpack"
+msgstr "Esporta modpack"
+
+msgid "Add world…"
+msgstr "Aggiungi mondo…"
+
+msgid "Update all"
+msgstr "Aggiorna tutto"
+
+msgid "Add Microsoft account"
+msgstr "Aggiungi account Microsoft"
+
+msgid "Move up"
+msgstr "Sposta su"
+
+msgid "Minecraft disclaimer"
+msgstr "Dichiarazione di non responsabilità Minecraft"
+
+msgid "Shader packs"
+msgstr "Pacchetti Shader"

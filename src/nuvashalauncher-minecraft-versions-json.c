@@ -10,9 +10,6 @@
 
 #include <math.h>
 #include <string.h>
-
-#define MAX_VERSION_REGEX_LENGTH 1024
-#define MAX_VERSION_VALUE_LENGTH 1024
 #include <sys/utsname.h>
 
 /* ---------------------------------------------------------- *

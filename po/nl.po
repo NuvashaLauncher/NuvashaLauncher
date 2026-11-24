@@ -1421,3 +1421,240 @@ msgstr "Stabiel"
 
 msgid "%u%% crash rate"
 msgstr "%u%% crashratio"
+
+msgid "A name cannot be empty."
+msgstr "een naam mag niet leeg zijn."
+
+msgid "Remove server"
+msgstr "Server verwijderen"
+
+msgid "Download modpack"
+msgstr "Modpack downloaden"
+
+msgid "%s “%s”"
+msgstr "%s „%s”"
+
+msgid "Delete instance"
+msgstr "Instantie verwijderen"
+
+msgid "No worlds"
+msgstr "Geen werelden"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "wachten op aanmelden in de browser…"
+
+msgid "Choose files"
+msgstr "Bestanden selecteren"
+
+msgid "Cannot create “%s”: %s"
+msgstr "Kan „%s” niet maken: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Cache wissen mislukt"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth & modloaders"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Wereld '%s' verwijderen? Dit kan niet ongedaan worden gemaakt."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Maak een instantie om te beginnen met spelen."
+
+msgid "Duplicated to “%s”"
+msgstr "Gedupliceerd naar “%s”"
+
+msgid "Downloading modpack"
+msgstr "Modpack downloaden"
+
+msgid "Try again"
+msgstr "Opnieuw proberen"
+
+msgid "Performance impact"
+msgstr "Invloed op prestaties"
+
+msgid "Add world"
+msgstr "Wereld toevoegen"
+
+msgid "Create instance"
+msgstr "Instantie maken"
+
+msgid "Browse modpacks"
+msgstr "Modpacks bekijken"
+
+msgid "Remove server “%s”?"
+msgstr "Server '%s' verwijderen?"
+
+msgid "Path tracing"
+msgstr "Padtracering"
+
+msgid "Clean export"
+msgstr "Schone export"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Spelmechanieken"
+
+msgid "Minecraft version"
+msgstr "Minecraft-versie"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Map openen"
+
+msgid "AppStream metadata"
+msgstr "AppStream-metadata"
+
+msgid "Add Java runtime"
+msgstr "Java-runtime toevoegen"
+
+msgid "World generation"
+msgstr "Wereldgeneratie"
+
+msgid "Keyboard shortcuts"
+msgstr "Sneltoetsen"
+
+msgid "Resource packs"
+msgstr "Resourcepacks"
+
+msgid "Edit server"
+msgstr "Server bewerken"
+
+msgid "Keep playing"
+msgstr "Doorgaan met spelen"
+
+msgid "Technical details"
+msgstr "Technische details"
+
+msgid "Pack name"
+msgstr "Pakketnaam"
+
+msgid "Colored lighting"
+msgstr "Gekleurde verlichting"
+
+msgid "Rename world"
+msgstr "Wereld hernoemen"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "een naam mag alleen letters, cijfers en underscores bevatten."
+
+msgid "Preferences"
+msgstr "Instellingen"
+
+msgid "Delete world"
+msgstr "Wereld verwijderen"
+
+msgid "Asking Microsoft for a code…"
+msgstr "een code opvragen bij Microsoft…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Instabiele modladerversies tonen"
+
+msgid "Move down"
+msgstr "Omlaag verplaatsen"
+
+msgid "Clear cache"
+msgstr "De cache van Nuvasha Launcher wissen"
+
+msgid "Delete “%s”?"
+msgstr "“%s” verwijderen?"
+
+msgid "Import modpack…"
+msgstr "Modpack importeren…"
+
+msgid "Delete selected"
+msgstr "Geselecteerde verwijderen"
+
+msgid "Java runtime"
+msgstr "Java-runtime"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "een naam moet 3 tot 16 tekens lang zijn."
+
+msgid "Import modpack"
+msgstr "Modpack importeren"
+
+msgid "Core shaders"
+msgstr "Shaders van het basisspel"
+
+msgid "Sign in"
+msgstr "Aanmelden"
+
+msgid "Cache cleared"
+msgstr "Cache gewist"
+
+msgid "No instances yet"
+msgstr "Nog geen instanties"
+
+msgid "Add offline account"
+msgstr "Offline-account toevoegen"
+
+msgid "Copy seed"
+msgstr "Seed kopiëren"
+
+msgid "Services & ecosystem"
+msgstr "Diensten en ecosysteem"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Er is geen modpack dat aan de zoekopdracht voldoet. Probeer een ander woord."
+
+msgid "Line limit"
+msgstr "Regellimiet"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth-modpacks (*.mrpack)"
+
+msgid "Add server"
+msgstr "Server toevoegen"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Alle versies"
+
+msgid "No servers"
+msgstr "Geen servers"
+
+msgid "Clear cache?"
+msgstr "De cache van Nuvasha Launcher wissen?"
+
+msgid "Loader version"
+msgstr "Modladerversie"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Alle bestanden opnemen"
+
+msgid "Export modpack"
+msgstr "Modpack exporteren"
+
+msgid "Add world…"
+msgstr "Wereld toevoegen…"
+
+msgid "Update all"
+msgstr "Alles bijwerken"
+
+msgid "Add Microsoft account"
+msgstr "Microsoft-account toevoegen"
+
+msgid "Move up"
+msgstr "Omhoog verplaatsen"
+
+msgid "Minecraft disclaimer"
+msgstr "Minecraft-disclaimer"
+
+msgid "Shader packs"
+msgstr "Shaders"

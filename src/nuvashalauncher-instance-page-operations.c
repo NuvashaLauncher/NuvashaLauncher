@@ -159,9 +159,9 @@ open_export_file_dialog (NuvashaLauncherInstancePage *self)
   g_autofree char *filename = g_strdup_printf (
     "%s.mrpack", name != NULL ? name : "instance");
 
-  gtk_file_dialog_set_title (dialog, _("Export Modpack"));
+  gtk_file_dialog_set_title (dialog, _("Export modpack"));
   gtk_file_dialog_set_initial_name (dialog, filename);
-  gtk_file_filter_set_name (filter, _("Modrinth Modpacks (*.mrpack)"));
+  gtk_file_filter_set_name (filter, _("Modrinth modpacks (*.mrpack)"));
   gtk_file_filter_add_suffix (filter, "mrpack");
   g_list_store_append (filters, filter);
   gtk_file_dialog_set_filters (dialog, G_LIST_MODEL (filters));
@@ -276,7 +276,7 @@ show_export_metadata (NuvashaLauncherInstancePage *self)
   g_signal_connect (data->dialog, "closed",
                     G_CALLBACK (on_export_metadata_closed), data);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->name),
-                                  _("Pack Name"));
+                                  _("Pack name"));
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->summary),
                                   _("Summary"));
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (data->version),
@@ -367,8 +367,8 @@ show_export_policy (NuvashaLauncherInstancePage *self)
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
-  adw_alert_dialog_add_response (alert, "clean", _("Clean Export"));
-  adw_alert_dialog_add_response (alert, "include", _("Include All Files"));
+  adw_alert_dialog_add_response (alert, "clean", _("Clean export"));
+  adw_alert_dialog_add_response (alert, "include", _("Include all files"));
   adw_alert_dialog_set_response_appearance (alert, "include",
                                             ADW_RESPONSE_DESTRUCTIVE);
   adw_alert_dialog_set_default_response (alert, "clean");
@@ -544,7 +544,7 @@ on_duplicate_ready (GObject *source, GAsyncResult *result, gpointer user_data)
     {
       g_autofree char *name = instance_string (copy, "name");
       g_autofree char *message =
-        g_strdup_printf (_("Duplicated to \"%s\""), name);
+        g_strdup_printf (_("Duplicated to “%s”"), name);
 
       instance_page_show_toast (self, message);
     }
@@ -615,7 +615,7 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   g_autofree char *name = instance_string (self->instance, "name");
-  g_autofree char *heading = g_strdup_printf (_("Delete \"%s\"?"), name);
+  g_autofree char *heading = g_strdup_printf (_("Delete “%s”?"), name);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
     adw_alert_dialog_new (heading, NULL));
 
@@ -631,52 +631,4 @@ on_delete_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 
   adw_alert_dialog_choose (alert, instance_page_dialog_parent (self), NULL,
                            on_delete_chosen, g_object_ref (self));
-}
-
-void
-nuvashalauncher_instance_page_trigger_export (NuvashaLauncherInstancePage *self)
-{
-  g_return_if_fail (NUVASHALAUNCHER_IS_INSTANCE_PAGE (self));
-  on_export_clicked (NULL, self);
-}
-
-void
-nuvashalauncher_instance_page_trigger_delete (NuvashaLauncherInstancePage *self)
-{
-  g_return_if_fail (NUVASHALAUNCHER_IS_INSTANCE_PAGE (self));
-  on_delete_clicked (NULL, self);
-}
-
-void
-nuvashalauncher_instance_page_trigger_duplicate (NuvashaLauncherInstancePage *self)
-{
-  g_return_if_fail (NUVASHALAUNCHER_IS_INSTANCE_PAGE (self));
-  on_duplicate_clicked (NULL, self);
-}
-
-void
-nuvashalauncher_instance_page_export_to_path (NuvashaLauncherInstancePage *self,
-                                      const char *path)
-{
-  g_autofree char *name = NULL;
-
-  g_return_if_fail (NUVASHALAUNCHER_IS_INSTANCE_PAGE (self));
-  g_return_if_fail (path != NULL && *path != '\0');
-
-  if (self->export_operation != NULL)
-    return;
-
-  g_object_get (self->instance, "name", &name, NULL);
-  self->export_include_transient = FALSE;
-  self->export_download = nuvashalauncher_downloads_add (
-    NUVASHALAUNCHER_DOWNLOAD_UPDATE, name != NULL ? name : _("Modpack export"));
-  nuvashalauncher_download_set_detail (self->export_download, _("Exporting modpack"));
-  g_object_add_weak_pointer (G_OBJECT (self->export_download),
-                             (gpointer *) &self->export_download);
-  self->export_operation = nuvashalauncher_modpack_export_async (
-    self->instance, path, NULL, NULL, NULL, FALSE,
-    on_export_progress, self, on_export_done, g_object_ref (self));
-  nuvashalauncher_task_scope_follow_cancellable (self->export_operation,
-                            nuvashalauncher_download_get_cancellable (
-                              self->export_download));
 }

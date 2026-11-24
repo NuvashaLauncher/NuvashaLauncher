@@ -271,7 +271,7 @@ asset_index_load_free (AssetIndexLoad *load)
 }
 
 static gboolean
-file_matches_sha1 (const char *path, const char *expected_hash, GChecksum *checksum)
+file_matches_sha1 (const char *path, const char *expected_hash, gint64 expected_size, GChecksum *checksum)
 {
   int fd = open (path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
   struct stat st;
@@ -281,6 +281,13 @@ file_matches_sha1 (const char *path, const char *expected_hash, GChecksum *check
     return FALSE;
 
   if (fstat (fd, &st) != 0 || !S_ISREG (st.st_mode))
+    {
+      close (fd);
+      return FALSE;
+    }
+
+  /* Quick reject: if size is known and file size does not match, avoid reading */
+  if (expected_size >= 0 && (gint64) st.st_size != expected_size)
     {
       close (fd);
       return FALSE;
@@ -363,6 +370,8 @@ asset_index_parse_thread (GTask *task,
             g_autofree char *bucket = NULL;
             g_autofree char *destination = NULL;
 
+            gint64 expected_size = -1;
+
             if (g_task_return_error_if_cancelled (task))
               return;
 
@@ -379,6 +388,13 @@ asset_index_parse_thread (GTask *task,
                     continue;
                   hash = json_node_get_string (hash_node);
                 }
+              if (json_object_has_member (object, "size"))
+                {
+                  JsonNode *size_node = json_object_get_member (object, "size");
+                  if (JSON_NODE_HOLDS_VALUE (size_node) &&
+                      json_node_get_value_type (size_node) == G_TYPE_INT64)
+                    expected_size = json_node_get_int (size_node);
+                }
             }
 
             if (hash == NULL || g_hash_table_contains (seen, hash))
@@ -389,7 +405,7 @@ asset_index_parse_thread (GTask *task,
             if (destination == NULL)
               continue;
 
-            if (file_matches_sha1 (destination, hash, checksum))
+            if (file_matches_sha1 (destination, hash, expected_size, checksum))
               g_hash_table_add (load->verified_hashes, g_strdup (hash));
             else if (bucket != NULL &&
                      !g_hash_table_contains (load->ensured_buckets, bucket) &&

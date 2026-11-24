@@ -58,7 +58,7 @@ static void
 show_error (NuvashaLauncherUsersPopover *self, const GError *error)
 {
   nuvashalauncher_ui_error_label (self->error_label, error);
-  nuvashalauncher_ui_show_error (GTK_WIDGET (self), _("Technical Details"), error);
+  nuvashalauncher_ui_show_error (GTK_WIDGET (self), _("Technical details"), error);
 }
 
 /* The account a widget in a row is about, which is the id of the account
@@ -395,8 +395,8 @@ nuvashalauncher_users_popover_init (NuvashaLauncherUsersPopover *self)
 {
   GtkScrolledWindow *scrolled = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
   GtkListBox *rows = GTK_LIST_BOX (gtk_list_box_new ());
-  GtkButton *microsoft = GTK_BUTTON (gtk_button_new_with_label (_("Add Microsoft Account")));
-  GtkButton *offline = GTK_BUTTON (gtk_button_new_with_label (_("Add Offline Account")));
+  GtkButton *microsoft = GTK_BUTTON (gtk_button_new_with_label (_("Add Microsoft account")));
+  GtkButton *offline = GTK_BUTTON (gtk_button_new_with_label (_("Add offline account")));
 
   /* A row is chosen by clicking it, not by a selection the list keeps:
      the active account is the store's business. The list scrolls instead

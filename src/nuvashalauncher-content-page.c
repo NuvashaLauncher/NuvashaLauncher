@@ -88,7 +88,7 @@ nuvashalauncher_content_page_on_open_folder_clicked (GtkButton *button G_GNUC_UN
   if (!nuvashalauncher_content_ensure_folder (self->folder, &create_error))
     {
       g_autofree char *message =
-        g_strdup_printf (_("Cannot create \"%s\": %s"), self->folder,
+        g_strdup_printf (_("Cannot create “%s”: %s"), self->folder,
                            nuvashalauncher_error_message (create_error));
 
       show_error (self, message, create_error);

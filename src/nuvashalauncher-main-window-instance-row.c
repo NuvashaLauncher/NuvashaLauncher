@@ -109,7 +109,7 @@ confirm_stop (NuvashaLauncherMainWindow *self, NuvashaLauncher *launcher)
                  "save is lost.")));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
-  adw_alert_dialog_add_response (alert, "cancel", _("Keep Playing"));
+  adw_alert_dialog_add_response (alert, "cancel", _("Keep playing"));
   adw_alert_dialog_add_response (alert, "stop", _("Stop"));
   adw_alert_dialog_set_response_appearance (alert, "stop",
                                             ADW_RESPONSE_DESTRUCTIVE);

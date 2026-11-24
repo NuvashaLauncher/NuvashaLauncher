@@ -3,6 +3,12 @@
   <object class="AdwToolbarView" id="toolbar">
     <property name="top-bar-style">raised</property>
     <child type="top"><object class="AdwHeaderBar" id="header"/></child>
-    <property name="content"><object class="AdwViewStack" id="stack"/></property>
+    <property name="content">
+      <object class="AdwToastOverlay" id="toast_overlay">
+        <property name="child">
+          <object class="AdwViewStack" id="stack"/>
+        </property>
+      </object>
+    </property>
   </object>
 </interface>

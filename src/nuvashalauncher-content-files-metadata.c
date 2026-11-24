@@ -31,13 +31,18 @@ json_string_member (JsonObject *object, const char *name)
 static char *
 loose_json_string (const guint8 *data, gsize length, const char *name)
 {
-  g_autofree char *needle = g_strdup_printf ("\"%s\"", name);
-  const char *start = g_strstr_len ((const char *) data, length, needle);
+  char needle[128];
+  int needle_len = snprintf (needle, sizeof (needle), "\"%s\"", name);
+  const char *start;
   const char *end = NULL;
 
+  if (needle_len < 0 || (size_t) needle_len >= sizeof (needle))
+    return NULL;
+
+  start = g_strstr_len ((const char *) data, length, needle);
   if (start == NULL)
     return NULL;
-  start += strlen (needle);
+  start += needle_len;
   while ((gsize) (start - (const char *) data) < length &&
          g_ascii_isspace (*start))
     start++;

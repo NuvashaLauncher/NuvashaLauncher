@@ -16,7 +16,6 @@ G_BEGIN_DECLS
  * The arithmetic is done in a 64-bit type on purpose: a limit written as
  * plain `1024 * 1024` is an `int` product, which silently overflows as soon
  * as a limit grows past 2 GiB instead of failing loudly. */
-#define NUVASHALAUNCHER_FS_MAX_SMALL_METADATA_SIZE G_GINT64_CONSTANT (1024 * 1024)
 #define NUVASHALAUNCHER_FS_MAX_CONTENT_INDEX_SIZE G_GINT64_CONSTANT (4 * 1024 * 1024)
 #define NUVASHALAUNCHER_FS_MAX_INSTANCE_METADATA_SIZE G_GINT64_CONSTANT (16 * 1024 * 1024)
 #define NUVASHALAUNCHER_FS_MAX_REMOTE_JSON_SIZE G_GINT64_CONSTANT (64 * 1024 * 1024)

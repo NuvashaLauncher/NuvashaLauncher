@@ -585,7 +585,7 @@ scan_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   g_autofree char *digest = NULL;
 
-  digest = nuvashalauncher_download_file_hash_finish (result, &error);
+  digest = nuvashalauncher_download_hash_file_finish (result, &error);
 
    if (g_cancellable_is_cancelled (nuvashalauncher_task_scope_get_cancellable (run->scope)))
     run->hash_cancelled = TRUE;
@@ -641,7 +641,7 @@ scan_hash_start_more (ScanRun *run)
       input->run = run;
       input->file = file;
       nuvashalauncher_task_scope_release_when_done (
-           nuvashalauncher_download_file_hash_async (handle, G_CHECKSUM_SHA1,
+           nuvashalauncher_download_hash_file_async (handle, G_CHECKSUM_SHA1,
                                          scan_hash_ready, input),
            nuvashalauncher_task_scope_get_cancellable (run->scope));
       run->hash_pending++;

@@ -84,10 +84,10 @@ on_import_modpack (GSimpleAction *action G_GNUC_UNUSED,
   g_autoptr (GtkFileFilter) filter = gtk_file_filter_new ();
   g_autoptr (GListStore) filters = g_list_store_new (GTK_TYPE_FILE_FILTER);
 
-  gtk_file_dialog_set_title (dialog, _("Import Modpack"));
+  gtk_file_dialog_set_title (dialog, _("Import modpack"));
   g_autoptr (GFile) home = g_file_new_for_path (g_get_home_dir ());
   gtk_file_dialog_set_initial_folder (dialog, home);
-  gtk_file_filter_set_name (filter, _("Modrinth Modpacks (*.mrpack)"));
+  gtk_file_filter_set_name (filter, _("Modrinth modpacks (*.mrpack)"));
   gtk_file_filter_add_suffix (filter, "mrpack");
   g_list_store_append (filters, filter);
   gtk_file_dialog_set_filters (dialog, G_LIST_MODEL (filters));
@@ -144,7 +144,7 @@ on_log_limit_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
     {
       adw_spin_row_set_value (
         row, nuvashalauncher_settings_get_log_line_limit (self->model->settings));
-      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
     }
 }
 
@@ -167,7 +167,7 @@ on_show_unstable_loaders_toggled (GObject *object,
     {
       adw_switch_row_set_active (
         row, nuvashalauncher_settings_get_show_unstable_loaders (self->model->settings));
-      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
     }
 }
 
@@ -188,7 +188,7 @@ on_export_metadata_toggled (GObject *object,
     {
       adw_switch_row_set_active (
         row, nuvashalauncher_settings_get_export_metadata (self->model->settings));
-      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
     }
 }
 
@@ -209,7 +209,7 @@ on_delete_dependents_toggled (GObject *object,
     {
       adw_switch_row_set_active (
         row, nuvashalauncher_settings_get_delete_dependents (self->model->settings));
-      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
     }
 }
 
@@ -229,7 +229,7 @@ on_language_selected (GObject *object,
     return;
 
   if (!nuvashalauncher_settings_set_language (self->model->settings, languages[selected].code, &error))
-    nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+    nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
 }
 
 static void
@@ -250,7 +250,7 @@ on_cache_modrinth_api_responses_toggled (GObject *object,
     {
       adw_switch_row_set_active (
         row, nuvashalauncher_settings_get_cache_modrinth_api_responses (self->model->settings));
-      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
     }
 }
 
@@ -284,7 +284,7 @@ on_cache_expiration_selected (GObject *object,
         if (values[i] == current)
           current_index = i;
       adw_combo_row_set_selected (row, current_index);
-      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical Details"), error);
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
     }
 }
 
@@ -298,7 +298,7 @@ on_clear_cache_clicked (GtkButton *button G_GNUC_UNUSED,
 {
   NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
-     adw_alert_dialog_new (_("Clear Nuvasha Launcher Cache?"), NULL));
+     adw_alert_dialog_new (_("Clear cache?"), NULL));
 
   adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
   adw_alert_dialog_add_response (alert, "clear", _("Clear"));
@@ -326,24 +326,16 @@ on_cache_cleared (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   NuvashaLauncherMainWindow *self = wait->window;
   g_autoptr (GError) error = NULL;
   gboolean success = g_task_propagate_boolean (G_TASK (result), &error);
-  AdwAlertDialog *alert = NULL;
 
   if (success)
-    alert = ADW_ALERT_DIALOG (
-      adw_alert_dialog_new (_("Cache Cleared"),
-                             _("Nuvasha Launcher cache data was cleared successfully.")));
-  else
-    nuvashalauncher_ui_show_error (GTK_WIDGET (self), _("Cache Cleanup Failed"), error);
-
-  if (alert != NULL)
     {
-      adw_alert_dialog_set_heading_use_markup (alert, FALSE);
-      adw_alert_dialog_set_body_use_markup (alert, FALSE);
-      adw_alert_dialog_add_response (alert, "ok", _("OK"));
-      adw_alert_dialog_set_default_response (alert, "ok");
-      adw_alert_dialog_set_close_response (alert, "ok");
-      adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (self));
+      if (self->ui.toast_overlay != NULL)
+        adw_toast_overlay_add_toast (self->ui.toast_overlay,
+                                     adw_toast_new (_("Cache cleared")));
     }
+  else
+    nuvashalauncher_ui_show_error (GTK_WIDGET (self), _("Cache cleanup failed"), error);
+
   g_object_unref (self);
   nuvashalauncher_task_scope_unref (wait->operation);
   g_free (wait);
@@ -450,7 +442,7 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
   /* The loader versions live under the same choice: both say what the
      version lists hold. */
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (unstable_row),
-                                  _("Show unstable Mod Loader versions"));
+                                  _("Show unstable mod loader versions"));
   adw_switch_row_set_active (
     ADW_SWITCH_ROW (unstable_row),
     nuvashalauncher_settings_get_show_unstable_loaders (self->model->settings));
@@ -499,7 +491,7 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
   adw_spin_row_set_numeric (limit_row, TRUE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (limit_row), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (limit_row),
-                                  _("Line Limit"));
+                                  _("Line limit"));
    g_signal_connect_object (limit_row, "notify::value",
                             G_CALLBACK (on_log_limit_changed), self, 0);
   adw_preferences_group_add (logs_group, GTK_WIDGET (limit_row));
@@ -547,12 +539,13 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
   }
 
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (clear_cache_row),
-                                   _("Clear Nuvasha Launcher Cache"));
+                                   _("Clear cache"));
   {
-    GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name ("edit-delete-symbolic"));
-     nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (button), _("Clear Nuvasha Launcher Cache"));
-     g_signal_connect_object (button, "clicked", G_CALLBACK (on_clear_cache_clicked),
-                              self, 0);
+    GtkButton *button = GTK_BUTTON (gtk_button_new_from_icon_name ("user-trash-symbolic"));
+    gtk_widget_add_css_class (GTK_WIDGET (button), "destructive-action");
+    nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (button), _("Clear cache"));
+    g_signal_connect_object (button, "clicked", G_CALLBACK (on_clear_cache_clicked),
+                             self, 0);
     adw_action_row_add_suffix (clear_cache_row, GTK_WIDGET (button));
   }
   adw_preferences_group_add (cache_group, GTK_WIDGET (clear_cache_row));
@@ -611,7 +604,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
   adw_about_dialog_set_developers (ADW_ABOUT_DIALOG (dialog), authors);
   adw_about_dialog_set_designers (ADW_ABOUT_DIALOG (dialog), authors);
   adw_about_dialog_set_artists (ADW_ABOUT_DIALOG (dialog), authors);
-  adw_about_dialog_set_translator_credits (ADW_ABOUT_DIALOG (dialog), "Flia");
+  adw_about_dialog_set_translator_credits (ADW_ABOUT_DIALOG (dialog), _("translator-credits"));
   adw_about_dialog_set_comments (ADW_ABOUT_DIALOG (dialog),
                                  _("Minecraft launcher for Linux"));
   adw_about_dialog_set_website (ADW_ABOUT_DIALOG (dialog),
@@ -626,11 +619,11 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
                                      GTK_LICENSE_GPL_3_0_ONLY);
 
   adw_about_dialog_add_credit_section (ADW_ABOUT_DIALOG (dialog),
-                                       _("Services & Ecosystem"), services);
+                                       _("Services & ecosystem"), services);
 
   adw_about_dialog_add_legal_section (
     ADW_ABOUT_DIALOG (dialog),
-    _("Minecraft Disclaimer"),
+    _("Minecraft disclaimer"),
     NULL,
     GTK_LICENSE_CUSTOM,
     _("NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n\n"
@@ -638,7 +631,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
 
   adw_about_dialog_add_legal_section (
     ADW_ABOUT_DIALOG (dialog),
-    _("Modrinth & Mod Loaders"),
+    _("Modrinth & mod loaders"),
     NULL,
     GTK_LICENSE_CUSTOM,
     _("Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n\n"
@@ -646,7 +639,7 @@ on_about (GSimpleAction *action G_GNUC_UNUSED,
 
   adw_about_dialog_add_legal_section (
     ADW_ABOUT_DIALOG (dialog),
-    _("AppStream Metadata"),
+    _("AppStream metadata"),
     "© 2026 Flia",
     GTK_LICENSE_CUSTOM,
     _("The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."));
@@ -668,15 +661,15 @@ on_shortcuts (GSimpleAction *action G_GNUC_UNUSED,
   AdwShortcutsSection *general = adw_shortcuts_section_new (_("General"));
 
   adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new (_("Show Shortcuts"), "F1"));
+    general, adw_shortcuts_item_new (_("Keyboard shortcuts"), "<primary>question"));
   adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new (_("Create Instance"), "<primary>n"));
+    general, adw_shortcuts_item_new (_("Create instance"), "<primary>n"));
   adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new (_("Settings"), "<primary>comma"));
+    general, adw_shortcuts_item_new (_("Preferences"), "<primary>comma"));
   adw_shortcuts_section_add (
     general, adw_shortcuts_item_new (_("Quit"), "<primary>q"));
   adw_shortcuts_section_add (
-    general, adw_shortcuts_item_new (_("Delete Selected"), "<primary>d"));
+    general, adw_shortcuts_item_new (_("Delete selected"), "Delete"));
   adw_shortcuts_section_add (
     general, adw_shortcuts_item_new (_("Search"), "<primary>f"));
 
@@ -698,9 +691,9 @@ create_add_menu (void)
 {
   GMenu *menu = g_menu_new ();
 
-  g_menu_append (menu, _("Create Instance"), "win.create-instance");
-  g_menu_append (menu, _("Download Modpack"), "win.download-modpack");
-  g_menu_append (menu, _("Import Modpack"), "win.import-modpack");
+  g_menu_append (menu, _("Create instance"), "win.create-instance");
+  g_menu_append (menu, _("Download modpack"), "win.download-modpack");
+  g_menu_append (menu, _("Import modpack…"), "win.import-modpack");
 
   return menu;
 }
@@ -712,10 +705,10 @@ create_app_menu (void)
   g_autoptr (GMenu) general = g_menu_new ();
   g_autoptr (GMenu) rest = g_menu_new ();
 
-  g_menu_append (general, _("Settings"), "win.settings");
+  g_menu_append (general, _("Preferences"), "win.settings");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (general));
 
-  g_menu_append (rest, _("Keyboard Shortcuts"), "win.shortcuts");
+  g_menu_append (rest, _("Keyboard shortcuts"), "win.shortcuts");
   g_menu_append (rest, _("About Nuvasha Launcher"), "win.about");
   g_menu_append_section (menu, NULL, G_MENU_MODEL (rest));
 

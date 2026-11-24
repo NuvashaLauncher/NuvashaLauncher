@@ -25,9 +25,6 @@ NuvashaLauncherMainWindow *nuvashalauncher_main_window_new (AdwApplication      
                                     NuvashaLauncherInstanceManager *manager);
 
 /* Starts an instance by its stable ID without presenting the window. */
-gboolean nuvashalauncher_main_window_launch_instance (NuvashaLauncherMainWindow *self,
-                                              const char *instance_id,
-                                              GError **error);
 gboolean nuvashalauncher_main_window_launch_instance_as (NuvashaLauncherMainWindow *self,
                                                 const char *instance_id,
                                                 const char *account_id,

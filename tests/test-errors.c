@@ -104,9 +104,9 @@ test_error_widgets (void)
   GtkWidget *entry = find_type (content, ADW_TYPE_ENTRY_ROW);
   g_assert_nonnull (entry);
   gtk_editable_set_text (GTK_EDITABLE (entry), "a!");
-  g_assert_true (has_visible_label (content, "a name has to be 3 to 16 characters long"));
+  g_assert_true (has_visible_label (content, "A name has to be 3 to 16 characters long."));
   gtk_editable_set_text (GTK_EDITABLE (entry), "Valid_Name");
-  g_assert_false (has_visible_label (content, "a name has to be 3 to 16 characters long"));
+  g_assert_false (has_visible_label (content, "A name has to be 3 to 16 characters long."));
 }
 
 static void

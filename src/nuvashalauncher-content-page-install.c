@@ -151,7 +151,7 @@ remove_duplicate_project_files (NuvashaLauncherContentPage *self, const char *pr
           !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
          {
            g_autofree char *message = g_strdup_printf (
-             _("The duplicate file \"%s\" could not be removed: %s"),
+             _("The duplicate file “%s” could not be removed: %s"),
              installed->path, nuvashalauncher_error_message (error));
            show_error (self, message, error);
          }
@@ -248,7 +248,7 @@ fetch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
        if (!nuvashalauncher_content_remove_file (file->replaces, NULL) && run->page != NULL)
          {
            g_autofree char *message = g_strdup_printf (
-             _("The replaced file \"%s\" could not be removed"),
+             _("The replaced file “%s” could not be removed"),
              file->replaces);
            show_toast (run->page, message);
          }
@@ -611,7 +611,7 @@ show_plan (NuvashaLauncherContentPage *self, PlanRun *plan)
        Minimap 26.6.0". */
     const char *title = plan->title != NULL ? plan->title : "the file";
        g_autofree char *heading =
-       g_strdup_printf (_("%s \"%s\""),
+       g_strdup_printf (_("%s “%s”"),
                          action == NULL ? _("Install") : action, title);
      g_autofree char *body = plan_text (self, plan);
     AdwAlertDialog *alert =
@@ -620,7 +620,8 @@ show_plan (NuvashaLauncherContentPage *self, PlanRun *plan)
     adw_alert_dialog_set_heading_use_markup (alert, FALSE);
     adw_alert_dialog_set_body_use_markup (alert, FALSE);
      adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
-     adw_alert_dialog_add_response (alert, "install", _("Confirm"));
+     adw_alert_dialog_add_response (alert, "install",
+                                   action == NULL ? _("Install") : action);
     adw_alert_dialog_set_response_appearance (alert, "install",
                                               ADW_RESPONSE_SUGGESTED);
     adw_alert_dialog_set_default_response (alert, "cancel");

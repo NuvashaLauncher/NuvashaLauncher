@@ -1384,3 +1384,240 @@ msgstr "Stabil"
 
 msgid "%u%% crash rate"
 msgstr "%u%% összeomlási arány"
+
+msgid "A name cannot be empty."
+msgstr "a név nem lehet üres."
+
+msgid "Remove server"
+msgstr "Szerver eltávolítása"
+
+msgid "Download modpack"
+msgstr "Modpack letöltése"
+
+msgid "%s “%s”"
+msgstr "%s „%s”"
+
+msgid "Delete instance"
+msgstr "Példány törlése"
+
+msgid "No worlds"
+msgstr "Nincsenek világok"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "várja a bejelentkezést a böngészőben…"
+
+msgid "Choose files"
+msgstr "Fájlok kiválasztása"
+
+msgid "Cannot create “%s”: %s"
+msgstr "„%s” nem hozható létre: %s"
+
+msgid "Cache cleanup failed"
+msgstr "A gyorsítótár tisztítása nem sikerült"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth és mod-betöltők"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Törli a(z) „%s” világot? Ez nem vonható vissza."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Hozzon létre egy példányt a játék megkezdéséhez."
+
+msgid "Duplicated to “%s”"
+msgstr "Megkettőzve ide: “%s”"
+
+msgid "Downloading modpack"
+msgstr "Modpack letöltése"
+
+msgid "Try again"
+msgstr "Próbáld újra"
+
+msgid "Performance impact"
+msgstr "Teljesítményre gyakorolt hatás"
+
+msgid "Add world"
+msgstr "Világ hozzáadása"
+
+msgid "Create instance"
+msgstr "Példány létrehozása"
+
+msgid "Browse modpacks"
+msgstr "Modcsomagok böngészése"
+
+msgid "Remove server “%s”?"
+msgstr "Eltávolítja a(z) „%s” szervert?"
+
+msgid "Path tracing"
+msgstr "Útvonalkövetés"
+
+msgid "Clean export"
+msgstr "Tiszta exportálás"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Játékmechanikák"
+
+msgid "Minecraft version"
+msgstr "Minecraft verzió"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Nyissa meg a mappát"
+
+msgid "AppStream metadata"
+msgstr "AppStream metaadatok"
+
+msgid "Add Java runtime"
+msgstr "Java Runtime hozzáadása"
+
+msgid "World generation"
+msgstr "Világgenerálás"
+
+msgid "Keyboard shortcuts"
+msgstr "Billentyűparancsok"
+
+msgid "Resource packs"
+msgstr "Erőforrás csomagok"
+
+msgid "Edit server"
+msgstr "Szerver szerkesztése"
+
+msgid "Keep playing"
+msgstr "Játssz tovább"
+
+msgid "Technical details"
+msgstr "Technikai részletek"
+
+msgid "Pack name"
+msgstr "Csomag neve"
+
+msgid "Colored lighting"
+msgstr "Színes megvilágítás"
+
+msgid "Rename world"
+msgstr "Világ átnevezése"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "egy név csak betűket, számokat és aláhúzásjelet tartalmazhat."
+
+msgid "Preferences"
+msgstr "Beállítások elemre"
+
+msgid "Delete world"
+msgstr "Világ törlése"
+
+msgid "Asking Microsoft for a code…"
+msgstr "kódot kér a Microsofttól…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Instabil Mod Loader verziók megjelenítése"
+
+msgid "Move down"
+msgstr "Mozgatás lefelé"
+
+msgid "Clear cache"
+msgstr "A Nuvasha Launcher gyorsítótárának törlése"
+
+msgid "Delete “%s”?"
+msgstr "Törli a “%s” fájlt?"
+
+msgid "Import modpack…"
+msgstr "Modpack importálása…"
+
+msgid "Delete selected"
+msgstr "Kijelöltek törlése"
+
+msgid "Java runtime"
+msgstr "Java Runtime"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "a névnek 3-16 karakter hosszúságúnak kell lennie."
+
+msgid "Import modpack"
+msgstr "Modpack importálása"
+
+msgid "Core shaders"
+msgstr "Alapjáték-shaderek"
+
+msgid "Sign in"
+msgstr "Jelentkezzen be"
+
+msgid "Cache cleared"
+msgstr "Gyorsítótár törölve"
+
+msgid "No instances yet"
+msgstr "Még nincsenek példányok"
+
+msgid "Add offline account"
+msgstr "Offline fiók hozzáadása"
+
+msgid "Copy seed"
+msgstr "Mag másolása"
+
+msgid "Services & ecosystem"
+msgstr "Szolgáltatások és ökoszisztéma"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Nincs olyan modpack, amely megfelelne a keresési feltételeknek. Próbálkozzon egy másik szóval!."
+
+msgid "Line limit"
+msgstr "Vonalkorlát"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth Modpack (*.mrpack)"
+
+msgid "Add server"
+msgstr "Szerver hozzáadása"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Összes verzió"
+
+msgid "No servers"
+msgstr "Nincsenek szerverek"
+
+msgid "Clear cache?"
+msgstr "Törölni kell a Nuvasha Launcher gyorsítótárat?"
+
+msgid "Loader version"
+msgstr "Betöltő verzió"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Minden fájl szerepeltetése"
+
+msgid "Export modpack"
+msgstr "Modpack exportálása"
+
+msgid "Add world…"
+msgstr "Világ hozzáadása…"
+
+msgid "Update all"
+msgstr "Összes frissítése"
+
+msgid "Add Microsoft account"
+msgstr "Microsoft-fiók hozzáadása"
+
+msgid "Move up"
+msgstr "Mozgatás felfelé"
+
+msgid "Minecraft disclaimer"
+msgstr "Minecraft jogi nyilatkozat"
+
+msgid "Shader packs"
+msgstr "Shader-csomagok"

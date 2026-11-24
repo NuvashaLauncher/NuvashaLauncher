@@ -1417,3 +1417,240 @@ msgstr "안정적"
 
 msgid "%u%% crash rate"
 msgstr "충돌률 %u%%"
+
+msgid "A name cannot be empty."
+msgstr "이름을 비워 둘 수 없습니다."
+
+msgid "Remove server"
+msgstr "서버 제거"
+
+msgid "Download modpack"
+msgstr "모드팩 다운로드"
+
+msgid "%s “%s”"
+msgstr "%s “%s”"
+
+msgid "Delete instance"
+msgstr "인스턴스 삭제"
+
+msgid "No worlds"
+msgstr "월드 없음"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "브라우저에서 로그인을 기다리는 중…"
+
+msgid "Choose files"
+msgstr "파일 선택"
+
+msgid "Cannot create “%s”: %s"
+msgstr "“%s”을(를) 만들 수 없습니다: %s"
+
+msgid "Cache cleanup failed"
+msgstr "캐시 정리 실패"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth 및 모드 로더"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "“%s” 월드를 삭제할까요? 되돌릴 수 없습니다."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "플레이를 시작하려면 인스턴스를 생성하세요."
+
+msgid "Duplicated to “%s”"
+msgstr "“%s”(으)로 복제됨"
+
+msgid "Downloading modpack"
+msgstr "모드팩 다운로드 중"
+
+msgid "Try again"
+msgstr "다시 시도"
+
+msgid "Performance impact"
+msgstr "성능 영향"
+
+msgid "Add world"
+msgstr "월드 추가"
+
+msgid "Create instance"
+msgstr "인스턴스 생성"
+
+msgid "Browse modpacks"
+msgstr "모드팩 둘러보기"
+
+msgid "Remove server “%s”?"
+msgstr "“%s” 서버를 제거할까요?"
+
+msgid "Path tracing"
+msgstr "패스 트레이싱"
+
+msgid "Clean export"
+msgstr "깔끔하게 내보내기"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "게임 시스템"
+
+msgid "Minecraft version"
+msgstr "마인크래프트 버전"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "폴더 열기"
+
+msgid "AppStream metadata"
+msgstr "AppStream 메타데이터"
+
+msgid "Add Java runtime"
+msgstr "Java 런타임 추가"
+
+msgid "World generation"
+msgstr "세계 생성"
+
+msgid "Keyboard shortcuts"
+msgstr "키보드 단축키"
+
+msgid "Resource packs"
+msgstr "자원 팩"
+
+msgid "Edit server"
+msgstr "서버 편집"
+
+msgid "Keep playing"
+msgstr "계속 플레이"
+
+msgid "Technical details"
+msgstr "기술 세부 정보"
+
+msgid "Pack name"
+msgstr "팩 이름"
+
+msgid "Colored lighting"
+msgstr "색상 조명"
+
+msgid "Rename world"
+msgstr "월드 이름 바꾸기"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "이름에는 문자, 숫자, 밑줄만 사용할 수 있습니다."
+
+msgid "Preferences"
+msgstr "설정"
+
+msgid "Delete world"
+msgstr "월드 삭제"
+
+msgid "Asking Microsoft for a code…"
+msgstr "microsoft에 코드 요청…"
+
+msgid "Show unstable mod loader versions"
+msgstr "불안정한 모드 로더 버전 표시"
+
+msgid "Move down"
+msgstr "아래로 이동"
+
+msgid "Clear cache"
+msgstr "Nuvasha Launcher 캐시 지우기"
+
+msgid "Delete “%s”?"
+msgstr "%s 삭제하기"
+
+msgid "Import modpack…"
+msgstr "모드팩 가져오기…"
+
+msgid "Delete selected"
+msgstr "선택 항목 삭제"
+
+msgid "Java runtime"
+msgstr "Java 런타임"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "이름은 3~16자여야 합니다."
+
+msgid "Import modpack"
+msgstr "모드팩 가져오기"
+
+msgid "Core shaders"
+msgstr "코어 셰이더"
+
+msgid "Sign in"
+msgstr "로그인"
+
+msgid "Cache cleared"
+msgstr "캐시 삭제됨"
+
+msgid "No instances yet"
+msgstr "아직 인스턴스가 없습니다"
+
+msgid "Add offline account"
+msgstr "오프라인 계정 추가"
+
+msgid "Copy seed"
+msgstr "시드 복사"
+
+msgid "Services & ecosystem"
+msgstr "서비스 및 생태계"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "요청하신 내용과 일치하는 모드팩이 없습니다. 다른 단어를 입력해 보세요."
+
+msgid "Line limit"
+msgstr "줄 수 제한"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth 모드팩 (*.mrpack)"
+
+msgid "Add server"
+msgstr "서버 추가"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "모든 버전"
+
+msgid "No servers"
+msgstr "서버 없음"
+
+msgid "Clear cache?"
+msgstr "Nuvasha Launcher 캐시를 지울까요?"
+
+msgid "Loader version"
+msgstr "모드 로더 버전"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "모든 파일 포함"
+
+msgid "Export modpack"
+msgstr "모드팩 내보내기"
+
+msgid "Add world…"
+msgstr "월드 추가…"
+
+msgid "Update all"
+msgstr "모두 업데이트"
+
+msgid "Add Microsoft account"
+msgstr "Microsoft 계정 추가"
+
+msgid "Move up"
+msgstr "위로 이동"
+
+msgid "Minecraft disclaimer"
+msgstr "Minecraft 면책 조항"
+
+msgid "Shader packs"
+msgstr "셰이더 팩"

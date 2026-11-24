@@ -127,21 +127,3 @@ nuvashalauncher_download_hash_file_finish (GAsyncResult *result, GError **error)
 
   return g_task_propagate_pointer (G_TASK (result), error);
 }
-
-NuvashaLauncherTaskScope *
-nuvashalauncher_download_file_hash_async (GFile *file, GChecksumType type,
-                              GAsyncReadyCallback callback,
-                              gpointer user_data)
-{
-  g_return_val_if_fail (G_IS_FILE (file), NULL);
-
-  return nuvashalauncher_download_hash_file_async (file, type, callback, user_data);
-}
-
-char *
-nuvashalauncher_download_file_hash_finish (GAsyncResult *result, GError **error)
-{
-  g_return_val_if_fail (G_IS_TASK (result), NULL);
-
-  return nuvashalauncher_download_hash_file_finish (result, error);
-}

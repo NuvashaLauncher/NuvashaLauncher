@@ -1384,3 +1384,240 @@ msgstr "穩定"
 
 msgid "%u%% crash rate"
 msgstr "%u%% 當機率"
+
+msgid "A name cannot be empty."
+msgstr "名稱不能為空."
+
+msgid "Remove server"
+msgstr "移除伺服器"
+
+msgid "Download modpack"
+msgstr "下載模組包"
+
+msgid "%s “%s”"
+msgstr "%s“%s”"
+
+msgid "Delete instance"
+msgstr "刪除實例"
+
+msgid "No worlds"
+msgstr "沒有世界"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "等待瀏覽器登入…"
+
+msgid "Choose files"
+msgstr "选择文件"
+
+msgid "Cannot create “%s”: %s"
+msgstr "無法創建“%s”：%s"
+
+msgid "Cache cleanup failed"
+msgstr "快取清理失敗"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth 與模組載入器"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "刪除世界「%s」？此操作無法復原。"
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "建立一個執行個體以開始遊戲。"
+
+msgid "Duplicated to “%s”"
+msgstr "複製到“%s”"
+
+msgid "Downloading modpack"
+msgstr "下載模組包"
+
+msgid "Try again"
+msgstr "再試一次"
+
+msgid "Performance impact"
+msgstr "效能影響"
+
+msgid "Add world"
+msgstr "新增世界"
+
+msgid "Create instance"
+msgstr "建立實例"
+
+msgid "Browse modpacks"
+msgstr "浏览模组包"
+
+msgid "Remove server “%s”?"
+msgstr "移除伺服器「%s」？"
+
+msgid "Path tracing"
+msgstr "路徑追蹤"
+
+msgid "Clean export"
+msgstr "清潔出口"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "遊戲機制"
+
+msgid "Minecraft version"
+msgstr "我的世界版本"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "打開資料夾"
+
+msgid "AppStream metadata"
+msgstr "AppStream 中繼資料"
+
+msgid "Add Java runtime"
+msgstr "新增 Java 運行時"
+
+msgid "World generation"
+msgstr "世界生成"
+
+msgid "Keyboard shortcuts"
+msgstr "鍵盤快速鍵"
+
+msgid "Resource packs"
+msgstr "資源包"
+
+msgid "Edit server"
+msgstr "編輯伺服器"
+
+msgid "Keep playing"
+msgstr "繼續玩"
+
+msgid "Technical details"
+msgstr "技術詳細資料"
+
+msgid "Pack name"
+msgstr "套件名稱"
+
+msgid "Colored lighting"
+msgstr "彩色光照"
+
+msgid "Rename world"
+msgstr "重新命名世界"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "名稱只能包含字母、數字和底線."
+
+msgid "Preferences"
+msgstr "設定"
+
+msgid "Delete world"
+msgstr "刪除世界"
+
+msgid "Asking Microsoft for a code…"
+msgstr "向微軟索取程式碼…"
+
+msgid "Show unstable mod loader versions"
+msgstr "顯示不穩定的 Mod Loader 版本"
+
+msgid "Move down"
+msgstr "下移"
+
+msgid "Clear cache"
+msgstr "清除 Nuvasha Launcher 缓存"
+
+msgid "Delete “%s”?"
+msgstr "刪除“%s”？"
+
+msgid "Import modpack…"
+msgstr "導入模組包…"
+
+msgid "Delete selected"
+msgstr "刪除所選項目"
+
+msgid "Java runtime"
+msgstr "Java運行時"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "名稱長度必須為 3 到 16 個字符."
+
+msgid "Import modpack"
+msgstr "導入模組包"
+
+msgid "Core shaders"
+msgstr "核心著色器"
+
+msgid "Sign in"
+msgstr "登入"
+
+msgid "Cache cleared"
+msgstr "快取已清除"
+
+msgid "No instances yet"
+msgstr "還沒有實例"
+
+msgid "Add offline account"
+msgstr "新增離線帳戶"
+
+msgid "Copy seed"
+msgstr "複製種子碼"
+
+msgid "Services & ecosystem"
+msgstr "服務與生態"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "没有符合要求的模组包。请尝试输入其他关键词."
+
+msgid "Line limit"
+msgstr "線路限制"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth 模組包 (*.mrpack)"
+
+msgid "Add server"
+msgstr "新增伺服器"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "所有版本"
+
+msgid "No servers"
+msgstr "沒有伺服器"
+
+msgid "Clear cache?"
+msgstr "清除 Nuvasha Launcher 缓存？"
+
+msgid "Loader version"
+msgstr "裝載機版本"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "包括所有文件"
+
+msgid "Export modpack"
+msgstr "匯出模組包"
+
+msgid "Add world…"
+msgstr "新增世界…"
+
+msgid "Update all"
+msgstr "全部更新"
+
+msgid "Add Microsoft account"
+msgstr "新增微軟帳戶"
+
+msgid "Move up"
+msgstr "上移"
+
+msgid "Minecraft disclaimer"
+msgstr "Minecraft 免責聲明"
+
+msgid "Shader packs"
+msgstr "著色器包"

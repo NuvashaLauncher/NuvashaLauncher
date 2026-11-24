@@ -209,7 +209,7 @@ start_modpack_install (NuvashaLauncherDownloadModpackDialog *self,
                         ? project->title
                         : "";
   g_autofree char *heading =
-    g_strdup_printf (_("%s \"%s\""), _("Install"), title);
+    g_strdup_printf (_("%s “%s”"), _("Install"), title);
   const char *body = NULL;
 
   if (version != NULL)
@@ -227,7 +227,7 @@ start_modpack_install (NuvashaLauncherDownloadModpackDialog *self,
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
-  adw_alert_dialog_add_response (alert, "install", _("Confirm"));
+  adw_alert_dialog_add_response (alert, "install", _("Install"));
   adw_alert_dialog_set_response_appearance (alert, "install",
                                             ADW_RESPONSE_SUGGESTED);
   adw_alert_dialog_set_default_response (alert, "cancel");

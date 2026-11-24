@@ -30,10 +30,6 @@
   padding: 6px 0;
 }
 
-.nuvashalauncher-modpack-results row {
-  border-radius: 0;
-}
-
 .nuvashalauncher-instance-row {
   padding-top: 4px;
   padding-bottom: 4px;
@@ -41,11 +37,11 @@
 }
 
 .nuvashalauncher-instance-icon {
-  border-radius: 50%;
+  border-radius: 8px;
 }
 
 .nuvashalauncher-content-icon {
-  border-radius: 50%;
+  border-radius: 8px;
 }
 
 .nuvashalauncher-dialog-content {
@@ -101,8 +97,7 @@
   margin-bottom: 6px;
 }
 
-.nuvashalauncher-settings-page preferencesgroup,
-.nuvashalauncher-settings-page preferencesgroup > row {
+.nuvashalauncher-settings-page preferencesgroup {
   margin-bottom: 2px;
 }
 

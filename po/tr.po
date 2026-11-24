@@ -1421,3 +1421,240 @@ msgstr "Kararlı"
 
 msgid "%u%% crash rate"
 msgstr "%%%u çökme oranı"
+
+msgid "A name cannot be empty."
+msgstr "ad boş olamaz."
+
+msgid "Remove server"
+msgstr "Sunucuyu Kaldır"
+
+msgid "Download modpack"
+msgstr "Modpack indir"
+
+msgid "%s “%s”"
+msgstr "%s “%s”"
+
+msgid "Delete instance"
+msgstr "Örneği sil"
+
+msgid "No worlds"
+msgstr "Dünya Yok"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "tarayıcıda oturum açılması bekleniyor…"
+
+msgid "Choose files"
+msgstr "Dosyaları Seç"
+
+msgid "Cannot create “%s”: %s"
+msgstr "“%s” oluşturulamıyor: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Önbellek temizlenemedi"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth ve Mod Yükleyicileri"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "“%s” dünyası silinsin mi? Bu işlem geri alınamaz."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Oynamaya başlamak için bir örnek oluşturun."
+
+msgid "Duplicated to “%s”"
+msgstr "“%s” konumuna çoğaltıldı"
+
+msgid "Downloading modpack"
+msgstr "Mod paketi indiriliyor"
+
+msgid "Try again"
+msgstr "Tekrar Dene"
+
+msgid "Performance impact"
+msgstr "Performans etkisi"
+
+msgid "Add world"
+msgstr "Dünya Ekle"
+
+msgid "Create instance"
+msgstr "Örnek Oluştur"
+
+msgid "Browse modpacks"
+msgstr "Mod Paketlerine Göz At"
+
+msgid "Remove server “%s”?"
+msgstr "“%s” sunucusu kaldırılsın mı?"
+
+msgid "Path tracing"
+msgstr "Yol izleme"
+
+msgid "Clean export"
+msgstr "Temiz dışa aktarma"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Oyun mekanikleri"
+
+msgid "Minecraft version"
+msgstr "Minecraft Sürümü"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Klasörü Aç"
+
+msgid "AppStream metadata"
+msgstr "AppStream Meta Verileri"
+
+msgid "Add Java runtime"
+msgstr "Java çalışma zamanı ekle"
+
+msgid "World generation"
+msgstr "Dünya oluşturma"
+
+msgid "Keyboard shortcuts"
+msgstr "Klavye kısayolları"
+
+msgid "Resource packs"
+msgstr "Kaynak Paketleri"
+
+msgid "Edit server"
+msgstr "Sunucuyu Düzenle"
+
+msgid "Keep playing"
+msgstr "Oynamaya devam et"
+
+msgid "Technical details"
+msgstr "Teknik ayrıntılar"
+
+msgid "Pack name"
+msgstr "Paket adı"
+
+msgid "Colored lighting"
+msgstr "Renkli aydınlatma"
+
+msgid "Rename world"
+msgstr "Dünyayı Yeniden Adlandır"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "bir ad yalnızca harf, rakam ve alt çizgi içerebilir."
+
+msgid "Preferences"
+msgstr "Ayarlar"
+
+msgid "Delete world"
+msgstr "Dünyayı Sil"
+
+msgid "Asking Microsoft for a code…"
+msgstr "Microsoft’dan kod isteniyor…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Kararsız mod yükleyici sürümlerini göster"
+
+msgid "Move down"
+msgstr "Aşağı Taşı"
+
+msgid "Clear cache"
+msgstr "Nuvasha Launcher Önbelleğini Temizle"
+
+msgid "Delete “%s”?"
+msgstr "“%s” silinsin mi?"
+
+msgid "Import modpack…"
+msgstr "Mod paketi içe aktar…"
+
+msgid "Delete selected"
+msgstr "Seçilenleri Sil"
+
+msgid "Java runtime"
+msgstr "Java çalışma zamanı"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "ad 3 ila 16 karakter uzunluğunda olmalıdır."
+
+msgid "Import modpack"
+msgstr "Mod paketi içe aktar"
+
+msgid "Core shaders"
+msgstr "Temel oyun gölgelendiricileri"
+
+msgid "Sign in"
+msgstr "Oturum aç"
+
+msgid "Cache cleared"
+msgstr "Önbellek temizlendi"
+
+msgid "No instances yet"
+msgstr "Henüz örnek yok"
+
+msgid "Add offline account"
+msgstr "Çevrimdışı hesap ekle"
+
+msgid "Copy seed"
+msgstr "Tohumu Kopyala"
+
+msgid "Services & ecosystem"
+msgstr "Hizmetler ve Ekosistem"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "İstenen şartlara uyan mod paketi bulunamadı. Başka bir kelime deneyin."
+
+msgid "Line limit"
+msgstr "Satır sınırı"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth mod paketleri (*.mrpack)"
+
+msgid "Add server"
+msgstr "Sunucu Ekle"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Tüm sürümler"
+
+msgid "No servers"
+msgstr "Sunucu Yok"
+
+msgid "Clear cache?"
+msgstr "Nuvasha Launcher önbelleğini temizlemek mi?"
+
+msgid "Loader version"
+msgstr "Mod yükleyici sürümü"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Tüm dosyaları dahil et"
+
+msgid "Export modpack"
+msgstr "Mod paketi dışa aktar"
+
+msgid "Add world…"
+msgstr "Dünya Ekle…"
+
+msgid "Update all"
+msgstr "Tümünü Güncelle"
+
+msgid "Add Microsoft account"
+msgstr "Microsoft Hesabı Ekle"
+
+msgid "Move up"
+msgstr "Yukarı Taşı"
+
+msgid "Minecraft disclaimer"
+msgstr "Minecraft Sorumluluk Reddi"
+
+msgid "Shader packs"
+msgstr "Gölgelendirici Paketleri"

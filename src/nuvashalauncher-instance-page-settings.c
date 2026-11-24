@@ -982,16 +982,16 @@ create_settings_page (NuvashaLauncherInstancePage *self)
     button_row (actions, _("Duplicate"), NULL,
                 "edit-copy-symbolic", G_CALLBACK (on_duplicate_clicked), self));
   settings_search_add_row (actions_group,
-    button_row (actions, _("Open Folder"), NULL,
+    button_row (actions, _("Open folder"), NULL,
                 "folder-symbolic", G_CALLBACK (on_open_folder_clicked),
                 self));
   settings_search_add_row (actions_group,
-    button_row (actions, _("Export Modpack"),
+    button_row (actions, _("Export modpack"),
                 NULL,
                 "export-symbolic", G_CALLBACK (on_export_clicked), self));
   settings_search_add_row (actions_group,
-    button_row (actions, _("Delete Instance"),
-                NULL, "edit-delete-symbolic",
+    button_row (actions, _("Delete instance"),
+                NULL, "user-trash-symbolic",
                 G_CALLBACK (on_delete_clicked), self));
 
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),

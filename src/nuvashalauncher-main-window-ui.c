@@ -68,12 +68,6 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
                                   G_MENU_MODEL (add_menu));
   adw_header_bar_pack_start (ADW_HEADER_BAR (header), GTK_WIDGET (add_button));
 
-  add_popover = GTK_WIDGET (
-    gtk_menu_button_get_popover (GTK_MENU_BUTTON (add_button)));
-  if (add_popover != NULL)
-     set_menu_item_tooltip (add_popover, _("Download Modpack"),
-                            _("Search Modrinth and install a modpack"));
-
   /* Show active downloads and the content-page selection count. Hide the
    * button when both are empty. */
   self->downloads.icon = GTK_IMAGE (gtk_image_new_from_icon_name (
@@ -143,22 +137,30 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (app_menu_button),
                                  "open-menu-symbolic");
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (app_menu_button),
-                                  _("Application menu"));
+                                  _("Main menu"));
   gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (app_menu_button),
                                   G_MENU_MODEL (app_menu));
 
   adw_header_bar_pack_end (ADW_HEADER_BAR (header), GTK_WIDGET (app_menu_button));
   adw_header_bar_pack_end (ADW_HEADER_BAR (header), GTK_WIDGET (users_button));
 
-  /* The empty state has no button in the middle: the "+" menu is the
-   * only way to create an instance. */
-  adw_status_page_set_title (ADW_STATUS_PAGE (empty_page), _("No Instances Yet"));
+  /* Empty state with primary call-to-action button conforming to GNOME HIG */
+  adw_status_page_set_title (ADW_STATUS_PAGE (empty_page), _("No instances yet"));
   adw_status_page_set_description (ADW_STATUS_PAGE (empty_page),
-                                   _("Use the + button in the header to create one"));
+                                   _("Create an instance to start playing."));
   gtk_widget_set_hexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (empty_page), "nuvashalauncher-empty-state");
 
+  {
+    GtkWidget *create_btn = gtk_button_new_with_label (_("Create instance"));
+    gtk_widget_add_css_class (create_btn, "suggested-action");
+    gtk_widget_add_css_class (create_btn, "pill");
+    gtk_actionable_set_action_name (GTK_ACTIONABLE (create_btn), "win.create-instance");
+    adw_status_page_set_child (ADW_STATUS_PAGE (empty_page), create_btn);
+  }
+
+  self->ui.toast_overlay = ADW_TOAST_OVERLAY (gtk_builder_get_object (shell_builder, "toast_overlay"));
   self->ui.stack = ADW_VIEW_STACK (gtk_builder_get_object (shell_builder, "stack"));
   adw_view_stack_add_named (self->ui.stack, GTK_WIDGET (empty_page), "empty");
   gtk_widget_set_hexpand (GTK_WIDGET (self->ui.stack), TRUE);

@@ -197,7 +197,7 @@ nuvashalauncher_java_row_fill (NuvashaLauncherJavaRow *self)
   self->add_index = GTK_INVALID_LIST_POSITION;
   if (ids->len > 0)
     {
-      g_ptr_array_add (names, g_strdup (_("Add Java Runtime")));
+      g_ptr_array_add (names, g_strdup (_("Add Java runtime")));
       self->add_index = names->len - 1;
     }
 
@@ -505,7 +505,7 @@ nuvashalauncher_java_row_init (NuvashaLauncherJavaRow *self)
 {
   /* A Java path is a file name and may hold an "&": it is plain text. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self), FALSE);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), _("Java Runtime"));
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self), _("Java runtime"));
 
    self->ready = FALSE;
   self->javas = g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_java_free);
@@ -552,7 +552,7 @@ nuvashalauncher_java_row_init (NuvashaLauncherJavaRow *self)
   g_signal_connect_object (self, "notify::selected",
                            G_CALLBACK (nuvashalauncher_java_row_on_picked), self, 0);
 
-  self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add Java Runtime")));
+  self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add Java runtime")));
   gtk_widget_set_valign (GTK_WIDGET (self->add_button), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->add_button), FALSE);
   g_signal_connect_object (self->add_button, "clicked",

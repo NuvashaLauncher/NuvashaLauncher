@@ -20,7 +20,6 @@ G_BEGIN_DECLS
  * enough for a list plus the buttons below it, so a dialog of this kind
  * opens without a scrollbar on a laptop and does not fill a desktop. */
 #define NUVASHALAUNCHER_DIALOG_CONTENT_WIDTH 720
-#define NUVASHALAUNCHER_DIALOG_WIDE_CONTENT_WIDTH 1040
 #define NUVASHALAUNCHER_DIALOG_CONTENT_HEIGHT 560
 
 /* Gives @dialog the size the dialogs of this kind share. Both width and

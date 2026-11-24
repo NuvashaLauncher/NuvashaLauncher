@@ -673,7 +673,7 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
     GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
     GtkBox *filters = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
     GtkStringList *version_model = gtk_string_list_new ((const char *[]) {
-      _("All Versions"), NULL });
+      _("All versions"), NULL });
     GtkDropDown *version_dropdown = GTK_DROP_DOWN (
       gtk_drop_down_new (G_LIST_MODEL (version_model), NULL));
     GtkStringList *sort_model = gtk_string_list_new ((const char *[]) {
@@ -771,7 +771,7 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
   gtk_widget_set_vexpand (GTK_WIDGET (box), TRUE);
   gtk_box_append (GTK_BOX (root), GTK_WIDGET (box));
 
-  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (root), _("Browse Modpacks")));
+  page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (root), _("Browse modpacks")));
   adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "browse");
 
   adw_navigation_view_add (ADW_NAVIGATION_VIEW (self->nav),

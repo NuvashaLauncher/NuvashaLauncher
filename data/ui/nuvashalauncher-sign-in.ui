@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="NuvashaLauncherSignInDialog" parent="AdwDialog">
-    <property name="title" translatable="yes">Sign In</property>
+    <property name="title" translatable="yes">Sign in</property>
     <property name="content-width">440</property>
     <child>
       <object class="AdwToolbarView" id="toolbar">

@@ -289,7 +289,7 @@ nuvashalauncher_content_page_on_trash_clicked (GtkButton *button G_GNUC_UNUSED,
             }
       }
 
-  heading = g_strdup_printf (_("Delete \"%s\"?"), title);
+  heading = g_strdup_printf (_("Delete “%s”?"), title);
   if (dependents->len > 0)
     body = g_strdup_printf (
       _("The following mods depend on %s:\n%s"), title, dependents->str);

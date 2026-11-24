@@ -25,14 +25,6 @@
 G_DEFINE_FINAL_TYPE (NuvashaLauncherMainWindow, nuvashalauncher_main_window, ADW_TYPE_APPLICATION_WINDOW)
 
 gboolean
-nuvashalauncher_main_window_launch_instance (NuvashaLauncherMainWindow *self,
-                                     const char *instance_id,
-                                     GError **error)
-{
-  return nuvashalauncher_main_window_launch_instance_as (self, instance_id, NULL, error);
-}
-
-gboolean
 nuvashalauncher_main_window_launch_instance_as (NuvashaLauncherMainWindow *self,
                                         const char *instance_id,
                                         const char *account_id,
@@ -333,7 +325,7 @@ nuvashalauncher_main_window_new (AdwApplication *application, NuvashaLauncherIns
   {
     const char *create[] = { "<primary>n", NULL };
     const char *settings[] = { "<primary>comma", NULL };
-    const char *shortcuts[] = { "F1", NULL };
+    const char *shortcuts[] = { "<primary>question", NULL };
     const char *quit[] = { "<primary>q", NULL };
 
     gtk_application_set_accels_for_action (GTK_APPLICATION (application), "win.create-instance",
@@ -361,8 +353,13 @@ nuvashalauncher_main_window_new (AdwApplication *application, NuvashaLauncherIns
    gtk_list_box_bind_model (list, G_LIST_MODEL (instances),
                             create_instance_row, self, NULL);
 
+   AdwClamp *clamp = ADW_CLAMP (adw_clamp_new ());
+   adw_clamp_set_maximum_size (clamp, 860);
+   adw_clamp_set_tightening_threshold (clamp, 600);
+   adw_clamp_set_child (clamp, GTK_WIDGET (list));
+
    scroll = GTK_SCROLLED_WINDOW (gtk_scrolled_window_new ());
-   gtk_scrolled_window_set_child (scroll, GTK_WIDGET (list));
+   gtk_scrolled_window_set_child (scroll, GTK_WIDGET (clamp));
    gtk_widget_set_margin_top (GTK_WIDGET (scroll), 12);
    gtk_widget_set_margin_bottom (GTK_WIDGET (scroll), 12);
    gtk_widget_set_margin_start (GTK_WIDGET (scroll), 12);

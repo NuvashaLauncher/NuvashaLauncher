@@ -1384,3 +1384,240 @@ msgstr "Ổn định"
 
 msgid "%u%% crash rate"
 msgstr "%u%% tỉ lệ lỗi"
+
+msgid "A name cannot be empty."
+msgstr "tên không được để trống."
+
+msgid "Remove server"
+msgstr "Xóa máy chủ"
+
+msgid "Download modpack"
+msgstr "Tải xuống Modpack"
+
+msgid "%s “%s”"
+msgstr "%s “%s”"
+
+msgid "Delete instance"
+msgstr "Xóa phiên bản"
+
+msgid "No worlds"
+msgstr "Không có thế giới nào"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "chờ đăng nhập trên trình duyệt…"
+
+msgid "Choose files"
+msgstr "Chọn Tệp"
+
+msgid "Cannot create “%s”: %s"
+msgstr "Không thể tạo “%s”: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Dọn dẹp bộ đệm không thành công"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth & Trình tải mod"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Xóa thế giới “%s”? Không thể hoàn tác thao tác này."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Tạo một phiên bản để bắt đầu chơi."
+
+msgid "Duplicated to “%s”"
+msgstr "Đã sao chép vào “%s”"
+
+msgid "Downloading modpack"
+msgstr "Đang tải xuống Modpack"
+
+msgid "Try again"
+msgstr "Thử lại"
+
+msgid "Performance impact"
+msgstr "Ảnh hưởng đến hiệu năng"
+
+msgid "Add world"
+msgstr "Thêm thế giới"
+
+msgid "Create instance"
+msgstr "Tạo phiên bản"
+
+msgid "Browse modpacks"
+msgstr "Duyệt qua Modpacks"
+
+msgid "Remove server “%s”?"
+msgstr "Xóa máy chủ “%s”?"
+
+msgid "Path tracing"
+msgstr "Truy vết đường đi"
+
+msgid "Clean export"
+msgstr "Xuất khẩu sạch"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Cơ chế trò chơi"
+
+msgid "Minecraft version"
+msgstr "Phiên bản Minecraft"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Mở thư mục"
+
+msgid "AppStream metadata"
+msgstr "Metadata AppStream"
+
+msgid "Add Java runtime"
+msgstr "Thêm thời gian chạy Java"
+
+msgid "World generation"
+msgstr "Tạo thế giới"
+
+msgid "Keyboard shortcuts"
+msgstr "Phím tắt"
+
+msgid "Resource packs"
+msgstr "Gói tài nguyên"
+
+msgid "Edit server"
+msgstr "Chỉnh sửa máy chủ"
+
+msgid "Keep playing"
+msgstr "Tiếp tục chơi"
+
+msgid "Technical details"
+msgstr "Chi tiết kỹ thuật"
+
+msgid "Pack name"
+msgstr "Tên gói"
+
+msgid "Colored lighting"
+msgstr "Ánh sáng màu"
+
+msgid "Rename world"
+msgstr "Đổi tên thế giới"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "tên chỉ có thể chứa các chữ cái, chữ số và dấu gạch dưới."
+
+msgid "Preferences"
+msgstr "Cài đặt"
+
+msgid "Delete world"
+msgstr "Xóa thế giới"
+
+msgid "Asking Microsoft for a code…"
+msgstr "yêu cầu Microsoft cung cấp mã…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Hiển thị các phiên bản Mod Loader không ổn định"
+
+msgid "Move down"
+msgstr "Di chuyển xuống"
+
+msgid "Clear cache"
+msgstr "Xóa bộ nhớ cache Nuvasha Launcher"
+
+msgid "Delete “%s”?"
+msgstr "Xóa “%s”?"
+
+msgid "Import modpack…"
+msgstr "Nhập khẩu Modpack…"
+
+msgid "Delete selected"
+msgstr "Xóa mục đã chọn"
+
+msgid "Java runtime"
+msgstr "Thời gian chạy Java"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "tên phải dài từ 3 đến 16 ký tự."
+
+msgid "Import modpack"
+msgstr "Nhập khẩu Modpack"
+
+msgid "Core shaders"
+msgstr "Shader cốt lõi"
+
+msgid "Sign in"
+msgstr "Đăng nhập"
+
+msgid "Cache cleared"
+msgstr "Đã xóa bộ nhớ đệm"
+
+msgid "No instances yet"
+msgstr "Chưa có trường hợp nào"
+
+msgid "Add offline account"
+msgstr "Thêm tài khoản ngoại tuyến"
+
+msgid "Copy seed"
+msgstr "Sao chép seed"
+
+msgid "Services & ecosystem"
+msgstr "Dịch vụ & Hệ sinh thái"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Không có modpack nào phù hợp. Hãy thử một từ khác."
+
+msgid "Line limit"
+msgstr "Giới hạn dòng"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Gói Modrinth (*.mrpack)"
+
+msgid "Add server"
+msgstr "Thêm máy chủ"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Tất cả phiên bản"
+
+msgid "No servers"
+msgstr "Không có máy chủ nào"
+
+msgid "Clear cache?"
+msgstr "Xóa Nuvasha Launcher Cache?"
+
+msgid "Loader version"
+msgstr "Phiên bản tải"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Bao gồm tất cả các tệp"
+
+msgid "Export modpack"
+msgstr "Xuất Modpack"
+
+msgid "Add world…"
+msgstr "Thêm thế giới…"
+
+msgid "Update all"
+msgstr "Cập nhật tất cả"
+
+msgid "Add Microsoft account"
+msgstr "Thêm tài khoản Microsoft"
+
+msgid "Move up"
+msgstr "Di chuyển lên"
+
+msgid "Minecraft disclaimer"
+msgstr "Tuyên bố từ chối trách nhiệm Minecraft"
+
+msgid "Shader packs"
+msgstr "Gói đổ bóng"

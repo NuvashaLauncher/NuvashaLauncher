@@ -90,10 +90,6 @@ JsonParser *nuvashalauncher_download_cache_parser (const char *contents, gsize l
                                        gboolean *out_fresh,
                                        char **response, char **etag);
 
-NuvashaLauncherTaskScope *nuvashalauncher_download_hash_file_async (GFile *file, GChecksumType type,
-                                            GAsyncReadyCallback callback,
-                                            gpointer user_data);
-char *nuvashalauncher_download_hash_file_finish (GAsyncResult *result, GError **error);
 GError *nuvashalauncher_download_cancelled_error (void);
 void nuvashalauncher_download_request_fail (DownloadRequest *request, GError *error);
 void nuvashalauncher_download_request_succeed_json (DownloadRequest *request,
@@ -104,7 +100,6 @@ char *nuvashalauncher_download_cache_encode (const char *response,
 void nuvashalauncher_download_cache_write_encoded (DownloadRequest *request,
                                                    char *encoded_data,
                                                    gsize encoded_length);
-void nuvashalauncher_download_cache_write (DownloadRequest *request, const char *response);
 
 void nuvashalauncher_download_destroy_source (DownloadRequest *request, guint *source_id);
 void nuvashalauncher_download_close_sink (DownloadRequest *request);

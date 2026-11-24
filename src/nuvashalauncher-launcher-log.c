@@ -145,6 +145,17 @@ nuvashalauncher_launcher_get_log_text (NuvashaLauncher *self)
 }
 
 void
+nuvashalauncher_launcher_foreach_log_line (NuvashaLauncher *self,
+                                           GFunc            func,
+                                           gpointer         user_data)
+{
+  g_return_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self));
+  g_return_if_fail (func != NULL);
+
+  g_queue_foreach (self->lines, func, user_data);
+}
+
+void
 nuvashalauncher_launcher_clear_log (NuvashaLauncher *self)
 {
   g_return_if_fail (NUVASHALAUNCHER_IS_LAUNCHER (self));

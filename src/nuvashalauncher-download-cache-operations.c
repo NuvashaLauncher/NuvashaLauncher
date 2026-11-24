@@ -260,7 +260,7 @@ global_cache_hash_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 {
   DownloadRequest *request = user_data;
   g_autoptr (GError) error = NULL;
-  g_autofree char *digest = nuvashalauncher_download_file_hash_finish (result, &error);
+  g_autofree char *digest = nuvashalauncher_download_hash_file_finish (result, &error);
 
   if (request_was_cancelled (request, error))
     {

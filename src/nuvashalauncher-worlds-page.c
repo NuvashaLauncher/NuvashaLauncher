@@ -309,7 +309,7 @@ on_rename_world_clicked (GtkButton *button, gpointer user_data)
     return;
 
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
-    adw_alert_dialog_new (_("Rename World"), NULL));
+    adw_alert_dialog_new (_("Rename world"), NULL));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
   GtkWidget *entry = gtk_entry_new ();
@@ -568,9 +568,9 @@ on_delete_world_clicked (GtkButton *button, gpointer user_data)
   if (w == NULL)
     return;
 
-  g_autofree char *body = g_strdup_printf (_("Delete world \"%s\"? This cannot be undone."), w->name);
+  g_autofree char *body = g_strdup_printf (_("Delete world “%s”? This cannot be undone."), w->name);
   AdwAlertDialog *alert = ADW_ALERT_DIALOG (
-    adw_alert_dialog_new (_("Delete World"), body));
+    adw_alert_dialog_new (_("Delete world"), body));
   adw_alert_dialog_set_heading_use_markup (alert, FALSE);
   adw_alert_dialog_set_body_use_markup (alert, FALSE);
   adw_alert_dialog_add_responses (alert,
@@ -650,7 +650,7 @@ build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w)
   gtk_box_append (box, popover_menu_button (_("Duplicate"), w, popover,
                                             G_CALLBACK (on_duplicate_world_clicked), self));
   if (w->has_seed)
-    gtk_box_append (box, popover_menu_button (_("Copy Seed"), w, popover,
+    gtk_box_append (box, popover_menu_button (_("Copy seed"), w, popover,
                                               G_CALLBACK (on_copy_seed_clicked), self));
   GtkWidget *del = popover_menu_button (_("Delete"), w, popover,
                                         G_CALLBACK (on_delete_world_clicked), self);
@@ -1068,7 +1068,7 @@ on_add_world_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
   gtk_file_filter_add_suffix (filter, "zip");
   g_list_store_append (filters, filter);
 
-  gtk_file_dialog_set_title (dialog, _("Add World"));
+  gtk_file_dialog_set_title (dialog, _("Add world"));
   gtk_file_dialog_set_filters (dialog, G_LIST_MODEL (filters));
 
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (self));
@@ -1187,7 +1187,7 @@ nuvashalauncher_worlds_page_new (NuvashaLauncherInstance *instance,
 
   GtkWidget *add_btn = gtk_button_new_from_icon_name ("list-add-symbolic");
   gtk_widget_set_valign (add_btn, GTK_ALIGN_CENTER);
-  nuvashalauncher_ui_prepare_icon_button (add_btn, _("Add World"));
+  nuvashalauncher_ui_prepare_icon_button (add_btn, _("Add world…"));
   g_signal_connect_object (add_btn, "clicked", G_CALLBACK (on_add_world_clicked), self, 0);
 
   GtkWidget *spacer = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -1197,7 +1197,7 @@ nuvashalauncher_worlds_page_new (NuvashaLauncherInstance *instance,
   gtk_widget_set_valign (GTK_WIDGET (right_actions), GTK_ALIGN_CENTER);
 
   GtkWidget *folder_btn = gtk_button_new_from_icon_name ("folder-symbolic");
-  nuvashalauncher_ui_prepare_icon_button (folder_btn, _("Open Folder"));
+  nuvashalauncher_ui_prepare_icon_button (folder_btn, _("Open folder"));
   g_signal_connect_object (folder_btn, "clicked", G_CALLBACK (on_open_folder_clicked), self, 0);
 
   GtkWidget *refresh_btn = gtk_button_new_from_icon_name ("view-refresh-symbolic");
@@ -1234,8 +1234,15 @@ nuvashalauncher_worlds_page_new (NuvashaLauncherInstance *instance,
   gtk_widget_set_hexpand (GTK_WIDGET (empty), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (empty), TRUE);
   adw_status_page_set_icon_name (empty, "applications-games-symbolic");
-  adw_status_page_set_title (empty, _("No Worlds"));
+  adw_status_page_set_title (empty, _("No worlds"));
   adw_status_page_set_description (empty, _("Worlds saved by Minecraft or imported here will appear in this list."));
+
+  GtkWidget *empty_add_btn = gtk_button_new_with_label (_("Add world…"));
+  gtk_widget_add_css_class (empty_add_btn, "suggested-action");
+  gtk_widget_add_css_class (empty_add_btn, "pill");
+  gtk_widget_set_halign (empty_add_btn, GTK_ALIGN_CENTER);
+  g_signal_connect_object (empty_add_btn, "clicked", G_CALLBACK (on_add_world_clicked), self, 0);
+  adw_status_page_set_child (empty, empty_add_btn);
 
   adw_view_stack_add_named (self->stack, GTK_WIDGET (scroller), "list");
   adw_view_stack_add_named (self->stack, GTK_WIDGET (empty), "empty");

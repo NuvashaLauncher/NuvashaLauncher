@@ -16,7 +16,7 @@
   <object class="AdwStatusPage" id="empty">
     <property name="icon-name">system-search-symbolic</property>
     <property name="title" translatable="yes">Nothing to show yet</property>
-    <property name="description" translatable="yes">No modpack matches what was asked for. Try another word</property>
+    <property name="description" translatable="yes">No modpack matches what was asked for. Try another word.</property>
   </object>
   <object class="AdwStatusPage" id="error">
     <property name="icon-name">dialog-error-symbolic</property>

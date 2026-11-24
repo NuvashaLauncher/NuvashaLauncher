@@ -1386,3 +1386,240 @@ msgstr "Stabilní"
 
 msgid "%u%% crash rate"
 msgstr "%u%% pádů"
+
+msgid "A name cannot be empty."
+msgstr "jméno nemůže být prázdné."
+
+msgid "Remove server"
+msgstr "Odebrat server"
+
+msgid "Download modpack"
+msgstr "Stáhněte si Modpack"
+
+msgid "%s “%s”"
+msgstr "%s „%s“"
+
+msgid "Delete instance"
+msgstr "Smazat instanci"
+
+msgid "No worlds"
+msgstr "Žádné světy"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "čekání na přihlášení v prohlížeči…"
+
+msgid "Choose files"
+msgstr "Vybrat soubory"
+
+msgid "Cannot create “%s”: %s"
+msgstr "Nelze vytvořit “%s”: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Vyčištění mezipaměti se nezdařilo"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth a zavaděče modů"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Smazat svět „%s“? Tuto akci nelze vrátit zpět."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Vytvořte instanci a začněte hrát."
+
+msgid "Duplicated to “%s”"
+msgstr "Duplikováno do „%s“"
+
+msgid "Downloading modpack"
+msgstr "Stahování Modpacku"
+
+msgid "Try again"
+msgstr "Zkuste to znovu"
+
+msgid "Performance impact"
+msgstr "Dopad na výkon"
+
+msgid "Add world"
+msgstr "Přidat svět"
+
+msgid "Create instance"
+msgstr "Vytvořit instanci"
+
+msgid "Browse modpacks"
+msgstr "Procházet modpacky"
+
+msgid "Remove server “%s”?"
+msgstr "Odebrat server „%s“?"
+
+msgid "Path tracing"
+msgstr "Sledování cest"
+
+msgid "Clean export"
+msgstr "Čistý export"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Herní mechaniky"
+
+msgid "Minecraft version"
+msgstr "Verze Minecraft"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Otevřete složku"
+
+msgid "AppStream metadata"
+msgstr "Metadata AppStream"
+
+msgid "Add Java runtime"
+msgstr "Přidat Java Runtime"
+
+msgid "World generation"
+msgstr "Generování světa"
+
+msgid "Keyboard shortcuts"
+msgstr "Klávesové zkratky"
+
+msgid "Resource packs"
+msgstr "Balíčky zdrojů"
+
+msgid "Edit server"
+msgstr "Upravit server"
+
+msgid "Keep playing"
+msgstr "Pokračujte ve hře"
+
+msgid "Technical details"
+msgstr "Technické podrobnosti"
+
+msgid "Pack name"
+msgstr "Název balíčku"
+
+msgid "Colored lighting"
+msgstr "Barevné osvětlení"
+
+msgid "Rename world"
+msgstr "Přejmenovat svět"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "jméno může obsahovat pouze písmena, číslice a podtržítka."
+
+msgid "Preferences"
+msgstr "Nastavení"
+
+msgid "Delete world"
+msgstr "Smazat svět"
+
+msgid "Asking Microsoft for a code…"
+msgstr "požádat Microsoft o kód…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Zobrazit nestabilní verze Mod Loader"
+
+msgid "Move down"
+msgstr "Posunout dolů"
+
+msgid "Clear cache"
+msgstr "Vymazat mezipaměť Nuvasha Launcher"
+
+msgid "Delete “%s”?"
+msgstr "Smazat “%s”?"
+
+msgid "Import modpack…"
+msgstr "Importujte Modpack…"
+
+msgid "Delete selected"
+msgstr "Smazat vybrané"
+
+msgid "Java runtime"
+msgstr "Java Runtime"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "název musí mít 3 až 16 znaků."
+
+msgid "Import modpack"
+msgstr "Importujte Modpack"
+
+msgid "Core shaders"
+msgstr "Shadery základní hry"
+
+msgid "Sign in"
+msgstr "Přihlaste se"
+
+msgid "Cache cleared"
+msgstr "Cache vymazána"
+
+msgid "No instances yet"
+msgstr "Zatím žádné instance"
+
+msgid "Add offline account"
+msgstr "Přidat účet offline"
+
+msgid "Copy seed"
+msgstr "Kopírovat seed"
+
+msgid "Services & ecosystem"
+msgstr "Služby a ekosystém"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Žádný modpack neodpovídá zadanému požadavku. Zkuste jiné slovo."
+
+msgid "Line limit"
+msgstr "Limit linky"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
+
+msgid "Add server"
+msgstr "Přidat server"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Všechny verze"
+
+msgid "No servers"
+msgstr "Žádné servery"
+
+msgid "Clear cache?"
+msgstr "Vymazat mezipaměť Nuvasha Launcher?"
+
+msgid "Loader version"
+msgstr "Verze nakladače"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Zahrnout všechny soubory"
+
+msgid "Export modpack"
+msgstr "Exportujte Modpack"
+
+msgid "Add world…"
+msgstr "Přidat svět…"
+
+msgid "Update all"
+msgstr "Aktualizovat vše"
+
+msgid "Add Microsoft account"
+msgstr "Přidat účet Microsoft"
+
+msgid "Move up"
+msgstr "Posunout nahoru"
+
+msgid "Minecraft disclaimer"
+msgstr "Zřeknutí se odpovědnosti za Minecraft"
+
+msgid "Shader packs"
+msgstr "Balíčky shaderů"

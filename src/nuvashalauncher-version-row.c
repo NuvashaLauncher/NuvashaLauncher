@@ -357,7 +357,7 @@ nuvashalauncher_version_row_init (NuvashaLauncherVersionRow *self)
   /* A Minecraft version is a name from Mojang, not markup. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self), FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self),
-                                  _("Minecraft Version"));
+                                  _("Minecraft version"));
 
   /* Nothing to choose until a load fills the list. */
   self->ready = FALSE;

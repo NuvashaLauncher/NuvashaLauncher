@@ -1392,3 +1392,240 @@ msgstr "مستقر"
 
 msgid "%u%% crash rate"
 msgstr "نسبة الأعطال %u%%"
+
+msgid "A name cannot be empty."
+msgstr "لا يمكن أن يكون الاسم فارغًا."
+
+msgid "Remove server"
+msgstr "إزالة الخادم"
+
+msgid "Download modpack"
+msgstr "تحميل مودباك"
+
+msgid "%s “%s”"
+msgstr "%s “%s”"
+
+msgid "Delete instance"
+msgstr "حذف المثيل"
+
+msgid "No worlds"
+msgstr "لا توجد عوالم"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "في انتظار تسجيل الدخول في المتصفح…"
+
+msgid "Choose files"
+msgstr "اختر الملفات"
+
+msgid "Cannot create “%s”: %s"
+msgstr "لا يمكن إنشاء “%s”: %s"
+
+msgid "Cache cleanup failed"
+msgstr "فشل تنظيف ذاكرة التخزين المؤقت"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth ومحملات التعديلات"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "هل تريد حذف العالم «%s»؟ لا يمكن التراجع عن هذا الإجراء."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "أنشئ نسخة لبدء اللعب."
+
+msgid "Duplicated to “%s”"
+msgstr "تم التكرار إلى “%s”"
+
+msgid "Downloading modpack"
+msgstr "تحميل مودباك"
+
+msgid "Try again"
+msgstr "حاول ثانية"
+
+msgid "Performance impact"
+msgstr "التأثير على الأداء"
+
+msgid "Add world"
+msgstr "إضافة عالم"
+
+msgid "Create instance"
+msgstr "إنشاء مثيل"
+
+msgid "Browse modpacks"
+msgstr "تصفح حزم التعديل"
+
+msgid "Remove server “%s”?"
+msgstr "هل تريد إزالة الخادم «%s»؟"
+
+msgid "Path tracing"
+msgstr "تتبع المسار"
+
+msgid "Clean export"
+msgstr "تصدير نظيف"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "آليات اللعب"
+
+msgid "Minecraft version"
+msgstr "نسخة ماينكرافت"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "افتح المجلد"
+
+msgid "AppStream metadata"
+msgstr "بيانات AppStream الوصفية"
+
+msgid "Add Java runtime"
+msgstr "أضف وقت تشغيل جافا"
+
+msgid "World generation"
+msgstr "توليد العالم"
+
+msgid "Keyboard shortcuts"
+msgstr "اختصارات لوحة المفاتيح"
+
+msgid "Resource packs"
+msgstr "حزم الموارد"
+
+msgid "Edit server"
+msgstr "تحرير الخادم"
+
+msgid "Keep playing"
+msgstr "استمر في اللعب"
+
+msgid "Technical details"
+msgstr "التفاصيل التقنية"
+
+msgid "Pack name"
+msgstr "اسم الحزمة"
+
+msgid "Colored lighting"
+msgstr "إضاءة ملونة"
+
+msgid "Rename world"
+msgstr "إعادة تسمية العالم"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "يمكن أن يحتوي الاسم على أحرف وأرقام وشرطات سفلية فقط."
+
+msgid "Preferences"
+msgstr "إعدادات"
+
+msgid "Delete world"
+msgstr "حذف العالم"
+
+msgid "Asking Microsoft for a code…"
+msgstr "يطلب من Microsoft الحصول على رمز…"
+
+msgid "Show unstable mod loader versions"
+msgstr "إظهار إصدارات Mod Loader غير المستقرة"
+
+msgid "Move down"
+msgstr "تحريك لأسفل"
+
+msgid "Clear cache"
+msgstr "مسح ذاكرة التخزين المؤقت لـ Nuvasha Launcher"
+
+msgid "Delete “%s”?"
+msgstr "هل تريد حذف “%s”؟"
+
+msgid "Import modpack…"
+msgstr "استيراد مودباك…"
+
+msgid "Delete selected"
+msgstr "حذف المحدد"
+
+msgid "Java runtime"
+msgstr "جافا وقت التشغيل"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "يجب أن يتراوح طول الاسم من 3 إلى 16 حرفًا."
+
+msgid "Import modpack"
+msgstr "استيراد مودباك"
+
+msgid "Core shaders"
+msgstr "مظللات اللعبة الأساسية"
+
+msgid "Sign in"
+msgstr "تسجيل الدخول"
+
+msgid "Cache cleared"
+msgstr "تم مسح ذاكرة التخزين المؤقت"
+
+msgid "No instances yet"
+msgstr "لا توجد حالات حتى الآن"
+
+msgid "Add offline account"
+msgstr "إضافة حساب غير متصل"
+
+msgid "Copy seed"
+msgstr "نسخ البذرة"
+
+msgid "Services & ecosystem"
+msgstr "الخدمات والنظام البيئي"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "لا توجد حزمة تعديلات تتطابق مع ما تم طلبه. جرب كلمة أخرى."
+
+msgid "Line limit"
+msgstr "حد الخط"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modpacks Modrinth (*.mrpack)"
+
+msgid "Add server"
+msgstr "إضافة خادم"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "جميع الإصدارات"
+
+msgid "No servers"
+msgstr "لا توجد خوادم"
+
+msgid "Clear cache?"
+msgstr "مسح ذاكرة التخزين المؤقت لـ Nuvasha Launcher؟"
+
+msgid "Loader version"
+msgstr "نسخة اللودر"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "تضمين كافة الملفات"
+
+msgid "Export modpack"
+msgstr "تصدير مودباك"
+
+msgid "Add world…"
+msgstr "إضافة عالم…"
+
+msgid "Update all"
+msgstr "تحديث الكل"
+
+msgid "Add Microsoft account"
+msgstr "أضف حساب مايكروسوفت"
+
+msgid "Move up"
+msgstr "تحريك لأعلى"
+
+msgid "Minecraft disclaimer"
+msgstr "إخلاء مسؤولية Minecraft"
+
+msgid "Shader packs"
+msgstr "حزم شادر"

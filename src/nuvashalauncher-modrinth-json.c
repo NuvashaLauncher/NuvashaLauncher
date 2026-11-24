@@ -21,13 +21,6 @@ nuvashalauncher_modrinth_error_quark (void)
   return g_quark_from_static_string ("nuvashalauncher-modrinth-error");
 }
 
-char *
-nuvashalauncher_modrinth_json_node_to_string (JsonNode *node)
-{
-  g_return_val_if_fail (node != NULL, NULL);
-  return json_to_string (node, FALSE);
-}
-
 /* ---------------------------------------------------------- *
  * The kinds of content
  * ---------------------------------------------------------- */
@@ -46,21 +39,6 @@ nuvashalauncher_content_type_to_string (NuvashaLauncherContentType type)
     case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return "mod";
-    }
-}
-
-const char *
-nuvashalauncher_content_type_title (NuvashaLauncherContentType type)
-{
-  switch (type)
-    {
-    case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
-      return _("Resource Packs");
-    case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
-      return _("Shader Packs");
-    case NUVASHALAUNCHER_CONTENT_MOD:
-    default:
-      return _("Mods");
     }
 }
 

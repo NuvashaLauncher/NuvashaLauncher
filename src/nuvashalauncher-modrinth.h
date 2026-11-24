@@ -47,7 +47,6 @@ typedef enum {
 } NuvashaLauncherModrinthError;
 
 GQuark nuvashalauncher_modrinth_error_quark (void);
-char *nuvashalauncher_modrinth_json_node_to_string (JsonNode *node);
 
 /* ---------------------------------------------------------- *
  * The kinds of content
@@ -65,9 +64,6 @@ typedef enum {
 /* What Modrinth calls this kind of content in a facet: "mod", "resourcepack",
  * or "shader". Never NULL. */
 const char *nuvashalauncher_content_type_to_string (NuvashaLauncherContentType type);
-
-/* What the page and the rows are titled. Never NULL. */
-const char *nuvashalauncher_content_type_title (NuvashaLauncherContentType type);
 
 /* The folder of the instance this content goes in. Never NULL. */
 const char *nuvashalauncher_content_type_folder (NuvashaLauncherContentType type);
@@ -436,31 +432,13 @@ NuvashaLauncherModrinthVersion *nuvashalauncher_modrinth_version_by_hash_finish 
 
 /* A newer version of the project the file @sha1 belongs to, for
  * @minecraft_version and @loader.
- *
- * This is Modrinth's hash update endpoint, so the question asked is
- * "is there something newer for these exact files", not "is the newest
- * version of the project newer than the file on disk".
- *
- * NULL is the answer when Modrinth has nothing newer that fits, which
- * is what a page shows as up to date; it is not an error. */
-NuvashaLauncherTaskScope *nuvashalauncher_modrinth_update_by_hash_async (NuvashaLauncherContentType type,
-                                                   const char *sha1,
-                                                   const char *minecraft_version,
-                                                   const char *loader,
-                                                   GAsyncReadyCallback callback,
-                                                   gpointer user_data);
-
-/* (transfer full). NULL when there is no update, and on error. */
-NuvashaLauncherModrinthVersion *nuvashalauncher_modrinth_update_by_hash_finish (GAsyncResult  *result,
-                                                         GError       **error);
-
 /* Parse a batch hash-update response object (hash -> version) from JSON.
  * (transfer full) GHashTable* mapping char* sha1 -> NuvashaLauncherModrinthVersion*. */
 GHashTable *nuvashalauncher_modrinth_updates_from_json (const char  *json,
                                                         gssize       length,
                                                         GError     **error);
 
-/* Batch version of nuvashalauncher_modrinth_update_by_hash_async() using
+/* Query Modrinth for updates for multiple files using
  * Modrinth's POST /v2/version_files/update endpoint for @hashes (GPtrArray of
  * const char* sha1 strings). */
 NuvashaLauncherTaskScope *nuvashalauncher_modrinth_updates_by_hashes_async (

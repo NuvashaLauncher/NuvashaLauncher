@@ -498,7 +498,7 @@ nuvashalauncher_loader_row_new (void)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (self->version_row),
                                       FALSE);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (self->version_row),
-                                  _("Loader Version"));
+                                  _("Loader version"));
   self->retry = GTK_BUTTON (
     g_object_ref_sink (gtk_button_new_with_label (_("Retry"))));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (self->retry), _("Retry"));

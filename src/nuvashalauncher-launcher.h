@@ -276,6 +276,10 @@ guint nuvashalauncher_launcher_get_line_count (NuvashaLauncher *self);
 
 char *nuvashalauncher_launcher_get_log_text (NuvashaLauncher *self);
 
+void nuvashalauncher_launcher_foreach_log_line (NuvashaLauncher *self,
+                                                GFunc            func,
+                                                gpointer         user_data);
+
 /* Drops every line logged so far. */
 void nuvashalauncher_launcher_clear_log (NuvashaLauncher *self);
 

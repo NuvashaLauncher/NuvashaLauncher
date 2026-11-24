@@ -57,10 +57,9 @@ LOCALE_MOS := $(LOCALES:%=build/locale/%/LC_MESSAGES/nuvashalauncher.mo)
 SCHEMA_XML := data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml
 SCHEMA_COMPILED := build/schemas/gschemas.compiled
 
-CFLAGS     ?= -std=c17 -Wall -Wextra -Wpedantic -MMD -MP -pipe
+CFLAGS     ?= -std=c17 -Wall -Wextra -Wpedantic -Wno-overlength-strings -MMD -MP -pipe
 RELFLAGS   := -O2 -flto=auto -D_FORTIFY_SOURCE=2 -fstack-protector-strong -ffunction-sections -fdata-sections -fPIC
-override RELFLAGS += -fPIC
-RELLDFLAGS := -pie -flto=auto -Wl,-z,relro,-z,now -Wl,--gc-sections -Wl,--as-needed
+RELLDFLAGS := -pie -flto=auto -Wl,-z,relro,-z,now -Wl,--gc-sections -Wl,--as-needed -Wl,-Bsymbolic-functions
 DBGFLAGS   := -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-recover=all
 
 BIN    := build/nuvashalauncher
@@ -127,19 +126,19 @@ $(DBGBIN): $(DBGOBJS) | build-debug
 	$(CC) $(DBGFLAGS) -o $@ $(DBGOBJS) $(PKG_LIBS)
 
 build/%.o: src/%.c | build
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -c -o $@ $<
 
 $(RESOURCE_C): data/nuvashalauncher.gresource.xml data/nuvashalauncher.css $(wildcard data/ui/*.ui) | build
 	glib-compile-resources --generate-source --target=$@ --sourcedir=data $<
 
 $(RESOURCE_O): $(RESOURCE_C) | build
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(RELFLAGS) $(PKG_CFLAGS) -c -o $@ $<
 
 build-debug/%.o: src/%.c | build-debug
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -c -o $@ $<
 
 $(RESOURCE_DBG_O): $(RESOURCE_C) | build-debug
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -Wno-overlength-strings -c -o $@ $(RESOURCE_C)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DBGFLAGS) $(PKG_CFLAGS) -c -o $@ $(RESOURCE_C)
 
 $(TESTLIBSO): $(TESTLIBOBJS) $(RESOURCE_O) | build
 	$(CC) $(RELFLAGS) -shared -o $@ $(TESTLIBOBJS) $(RESOURCE_O) $(PKG_LIBS)

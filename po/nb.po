@@ -1384,3 +1384,240 @@ msgstr "Stabil"
 
 msgid "%u%% crash rate"
 msgstr "%u%% krasjrate"
+
+msgid "A name cannot be empty."
+msgstr "et navn kan ikke være tomt."
+
+msgid "Remove server"
+msgstr "Fjern server"
+
+msgid "Download modpack"
+msgstr "Last ned Modpack"
+
+msgid "%s “%s”"
+msgstr "%s &quot;%s&quot;"
+
+msgid "Delete instance"
+msgstr "Slett forekomst"
+
+msgid "No worlds"
+msgstr "Ingen verdener"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "venter på påloggingen i nettleseren…"
+
+msgid "Choose files"
+msgstr "Velg filer"
+
+msgid "Cannot create “%s”: %s"
+msgstr "Kan ikke opprette “%s”: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Bufferopprydding mislyktes"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth og mod-lastere"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Slette verdenen «%s»? Dette kan ikke angres."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Opprett en instans for å begynne å spille."
+
+msgid "Duplicated to “%s”"
+msgstr "Duplisert til “%s”"
+
+msgid "Downloading modpack"
+msgstr "Laster ned Modpack"
+
+msgid "Try again"
+msgstr "Prøv igjen"
+
+msgid "Performance impact"
+msgstr "Påvirkning på ytelsen"
+
+msgid "Add world"
+msgstr "Legg til verden"
+
+msgid "Create instance"
+msgstr "Opprett forekomst"
+
+msgid "Browse modpacks"
+msgstr "Bla gjennom modpakker"
+
+msgid "Remove server “%s”?"
+msgstr "Fjerne serveren «%s»?"
+
+msgid "Path tracing"
+msgstr "Banesporing"
+
+msgid "Clean export"
+msgstr "Ren eksport"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Spillmekanikk"
+
+msgid "Minecraft version"
+msgstr "Minecraft versjon"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Åpne mappe"
+
+msgid "AppStream metadata"
+msgstr "AppStream-metadata"
+
+msgid "Add Java runtime"
+msgstr "Legg til Java Runtime"
+
+msgid "World generation"
+msgstr "Verdensgenerering"
+
+msgid "Keyboard shortcuts"
+msgstr "Tastatursnarveier"
+
+msgid "Resource packs"
+msgstr "Ressurspakker"
+
+msgid "Edit server"
+msgstr "Rediger server"
+
+msgid "Keep playing"
+msgstr "Fortsett å spille"
+
+msgid "Technical details"
+msgstr "Tekniske detaljer"
+
+msgid "Pack name"
+msgstr "Pakkenavn"
+
+msgid "Colored lighting"
+msgstr "Farget belysning"
+
+msgid "Rename world"
+msgstr "Gi verden nytt navn"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "et navn kan bare inneholde bokstaver, sifre og understreker."
+
+msgid "Preferences"
+msgstr "Innstillinger"
+
+msgid "Delete world"
+msgstr "Slett verden"
+
+msgid "Asking Microsoft for a code…"
+msgstr "ber Microsoft om en kode…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Vis ustabile Mod Loader-versjoner"
+
+msgid "Move down"
+msgstr "Flytt ned"
+
+msgid "Clear cache"
+msgstr "Tøm Nuvasha Launcher-cachen"
+
+msgid "Delete “%s”?"
+msgstr "Vil du slette «%s»?"
+
+msgid "Import modpack…"
+msgstr "Importer Modpack…"
+
+msgid "Delete selected"
+msgstr "Slett valgte"
+
+msgid "Java runtime"
+msgstr "Java kjøretid"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "et navn må bestå av 3 til 16 tegn."
+
+msgid "Import modpack"
+msgstr "Importer Modpack"
+
+msgid "Core shaders"
+msgstr "Grunnspillets shadere"
+
+msgid "Sign in"
+msgstr "Logg på"
+
+msgid "Cache cleared"
+msgstr "Buffer tømt"
+
+msgid "No instances yet"
+msgstr "Ingen tilfeller ennå"
+
+msgid "Add offline account"
+msgstr "Legg til frakoblet konto"
+
+msgid "Copy seed"
+msgstr "Kopier seed"
+
+msgid "Services & ecosystem"
+msgstr "Tjenester og økosystem"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Det finnes ingen modpakker som samsvarer med det du søkte etter. Prøv et annet søkeord."
+
+msgid "Line limit"
+msgstr "Linjegrense"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
+
+msgid "Add server"
+msgstr "Legg til server"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Alle versjoner"
+
+msgid "No servers"
+msgstr "Ingen servere"
+
+msgid "Clear cache?"
+msgstr "Tømme Nuvasha Launcher-cachen?"
+
+msgid "Loader version"
+msgstr "Lasterversjon"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Inkluder alle filer"
+
+msgid "Export modpack"
+msgstr "Eksporter Modpack"
+
+msgid "Add world…"
+msgstr "Legg til verden…"
+
+msgid "Update all"
+msgstr "Oppdater alle"
+
+msgid "Add Microsoft account"
+msgstr "Legg til Microsoft-konto"
+
+msgid "Move up"
+msgstr "Flytt opp"
+
+msgid "Minecraft disclaimer"
+msgstr "Minecraft-ansvarsfraskrivelse"
+
+msgid "Shader packs"
+msgstr "Shader-pakker"

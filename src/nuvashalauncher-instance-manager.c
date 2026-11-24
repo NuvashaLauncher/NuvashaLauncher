@@ -22,11 +22,7 @@
 static void assign_default_instance_icon (NuvashaLauncherInstance *instance,
                                           const char *directory);
 
-/* Layout version of instances.json. */
-#define INSTANCES_FORMAT_VERSION 2
-
 #define METADATA_FILE "instances.json"
-#define CORRUPT_SUFFIX ".corrupt"
 
 G_DEFINE_TYPE (NuvashaLauncherInstanceManager, nuvashalauncher_instance_manager, G_TYPE_OBJECT)
 

@@ -125,13 +125,13 @@ JsonParser *nuvashalauncher_download_json_finish (GAsyncResult *result,
  * G_IO_ERROR_NOT_FOUND when there is no such file.
  *
  * (transfer full) lowercase hexadecimal digest. */
-NuvashaLauncherTaskScope *nuvashalauncher_download_file_hash_async (GFile *file,
+NuvashaLauncherTaskScope *nuvashalauncher_download_hash_file_async (GFile *file,
                                              GChecksumType type,
                                              GAsyncReadyCallback callback,
                                              gpointer user_data);
 
 /* (transfer full). NULL on error. */
-char *nuvashalauncher_download_file_hash_finish (GAsyncResult *result,
+char *nuvashalauncher_download_hash_file_finish (GAsyncResult *result,
                                      GError     **error);
 
 NuvashaLauncherTaskScope *nuvashalauncher_download_json_cached_async (NuvashaLauncherDownloadService *service,

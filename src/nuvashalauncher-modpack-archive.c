@@ -24,8 +24,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#define NUVASHALAUNCHER_MODPACK_FORMAT_VERSION 1
-
 /* Maximum inflated archive size. Tests may lower this limit. */
 static guint64 max_content_size = NUVASHALAUNCHER_MODPACK_MAX_CONTENT_SIZE;
 

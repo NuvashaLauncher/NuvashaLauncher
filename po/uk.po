@@ -1420,3 +1420,240 @@ msgstr "Стабільна"
 
 msgid "%u%% crash rate"
 msgstr "%u%% збоїв"
+
+msgid "A name cannot be empty."
+msgstr "ім’я не може бути порожнім."
+
+msgid "Remove server"
+msgstr "Вилучити сервер"
+
+msgid "Download modpack"
+msgstr "Завантажити модпак"
+
+msgid "%s “%s”"
+msgstr "%s «%s»"
+
+msgid "Delete instance"
+msgstr "Видалити екземпляр"
+
+msgid "No worlds"
+msgstr "Немає світів"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "очікування входу в браузері…"
+
+msgid "Choose files"
+msgstr "Вибрати файли"
+
+msgid "Cannot create “%s”: %s"
+msgstr "Не вдалося створити «%s»: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Не вдалося очистити кеш"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth та завантажувачі модів"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Видалити світ «%s»? Цю дію не можна скасувати."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Створіть екземпляр, щоб почати гру."
+
+msgid "Duplicated to “%s”"
+msgstr "Скопійовано до “%s”"
+
+msgid "Downloading modpack"
+msgstr "Завантаження модпака"
+
+msgid "Try again"
+msgstr "Спробувати ще раз"
+
+msgid "Performance impact"
+msgstr "Вплив на продуктивність"
+
+msgid "Add world"
+msgstr "Додати світ"
+
+msgid "Create instance"
+msgstr "Створити екземпляр"
+
+msgid "Browse modpacks"
+msgstr "Переглянути модпаки"
+
+msgid "Remove server “%s”?"
+msgstr "Вилучити сервер «%s»?"
+
+msgid "Path tracing"
+msgstr "Трасування шляхів"
+
+msgid "Clean export"
+msgstr "Чистий експорт"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Ігрові механіки"
+
+msgid "Minecraft version"
+msgstr "Версія Minecraft"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Відкрити теку"
+
+msgid "AppStream metadata"
+msgstr "Метадані AppStream"
+
+msgid "Add Java runtime"
+msgstr "Додати середовище виконання Java"
+
+msgid "World generation"
+msgstr "Генерація світу"
+
+msgid "Keyboard shortcuts"
+msgstr "Комбінації клавіш"
+
+msgid "Resource packs"
+msgstr "Пакети ресурсів"
+
+msgid "Edit server"
+msgstr "Редагувати сервер"
+
+msgid "Keep playing"
+msgstr "Продовжити гру"
+
+msgid "Technical details"
+msgstr "Технічні відомості"
+
+msgid "Pack name"
+msgstr "Назва пакета"
+
+msgid "Colored lighting"
+msgstr "Кольорове освітлення"
+
+msgid "Rename world"
+msgstr "Перейменувати світ"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "ім’я може містити лише літери, цифри та символи підкреслення."
+
+msgid "Preferences"
+msgstr "Налаштування"
+
+msgid "Delete world"
+msgstr "Видалити світ"
+
+msgid "Asking Microsoft for a code…"
+msgstr "запит коду в Microsoft…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Показувати нестабільні версії завантажувачів модів"
+
+msgid "Move down"
+msgstr "Перемістити вниз"
+
+msgid "Clear cache"
+msgstr "Очистити кеш Nuvasha Launcher"
+
+msgid "Delete “%s”?"
+msgstr "Видалити “%s”?"
+
+msgid "Import modpack…"
+msgstr "Імпортувати модпак…"
+
+msgid "Delete selected"
+msgstr "Видалити вибране"
+
+msgid "Java runtime"
+msgstr "Середовище виконання Java"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "ім’я має містити від 3 до 16 символів."
+
+msgid "Import modpack"
+msgstr "Імпортувати модпак"
+
+msgid "Core shaders"
+msgstr "Шейдери базової гри"
+
+msgid "Sign in"
+msgstr "Увійти"
+
+msgid "Cache cleared"
+msgstr "Кеш очищено"
+
+msgid "No instances yet"
+msgstr "Екземплярів ще немає"
+
+msgid "Add offline account"
+msgstr "Додати офлайн-обліковий запис"
+
+msgid "Copy seed"
+msgstr "Копіювати зерно"
+
+msgid "Services & ecosystem"
+msgstr "Сервіси та екосистема"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Жоден модпак не відповідає введеному запиту. Спробуйте ввести інше слово."
+
+msgid "Line limit"
+msgstr "Обмеження рядків"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Модпаки Modrinth (*.mrpack)"
+
+msgid "Add server"
+msgstr "Додати сервер"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Усі версії"
+
+msgid "No servers"
+msgstr "Немає серверів"
+
+msgid "Clear cache?"
+msgstr "Очистити кеш Nuvasha Launcher?"
+
+msgid "Loader version"
+msgstr "Версія завантажувача модів"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Включити всі файли"
+
+msgid "Export modpack"
+msgstr "Експортувати модпак"
+
+msgid "Add world…"
+msgstr "Додати світ…"
+
+msgid "Update all"
+msgstr "Оновити все"
+
+msgid "Add Microsoft account"
+msgstr "Додати обліковий запис Microsoft"
+
+msgid "Move up"
+msgstr "Перемістити вгору"
+
+msgid "Minecraft disclaimer"
+msgstr "Відмова від відповідальності щодо Minecraft"
+
+msgid "Shader packs"
+msgstr "Пакети шейдерів"

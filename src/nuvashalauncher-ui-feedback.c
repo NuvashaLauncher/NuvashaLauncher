@@ -53,7 +53,7 @@ GtkWidget *
 nuvashalauncher_ui_error_details (const GError *error)
 {
   GtkWidget *details = gtk_label_new (nuvashalauncher_error_message (error));
-  GtkWidget *expander = gtk_expander_new (_("Technical Details"));
+  GtkWidget *expander = gtk_expander_new (_("Technical details"));
   gtk_label_set_use_markup (GTK_LABEL (details), FALSE);
   gtk_label_set_wrap (GTK_LABEL (details), TRUE);
   gtk_label_set_selectable (GTK_LABEL (details), TRUE);
@@ -85,8 +85,9 @@ nuvashalauncher_ui_show_error (GtkWidget *parent, const char *title,
   adw_alert_dialog_set_body_use_markup (dialog, FALSE);
   if (error != NULL)
     adw_alert_dialog_set_extra_child (dialog, nuvashalauncher_ui_error_details (error));
-  adw_alert_dialog_add_response (dialog, "ok", _("OK"));
-  adw_alert_dialog_set_close_response (dialog, "ok");
+  adw_alert_dialog_add_response (dialog, "close", _("Close"));
+  adw_alert_dialog_set_default_response (dialog, "close");
+  adw_alert_dialog_set_close_response (dialog, "close");
   adw_dialog_present (ADW_DIALOG (dialog), parent);
 }
 
@@ -119,7 +120,7 @@ nuvashalauncher_ui_error_banner (AdwBanner *banner, const GError *error)
                           (GDestroyNotify) g_error_free);
   adw_banner_set_use_markup (banner, FALSE);
   adw_banner_set_title (banner, nuvashalauncher_error_message (error));
-  adw_banner_set_button_label (banner, _("Technical Details"));
+  adw_banner_set_button_label (banner, _("Technical details"));
   if (g_object_get_data (G_OBJECT (banner), "nuvashalauncher-error-handler") == NULL)
     {
       g_signal_connect (banner, "button-clicked", G_CALLBACK (on_error_banner_details), NULL);
@@ -147,7 +148,7 @@ on_error_toast_details (AdwToast *toast G_GNUC_UNUSED, gpointer user_data)
 {
   ErrorToast *details = user_data;
   g_autoptr (GtkWidget) parent = g_weak_ref_get (&details->parent);
-  nuvashalauncher_ui_show_error (parent, _("Technical Details"), details->error);
+  nuvashalauncher_ui_show_error (parent, _("Technical details"), details->error);
 }
 
 void
@@ -160,7 +161,7 @@ nuvashalauncher_ui_error_toast (GtkWidget *page, GtkWidget *overlay, const GErro
     return;
   if (page == NULL || overlay == NULL || gtk_widget_get_root (page) == NULL)
     {
-      nuvashalauncher_ui_show_error (page, _("Technical Details"), error);
+      nuvashalauncher_ui_show_error (page, _("Technical details"), error);
       return;
     }
   details = g_new0 (ErrorToast, 1);
@@ -169,7 +170,7 @@ nuvashalauncher_ui_error_toast (GtkWidget *page, GtkWidget *overlay, const GErro
   toast = adw_toast_new (nuvashalauncher_error_message (error));
   adw_toast_set_use_markup (toast, FALSE);
   adw_toast_set_timeout (toast, 0);
-  adw_toast_set_button_label (toast, _("Technical Details"));
+  adw_toast_set_button_label (toast, _("Technical details"));
   g_object_set_data_full (G_OBJECT (toast), "nuvashalauncher-error", details, error_toast_free);
   g_signal_connect (toast, "button-clicked", G_CALLBACK (on_error_toast_details), details);
   adw_toast_overlay_add_toast (ADW_TOAST_OVERLAY (overlay), toast);

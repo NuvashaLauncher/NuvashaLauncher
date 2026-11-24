@@ -23,9 +23,6 @@
 #include <string.h>
 #include <sys/utsname.h>
 
-/* The manifest itself, cached beside the version documents. */
-#define MANIFEST_FILE "manifest.json"
-
 /* ---------------------------------------------------------- *
  * Fetching
  * ---------------------------------------------------------- */

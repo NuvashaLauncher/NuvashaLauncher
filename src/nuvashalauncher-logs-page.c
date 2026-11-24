@@ -197,27 +197,26 @@ show_lines (NuvashaLauncherLogsPage *self)
   g_string_free (built, TRUE);
 }
 
+static void
+reload_log_line_cb (gpointer data, gpointer user_data)
+{
+  const char *raw_line = data;
+  NuvashaLauncherLogsPage *self = user_data;
+  g_autofree char *line = display_line (raw_line);
+
+  if (line != NULL && *line != '\0')
+    g_queue_push_tail (self->lines, g_steal_pointer (&line));
+}
+
 /* The whole log as it is now: what the page shows when it appears and
    after a clear. */
 static void
 reload_log (NuvashaLauncherLogsPage *self)
 {
-  g_autofree char *text = nuvashalauncher_launcher_get_log_text (self->launcher);
-
   g_queue_clear_full (self->lines, g_free);
 
-  if (text != NULL && *text != '\0')
-    {
-      g_auto (GStrv) split = g_strsplit (text, "\n", -1);
-
-      for (guint i = 0; split != NULL && split[i] != NULL; i++)
-        {
-          g_autofree char *line = display_line (split[i]);
-
-          if (line != NULL && *line != '\0')
-            g_queue_push_tail (self->lines, g_steal_pointer (&line));
-        }
-    }
+  if (self->launcher != NULL)
+    nuvashalauncher_launcher_foreach_log_line (self->launcher, reload_log_line_cb, self);
 
   self->filtered = FALSE;
   show_lines (self);
@@ -495,7 +494,7 @@ open_finished (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
 
   if (!g_app_info_launch_default_for_uri_finish (result, &error))
-    nuvashalauncher_ui_show_error (GTK_WIDGET (self), _("Technical Details"), error);
+    nuvashalauncher_ui_show_error (GTK_WIDGET (self), _("Technical details"), error);
 
   g_object_unref (self);
 }
@@ -667,7 +666,7 @@ nuvashalauncher_logs_page_new (NuvashaLauncher *launcher)
   self->clear = GTK_BUTTON (toolbar_button ("edit-clear-symbolic", _("Clear"),
                                 G_CALLBACK (on_clear_clicked), self));
 
-   self->open = GTK_BUTTON (toolbar_button ("folder-symbolic", _("Open Folder"),
+   self->open = GTK_BUTTON (toolbar_button ("folder-symbolic", _("Open folder"),
                                 G_CALLBACK (on_open_clicked), self));
    actions = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
    gtk_widget_set_valign (actions, GTK_ALIGN_CENTER);

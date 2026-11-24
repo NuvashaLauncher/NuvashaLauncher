@@ -305,13 +305,3 @@ nuvashalauncher_download_cache_write_encoded (DownloadRequest *request,
                                   g_task_get_cancellable (request->task),
                                   nuvashalauncher_download_cache_write_done, request);
 }
-
-void
-nuvashalauncher_download_cache_write (DownloadRequest *request, const char *response)
-{
-  gsize length = 0;
-  char *data = nuvashalauncher_download_cache_encode (
-    response, request->response_etag, &length);
-
-  nuvashalauncher_download_cache_write_encoded (request, data, length);
-}

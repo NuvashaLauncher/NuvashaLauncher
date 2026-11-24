@@ -1384,3 +1384,240 @@ msgstr "Vakaa"
 
 msgid "%u%% crash rate"
 msgstr "%u%% kaatumisaste"
+
+msgid "A name cannot be empty."
+msgstr "nimi ei voi olla tyhjä."
+
+msgid "Remove server"
+msgstr "Poista palvelin"
+
+msgid "Download modpack"
+msgstr "Lataa Modpack"
+
+msgid "%s “%s”"
+msgstr "%s “%s”"
+
+msgid "Delete instance"
+msgstr "Poista ilmentymä"
+
+msgid "No worlds"
+msgstr "Ei maailmoja"
+
+msgid "Waiting for sign-in in browser…"
+msgstr "odottaa sisäänkirjautumista selaimessa…"
+
+msgid "Choose files"
+msgstr "Valitse tiedostot"
+
+msgid "Cannot create “%s”: %s"
+msgstr "Ei voida luoda “%s”: %s"
+
+msgid "Cache cleanup failed"
+msgstr "Välimuistin puhdistus epäonnistui"
+
+msgid "Español"
+msgstr "Español"
+
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth ja modilataajat"
+
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Poistetaanko maailma “%s”? Tätä ei voi kumota."
+
+msgid "Português"
+msgstr "Português"
+
+msgid "Create an instance to start playing."
+msgstr "Luo ilmentymä aloittaaksesi pelaamisen."
+
+msgid "Duplicated to “%s”"
+msgstr "Kopioitu kohteeseen “%s”"
+
+msgid "Downloading modpack"
+msgstr "Ladataan Modpackia"
+
+msgid "Try again"
+msgstr "Yritä uudelleen"
+
+msgid "Performance impact"
+msgstr "Vaikutus suorituskykyyn"
+
+msgid "Add world"
+msgstr "Lisää maailma"
+
+msgid "Create instance"
+msgstr "Luo ilmentymä"
+
+msgid "Browse modpacks"
+msgstr "Selaa modpaketteja"
+
+msgid "Remove server “%s”?"
+msgstr "Poistetaanko palvelin “%s”?"
+
+msgid "Path tracing"
+msgstr "Polunseuranta"
+
+msgid "Clean export"
+msgstr "Puhdas vienti"
+
+msgid "Main menu"
+msgstr "Application menu"
+
+msgid "Game mechanics"
+msgstr "Pelimekaniikat"
+
+msgid "Minecraft version"
+msgstr "Minecraft versio"
+
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
+
+msgid "Open folder"
+msgstr "Avaa kansio"
+
+msgid "AppStream metadata"
+msgstr "AppStream-metatiedot"
+
+msgid "Add Java runtime"
+msgstr "Lisää Java Runtime"
+
+msgid "World generation"
+msgstr "Maailman luonti"
+
+msgid "Keyboard shortcuts"
+msgstr "Pikanäppäimet"
+
+msgid "Resource packs"
+msgstr "Resurssipaketit"
+
+msgid "Edit server"
+msgstr "Muokkaa palvelinta"
+
+msgid "Keep playing"
+msgstr "Jatka pelaamista"
+
+msgid "Technical details"
+msgstr "Tekniset tiedot"
+
+msgid "Pack name"
+msgstr "Pakkauksen nimi"
+
+msgid "Colored lighting"
+msgstr "Värillinen valaistus"
+
+msgid "Rename world"
+msgstr "Nimeä maailma uudelleen"
+
+msgid "A name can only hold letters, digits and underscores."
+msgstr "nimi voi sisältää vain kirjaimia, numeroita ja alaviivoja."
+
+msgid "Preferences"
+msgstr "Asetukset"
+
+msgid "Delete world"
+msgstr "Poista maailma"
+
+msgid "Asking Microsoft for a code…"
+msgstr "pyytää Microsoftilta koodia…"
+
+msgid "Show unstable mod loader versions"
+msgstr "Näytä epävakaat Mod Loader -versiot"
+
+msgid "Move down"
+msgstr "Siirrä alas"
+
+msgid "Clear cache"
+msgstr "Tyhjennä Nuvasha Launchern välimuisti"
+
+msgid "Delete “%s”?"
+msgstr "Poistetaanko “%s”?"
+
+msgid "Import modpack…"
+msgstr "Tuo Modpack…"
+
+msgid "Delete selected"
+msgstr "Poista valitut"
+
+msgid "Java runtime"
+msgstr "Java-ajoympäristö"
+
+msgid "A name has to be 3 to 16 characters long."
+msgstr "Nimen on oltava 3–16 merkkiä pitkä."
+
+msgid "Import modpack"
+msgstr "Tuo Modpack"
+
+msgid "Core shaders"
+msgstr "Peruspelin varjostimet"
+
+msgid "Sign in"
+msgstr "Kirjaudu sisään"
+
+msgid "Cache cleared"
+msgstr "Välimuisti tyhjennetty"
+
+msgid "No instances yet"
+msgstr "Ei vielä tapauksia"
+
+msgid "Add offline account"
+msgstr "Lisää offline-tili"
+
+msgid "Copy seed"
+msgstr "Kopioi siemen"
+
+msgid "Services & ecosystem"
+msgstr "Palvelut ja ekosysteemi"
+
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Yhtään modpakettia ei löytynyt haetun mukaisena. Kokeile toista hakusanaa."
+
+msgid "Line limit"
+msgstr "Linjarajoitus"
+
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth-modipaketit (*.mrpack)"
+
+msgid "Add server"
+msgstr "Lisää palvelin"
+
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
+
+msgid "All versions"
+msgstr "Kaikki versiot"
+
+msgid "No servers"
+msgstr "Ei palvelimia"
+
+msgid "Clear cache?"
+msgstr "Tyhjennetäänkö Nuvasha Launchern välimuisti?"
+
+msgid "Loader version"
+msgstr "Loader-versio"
+
+msgid "translator-credits"
+msgstr "Flia"
+
+msgid "Include all files"
+msgstr "Sisällytä kaikki tiedostot"
+
+msgid "Export modpack"
+msgstr "Vie Modpack"
+
+msgid "Add world…"
+msgstr "Lisää maailma…"
+
+msgid "Update all"
+msgstr "Päivitä kaikki"
+
+msgid "Add Microsoft account"
+msgstr "Lisää Microsoft-tili"
+
+msgid "Move up"
+msgstr "Siirrä ylös"
+
+msgid "Minecraft disclaimer"
+msgstr "Minecraft-vastuuvapauslauseke"
+
+msgid "Shader packs"
+msgstr "Shader-paketit"

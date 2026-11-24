@@ -44,12 +44,6 @@ NuvashaLauncherInstancePage *nuvashalauncher_instance_page_new (NuvashaLauncherI
 
 /* Selects the instance's live log view. */
 void nuvashalauncher_instance_page_show_logs (NuvashaLauncherInstancePage *self);
-/* Invoke the existing instance action flows from an external toolbar. */
-void nuvashalauncher_instance_page_trigger_export (NuvashaLauncherInstancePage *self);
-void nuvashalauncher_instance_page_trigger_delete (NuvashaLauncherInstancePage *self);
-void nuvashalauncher_instance_page_trigger_duplicate (NuvashaLauncherInstancePage *self);
-void nuvashalauncher_instance_page_export_to_path (NuvashaLauncherInstancePage *self,
-                                           const char *path);
 
 G_END_DECLS
 

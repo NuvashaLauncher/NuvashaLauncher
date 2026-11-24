@@ -13,13 +13,6 @@
 
 #define AVATAR_SIZE 40
 
-/* A skin is a picture of 64 by 64 and the face of it is 8 by 8 of that,
- * in the middle of the top of the picture. */
-#define SKIN_SIZE 64
-#define FACE_SIZE 8
-#define FACE_X 8
-#define FACE_Y 8
-
 typedef struct _SkinMenu
 {
   grefcount refs;
@@ -432,7 +425,7 @@ on_export_skin_copied (GObject *source, GAsyncResult *result, gpointer user_data
   g_autoptr (GError) error = NULL;
 
   if (!nuvashalauncher_fs_copy_finish (G_FILE (source), result, &error))
-    nuvashalauncher_ui_show_error (NULL, _("Technical Details"), error);
+    nuvashalauncher_ui_show_error (NULL, _("Technical details"), error);
 
   g_object_unref (user_data);
 }
@@ -454,7 +447,7 @@ on_export_skin_chosen (GObject *source, GAsyncResult *result, gpointer user_data
       if (error != NULL &&
           !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_CANCELLED) &&
           !g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED))
-        nuvashalauncher_ui_show_error (NULL, _("Technical Details"), error);
+        nuvashalauncher_ui_show_error (NULL, _("Technical details"), error);
       g_object_unref (source_file);
     }
 }
@@ -994,7 +987,7 @@ nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImag
     nuvashalauncher_skin_view_set_slim (preview, is_slim);
   }
   data->applying_profile = FALSE;
-  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (open_skins), _("Open Folder"));
+  nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (open_skins), _("Open folder"));
   nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (remove), _("Delete"));
   gtk_widget_set_hexpand (GTK_WIDGET (export), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET (import), FALSE);
@@ -1003,7 +996,7 @@ nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImag
   gtk_widget_set_halign (GTK_WIDGET (remove), GTK_ALIGN_END);
   gtk_accessible_update_property (GTK_ACCESSIBLE (open_skins),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                  _("Open Folder"), -1);
+                                  _("Open folder"), -1);
   gtk_accessible_update_property (GTK_ACCESSIBLE (remove),
                                   GTK_ACCESSIBLE_PROPERTY_LABEL,
                                   _("Delete"), -1);

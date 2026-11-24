@@ -82,6 +82,14 @@ nuvashalauncher_content_page_set_installed_search_visible (
 }
 
 static void
+on_installed_empty_browse_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  NuvashaLauncherContentPage *self = user_data;
+  if (self->switcher_browse != NULL)
+    gtk_toggle_button_set_active (self->switcher_browse, TRUE);
+}
+
+static void
 on_installed_search_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   NuvashaLauncherContentPage *self = user_data;
@@ -146,7 +154,7 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
 
      gtk_button_set_child (update_all, GTK_WIDGET (update_content));
      gtk_widget_set_valign (GTK_WIDGET (update_all), GTK_ALIGN_CENTER);
-     nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (update_all), _("Update All"));
+     nuvashalauncher_ui_prepare_icon_button (GTK_WIDGET (update_all), _("Update all"));
     g_signal_connect (update_all, "clicked",
                       G_CALLBACK (nuvashalauncher_content_page_on_update_all_clicked), self);
    gtk_stack_add_named (update_content, GTK_WIDGET (update_icon), "icon");
@@ -181,7 +189,7 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
    gtk_widget_set_sensitive (GTK_WIDGET (self->installed.update_all), FALSE);
   gtk_box_append (GTK_BOX (actions), GTK_WIDGET (self->installed.update_all));
   gtk_box_append (GTK_BOX (actions),
-                  toolbar_button ("folder-symbolic", _("Open Folder"),
+                  toolbar_button ("folder-symbolic", _("Open folder"),
                                   G_CALLBACK (nuvashalauncher_content_page_on_open_folder_clicked), self));
 
   /* The actions belong to the toolbar row above both lists, not to this
@@ -210,6 +218,14 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
   adw_status_page_set_description (
       ADW_STATUS_PAGE (self->installed.status),
        _("Browse for something to put into the folder of this instance"));
+
+  GtkWidget *empty_browse_btn = gtk_button_new_with_label (_("Browse"));
+  gtk_widget_add_css_class (empty_browse_btn, "suggested-action");
+  gtk_widget_add_css_class (empty_browse_btn, "pill");
+  gtk_widget_set_halign (empty_browse_btn, GTK_ALIGN_CENTER);
+  g_signal_connect_object (empty_browse_btn, "clicked",
+                           G_CALLBACK (on_installed_empty_browse_clicked), self, 0);
+  adw_status_page_set_child (ADW_STATUS_PAGE (self->installed.status), empty_browse_btn);
 
   /* The list starts where the row above it ends: its first row is not
      rounded at the top, so the two read as one piece. */

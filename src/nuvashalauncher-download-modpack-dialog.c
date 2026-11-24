@@ -29,14 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* One page of results. */
-#define RESULTS_PER_PAGE 20
-
-/* How long the words of a search entry rest before they are asked for,
- * so that typing is not one request per letter. */
-#define SEARCH_DELAY_MS 500
-
-
 G_DEFINE_FINAL_TYPE (NuvashaLauncherDownloadModpackDialog, nuvashalauncher_download_modpack_dialog,
                      ADW_TYPE_DIALOG)
 
@@ -191,12 +183,6 @@ nuvashalauncher_download_modpack_dialog_init (NuvashaLauncherDownloadModpackDial
 
   nuvashalauncher_dialog_set_standard_size (ADW_DIALOG (self));
   gtk_widget_set_size_request (GTK_WIDGET (self), 360, 200);
-
-  /* The installing page appears in place instead of sliding in: the
-     movement is not information, and the pages of this dialog are few
-     and shallow enough that an instant change reads cleanly. */
-  adw_navigation_view_set_animate_transitions (
-    ADW_NAVIGATION_VIEW (self->nav), FALSE);
 }
 
 NuvashaLauncherDownloadModpackDialog *

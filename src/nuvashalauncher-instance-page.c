@@ -590,11 +590,11 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_RESOURCE_PACK)),
-     "resource-packs", _("Resource Packs"), "image-x-generic-symbolic");
+     "resource-packs", _("Resource packs"), "image-x-generic-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_SHADER_PACK)),
-     "shader-packs", _("Shader Packs"), "applications-graphics-symbolic");
+     "shader-packs", _("Shader packs"), "applications-graphics-symbolic");
   adw_view_stack_add_titled_with_icon (
     ADW_VIEW_STACK (stack),
     GTK_WIDGET (nuvashalauncher_content_page_new (instance, NUVASHALAUNCHER_CONTENT_MOD)),
