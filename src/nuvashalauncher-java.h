@@ -125,6 +125,20 @@ NuvashaLauncherTaskScope *nuvashalauncher_java_detect_list_async (char **roots,
                                           GAsyncReadyCallback callback,
                                           gpointer user_data);
 
+/* Returns the launcher-managed Java directory below g_get_user_data_dir(),
+ * creating it if it does not yet exist. In Flatpak, this resolves to
+ * ~/.var/app/com.github.NuvashaLauncher.NuvashaLauncher/data/nuvashalauncher/java;
+ * otherwise ~/.local/share/nuvashalauncher/java. */
+char *nuvashalauncher_java_get_dir (void);
+
+/* Determines whether a newly added Java executable resides outside the launcher
+ * directory and system package roots and should be copied into the launcher's
+ * Java storage. If TRUE, @out_source_home receives the allocated JDK root folder
+ * and @out_rel_exec receives the relative executable path inside that root. */
+gboolean nuvashalauncher_java_should_copy (const char  *executable,
+                                          char       **out_source_home,
+                                          char       **out_rel_exec);
+
 G_END_DECLS
 
 #endif /* NUVASHALAUNCHER_JAVA_H */

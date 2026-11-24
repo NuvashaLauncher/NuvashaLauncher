@@ -519,7 +519,8 @@ default_roots (void)
                                             "java", NULL);
   g_autofree char *mise = g_build_filename (home, ".local", "share", "mise",
                                             "installs", "java", NULL);
-  char **out = g_new0 (char *, G_N_ELEMENTS (system) + 5);
+  g_autofree char *launcher_java = nuvashalauncher_java_get_dir ();
+  char **out = g_new0 (char *, G_N_ELEMENTS (system) + 6);
   guint n = 0;
 
   for (guint i = 0; system[i] != NULL; i++)
@@ -529,6 +530,7 @@ default_roots (void)
   out[n++] = g_steal_pointer (&sdkman);
   out[n++] = g_steal_pointer (&asdf);
   out[n++] = g_steal_pointer (&mise);
+  out[n++] = g_steal_pointer (&launcher_java);
   out[n++] = NULL;
 
   return out;

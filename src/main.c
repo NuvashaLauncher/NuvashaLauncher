@@ -16,6 +16,7 @@
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-errors.h"
 #include "nuvashalauncher-ui-feedback.h"
+#include "nuvashalauncher-java.h"
 
 static void
 on_quit (GSimpleAction *action G_GNUC_UNUSED,
@@ -229,6 +230,7 @@ main (int argc, char **argv)
   g_autoptr (AdwApplication) app = NULL;
 
   use_development_schema ();
+  g_free (nuvashalauncher_java_get_dir ());
   {
     g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
     nuvashalauncher_i18n_init (nuvashalauncher_settings_get_language (settings));
