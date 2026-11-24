@@ -26,7 +26,7 @@ find_open_folder_button (GtkWidget *w)
       /* The button is only an icon; its name is the tooltip. */
       const char *label = gtk_widget_get_tooltip_text (w);
 
-      if (label != NULL && g_strcmp0 (label, "Open Folder") == 0)
+      if (label != NULL && g_strcmp0 (label, "Open folder") == 0)
         return w;
     }
 

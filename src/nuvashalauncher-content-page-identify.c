@@ -400,6 +400,8 @@ on_project_titles_batch_ready (GObject *source G_GNUC_UNUSED,
   project_titles_batch_free (request);
 }
 
+#define PROJECT_TITLES_BATCH_SIZE 50
+
 static void
 request_missing_project_titles (NuvashaLauncherContentPage *self,
                               GPtrArray                  *project_ids)
@@ -407,21 +409,32 @@ request_missing_project_titles (NuvashaLauncherContentPage *self,
   if (self == NULL || project_ids == NULL || project_ids->len == 0)
     return;
 
-  if (project_ids->len == 1)
+  for (guint offset = 0; offset < project_ids->len;
+       offset += PROJECT_TITLES_BATCH_SIZE)
     {
-      request_project_title (self, g_ptr_array_index (project_ids, 0));
-      return;
-    }
+      guint remaining = project_ids->len - offset;
+      guint count = MIN (remaining, PROJECT_TITLES_BATCH_SIZE);
 
-  ProjectTitlesBatchRequest *request = g_new0 (ProjectTitlesBatchRequest, 1);
-  request->page = self;
-  request->project_ids = g_ptr_array_ref (project_ids);
-  g_object_add_weak_pointer (G_OBJECT (self),
-                             (gpointer *) &request->page);
-  request->operation = nuvashalauncher_modrinth_projects_by_ids_async (
-    project_ids, on_project_titles_batch_ready, request);
-  if (request->operation == NULL)
-    project_titles_batch_free (request);
+      if (count == 1)
+        {
+          request_project_title (self, g_ptr_array_index (project_ids, offset));
+          continue;
+        }
+
+      g_autoptr (GPtrArray) chunk = g_ptr_array_new_with_free_func (g_free);
+      for (guint i = 0; i < count; i++)
+        g_ptr_array_add (chunk, g_strdup (g_ptr_array_index (project_ids, offset + i)));
+
+      ProjectTitlesBatchRequest *request = g_new0 (ProjectTitlesBatchRequest, 1);
+      request->page = self;
+      request->project_ids = g_ptr_array_ref (chunk);
+      g_object_add_weak_pointer (G_OBJECT (self),
+                                 (gpointer *) &request->page);
+      request->operation = nuvashalauncher_modrinth_projects_by_ids_async (
+        chunk, on_project_titles_batch_ready, request);
+      if (request->operation == NULL)
+        project_titles_batch_free (request);
+    }
 }
 
 static void
@@ -614,6 +627,8 @@ identify_start (IdentifyRun *run)
     {
       g_autoptr (GPtrArray) batch_hashes =
         g_ptr_array_new_with_free_func (g_free);
+      g_autoptr (GPtrArray) missing_projects = NULL;
+      gboolean icons_updated = FALSE;
 
       run->batch_done = TRUE;
 
@@ -624,12 +639,65 @@ identify_start (IdentifyRun *run)
           GtkWidget *row =
             g_hash_table_lookup (self->installed.rows, file->path);
 
-          if (row == NULL || file->sha1 == NULL ||
+          if (row == NULL)
+            continue;
+
+          if (file->project_id != NULL && *file->project_id != '\0')
+            {
+              gboolean needs_name =
+                !file->local_metadata || file->project_name == NULL ||
+                *file->project_name == '\0' ||
+                g_strcmp0 (file->project_name, file->project_id) == 0;
+              gboolean needs_icon =
+                (file->icon_url == NULL || *file->icon_url == '\0') &&
+                file->local_icon_path == NULL &&
+                file->local_icon_member == NULL;
+
+              if (needs_name || needs_icon)
+                {
+                  const char *known_name =
+                    g_hash_table_lookup (self->browse.model->project_titles,
+                                         file->project_id);
+                  const char *known_icon =
+                    g_hash_table_lookup (self->browse.model->project_icons,
+                                         file->project_id);
+                  gboolean changed = FALSE;
+
+                  if (needs_name && known_name != NULL && *known_name != '\0')
+                    {
+                      g_free (file->project_name);
+                      file->project_name = g_strdup (known_name);
+                      needs_name = FALSE;
+                      changed = TRUE;
+                    }
+                  if (needs_icon && known_icon != NULL && *known_icon != '\0')
+                    {
+                      g_free (file->icon_url);
+                      file->icon_url = g_strdup (known_icon);
+                      needs_icon = FALSE;
+                      changed = TRUE;
+                      icons_updated = TRUE;
+                    }
+                  if (changed)
+                    {
+                      file_row_refresh (row);
+                      queue_persist_identified_file (self, file);
+                    }
+                  if (needs_name || needs_icon)
+                    add_remote_dependency (&missing_projects, file->project_id);
+                }
+            }
+
+          if (file->sha1 == NULL ||
               (file->version_id != NULL && *file->version_id != '\0'))
             continue;
 
           g_ptr_array_add (batch_hashes, g_strdup (file->sha1));
         }
+
+      if (icons_updated)
+        load_visible_icons (self);
+      request_missing_project_titles (self, missing_projects);
 
       if (batch_hashes->len > 1)
         {

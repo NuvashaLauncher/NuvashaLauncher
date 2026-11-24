@@ -67,6 +67,30 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
     }
 }
 
+static gboolean
+on_memory_output (AdwSpinRow *row, gpointer user_data G_GNUC_UNUSED)
+{
+  if ((guint) adw_spin_row_get_value (row) == 0)
+    {
+      gtk_editable_set_text (GTK_EDITABLE (row), "Default");
+      return TRUE;
+    }
+  return FALSE;
+}
+
+static gint
+on_memory_input (AdwSpinRow *row, gdouble *new_value, gpointer user_data G_GNUC_UNUSED)
+{
+  const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
+
+  if (text != NULL && g_ascii_strcasecmp (text, "Default") == 0)
+    {
+      *new_value = 0.0;
+      return TRUE;
+    }
+  return FALSE;
+}
+
 static void
 on_memory_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
@@ -954,7 +978,13 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   AdwSpinRow *memory_row = ADW_SPIN_ROW (adw_spin_row_new_with_range (0, 65536, 512));
   adw_spin_row_set_digits (memory_row, 0);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (memory_row), "RAM (MiB)");
+  g_signal_connect_object (memory_row, "output",
+                           G_CALLBACK (on_memory_output), self, 0);
+  g_signal_connect_object (memory_row, "input",
+                           G_CALLBACK (on_memory_input), self, 0);
   adw_spin_row_set_value (memory_row, (double) memory_mib);
+  if (memory_mib == 0)
+    gtk_editable_set_text (GTK_EDITABLE (memory_row), "Default");
   g_signal_connect_object (memory_row, "notify::value",
                            G_CALLBACK (on_memory_changed), self, 0);
   adw_preferences_group_add (java, GTK_WIDGET (memory_row));
