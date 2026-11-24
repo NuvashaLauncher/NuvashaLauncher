@@ -1,4 +1,4 @@
-# Maintainer: Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>
+# Maintainer: Flia <nuvashalauncher@gmail.com>
 
 pkgname=nuvashalauncher
 pkgver=${_pkgver:-1.7}

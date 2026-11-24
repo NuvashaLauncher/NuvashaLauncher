@@ -1,7 +1,7 @@
 Source: nuvashalauncher
 Section: games
 Priority: optional
-Maintainer: Flia <43163973-anotherminecraftlauncher@users.noreply.gitlab.com>
+Maintainer: Flia <nuvashalauncher@gmail.com>
 Rules-Requires-Root: no
 Build-Depends:
  debhelper-compat (= 13),
