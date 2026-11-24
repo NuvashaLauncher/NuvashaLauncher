@@ -430,8 +430,6 @@ NuvashaLauncherTaskScope *nuvashalauncher_modrinth_version_by_hash_async (const 
 NuvashaLauncherModrinthVersion *nuvashalauncher_modrinth_version_by_hash_finish (GAsyncResult  *result,
                                                          GError       **error);
 
-/* A newer version of the project the file @sha1 belongs to, for
- * @minecraft_version and @loader.
 /* Parse a batch hash-update response object (hash -> version) from JSON.
  * (transfer full) GHashTable* mapping char* sha1 -> NuvashaLauncherModrinthVersion*. */
 GHashTable *nuvashalauncher_modrinth_updates_from_json (const char  *json,

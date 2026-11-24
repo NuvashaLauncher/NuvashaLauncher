@@ -5,6 +5,7 @@
 /* Parse modpack manifest JSON and file entries. */
 
 #include "nuvashalauncher-modpack.h"
+#include "nuvashalauncher-modpack-private.h"
 #include "nuvashalauncher-json.h"
 
 #include <string.h>
