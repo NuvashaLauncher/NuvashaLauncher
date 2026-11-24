@@ -194,7 +194,7 @@ jobs:
           flatpak build-bundle --arch=${{ matrix.arch }} flatpak-repo \
             "nuvashalauncher-${{ matrix.arch }}.flatpak" \
             com.github.NuvashaLauncher.NuvashaLauncher
-          flatpak build-bundle --arch=${{ matrix.arch }} flatpak-repo \
+          flatpak build-bundle --runtime --arch=${{ matrix.arch }} flatpak-repo \
             "nuvashalauncher-${{ matrix.arch }}-locale.flatpak" \
             com.github.NuvashaLauncher.NuvashaLauncher.Locale
 

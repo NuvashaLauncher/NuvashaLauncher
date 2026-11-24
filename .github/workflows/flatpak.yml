@@ -51,7 +51,7 @@ jobs:
             flatpak-build packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml
           flatpak build-bundle flatpak-repo nuvashalauncher.flatpak \
             com.github.NuvashaLauncher.NuvashaLauncher
-          flatpak build-bundle flatpak-repo nuvashalauncher-locale.flatpak \
+          flatpak build-bundle --runtime flatpak-repo nuvashalauncher-locale.flatpak \
             com.github.NuvashaLauncher.NuvashaLauncher.Locale
 
       - name: Install Flatpak bundle

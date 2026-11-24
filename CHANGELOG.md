@@ -2,6 +2,33 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [1.6] - 2026-11-24
+
+### GNOME HIG Alignment & UI Polish
+- **Header Bar Dialogs**: Modernized dialog windows (`nuvashalauncher-create-instance.ui`, `nuvashalauncher-offline-account.ui`, `nuvashalauncher-modpack-optional.ui`, `nuvashalauncher-modpack-error.ui`) by moving action buttons to `AdwHeaderBar` and eliminating legacy button boxes.
+- **In-App Toast Notifications**: Integrated `AdwToastOverlay` into the main shell (`nuvashalauncher-main-shell.ui`, `nuvashalauncher-main-window-ui.c`) to provide non-destructive in-app toast feedback for copy and status operations.
+- **Improved Empty States**: Upgraded empty state views across pages with clear actionable descriptions and pill-shaped action buttons.
+- **HIG Typography & Sentence Casing**: Standardized interface text, dialog labels, error messages, and descriptions to adhere strictly to GNOME Human Interface Guidelines, adopting sentence casing and Unicode typographic quotation marks.
+- **Icons & Visual Styling**: Standardized icon usage to `user-trash-symbolic`, refined squircle corner radii in `data/nuvashalauncher.css`, and updated the Help shortcut accelerator to `<primary>question`.
+
+### Modpack Management & Download UX
+- **Download Confirmation Dialog**: Added an `AdwAlertDialog` confirmation step when initiating modpack downloads from Modrinth (`nuvashalauncher-download-modpack-details.c`), displaying the pack title and version before beginning download and installation.
+
+### Accounts & Secret Store
+- **Unified Secret Password Search**: Switched account credentials lookup in `nuvashalauncher-secret-store.c` to `secret_password_search_sync()` with `account-id` attribute filtering, fixing offline and sandboxed account restoration across Flatpak and host desktop sessions.
+- **Account Persistence Testing**: Expanded `tests/test-accounts.c` to validate secret store roundtrip persistence and retrieval for offline accounts alongside Microsoft accounts.
+
+### Localization & Flatpak Packaging
+- **Base Spanish & Portuguese Translations**: Added base Spanish (`po/es.po`) and base Portuguese (`po/pt.po`) catalogs alongside regional variants, and registered `"es"` and `"pt"` in the language selector (`nuvashalauncher-i18n.c`).
+- **Translation Catalogs Synchronization**: Synchronized all 28 gettext translation files with the latest HIG string refinements and new dialog labels.
+- **Flatpak Locale Packaging**: Updated Flatpak packaging workflows (`.github/workflows/flatpak.yml`, `.github/workflows/release.yml`) to include locale runtime extensions, ensuring translations render correctly in Flatpak builds.
+
+### Bug Fixes & Build Cleanliness
+- **Secret Service API Signature**: Fixed the `secret_password_search_sync()` call signature in `nuvashalauncher-secret-store.c` to properly terminate the attribute varargs list with `NULL`.
+- **Header & Compiler Warning Fixes**: Resolved an unclosed comment in `nuvashalauncher-modrinth.h`, included missing `nuvashalauncher-modpack-private.h` in `nuvashalauncher-modpack-manifest.c`, and removed an unused variable in `nuvashalauncher-main-window-ui.c`.
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.5...v1.6
+
 ## [1.5] - 2026-11-23
 
 ### UI Streamlining & Selection Simplification
