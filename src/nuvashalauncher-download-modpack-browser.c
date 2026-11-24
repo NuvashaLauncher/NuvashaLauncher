@@ -231,14 +231,92 @@ take_rows_out (GPtrArray **rows, AdwPreferencesGroup *group)
 }
 
 static void
-on_modpack_quick_install_clicked (GtkButton *button, gpointer user_data)
+update_modpack_selection_ui (NuvashaLauncherDownloadModpackDialog *self)
+{
+  if (self->selection_bar == NULL)
+    return;
+
+  guint count = self->selected_projects != NULL
+                  ? g_hash_table_size (self->selected_projects)
+                  : 0;
+
+  if (count == 0)
+    {
+      gtk_widget_set_visible (GTK_WIDGET (self->selection_bar), FALSE);
+      return;
+    }
+
+  const char *format = ngettext ("%u modpack selected", "%u modpacks selected", count);
+  g_autofree char *text = g_strdup_printf (format, count);
+  gtk_label_set_text (self->selection_label, text);
+  gtk_widget_set_visible (GTK_WIDGET (self->selection_bar), TRUE);
+}
+
+static void
+on_modpack_row_check_toggled (GtkCheckButton *check, gpointer user_data)
 {
   NuvashaLauncherDownloadModpackDialog *self =
     NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
   NuvashaLauncherModrinthProject *project =
-    g_object_get_data (G_OBJECT (button), "nuvashalauncher-project");
+    g_object_get_data (G_OBJECT (check), "nuvashalauncher-project");
 
-  modpack_quick_install_project (self, project);
+  if (project == NULL || project->project_id == NULL)
+    return;
+
+  if (self->selected_projects == NULL)
+    self->selected_projects =
+      g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                             (GDestroyNotify) nuvashalauncher_modrinth_project_free);
+
+  if (gtk_check_button_get_active (check))
+    {
+      if (!g_hash_table_contains (self->selected_projects, project->project_id))
+        g_hash_table_insert (self->selected_projects,
+                             g_strdup (project->project_id),
+                             nuvashalauncher_modrinth_project_copy (project));
+    }
+  else
+    {
+      g_hash_table_remove (self->selected_projects, project->project_id);
+    }
+
+  update_modpack_selection_ui (self);
+}
+
+static void
+on_modpack_batch_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  NuvashaLauncherDownloadModpackDialog *self =
+    NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
+
+  if (self->selected_projects == NULL ||
+      g_hash_table_size (self->selected_projects) == 0)
+    return;
+
+  GPtrArray *projects = g_ptr_array_new_with_free_func (
+    (GDestroyNotify) nuvashalauncher_modrinth_project_free);
+
+  GHashTableIter iter;
+  gpointer key, value;
+  g_hash_table_iter_init (&iter, self->selected_projects);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    g_ptr_array_add (projects, nuvashalauncher_modrinth_project_copy (value));
+
+  g_hash_table_remove_all (self->selected_projects);
+  update_modpack_selection_ui (self);
+
+  if (self->rows != NULL)
+    {
+      for (guint i = 0; i < self->rows->len; i++)
+        {
+          GtkWidget *row = g_ptr_array_index (self->rows, i);
+          GtkWidget *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-check");
+          if (check != NULL && GTK_IS_CHECK_BUTTON (check))
+            gtk_check_button_set_active (GTK_CHECK_BUTTON (check), FALSE);
+        }
+    }
+
+  modpack_dialog_install_batch (self, projects);
 }
 
 static void
@@ -388,19 +466,28 @@ results_arrived (NuvashaLauncherDownloadModpackDialog *self, NuvashaLauncherModr
           {
             NuvashaLauncherModrinthProject *stored =
               g_ptr_array_index (self->hits, self->hits->len - 1);
+            GtkWidget *check = gtk_check_button_new ();
+            gtk_widget_set_valign (check, GTK_ALIGN_CENTER);
+            gtk_widget_set_tooltip_text (check, _("Select"));
+            g_object_set_data (G_OBJECT (check), "nuvashalauncher-project", stored);
+            g_object_set_data (G_OBJECT (row), "nuvashalauncher-check", check);
 
-            adw_action_row_add_suffix (
-              ADW_ACTION_ROW (row),
-              modpack_row_action_button ("pan-down-symbolic", _("Versions"),
-                                         stored,
-                                         G_CALLBACK (on_modpack_versions_clicked),
-                                         self));
-            adw_action_row_add_suffix (
-              ADW_ACTION_ROW (row),
+            if (self->selected_projects != NULL &&
+                g_hash_table_contains (self->selected_projects, stored->project_id))
+              gtk_check_button_set_active (GTK_CHECK_BUTTON (check), TRUE);
+
+            g_signal_connect_object (check, "toggled",
+                                     G_CALLBACK (on_modpack_row_check_toggled), self, 0);
+
+            GtkWidget *button =
               modpack_row_action_button ("folder-download-symbolic", _("Install"),
                                          stored,
-                                         G_CALLBACK (on_modpack_quick_install_clicked),
-                                         self));
+                                         G_CALLBACK (on_modpack_versions_clicked),
+                                         self);
+
+            adw_action_row_add_suffix (ADW_ACTION_ROW (row), check);
+            adw_action_row_add_suffix (ADW_ACTION_ROW (row), button);
+            adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), button);
           }
           g_ptr_array_add (self->rows, row);
 
@@ -770,6 +857,39 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
 
   gtk_widget_set_vexpand (GTK_WIDGET (box), TRUE);
   gtk_box_append (GTK_BOX (root), GTK_WIDGET (box));
+
+  {
+    GtkBox *selection_bar = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12));
+    GtkLabel *selection_label = GTK_LABEL (gtk_label_new (NULL));
+    GtkButton *selection_button = GTK_BUTTON (gtk_button_new_with_label (_("Install")));
+
+    gtk_widget_set_visible (GTK_WIDGET (selection_bar), FALSE);
+    gtk_widget_add_css_class (GTK_WIDGET (selection_bar), "toolbar");
+    gtk_widget_set_margin_start (GTK_WIDGET (selection_bar), 12);
+    gtk_widget_set_margin_end (GTK_WIDGET (selection_bar), 12);
+    gtk_widget_set_margin_top (GTK_WIDGET (selection_bar), 8);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (selection_bar), 8);
+
+    gtk_widget_set_hexpand (GTK_WIDGET (selection_label), TRUE);
+    gtk_widget_set_halign (GTK_WIDGET (selection_label), GTK_ALIGN_START);
+    gtk_label_set_wrap (selection_label, TRUE);
+
+    gtk_widget_add_css_class (GTK_WIDGET (selection_button), "suggested-action");
+    gtk_widget_add_css_class (GTK_WIDGET (selection_button), "pill");
+
+    gtk_box_append (selection_bar, GTK_WIDGET (selection_label));
+    gtk_box_append (selection_bar, GTK_WIDGET (selection_button));
+
+    self->selection_bar = selection_bar;
+    self->selection_label = selection_label;
+    self->selection_button = selection_button;
+
+    g_signal_connect_object (selection_button, "clicked",
+                             G_CALLBACK (on_modpack_batch_install_clicked),
+                             self, 0);
+
+    gtk_box_append (root, GTK_WIDGET (selection_bar));
+  }
 
   page = GTK_WIDGET (adw_navigation_page_new (GTK_WIDGET (root), _("Browse modpacks")));
   adw_navigation_page_set_tag (ADW_NAVIGATION_PAGE (page), "browse");

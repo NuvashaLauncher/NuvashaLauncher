@@ -1,452 +1,344 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: zh_CN\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-msgid "Adventure"
-msgstr "冒险"
-msgid "Atmosphere"
-msgstr "氛围"
-msgid "Audio"
-msgstr "音频"
-msgid "Blocks"
-msgstr "方块"
-msgid "Bloom"
-msgstr "泛光"
-msgid "Cartoon"
-msgstr "卡通"
-msgid "Categories"
-msgstr "类别"
-msgid "Colored Lighting"
-msgstr "彩色光照"
-msgid "Combat"
-msgstr "战斗"
-msgid "Core Shaders"
-msgstr "核心着色器"
-msgid "Cursed"
-msgstr "猎奇"
-msgid "Decoration"
-msgstr "装饰"
-msgid "Economy"
-msgstr "经济"
-msgid "Entities"
-msgstr "实体"
-msgid "Environment"
-msgstr "环境"
-msgid "Equipment"
-msgstr "装备"
-msgid "Fantasy"
-msgstr "奇幻"
-msgid "Features"
-msgstr "功能"
-msgid "Foliage"
-msgstr "植被"
-msgid "Fonts"
-msgstr "字体"
-msgid "Food"
-msgstr "食物"
-msgid "Game Mechanics"
-msgstr "游戏机制"
-msgid "Interface"
-msgstr "界面"
-msgid "High"
-msgstr "高"
-msgid "Items"
-msgstr "物品"
-msgid "Library"
-msgstr "程序库"
-msgid "Low"
-msgstr "低"
-msgid "Magic"
-msgstr "魔法"
-msgid "Management"
-msgstr "管理"
-msgid "Medium"
-msgstr "中"
-msgid "Minigame"
-msgstr "小游戏"
-msgid "Mobs"
-msgstr "生物"
-msgid "Modded"
-msgstr "模组适配"
-msgid "Models"
-msgstr "模型"
-msgid "Optimization"
-msgstr "优化"
-msgid "Path Tracing"
-msgstr "路径追踪"
-msgid "Performance Impact"
-msgstr "性能影响"
-msgid "Potato"
-msgstr "超低配置"
-msgid "Realistic"
-msgstr "写实"
-msgid "Reflections"
-msgstr "反射"
-msgid "Resolutions"
-msgstr "分辨率"
-msgid "Screenshot"
-msgstr "截图"
-msgid "Semi-realistic"
-msgstr "半写实"
-msgid "Shadows"
-msgstr "阴影"
-msgid "Simplistic"
-msgstr "简约"
-msgid "Social"
-msgstr "社交"
-msgid "Storage"
-msgstr "存储"
-msgid "Technology"
-msgstr "科技"
-msgid "Themed"
-msgstr "主题化"
-msgid "Transportation"
-msgstr "运输"
-msgid "Tweaks"
-msgstr "微调"
-msgid "Utility"
-msgstr "实用工具"
-msgid "Vanilla-like"
-msgstr "原版风格"
-msgid "World Generation"
-msgstr "世界生成"
 
-msgid "All Versions"
-msgstr "所有版本"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "相关度"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "离线"
 
-msgid "Newest"
-msgstr "最新发布"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "名称不能为空."
 
-msgid "Recently updated"
-msgstr "最近更新"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "名称长度必须为 3 到 16 个字符."
 
-msgid "Followers"
-msgstr "关注人数"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "名称只能包含字母、数字和下划线."
 
-msgid "Filter modpacks"
-msgstr "筛选整合包"
-
-msgid "Cancel"
-msgstr "取消"
-
-msgid "Confirm"
-msgstr "確認"
-
-msgid "Customize"
-msgstr "自定义"
-
-msgid "Delete"
-msgstr "删除"
-
-msgid "Retry"
-msgstr "再次挑战"
-
-msgid "Loading…"
-msgstr "加载中…"
-
-msgid "Download"
-msgstr "下载"
-
-msgid "Update All"
-msgstr "全部更新"
-
-msgid "Open Folder"
-msgstr "打开文件夹"
-
-msgid "Nothing installed yet"
-msgstr "尚未安装任何内容"
-
-msgid "Browse for something to put into the folder of this instance"
-msgstr "浏览要放入此实例文件夹的内容"
-
-msgid "Installed"
-msgstr "已安装"
-
-msgid "Loading more…"
-msgstr "加载更多"
-
-msgid "Nothing is selected"
-msgstr "未选择任何内容"
-
-
-msgid "Filter by category"
-msgstr "按类别筛选"
-
-msgid "Nothing to show yet"
-msgstr "没有可显示内容"
-
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
 msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "输入要查找的内容，或浏览Modrinth为该场次提供的所有内容"
-
-msgid "Browse"
-msgstr "浏览"
-
-msgid "No mod loader"
-msgstr "没有模组加载器"
-
-msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
 msgstr ""
-"模组需要模组加载器。请先在此实例的设置中选择 Fabric、Quilt、Forge 或 NeoForge"
+"该 Microsoft 帐户尚未关联任何 Xbox 个人资料：请先使用该帐户登录一次 "
+"xbox.com，然后在此处重新登录"
 
-msgid "Create Instance"
-msgstr "创建新记录"
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
+msgid ""
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
+msgstr ""
+"这是一个儿童账户：必须由成年人将其添加到 Microsoft 家庭中，该账户才能进行游戏"
 
-msgid "Name"
-msgstr "名称"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr "该账户注册所在的国家/地区无法使用 Xbox Live"
 
-msgid "Directory"
-msgstr "文件夹"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr "该账号需要经成人验证后才能进行游戏，这正是韩国账号必须完成的步骤"
 
-msgid "Choose a folder"
-msgstr "选择文件夹"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "微软没有提供用于登录的验证码"
 
-msgid "Create"
-msgstr "创建"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1fM 次下载"
 
-msgid "Download Modpack"
-msgstr "下载Modpack"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1fk 次下载"
 
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s 次下载"
 
-msgid "Search modpacks"
-msgstr "搜索modpacks"
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s  ·  作者：%s"
 
-msgid "Close"
-msgstr "关闭"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "作者：%s"
 
-msgid "Back"
-msgstr "回到"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "已选择 %u 个模组"
 
+#: src/nuvashalauncher-content-page-browser.c:95
+#, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "已选择 %u 个资源包"
+
+#: src/nuvashalauncher-content-page-browser.c:98
+#, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "已选择 %u 个光影"
+
+#: src/nuvashalauncher-content-page-browser.c:101
+#, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "已选择 %u 项"
+
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr "选择"
+
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "安装"
 
-msgid "Copy of %s"
-msgstr "%s 的副本"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "无法加载下一页"
 
-msgid "Choose Java executable"
-msgstr "选择 Java 可执行文件"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "无法搜索 Modrinth"
 
-msgid "the chosen file does not report a Java version"
-msgstr "所选文件未报告 Java 版本"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "其他"
 
-msgid "Choose an Icon"
-msgstr "选择一个图标"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "无法加载分类"
 
-msgid "Choose a Directory"
-msgstr "选择文件夹"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "再次挑战"
 
-msgid "Duplicated to \"%s\""
-msgstr "已复制到“%s”"
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "无法加载版本。请重试。"
 
-msgid "Delete \"%s\"?"
-msgstr "删除\"%s\""
-
-msgid "General"
-msgstr "常规"
-
-msgid "Icon"
-msgstr "标志"
-
-msgid "Change the Directory"
-msgstr "更改文件夹"
-
-msgid "Minecraft"
-msgstr "我的世界"
-
-msgid "Java"
-msgstr "Java"
-
-msgid "Java Runtime"
-msgstr "Java 运行时"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "此游戏需要 Java %d 或更高版本，当前选择的是 Java %d"
-
-msgid "Add Java Runtime"
-msgstr "添加 Java 运行时"
-
-msgid ""
-"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
-"not jre-openjdk-headless"
-msgstr ""
-"Minecraft 需要非无头模式的 Java：在 Arch 上请使用 jre-openjdk 软件包，而不是 "
-"jre-openjdk-headless"
-
-msgid "JVM Arguments"
-msgstr "JVM 参数"
-
-msgid ""
-"The configured Java was not detected; make sure it is still a usable java "
-"executable"
-msgstr "未检测到已配置的 Java；请确认它仍是可用的 Java 可执行文件"
-
-msgid "Actions"
-msgstr "操作"
-
-msgid "Duplicate"
-msgstr "复制"
-
-msgid "Delete Instance"
-msgstr "删除实例"
-
-msgid "Settings"
-msgstr "设置"
-
-msgid "Resource Packs"
-msgstr "资源包"
-
-msgid "Shader Packs"
-msgstr "着色器包"
-
-msgid "Mods"
-msgstr "模组"
-
-msgid "Logs"
-msgstr "日志"
-
-msgid "Custom: %s"
-msgstr "自定义：%s"
-
-msgid "the game was stopped by signal %d"
-msgstr "游戏被信号%d停止"
-
-msgid "the game exited with code %d"
-msgstr "游戏以代码%d退出"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "未找到与Minecraft %s兼容的%s版本。"
-
-msgid "Loader"
-msgstr "模组加载器"
-
-msgid "Loader Version"
-msgstr "模组加载器版本"
-
-msgid "Clear"
-msgstr "清除"
-
-msgid "Search the log"
-msgstr "搜索日志"
-
-msgid "Versions"
-msgstr "版本"
-
-msgid "Show unstable Minecraft versions"
-msgstr "显示不稳定的 Minecraft 版本"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "显示不稳定的模组加载器版本"
-
-msgid "Language"
-msgstr "语言"
-
-msgid "Interface language"
-msgstr "界面语言"
-
-msgid "Line Limit"
-msgstr "行数上限"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "关于Nuvasha Launcher"
-
-msgid "Keyboard Shortcuts"
-msgstr "热键"
-
-msgid "Stop"
-msgstr "停止"
-
-msgid "Play"
-msgstr "开始游戏"
-
-msgid "Keep Playing"
-msgstr "继续游戏"
-
-msgid "Downloads"
-msgstr "下载"
-
-msgid "Accounts"
-msgstr "账户"
-
-msgid "No Instances Yet"
-msgstr "还没有实例"
-
-msgid "Use the + button in the header to create one"
-msgstr "使用标题中的+按钮创建一个"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "无法确定模组加载器：%s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "未找到与Minecraft %s和%s兼容的版本。"
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "未找到与Minecraft %s兼容的版本。"
 
-msgid "Add Offline Account"
-msgstr "添加离线账户"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "版本"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "名称只能包含字母、数字和下划线"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "无法读取文件夹"
 
-msgid "a name cannot be empty"
-msgstr "名称不能为空"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "名称长度必须为 3 到 16 个字符"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "无法安装文件"
 
-msgid "Add"
-msgstr "视需要增加填充棉。"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "要求Microsoft提供代码"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "无法创建文件夹"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "正在浏览器中等待登录"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "内容"
 
-msgid "Sign In"
-msgstr "登入"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "安装"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "在浏览器中打开页面，然后输入此代码："
-
-msgid "Try Again"
-msgstr "再试一次"
-
-msgid "Remove"
-msgstr "移除"
-
-msgid "Add Microsoft Account"
-msgstr "添加 Microsoft 账户"
-
-msgid "Minecraft Version"
-msgstr "Minecraft版本"
-
-msgid "Install the selected %s?"
-msgstr "要安装选中的%s吗？"
-
-msgid "%s \"%s\""
-msgstr "%s“%s”"
-
-msgid "Search"
-msgstr "搜索"
-
-msgid "Update"
-msgstr "更新"
-
-msgid "Update the following %s"
-msgstr "更新以下%s"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "依赖项："
 
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "冲突\n"
+
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "正在安装 %s"
+
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "更新"
+
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s“%s”"
+
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "取消"
+
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "此项目没有发布适用于此实例的内容。"
+
+#: src/nuvashalauncher-content-page-install.c:1003
+#, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "正在安装 %u 个模组"
+
+#: src/nuvashalauncher-content-page-install.c:1006
+#, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "正在安装 %u 个资源包"
+
+#: src/nuvashalauncher-content-page-install.c:1009
+#, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "正在安装 %u 个光影"
+
+#: src/nuvashalauncher-content-page-install.c:1012
+#, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "正在安装 %u 项"
+
+#: src/nuvashalauncher-content-page-install.c:1038
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "安装以下模组？"
+
+#: src/nuvashalauncher-content-page-install.c:1041
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "安装以下资源包？"
+
+#: src/nuvashalauncher-content-page-install.c:1044
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "安装以下光影？"
+
+#: src/nuvashalauncher-content-page-install.c:1047
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "安装以下项目？"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "无法删除文件"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "启用"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "无法删除依赖的模组"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "无法重命名文件"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "已删除"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "删除“%s”"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
 msgid ""
 "The following mods depend on %s:\n"
 "%s"
@@ -454,92 +346,259 @@ msgstr ""
 "以下模组依赖于%s：\n"
 "%s"
 
-msgid "Cache"
-msgstr "缓存"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "删除"
 
-msgid "Cache Modrinth API responses"
-msgstr "缓存 Modrinth API 响应"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "已启用"
 
-msgid "Cache expiration"
-msgstr "缓存过期时间"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "已禁用"
 
-msgid "1 hour"
-msgstr "1 小时"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "禁用"
 
-msgid "6 hours"
-msgstr "6 小时"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "搜索"
 
-msgid "1 day"
-msgstr "1 天"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "全部更新"
 
-msgid "7 days"
-msgstr "7 天"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "正在获取更新"
 
-msgid "Show Shortcuts"
-msgstr "显示快捷键"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "进度"
 
-msgid "Quit"
-msgstr "退出"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "打开文件夹"
 
-# New modpack import/export actions use English until translators provide localized text.
-msgid "Import Modpack"
-msgstr "导入整合包"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "尚未安装任何内容"
 
-msgid "Modpack exported"
-msgstr "Modpack 已导出"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "浏览要放入此实例文件夹的内容"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth 模组包 (*.mrpack)"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "浏览"
 
-msgid "The export location is not a local file"
-msgstr "导出位置不是本地文件"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "已安装"
 
-msgid "Export Modpack"
-msgstr "导出整合包"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "加载更多"
 
-msgid "Importing modpack…"
-msgstr "正在导入整合包…"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "按类别筛选"
 
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "没有可显示内容"
+
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr "输入要查找的内容，或浏览Modrinth为该场次提供的所有内容"
+
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "关闭"
+
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "已更新 %u 个项目"
+
+#: src/nuvashalauncher-content-page-updates.c:246
+msgid "Everything is up to date"
+msgstr "一切都是最新的"
+
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "更新以下%s"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "確認"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
+msgid "The folder could not be opened: %s"
+msgstr "The folder could not be opened: %s"
+
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
+msgid "Cannot create “%s”: %s"
+msgstr "无法创建“%s”：%s"
+
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "没有模组加载器"
+
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"模组需要模组加载器。请先在此实例的设置中选择 Fabric、Quilt、Forge 或 NeoForge"
+
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "请从列表中选择一个《我的世界》版本。"
+
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "选择一个加载器的版本，或者选择另一个加载器。"
+
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "文件夹"
+
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "选择文件夹"
+
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "创建"
+
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "已选择 %u 个整合包"
+
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "服务返回了无效响应。请稍后重试。"
+
+#: src/nuvashalauncher-download-modpack-browser.c:763
+msgid "All versions"
+msgstr "所有版本"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "下载"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "相关度"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "最新发布"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "最近更新"
+
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "关注人数"
+
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "筛选整合包"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "浏览模组包"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr "找不到请求的文件、项目或兼容版本。"
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "安装以下整合包？"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"
 msgstr "正在读取整合包"
 
-msgid "Exporting modpack"
-msgstr "正在导出模组包"
-
-msgid "Modpack export"
-msgstr "导出模组包"
-
-msgid "Include transient files?"
-msgstr "是否包含临时文件？"
-
-msgid ""
-"Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "日志、崩溃报告、截图、缓存和下载通常会被排除。"
-
-msgid "Clean Export"
-msgstr "仅导出必要文件"
-
-msgid "Include All Files"
-msgstr "包含所有文件"
-
-msgid "Pack Name"
-msgstr "整合包名称"
-
-msgid "Summary"
-msgstr "摘要"
-
-msgid "Version ID"
-msgstr "版本 ID"
-
-msgid "Downloading files"
-msgstr "正在下载文件"
-
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
 msgid "Extracting files"
 msgstr "正在解压文件"
 
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "无法安装模组包"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "正在下载文件"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
 msgid "Optional files"
 msgstr "可选文件"
 
+#: src/nuvashalauncher-download-modpack-install.c:265
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
@@ -547,1105 +606,1866 @@ msgstr ""
 "整合包列出了这些文件，但表示它们不是必需的。除非你主动选择，否则不会安装。默"
 "认关闭"
 
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
 msgid "Pack could not be fetched"
 msgstr "无法获取整合包"
 
+#: src/nuvashalauncher-download-modpack-install.c:422
 msgid "Invalid pack"
 msgstr "整合包无效"
 
-msgid "The pack does not define its install"
-msgstr "整合包未定义安装信息"
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "此版本没有压缩包"
 
-msgid "Downloading Modpack"
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr "该项目未发布任何 Nuvasha Launcher 可安装的包文件。"
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
 msgstr "正在下载整合包"
 
-msgid "Writing archive"
-msgstr "正在写入归档"
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "下载"
 
-msgid "Export modpack metadata"
-msgstr "导出元数据"
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "连接失败。请检查网络连接后重试。"
 
-msgid "Ask for export metadata"
-msgstr "导出时询问元数据"
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "服务拒绝了请求。请稍后重试。"
 
-msgid "Pack information"
-msgstr "整合包信息"
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "请求过多。请稍等片刻后重试。"
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "导出前显示名称、摘要和版本字段。"
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr "无法读写文件。请检查位置、权限和磁盘可用空间。"
 
-msgid "Export complete"
-msgstr "导出完成"
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr "下载的文件未通过验证，未安装。请重新下载。"
 
-msgid "Export"
-msgstr "导出"
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "压缩包无效或不安全。请从可信来源重新下载。"
 
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "已安装 %u 个项目"
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "操作失败。请查看技术详情以获取更多信息。"
 
-msgid "Updated %u item"
-msgid_plural "Updated %u items"
-msgstr[0] "已更新 %u 个项目"
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "无法使用 Java 可执行文件。请选择正常工作的 Java 运行环境。"
 
-msgid "The icon must be a file on this computer"
-msgstr "图标必须是此计算机上的文件"
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "访问被拒绝。请检查文件夹权限。"
 
-msgid "The game is running; stop it before moving its directory"
-msgstr "游戏正在运行；请先停止游戏再移动其目录"
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "磁盘可用空间不足。"
 
-msgid "%s is being installed"
-msgstr "正在安装 %s"
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "找不到文件或文件夹。请检查其位置。"
 
-msgid "no compatible version"
-msgstr "没有兼容的版本"
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "目标已存在。请选择其他位置。"
 
-msgid "Enabled"
-msgstr "已启用"
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
 
-msgid "Disabled"
-msgstr "已禁用"
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "保存的登录信息已失效。请重新登录。"
 
-msgid "Deleted"
-msgstr "已删除"
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "登录被拒绝。如需登录，请重新开始。"
 
-msgid "Everything is up to date"
-msgstr "一切都是最新的"
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "此账户未拥有 Minecraft: Java Edition。"
 
-msgid "Cannot create \"%s\": %s"
-msgstr "无法创建“%s”：%s"
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "请在 minecraft.net 设置 Minecraft: Java Edition 个人资料，然后重试。"
 
-msgid "This project publishes nothing that fits this instance."
-msgstr "此项目没有发布适用于此实例的内容。"
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr "此构建未配置 Microsoft 登录。请更新启动器。"
 
-msgid "Unknown"
-msgstr "未知"
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
 
-msgid "%s (unstable)"
-msgstr "%s（不稳定）"
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr "无法安装此模组加载器。请选择其他版本或查看技术详情。"
 
-msgid "the next page could not be loaded"
-msgstr "无法加载下一页"
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr "游戏元数据无效或不可用。请刷新版本列表后重试。"
 
-msgid "Other"
-msgstr "其他"
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "此实例已不可用。请刷新实例列表。"
 
-msgid "%.1fM downloads"
-msgstr "%.1fM 次下载"
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "请为实例选择其他名称或文件夹。"
 
-msgid "%.1fk downloads"
-msgstr "%.1fk 次下载"
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr "实例设置无效。请检查所选版本和 JVM 参数。"
 
-msgid "%s  ·  by %s"
-msgstr "%s  ·  作者：%s"
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr "无法保存账户。请检查系统密钥环和文件权限。"
 
-msgid "by %s"
-msgstr "作者：%s"
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "清除"
 
-msgid "%s downloads"
-msgstr "%s 次下载"
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "登入"
 
-msgid "Cache Cleared"
-msgstr "缓存已清除"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "在浏览器中打开"
 
-msgid "Cache Cleanup Failed"
-msgstr "缓存清理失败"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "再试一次"
 
-msgid "The cache could not be cleared."
-msgstr "无法清除缓存。"
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "添加离线账户"
 
-msgid "the versions of this loader could not be read"
-msgstr "无法读取此模组加载器的版本"
-msgid "Unavailable"
-msgstr "不可用"
-msgid "No compatible Java runtime was found."
-msgstr "未找到兼容的 Java 运行时。"
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "名称"
 
-msgid "Minecraft crashed"
-msgstr "Minecraft 已崩溃"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "视需要增加填充棉。"
 
-msgid "Minecraft could not start"
-msgstr "Minecraft 无法启动"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "创建新记录"
 
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft 需要登录"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "下载Modpack"
 
-msgid "The file cannot be renamed"
-msgstr "无法重命名文件"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "导入整合包"
 
-msgid "The file cannot be deleted"
-msgstr "无法删除文件"
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "正在导入整合包…"
 
-msgid "The folder cannot be read"
-msgstr "无法读取文件夹"
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "搜索modpacks"
 
-msgid "The file could not be installed"
-msgstr "无法安装文件"
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "关闭"
 
-msgid "The folder cannot be created"
-msgstr "无法创建文件夹"
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "没有符合要求的模组包。请尝试输入其他关键词."
 
-msgid "This cannot be installed"
-msgstr "无法安装此内容"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "选择文件"
 
-msgid "Pick a Minecraft version first"
-msgstr "请先选择 Minecraft 版本"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "无法安装"
 
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "删除依赖项会删除依赖它的模组"
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "回到"
 
-msgid "A dependent mod cannot be deleted"
-msgstr "无法删除依赖的模组"
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "搜索日志"
 
 # UI string
-msgid "Skin"
-msgstr "Skin"
-
-# UI string
-msgid "Slim model"
-msgstr "纤细模型"
-
-# UI string
-msgid "OK"
-msgstr "好的"
-
-# UI string
-msgid "Export skin…"
-msgstr "导出皮肤…"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
 msgid "Classic model"
 msgstr "经典模型"
 
 # UI string
-msgid "PNG skin texture"
-msgstr "PNG 皮肤纹理"
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "纤细模型"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "自定义"
 
 # UI string
-msgid "Invalid skin"
-msgstr "无效的皮肤"
-
-# UI string
-msgid "No cape"
-msgstr "无披风"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
 msgid "Import skin…"
 msgstr "导入皮肤…"
 
 # UI string
-msgid "Delete skin?"
-msgstr "删除皮肤？"
-
-# UI string
-msgid "This skin will be removed from the skin library."
-msgstr "此皮肤将从皮肤库中移除。"
-
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "皮肤图片必须是64x64或64x32的PNG文件"
-
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "浏览模组包"
-
-msgid "Choose Files"
-msgstr "选择文件"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "清除 Nuvasha Launcher 缓存"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "清除 Nuvasha Launcher 缓存？"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"冲突\n"
-
-msgid "Content"
-msgstr "内容"
-
-msgid "Could not install"
-msgstr "无法安装"
-
-msgid "Could not install the modpack"
-msgstr "无法安装模组包"
-
-msgid "Could not load categories"
-msgstr "无法加载分类"
-
-msgid "Could not search Modrinth"
-msgstr "无法搜索 Modrinth"
-
-msgid "Could not understand the answer"
-msgstr "无法理解这个答案"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "禁用"
-
-msgid "Dismiss"
-msgstr "关闭"
-
-msgid "Enable"
-msgstr "启用"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "图片"
-
-msgid "Installing"
-msgstr "安装"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "实例的名称%s中不能包含"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "其中包含 Nuvasha Launcher 无法识别的文件。"
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "微软返回了一个不安全的验证地址"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "微软没有提供用于登录的验证码"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "微软 · 需要登录"
-
-msgid "Modrinth does not know this file"
-msgstr "Modrinth 不认识这个文件"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "莫德林斯正要求努瓦莎放慢节奏，请求太多了"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "没有符合要求的模组包。请尝试输入其他关键词"
-
-msgid "None"
-msgstr "无"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Nuvasha Launcher 缓存数据已成功清除。"
-
-msgid "Offline"
-msgstr "离线"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "请从列表中选择一个《我的世界》版本。"
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "选择一个加载器的版本，或者选择另一个加载器。"
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
-msgid "Remove %s?"
-msgstr "删除%s？"
-
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "搜索 Modrinth 并安装模组包"
-
-msgid "Stop %s?"
-msgstr "停%s？"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "系统默认值"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "该账号将从 Nuvasha Launcher 中移除，其保存的登录信息也将被清除。游戏本身不会受到任何影响。"
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "游戏正在运行，即将关闭。自上次保存以来的进度将丢失。"
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "该项目未发布任何 Nuvasha Launcher 可安装的包文件。"
-
-msgid "This version has no pack file"
-msgstr "此版本没有压缩包"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "该账户注册所在的国家/地区无法使用 Xbox Live"
-
-msgid "the game"
-msgstr "这款游戏"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "实例名称不能用作目录名"
-
-msgid "the instance name is empty"
-msgstr "实例名称为空"
-
-msgid "the sign-in did not finish"
-msgstr "登录未完成"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "该 Microsoft 帐户尚未关联任何 Xbox 个人资料：请先使用该帐户登录一次 xbox.com，然后在此处重新登录"
-
-msgid "this account"
-msgstr "该账户"
-
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "该账号需要经成人验证后才能进行游戏，这正是韩国账号必须完成的步骤"
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "这是一个儿童账户：必须由成年人将其添加到 Microsoft 家庭中，该账户才能进行游戏"
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "Minecraft Services 拒绝了请求（HTTP %u）%s%s"
-
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "导出皮肤…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
 msgid "Minecraft Services error"
 msgstr "Minecraft Services 错误"
 
-msgid "Application menu"
-msgstr "Application menu"
-
-msgid "The folder could not be opened: %s"
-msgstr "The folder could not be opened: %s"
-
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
 msgid "The selected modpack file is not local."
 msgstr "The selected modpack file is not local."
 
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
 msgid "The log folder could not be opened: %s"
 msgstr "The log folder could not be opened: %s"
 
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "系统默认值"
 
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
 
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
 
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
 
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
 
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
 
-msgid "Open in browser"
-msgstr "在浏览器中打开"
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
 
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "已选择 %u/%u"
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
 
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "将删除以下实例：\n%s"
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
 
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
 
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
 
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
 
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "编辑模式"
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
 
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "正在获取更新"
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
 
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
 
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "进度"
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
 
-msgid "Enter Edit Mode"
-msgstr "进入编辑模式"
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
 
-msgid "Delete Selected"
-msgstr "删除所选项"
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
 
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "%s 的副本"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "实例名称为空"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "实例的名称%s中不能包含"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "实例名称不能用作目录名"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Modpack 已导出"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "导出位置不是本地文件"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "导出模组包"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "正在导出模组包"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
+msgid "Export modpack"
+msgstr "导出整合包"
+
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth 模组包 (*.mrpack)"
+
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "整合包信息"
+
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "导出"
+
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "导出元数据"
+
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "整合包名称"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "摘要"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "版本 ID"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "是否包含临时文件？"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "日志、崩溃报告、截图、缓存和下载通常会被排除。"
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "仅导出必要文件"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "包含所有文件"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "游戏正在运行；请先停止游戏再移动其目录"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "选择文件夹"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "已复制到“%s”"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr "未检测到已配置的 Java；请确认它仍是可用的 Java 可执行文件"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "此游戏需要 Java %d 或更高版本，当前选择的是 Java %d"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr "请选择支持桌面的 Java 运行环境，而非无头安装。"
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "图标必须是此计算机上的文件"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "选择一个图标"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "图片"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "常规"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "标志"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "更改文件夹"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "我的世界"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "JVM 参数"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "操作"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "复制"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "删除实例"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "少于 1 分钟"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu 分钟"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu 小时 %llu 分钟"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "今天 %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "尚未游玩"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "从未"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "计算中…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "活动"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "已游玩"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "最后游玩"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "启动次数"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "崩溃次数"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "实例"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "占用空间"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "创建于"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "未知"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "日志"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "设置"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "资源包"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "着色器包"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "模组"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "世界"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "服务器"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "统计"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "所选文件未报告 Java 版本"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "选择 Java 可执行文件"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "加载中…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "自定义：%s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "添加 Java 运行时"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Java 运行时"
+
+#: src/nuvashalauncher-launcher-finish.c:74
 msgid "A new crash report was created. Open the logs for details."
 msgstr "已生成新的崩溃报告。请打开日志查看详情。"
 
-msgid "Access was denied. Check the folder permissions."
-msgstr "访问被拒绝。请检查文件夹权限。"
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "游戏被信号%d停止"
 
-msgid "An offline account with this name already exists."
-msgstr "已存在同名离线账户。"
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "游戏以代码%d退出"
 
-msgid "Choose another instance name or directory."
-msgstr "请为实例选择其他名称或文件夹。"
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "未找到兼容的 Java 运行时。"
 
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "无法安装此模组加载器。请选择其他版本或查看技术详情。"
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "无法读取此模组加载器的版本"
 
-msgid "Could not load project details. Try again."
-msgstr "无法加载项目详情。请重试。"
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s（不稳定）"
 
-msgid "Could not load versions. Try again."
-msgstr "无法加载版本。请重试。"
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "无"
 
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "无法打开浏览器。请手动打开显示的地址。"
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "未找到与Minecraft %s兼容的%s版本。"
 
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "无法读写文件。请检查位置、权限和磁盘可用空间。"
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "请先选择 Minecraft 版本"
 
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "无法保存账户。请检查系统密钥环和文件权限。"
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "模组加载器"
 
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "Microsoft 返回了不安全的登录地址。请先更新启动器再重试。"
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "模组加载器版本"
 
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "此构建未配置 Microsoft 登录。请更新启动器。"
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
 
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "请选择支持桌面的 Java 运行环境，而非无头安装。"
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
 
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "请在 minecraft.net 设置 Minecraft: Java Edition 个人资料，然后重试。"
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
 
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "登录被拒绝。如需登录，请重新开始。"
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
 
-msgid "Technical Details"
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
 msgstr "技术详情"
 
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "无法使用 Java 可执行文件。请选择正常工作的 Java 运行环境。"
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "清除 Nuvasha Launcher 缓存？"
 
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "压缩包无效或不安全。请从可信来源重新下载。"
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "缓存已清除"
 
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "连接失败。请检查网络连接后重试。"
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "缓存清理失败"
 
-msgid "The destination already exists. Choose another location."
-msgstr "目标已存在。请选择其他位置。"
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "导出时询问元数据"
 
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "下载的文件未通过验证，未安装。请重新下载。"
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "导出前显示名称、摘要和版本字段。"
 
-msgid "The file or folder was not found. Check its location."
-msgstr "找不到文件或文件夹。请检查其位置。"
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "删除依赖项会删除依赖它的模组"
 
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "游戏元数据无效或不可用。请刷新版本列表后重试。"
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "显示不稳定的 Minecraft 版本"
 
-msgid "The operation failed. See Technical Details for more information."
-msgstr "操作失败。请查看技术详情以获取更多信息。"
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "显示不稳定的模组加载器版本"
 
-msgid "The requested file, project, or compatible version was not found."
-msgstr "找不到请求的文件、项目或兼容版本。"
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "语言"
 
-msgid "The service rejected the request. Try again later."
-msgstr "服务拒绝了请求。请稍后重试。"
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "界面语言"
 
-msgid "The service returned an invalid response. Try again later."
-msgstr "服务返回了无效响应。请稍后重试。"
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "行数上限"
 
-msgid "There is not enough free disk space."
-msgstr "磁盘可用空间不足。"
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "缓存"
 
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "此账户未拥有 Minecraft: Java Edition。"
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "缓存 Modrinth API 响应"
 
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "此实例已不可用。请刷新实例列表。"
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1 小时"
 
-msgid "Too many requests. Wait a moment and try again."
-msgstr "请求过多。请稍等片刻后重试。"
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6 小时"
 
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "实例设置无效。请检查所选版本和 JVM 参数。"
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1 天"
 
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "保存的登录信息已失效。请重新登录。"
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7 天"
 
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "缓存过期时间"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "清除 Nuvasha Launcher 缓存"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
 msgid "Minecraft launcher for Linux"
 msgstr "Linux 平台 Minecraft 启动器"
 
-msgid "Services & Ecosystem"
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
 msgstr "服务与生态"
 
-msgid "Minecraft Disclaimer"
+#: src/nuvashalauncher-main-window-actions.c:626
+msgid "Minecraft disclaimer"
 msgstr "Minecraft 免责声明"
 
+#: src/nuvashalauncher-main-window-actions.c:629
 msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
 "\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
 msgstr ""
 "非 MINECRAFT 官方产品。未经 MOJANG 或 MICROSOFT 批准，也不与其关联。\n"
 "\n"
-"Minecraft 是 Mojang AB 的商标。本启动器为独立开发，不隶属于 Mojang Studios 或 Microsoft。"
+"Minecraft 是 Mojang AB 的商标。本启动器为独立开发，不隶属于 Mojang Studios "
+"或 Microsoft。"
 
-msgid "Modrinth & Mod Loaders"
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
 msgstr "Modrinth 与模组加载器"
 
+#: src/nuvashalauncher-main-window-actions.c:637
 msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
 "\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
 msgstr ""
 "整合包、模组、资源包和着色器均由 Modrinth 托管并由各自的作者创建。\n"
 "\n"
 "模组加载器由 Fabric、Quilt、Forge 和 NeoForge 项目独立开发。"
 
-msgid "AppStream Metadata"
-msgstr "AppStream 元数据"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "AppStream 元数据（描述、摘要和发行说明）遵循 Creative Commons CC0 1.0 Universal Public Domain Dedication 协议发布。"
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "复制"
-
-msgid "Rename"
-msgstr "重命名"
-
-msgid "Reset Icon"
-msgstr "重置图标"
-
-msgid "Delete World"
-msgstr "删除世界"
-
-msgid "Seed copied to clipboard"
-msgstr "种子已复制到剪贴板"
-
-msgid "Remove server \"%s\"?"
-msgstr "移除服务器“%s”？"
-
-msgid "Refresh"
-msgstr "刷新"
-
-msgid "Remove Server"
-msgstr "移除服务器"
-
-msgid "Survival"
-msgstr "生存"
-
-msgid "Edit"
-msgstr "编辑"
-
-msgid "Ask to download"
-msgstr "下载前询问"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Minecraft 保存或导入到此处的世界将显示在此列表中。"
-
-msgid "Rename World"
-msgstr "重命名世界"
-
-msgid "Servers"
-msgstr "服务器"
-
-msgid "Save"
-msgstr "保存"
-
-msgid "Add World"
-msgstr "添加世界"
-
-msgid "Spectator"
-msgstr "旁观"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "删除世界“%s”？此操作无法撤销。"
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "在此添加的服务器将保存到该实例的 servers.dat 中。"
-
-msgid "Add Server"
-msgstr "添加服务器"
-
-msgid "Edit Server"
-msgstr "编辑服务器"
-
-msgid "Address"
-msgstr "地址"
-
-msgid "Datapacks"
-msgstr "数据包"
-
-msgid "No Worlds"
-msgstr "无世界"
-
-msgid "Creative"
-msgstr "创造"
-
-msgid "Move Up"
-msgstr "上移"
-
-msgid "No Servers"
-msgstr "无服务器"
-
-msgid "Never download"
-msgstr "从不下载"
-
-msgid "Worlds"
-msgstr "世界"
-
-msgid "Always download"
-msgstr "始终下载"
-
-msgid "Move Down"
-msgstr "下移"
-
-msgid "Copy Seed"
-msgstr "复制种子"
-
-msgid "Stats"
-msgstr "统计"
-
-msgid "Playtime"
-msgstr "游玩时间"
-
-msgid "Time played"
-msgstr "已游玩"
-
-msgid "Not played yet"
-msgstr "尚未游玩"
-
-msgid "Less than a minute"
-msgstr "少于 1 分钟"
-
-msgid "%llu min"
-msgstr "%llu 分钟"
-
-msgid "%llu h %llu min"
-msgstr "%llu 小时 %llu 分钟"
-
-msgid "Runs on"
-msgstr "运行环境"
-
-msgid "Activity"
-msgstr "活动"
-
-msgid "Last session"
-msgstr "上次游玩"
-
-msgid "Last played"
-msgstr "最后游玩"
-
-msgid "Total launches"
-msgstr "启动次数"
-
-msgid "Total crashes"
-msgstr "崩溃次数"
-
-msgid "Server joins"
-msgstr "加入服务器次数"
-
-msgid "World loads"
-msgstr "加载世界次数"
-
-msgid "Player Profile"
-msgstr "玩家档案"
-
-msgid "Player type"
-msgstr "玩家类型"
-
-msgid "Pack style"
-msgstr "整合风格"
-
-msgid "Average session"
-msgstr "平均时长"
-
-msgid "Stability"
-msgstr "稳定性"
-
-msgid "Instance"
-msgstr "实例"
-
-msgid "Total size"
-msgstr "占用空间"
-
-msgid "Created on"
-msgstr "创建于"
-
-msgid "Calculating…"
-msgstr "计算中…"
-
-msgid "Never"
-msgstr "从未"
-
-msgid "Today, %s"
-msgstr "今天 %s"
-
-msgid "Hybrid"
-msgstr "混合"
-
-msgid "Server Player"
-msgstr "服务器玩家"
-
-msgid "Singleplayer"
-msgstr "单人玩家"
-
-msgid "Unplayed"
-msgstr "未游玩"
-
-msgid "Modpack"
-msgstr "整合包"
-
-msgid "Lightweight"
-msgstr "轻量"
-
-msgid "Kitchen Sink"
-msgstr "大型整合"
-
-msgid "Quick"
-msgstr "短时"
-
-msgid "Standard"
-msgstr "标准"
-
-msgid "Marathon"
-msgstr "马拉松"
-
-msgid "Stable"
-msgstr "稳定"
-
-msgid "%u%% crash rate"
-msgstr "%u%% 崩溃率"
-
-msgid "A name cannot be empty."
-msgstr "名称不能为空."
-
-msgid "Remove server"
-msgstr "移除服务器"
-
-msgid "Download modpack"
-msgstr "下载Modpack"
-
-msgid "%s “%s”"
-msgstr "%s“%s”"
-
-msgid "Delete instance"
-msgstr "删除实例"
-
-msgid "No worlds"
-msgstr "无世界"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "正在浏览器中等待登录…"
-
-msgid "Choose files"
-msgstr "选择文件"
-
-msgid "Cannot create “%s”: %s"
-msgstr "无法创建“%s”：%s"
-
-msgid "Cache cleanup failed"
-msgstr "缓存清理失败"
-
-msgid "Español"
-msgstr "Español"
-
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth 与模组加载器"
-
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "删除世界“%s”？此操作无法撤销。"
-
-msgid "Português"
-msgstr "Português"
-
-msgid "Create an instance to start playing."
-msgstr "创建一个实例以开始游戏。"
-
-msgid "Duplicated to “%s”"
-msgstr "已复制到“%s”"
-
-msgid "Downloading modpack"
-msgstr "正在下载整合包"
-
-msgid "Try again"
-msgstr "再试一次"
-
-msgid "Performance impact"
-msgstr "性能影响"
-
-msgid "Add world"
-msgstr "添加世界"
-
-msgid "Create instance"
-msgstr "创建新记录"
-
-msgid "Browse modpacks"
-msgstr "浏览模组包"
-
-msgid "Remove server “%s”?"
-msgstr "移除服务器“%s”？"
-
-msgid "Path tracing"
-msgstr "路径追踪"
-
-msgid "Clean export"
-msgstr "仅导出必要文件"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "游戏机制"
-
-msgid "Minecraft version"
-msgstr "Minecraft版本"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "打开文件夹"
-
+#: src/nuvashalauncher-main-window-actions.c:642
 msgid "AppStream metadata"
 msgstr "AppStream 元数据"
 
-msgid "Add Java runtime"
-msgstr "添加 Java 运行时"
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"AppStream 元数据（描述、摘要和发行说明）遵循 Creative Commons CC0 1.0 "
+"Universal Public Domain Dedication 协议发布。"
 
-msgid "World generation"
-msgstr "世界生成"
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "关于Nuvasha Launcher"
 
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
 msgid "Keyboard shortcuts"
 msgstr "热键"
 
-msgid "Resource packs"
-msgstr "资源包"
-
-msgid "Edit server"
-msgstr "编辑服务器"
-
-msgid "Keep playing"
-msgstr "继续游戏"
-
-msgid "Technical details"
-msgstr "技术详情"
-
-msgid "Pack name"
-msgstr "整合包名称"
-
-msgid "Colored lighting"
-msgstr "彩色光照"
-
-msgid "Rename world"
-msgstr "重命名世界"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "名称只能包含字母、数字和下划线."
-
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
 msgid "Preferences"
 msgstr "设置"
 
-msgid "Delete world"
-msgstr "删除世界"
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "退出"
 
-msgid "Asking Microsoft for a code…"
-msgstr "要求Microsoft提供代码…"
-
-msgid "Show unstable mod loader versions"
-msgstr "显示不稳定的模组加载器版本"
-
-msgid "Move down"
-msgstr "下移"
-
-msgid "Clear cache"
-msgstr "清除 Nuvasha Launcher 缓存"
-
-msgid "Delete “%s”?"
-msgstr "删除“%s”"
-
-msgid "Import modpack…"
-msgstr "导入整合包…"
-
+#: src/nuvashalauncher-main-window-actions.c:672
 msgid "Delete selected"
 msgstr "删除所选项"
 
-msgid "Java runtime"
-msgstr "Java 运行时"
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "导入整合包…"
 
-msgid "A name has to be 3 to 16 characters long."
-msgstr "名称长度必须为 3 到 16 个字符."
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "停止"
 
-msgid "Import modpack"
-msgstr "导入整合包"
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "开始游戏"
 
-msgid "Core shaders"
-msgstr "核心着色器"
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "停%s？"
 
-msgid "Sign in"
-msgstr "登入"
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "这款游戏"
 
-msgid "Cache cleared"
-msgstr "缓存已清除"
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr "游戏正在运行，即将关闭。自上次保存以来的进度将丢失。"
 
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "继续游戏"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "账户"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
 msgid "No instances yet"
 msgstr "还没有实例"
 
-msgid "Add offline account"
-msgstr "添加离线账户"
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "创建一个实例以开始游戏。"
 
-msgid "Copy seed"
-msgstr "复制种子"
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraft 已崩溃"
 
-msgid "Services & ecosystem"
-msgstr "服务与生态"
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Minecraft 无法启动"
 
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "没有符合要求的模组包。请尝试输入其他关键词."
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft 需要登录"
 
-msgid "Line limit"
-msgstr "行数上限"
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "Minecraft Services 拒绝了请求（HTTP %u）%s%s"
 
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Modrinth 模组包 (*.mrpack)"
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "正在写入归档"
 
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "导出完成"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "无法确定模组加载器：%s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "冒险"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "氛围"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "音频"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "方块"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "泛光"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "卡通"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "类别"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "彩色光照"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "战斗"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "核心着色器"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "猎奇"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "装饰"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "经济"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "实体"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "环境"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "装备"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "奇幻"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "功能"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "植被"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "字体"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "食物"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "游戏机制"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "界面"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "高"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "物品"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "程序库"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "低"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "魔法"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "管理"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "中"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "小游戏"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "生物"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "模组适配"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "模型"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "优化"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "路径追踪"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "性能影响"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "超低配置"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "写实"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "反射"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "分辨率"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "截图"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "半写实"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "阴影"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "简约"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "社交"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "存储"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "科技"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "主题化"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "运输"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "微调"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "实用工具"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "原版风格"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "世界生成"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr "莫德林斯正要求努瓦莎放慢节奏，请求太多了"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "Modrinth 不认识这个文件"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "未找到与Minecraft %s和%s兼容的版本。"
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "已存在同名离线账户。"
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "编辑服务器"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
 msgid "Add server"
 msgstr "添加服务器"
 
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "保存"
 
-msgid "All versions"
-msgstr "所有版本"
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "地址"
 
-msgid "No servers"
-msgstr "无服务器"
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "下载前询问"
 
-msgid "Clear cache?"
-msgstr "清除 Nuvasha Launcher 缓存？"
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "始终下载"
 
-msgid "Loader version"
-msgstr "模组加载器版本"
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "从不下载"
 
-msgid "translator-credits"
-msgstr "Flia"
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "移除服务器“%s”？"
 
-msgid "Include all files"
-msgstr "包含所有文件"
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "移除服务器"
 
-msgid "Export modpack"
-msgstr "导出整合包"
-
-msgid "Add world…"
-msgstr "添加世界…"
-
-msgid "Update all"
-msgstr "全部更新"
-
-msgid "Add Microsoft account"
-msgstr "添加 Microsoft 账户"
-
+#: src/nuvashalauncher-servers-page.c:455
 msgid "Move up"
 msgstr "上移"
 
-msgid "Minecraft disclaimer"
-msgstr "Minecraft 免责声明"
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "下移"
 
-msgid "Shader packs"
-msgstr "着色器包"
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "编辑"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "刷新"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "无服务器"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "在此添加的服务器将保存到该实例的 servers.dat 中。"
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "要求Microsoft提供代码…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "正在浏览器中等待登录…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "无法打开浏览器。请手动打开显示的地址。"
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr "Microsoft 返回了不安全的登录地址。请先更新启动器再重试。"
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "在浏览器中打开页面，然后输入此代码："
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Skin"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "皮肤图片必须是64x64或64x32的PNG文件"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "无效的皮肤"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "好的"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "PNG 皮肤纹理"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:368
+msgid "Delete skin?"
+msgstr "删除皮肤？"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:369
+msgid "This skin will be removed from the skin library."
+msgstr "此皮肤将从皮肤库中移除。"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "无披风"
+
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
+msgid "Remove %s?"
+msgstr "删除%s？"
+
+#: src/nuvashalauncher-users-popover.c:178
+msgid "this account"
+msgstr "该账户"
+
+#: src/nuvashalauncher-users-popover.c:181
+msgid ""
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
+msgstr ""
+"该账号将从 Nuvasha Launcher 中移除，其保存的登录信息也将被清除。游戏本身不会"
+"受到任何影响。"
+
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "移除"
+
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "微软 · 需要登录"
+
+#: src/nuvashalauncher-users-popover.c:398
+msgid "Add Microsoft account"
+msgstr "添加 Microsoft 账户"
+
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Minecraft版本"
+
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "生存"
+
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "创造"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "旁观"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "重命名世界"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "重命名"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "复制"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "种子已复制到剪贴板"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "删除世界“%s”？此操作无法撤销。"
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "删除世界"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "复制种子"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "添加世界"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "添加世界…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "无世界"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Minecraft 保存或导入到此处的世界将显示在此列表中。"
+
+#~ msgid "Colored Lighting"
+#~ msgstr "彩色光照"
+
+#~ msgid "Core Shaders"
+#~ msgstr "核心着色器"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "游戏机制"
+
+#~ msgid "Path Tracing"
+#~ msgstr "路径追踪"
+
+#~ msgid "Performance Impact"
+#~ msgstr "性能影响"
+
+#~ msgid "World Generation"
+#~ msgstr "世界生成"
+
+#~ msgid "All Versions"
+#~ msgstr "所有版本"
+
+#~ msgid "Update All"
+#~ msgstr "全部更新"
+
+#~ msgid "Open Folder"
+#~ msgstr "打开文件夹"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "未选择任何内容"
+
+#~ msgid "Create Instance"
+#~ msgstr "创建新记录"
+
+#~ msgid "Download Modpack"
+#~ msgstr "下载Modpack"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "已复制到“%s”"
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "删除\"%s\""
+
+#~ msgid "Java Runtime"
+#~ msgstr "Java 运行时"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "添加 Java 运行时"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "Minecraft 需要非无头模式的 Java：在 Arch 上请使用 jre-openjdk 软件包，而不"
+#~ "是 jre-openjdk-headless"
+
+#~ msgid "Delete Instance"
+#~ msgstr "删除实例"
+
+#~ msgid "Resource Packs"
+#~ msgstr "资源包"
+
+#~ msgid "Shader Packs"
+#~ msgstr "着色器包"
+
+#~ msgid "Loader Version"
+#~ msgstr "模组加载器版本"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "显示不稳定的模组加载器版本"
+
+#~ msgid "Line Limit"
+#~ msgstr "行数上限"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "热键"
+
+#~ msgid "Keep Playing"
+#~ msgstr "继续游戏"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "还没有实例"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "使用标题中的+按钮创建一个"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "添加离线账户"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "名称只能包含字母、数字和下划线"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "名称不能为空"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "名称长度必须为 3 到 16 个字符"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "要求Microsoft提供代码"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "正在浏览器中等待登录"
+
+#~ msgid "Sign In"
+#~ msgstr "登入"
+
+#~ msgid "Try Again"
+#~ msgstr "再试一次"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "添加 Microsoft 账户"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Minecraft版本"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s“%s”"
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "显示快捷键"
+
+# New modpack import/export actions use English until translators provide localized text.
+#~ msgid "Import Modpack"
+#~ msgstr "导入整合包"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Modrinth 模组包 (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "导出整合包"
+
+#~ msgid "Clean Export"
+#~ msgstr "仅导出必要文件"
+
+#~ msgid "Include All Files"
+#~ msgstr "包含所有文件"
+
+#~ msgid "Pack Name"
+#~ msgstr "整合包名称"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "整合包未定义安装信息"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "正在下载整合包"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "已安装 %u 个项目"
+
+#~ msgid "no compatible version"
+#~ msgstr "没有兼容的版本"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "无法创建“%s”：%s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "缓存已清除"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "缓存清理失败"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "无法清除缓存。"
+
+#~ msgid "Unavailable"
+#~ msgstr "不可用"
+
+#~ msgid "This cannot be installed"
+#~ msgstr "无法安装此内容"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "浏览模组包"
+
+#~ msgid "Choose Files"
+#~ msgstr "选择文件"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "清除 Nuvasha Launcher 缓存"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "清除 Nuvasha Launcher 缓存？"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "无法理解这个答案"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "其中包含 Nuvasha Launcher 无法识别的文件。"
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "微软返回了一个不安全的验证地址"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr "没有符合要求的模组包。请尝试输入其他关键词"
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Nuvasha Launcher 缓存数据已成功清除。"
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "搜索 Modrinth 并安装模组包"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "登录未完成"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "将删除以下实例：\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "编辑模式"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "进入编辑模式"
+
+#~ msgid "Delete Selected"
+#~ msgstr "删除所选项"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "无法加载项目详情。请重试。"
+
+#~ msgid "Technical Details"
+#~ msgstr "技术详情"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "服务与生态"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Minecraft 免责声明"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth 与模组加载器"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "AppStream 元数据"
+
+#~ msgid "Reset Icon"
+#~ msgstr "重置图标"
+
+#~ msgid "Delete World"
+#~ msgstr "删除世界"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "移除服务器“%s”？"
+
+#~ msgid "Remove Server"
+#~ msgstr "移除服务器"
+
+#~ msgid "Rename World"
+#~ msgstr "重命名世界"
+
+#~ msgid "Add World"
+#~ msgstr "添加世界"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "删除世界“%s”？此操作无法撤销。"
+
+#~ msgid "Add Server"
+#~ msgstr "添加服务器"
+
+#~ msgid "Edit Server"
+#~ msgstr "编辑服务器"
+
+#~ msgid "Datapacks"
+#~ msgstr "数据包"
+
+#~ msgid "No Worlds"
+#~ msgstr "无世界"
+
+#~ msgid "Move Up"
+#~ msgstr "上移"
+
+#~ msgid "No Servers"
+#~ msgstr "无服务器"
+
+#~ msgid "Move Down"
+#~ msgstr "下移"
+
+#~ msgid "Copy Seed"
+#~ msgstr "复制种子"
+
+#~ msgid "Playtime"
+#~ msgstr "游玩时间"
+
+#~ msgid "Runs on"
+#~ msgstr "运行环境"
+
+#~ msgid "Last session"
+#~ msgstr "上次游玩"
+
+#~ msgid "Server joins"
+#~ msgstr "加入服务器次数"
+
+#~ msgid "World loads"
+#~ msgstr "加载世界次数"
+
+#~ msgid "Player Profile"
+#~ msgstr "玩家档案"
+
+#~ msgid "Player type"
+#~ msgstr "玩家类型"
+
+#~ msgid "Pack style"
+#~ msgstr "整合风格"
+
+#~ msgid "Average session"
+#~ msgstr "平均时长"
+
+#~ msgid "Stability"
+#~ msgstr "稳定性"
+
+#~ msgid "Hybrid"
+#~ msgstr "混合"
+
+#~ msgid "Server Player"
+#~ msgstr "服务器玩家"
+
+#~ msgid "Singleplayer"
+#~ msgstr "单人玩家"
+
+#~ msgid "Unplayed"
+#~ msgstr "未游玩"
+
+#~ msgid "Modpack"
+#~ msgstr "整合包"
+
+#~ msgid "Lightweight"
+#~ msgstr "轻量"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "大型整合"
+
+#~ msgid "Quick"
+#~ msgstr "短时"
+
+#~ msgid "Standard"
+#~ msgstr "标准"
+
+#~ msgid "Marathon"
+#~ msgstr "马拉松"
+
+#~ msgid "Stable"
+#~ msgstr "稳定"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "%u%% 崩溃率"

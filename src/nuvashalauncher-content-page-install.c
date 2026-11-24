@@ -784,3 +784,331 @@ start_plan (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *ve
    * fetch writes anything to the folder. */
   plan_next (plan);
 }
+
+/* ---------------------------------------------------------- *
+ * The batch install plan for multiple selected items
+ * ---------------------------------------------------------- */
+
+typedef struct {
+  NuvashaLauncherContentPage *page;
+  GPtrArray *pending_projects;  /* NuvashaLauncherModrinthProject* */
+  GPtrArray *selected_titles;   /* char* */
+  GPtrArray *files;             /* InstallFile* (all files to install) */
+  GPtrArray *queue;             /* NuvashaLauncherModrinthDependency* */
+  GPtrArray *dependency_titles; /* char* */
+  GHashTable *seen;             /* project_id -> TRUE */
+  GCancellable *cancellable;
+  NuvashaLauncherTaskScope *operation;
+} BatchPlanRun;
+
+static void batch_plan_resolve_next_project (BatchPlanRun *batch);
+static void batch_plan_resolve_next_dependency (BatchPlanRun *batch);
+static void show_batch_plan (NuvashaLauncherContentPage *self, BatchPlanRun *batch);
+
+static void
+batch_plan_free (BatchPlanRun *batch)
+{
+  if (batch == NULL)
+    return;
+  if (batch->page != NULL)
+    g_object_remove_weak_pointer (G_OBJECT (batch->page), (gpointer *) &batch->page);
+  g_clear_pointer (&batch->pending_projects, g_ptr_array_unref);
+  g_clear_pointer (&batch->selected_titles, g_ptr_array_unref);
+  g_clear_pointer (&batch->files, g_ptr_array_unref);
+  g_clear_pointer (&batch->queue, g_ptr_array_unref);
+  g_clear_pointer (&batch->dependency_titles, g_ptr_array_unref);
+  g_clear_pointer (&batch->seen, g_hash_table_unref);
+  g_clear_object (&batch->cancellable);
+  if (batch->operation != NULL)
+    nuvashalauncher_task_scope_unref (batch->operation);
+  g_free (batch);
+}
+
+static void
+on_batch_project_versions_ready (GObject *source G_GNUC_UNUSED,
+                                 GAsyncResult *result,
+                                 gpointer user_data)
+{
+  BatchPlanRun *batch = user_data;
+  NuvashaLauncherContentPage *self = batch->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) versions =
+    nuvashalauncher_modrinth_versions_finish (result, &error);
+
+  if (self == NULL || (batch->cancellable != NULL && g_cancellable_is_cancelled (batch->cancellable)))
+    {
+      batch_plan_free (batch);
+      return;
+    }
+
+  if (versions != NULL && versions->len > 0)
+    {
+      NuvashaLauncherModrinthVersion *version = g_ptr_array_index (versions, 0);
+      NuvashaLauncherModrinthProject *current = g_ptr_array_index (batch->pending_projects, 0);
+      const char *title = current->title != NULL ? current->title : version->name;
+
+      g_ptr_array_add (batch->selected_titles, g_strdup (title));
+      g_hash_table_add (batch->seen, g_strdup (version->project_id));
+
+      InstallFile *own = install_file_of (version, NULL, FALSE, current->title);
+      if (own != NULL)
+        g_ptr_array_add (batch->files, own);
+
+      g_autoptr (GPtrArray) pending =
+        nuvashalauncher_modrinth_resolve_install (version, NULL, NULL, NULL);
+      if (pending != NULL)
+        {
+          for (guint i = 0; i < pending->len; i++)
+            {
+              NuvashaLauncherModrinthDependency *dep = g_ptr_array_index (pending, i);
+              if (!g_hash_table_contains (batch->seen, dep->project_id))
+                {
+                  g_hash_table_add (batch->seen, g_strdup (dep->project_id));
+                  g_ptr_array_add (batch->queue, nuvashalauncher_modrinth_dependency_copy (dep));
+                }
+            }
+        }
+    }
+
+  g_ptr_array_remove_index (batch->pending_projects, 0);
+  batch_plan_resolve_next_project (batch);
+}
+
+static void
+batch_plan_resolve_next_project (BatchPlanRun *batch)
+{
+  NuvashaLauncherContentPage *self = batch->page;
+  if (self == NULL)
+    {
+      batch_plan_free (batch);
+      return;
+    }
+
+  if (batch->pending_projects->len > 0)
+    {
+      NuvashaLauncherModrinthProject *p = g_ptr_array_index (batch->pending_projects, 0);
+      batch->operation = nuvashalauncher_modrinth_versions_async (
+        p->project_id, self->type, self->minecraft_version, self->loader,
+        on_batch_project_versions_ready, batch);
+      if (batch->cancellable != NULL)
+        nuvashalauncher_task_scope_follow_cancellable (batch->operation, batch->cancellable);
+      return;
+    }
+
+  batch_plan_resolve_next_dependency (batch);
+}
+
+static void
+on_batch_dependency_versions_ready (GObject *source G_GNUC_UNUSED,
+                                    GAsyncResult *result,
+                                    gpointer user_data)
+{
+  BatchPlanRun *batch = user_data;
+  NuvashaLauncherContentPage *self = batch->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) versions =
+    nuvashalauncher_modrinth_versions_finish (result, &error);
+
+  if (self == NULL || (batch->cancellable != NULL && g_cancellable_is_cancelled (batch->cancellable)))
+    {
+      batch_plan_free (batch);
+      return;
+    }
+
+  if (versions != NULL && versions->len > 0)
+    {
+      NuvashaLauncherModrinthVersion *version = g_ptr_array_index (versions, 0);
+      const char *title = version->name != NULL ? version->name : version->project_id;
+      g_ptr_array_add (batch->dependency_titles, g_strdup (title));
+
+      InstallFile *file = install_file_of (version, NULL, FALSE, NULL);
+      if (file != NULL)
+        {
+          file->required = TRUE;
+          g_ptr_array_add (batch->files, file);
+        }
+
+      g_autoptr (GPtrArray) pending =
+        nuvashalauncher_modrinth_resolve_install (version, NULL, NULL, NULL);
+      if (pending != NULL)
+        {
+          for (guint i = 0; i < pending->len; i++)
+            {
+              NuvashaLauncherModrinthDependency *dep = g_ptr_array_index (pending, i);
+              if (!g_hash_table_contains (batch->seen, dep->project_id))
+                {
+                  g_hash_table_add (batch->seen, g_strdup (dep->project_id));
+                  g_ptr_array_add (batch->queue, nuvashalauncher_modrinth_dependency_copy (dep));
+                }
+            }
+        }
+    }
+
+  batch_plan_resolve_next_dependency (batch);
+}
+
+static void
+batch_plan_resolve_next_dependency (BatchPlanRun *batch)
+{
+  NuvashaLauncherContentPage *self = batch->page;
+  if (self == NULL)
+    {
+      batch_plan_free (batch);
+      return;
+    }
+
+  if (batch->queue->len > 0)
+    {
+      NuvashaLauncherModrinthDependency *dep = g_ptr_array_steal_index (batch->queue, 0);
+      g_autofree char *project_id = g_strdup (dep->project_id);
+      nuvashalauncher_modrinth_dependency_free (dep);
+
+      batch->operation = nuvashalauncher_modrinth_versions_async (
+        project_id, self->type, self->minecraft_version, self->loader,
+        on_batch_dependency_versions_ready, batch);
+      if (batch->cancellable != NULL)
+        nuvashalauncher_task_scope_follow_cancellable (batch->operation, batch->cancellable);
+      return;
+    }
+
+  show_batch_plan (self, batch);
+}
+
+static void
+on_batch_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
+  BatchPlanRun *batch = g_object_get_data (G_OBJECT (source), "nuvashalauncher-batch-plan");
+  const char *response =
+    adw_alert_dialog_choose_finish (ADW_ALERT_DIALOG (source), result);
+
+  if (batch == NULL)
+    {
+      g_object_unref (self);
+      return;
+    }
+
+  if (g_strcmp0 (response, "install") != 0 || batch->page == NULL)
+    {
+      batch_plan_free (batch);
+      g_object_unref (self);
+      return;
+    }
+
+  guint count = batch->selected_titles->len;
+  const char *msg_format = NULL;
+  switch (self->type)
+    {
+    case NUVASHALAUNCHER_CONTENT_MOD:
+      msg_format = ngettext ("%u mod is being installed", "%u mods are being installed", count);
+      break;
+    case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
+      msg_format = ngettext ("%u resource pack is being installed", "%u resource packs are being installed", count);
+      break;
+    case NUVASHALAUNCHER_CONTENT_SHADER:
+      msg_format = ngettext ("%u shader is being installed", "%u shaders are being installed", count);
+      break;
+    default:
+      msg_format = ngettext ("%u item is being installed", "%u items are being installed", count);
+      break;
+    }
+  g_autofree char *toast_msg = g_strdup_printf (msg_format, count);
+  show_toast (self, toast_msg);
+
+  start_fetch (self, batch->files);
+  batch->files = NULL;
+  batch_plan_free (batch);
+  g_object_unref (self);
+}
+
+static void
+show_batch_plan (NuvashaLauncherContentPage *self, BatchPlanRun *batch)
+{
+  if (batch->files == NULL || batch->files->len == 0)
+    {
+      batch_plan_free (batch);
+      return;
+    }
+
+  guint count = batch->selected_titles->len;
+  const char *heading_format = NULL;
+  switch (self->type)
+    {
+    case NUVASHALAUNCHER_CONTENT_MOD:
+      heading_format = ngettext ("Install the following mod?", "Install the following mods?", count);
+      break;
+    case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
+      heading_format = ngettext ("Install the following resource pack?", "Install the following resource packs?", count);
+      break;
+    case NUVASHALAUNCHER_CONTENT_SHADER:
+      heading_format = ngettext ("Install the following shader?", "Install the following shaders?", count);
+      break;
+    default:
+      heading_format = ngettext ("Install the following item?", "Install the following items?", count);
+      break;
+    }
+
+  g_autofree char *heading = g_strdup (heading_format);
+
+  g_autoptr (GString) body = g_string_new (NULL);
+  for (guint i = 0; i < batch->selected_titles->len; i++)
+    {
+      const char *title = g_ptr_array_index (batch->selected_titles, i);
+      g_string_append_printf (body, "• %s\n", title);
+    }
+
+  if (batch->dependency_titles->len > 0)
+    {
+      g_string_append_printf (body, "\n%s\n", _("Dependencies:"));
+      for (guint i = 0; i < batch->dependency_titles->len; i++)
+        {
+          const char *title = g_ptr_array_index (batch->dependency_titles, i);
+          g_string_append_printf (body, "• %s\n", title);
+        }
+    }
+
+  while (body->len > 0 && body->str[body->len - 1] == '\n')
+    g_string_truncate (body, body->len - 1);
+
+  AdwAlertDialog *alert =
+    ADW_ALERT_DIALOG (adw_alert_dialog_new (heading, body->str));
+
+  adw_alert_dialog_set_heading_use_markup (alert, FALSE);
+  adw_alert_dialog_set_body_use_markup (alert, FALSE);
+  adw_alert_dialog_add_response (alert, "cancel", _("Cancel"));
+  adw_alert_dialog_add_response (alert, "install", _("Install"));
+  adw_alert_dialog_set_response_appearance (alert, "install",
+                                            ADW_RESPONSE_SUGGESTED);
+  adw_alert_dialog_set_default_response (alert, "cancel");
+  adw_alert_dialog_set_close_response (alert, "cancel");
+
+  g_object_set_data (G_OBJECT (alert), "nuvashalauncher-batch-plan", batch);
+  adw_alert_dialog_choose (alert, GTK_WIDGET (self), NULL, on_batch_plan_chosen,
+                           g_object_ref (self));
+}
+
+void
+nuvashalauncher_content_page_start_batch_plan (NuvashaLauncherContentPage *self,
+                                               GPtrArray *projects)
+{
+  if (self == NULL || projects == NULL || projects->len == 0)
+    {
+      if (projects != NULL)
+        g_ptr_array_unref (projects);
+      return;
+    }
+
+  BatchPlanRun *batch = g_new0 (BatchPlanRun, 1);
+  batch->page = self;
+  g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &batch->page);
+  batch->pending_projects = projects;
+  batch->selected_titles = g_ptr_array_new_with_free_func (g_free);
+  batch->files = g_ptr_array_new_with_free_func ((GDestroyNotify) install_file_free);
+  batch->queue = g_ptr_array_new_with_free_func ((GDestroyNotify) nuvashalauncher_modrinth_dependency_free);
+  batch->dependency_titles = g_ptr_array_new_with_free_func (g_free);
+  batch->seen = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  if (self->browse.model != NULL && self->browse.model->cancellable != NULL)
+    batch->cancellable = g_object_ref (self->browse.model->cancellable);
+
+  batch_plan_resolve_next_project (batch);
+}

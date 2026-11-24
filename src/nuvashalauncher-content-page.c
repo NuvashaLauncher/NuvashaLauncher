@@ -313,6 +313,7 @@ nuvashalauncher_content_page_finalize (GObject *object)
 
   g_clear_pointer (&self->installed.files, g_ptr_array_unref);
   g_clear_pointer (&self->installed.rows, g_hash_table_unref);
+  g_clear_pointer (&self->browse.selected_projects, g_hash_table_unref);
   nuvashalauncher_content_browser_model_free (self->browse.model);
   self->browse.model = NULL;
   nuvashalauncher_content_install_model_free (self->install_model);

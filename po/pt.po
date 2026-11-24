@@ -1,1623 +1,2529 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: pt\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-msgid "Adventure"
-msgstr "Aventura"
-msgid "Atmosphere"
-msgstr "Atmosfera"
-msgid "Audio"
-msgstr "Áudio"
-msgid "Blocks"
-msgstr "Blocos"
-msgid "Bloom"
-msgstr "Brilho difuso"
-msgid "Cartoon"
-msgstr "Desenho animado"
-msgid "Categories"
-msgstr "Categorias"
-msgid "Colored Lighting"
-msgstr "Iluminação colorida"
-msgid "Combat"
-msgstr "Combate"
-msgid "Core Shaders"
-msgstr "Shaders do jogo base"
-msgid "Cursed"
-msgstr "Bizarros"
-msgid "Decoration"
-msgstr "Decoração"
-msgid "Economy"
-msgstr "Economia"
-msgid "Entities"
-msgstr "Entidades"
-msgid "Environment"
-msgstr "Ambiente"
-msgid "Equipment"
-msgstr "Equipamento"
-msgid "Fantasy"
-msgstr "Fantasia"
-msgid "Features"
-msgstr "Funcionalidades"
-msgid "Foliage"
-msgstr "Folhagem"
-msgid "Fonts"
-msgstr "Tipos de letra"
-msgid "Food"
-msgstr "Comida"
-msgid "Game Mechanics"
-msgstr "Mecânicas de jogo"
-msgid "Interface"
-msgstr "Interface"
-msgid "High"
-msgstr "Alto"
-msgid "Items"
-msgstr "Itens"
-msgid "Library"
-msgstr "Biblioteca"
-msgid "Low"
-msgstr "Baixo"
-msgid "Magic"
-msgstr "Magia"
-msgid "Management"
-msgstr "Gestão"
-msgid "Medium"
-msgstr "Médio"
-msgid "Minigame"
-msgstr "Minijogo"
-msgid "Mobs"
-msgstr "Criaturas"
-msgid "Modded"
-msgstr "Com mods"
-msgid "Models"
-msgstr "Modelos"
-msgid "Optimization"
-msgstr "Otimização"
-msgid "Path Tracing"
-msgstr "Traçado de caminhos"
-msgid "Performance Impact"
-msgstr "Impacto no desempenho"
-msgid "Potato"
-msgstr "Para computadores muito básicos"
-msgid "Realistic"
-msgstr "Realista"
-msgid "Reflections"
-msgstr "Reflexos"
-msgid "Resolutions"
-msgstr "Resoluções"
-msgid "Screenshot"
-msgstr "Captura de ecrã"
-msgid "Semi-realistic"
-msgstr "Semirrealista"
-msgid "Shadows"
-msgstr "Sombras"
-msgid "Simplistic"
-msgstr "Simples"
-msgid "Social"
-msgstr "Social"
-msgid "Storage"
-msgstr "Armazenamento"
-msgid "Technology"
-msgstr "Tecnologia"
-msgid "Themed"
-msgstr "Temático"
-msgid "Transportation"
-msgstr "Transporte"
-msgid "Tweaks"
-msgstr "Ajustes"
-msgid "Utility"
-msgstr "Utilidades"
-msgid "Vanilla-like"
-msgstr "Semelhante ao jogo base"
-msgid "World Generation"
-msgstr "Geração de mundo"
 
-msgid "All Versions"
-msgstr "Todas as versões"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "Relevância"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "Offline"
 
-msgid "Newest"
-msgstr "Mais recentes"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "um nome não pode estar vazio."
 
-msgid "Recently updated"
-msgstr "Atualizados recentemente"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "um nome deve ter de 3 a 16 caracteres."
 
-msgid "Followers"
-msgstr "Seguidores"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "um nome só pode conter letras, dígitos e sublinhados."
 
-msgid "Filter modpacks"
-msgstr "Filtrar modpacks"
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
+msgid ""
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
+msgstr ""
+"Esta conta da Microsoft ainda não tem nenhum perfil Xbox associado: inicie "
+"sessão no xbox.com uma vez com essa conta e, em seguida, inicie sessão aqui "
+"novamente"
 
-msgid "Cancel"
-msgstr "Cancelar"
-msgid "Confirm"
-msgstr "Confirmar"
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
+msgid ""
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
+msgstr ""
+"Esta é uma conta de criança: tem de ser adicionada a uma família Microsoft "
+"por um adulto antes de poder jogar"
 
-msgid "Customize"
-msgstr "Personalizar"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr ""
+"O Xbox Live não está disponível no país em que esta conta está registada"
 
-msgid "Delete"
-msgstr "Excluir"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"Esta conta precisa de ser verificada por um adulto antes de poder jogar, tal "
+"como acontece com as contas sul-coreanas"
 
-msgid "Retry"
-msgstr "Tentar novamente"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "A Microsoft não forneceu um código para iniciar sessão"
 
-msgid "Loading…"
-msgstr "Carregando…"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1fM downloads"
 
-msgid "Download"
-msgstr "Descarregar"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1fpara as transferências"
 
-msgid "Update All"
-msgstr "Atualizar tudo"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s transferências"
 
-msgid "Open Folder"
-msgstr "Abrir pasta"
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s · por %s"
 
-msgid "Nothing installed yet"
-msgstr "Nada instalado ainda"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "por %s"
 
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Procure algo para colocar na pasta desta instância"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "%u mod selecionado"
+msgstr[1] "%u mods selecionados"
 
-msgid "Installed"
-msgstr "Instalado"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "%u pacote de recursos selecionado"
+msgstr[1] "%u pacotes de recursos selecionados"
 
-msgid "Loading more…"
-msgstr "Carregando mais…"
+#: src/nuvashalauncher-content-page-browser.c:98
+#, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "%u shader selecionado"
+msgstr[1] "%u shaders selecionados"
 
-msgid "Nothing is selected"
-msgstr "Nada está selecionado"
+#: src/nuvashalauncher-content-page-browser.c:101
+#, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "%u item selecionado"
+msgstr[1] "%u itens selecionados"
 
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr "Selecionar"
 
-msgid "Filter by category"
-msgstr "Filtrar por categoria"
-
-msgid "Nothing to show yet"
-msgstr "Nada para mostrar ainda"
-
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Digite o que procurar ou navegue por tudo que Modrinth tem para esta instância"
-
-msgid "Browse"
-msgstr "Navegar"
-
-msgid "No mod loader"
-msgstr "Sem carregador de mod"
-
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Os mods precisam de um carregador de mods. Escolha Fabric, Quilt, Forge ou NeoForge nas configurações desta instância primeiro"
-
-msgid "Create Instance"
-msgstr "Criar instância"
-
-msgid "Name"
-msgstr "Nome"
-
-msgid "Directory"
-msgstr "Diretório"
-
-msgid "Choose a folder"
-msgstr "Escolha uma pasta"
-
-msgid "Create"
-msgstr "Criar"
-
-msgid "Download Modpack"
-msgstr "Baixar Modpack"
-
-
-msgid "Search modpacks"
-msgstr "Pesquisar modpacks"
-
-msgid "Close"
-msgstr "Fechar"
-
-msgid "Back"
-msgstr "Voltar"
-
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "Instalar"
 
-msgid "Copy of %s"
-msgstr "Cópia de %s"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "a próxima página não pôde ser carregada"
 
-msgid "Choose Java executable"
-msgstr "Escolha o executável Java"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Não foi possível pesquisar «Modrinth»"
 
-msgid "the chosen file does not report a Java version"
-msgstr "o arquivo escolhido não informa uma versão Java"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "Outro"
 
-msgid "Choose an Icon"
-msgstr "Escolha um ícone"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "Não foi possível carregar as categorias"
 
-msgid "Choose a Directory"
-msgstr "Escolha um diretório"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "Tentar novamente"
 
-msgid "Duplicated to \"%s\""
-msgstr "Duplicado para \"%s\""
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "Não foi possível carregar as versões. Tente novamente."
 
-msgid "Delete \"%s\"?"
-msgstr "Excluir \"%s\"?"
-
-msgid "General"
-msgstr "Em geral"
-
-msgid "Icon"
-msgstr "Ícone"
-
-msgid "Change the Directory"
-msgstr "Alterar o diretório"
-
-msgid "Minecraft"
-msgstr "Minecraft"
-
-msgid "Java"
-msgstr "Java"
-
-msgid "Java Runtime"
-msgstr "Tempo de execução Java"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "Este jogo precisa de Java %d ou mais recente, o Java selecionado é %d"
-
-msgid "Add Java Runtime"
-msgstr "Adicionar Java Runtime"
-
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "O Minecraft precisa de um Java sem cabeça: no Arch use o pacote jre-openjdk, não o jre-openjdk-headless"
-
-msgid "JVM Arguments"
-msgstr "Argumentos JVM"
-
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "O Java configurado não foi detectado; certifique-se de que ainda seja um executável java utilizável"
-
-msgid "Actions"
-msgstr "Ações"
-
-msgid "Duplicate"
-msgstr "Duplicado"
-
-msgid "Delete Instance"
-msgstr "Excluir instância"
-
-msgid "Settings"
-msgstr "Configurações"
-
-msgid "Resource Packs"
-msgstr "Pacotes de recursos"
-
-msgid "Shader Packs"
-msgstr "Pacotes de sombreadores"
-
-msgid "Mods"
-msgstr "Modificações"
-
-msgid "Logs"
-msgstr "Registros"
-
-msgid "Custom: %s"
-msgstr "Alfândega: %s"
-
-msgid "the game was stopped by signal %d"
-msgstr "o jogo foi interrompido pelo sinal %d"
-
-msgid "the game exited with code %d"
-msgstr "o jogo foi encerrado com o código %d"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "Nenhuma versão compatível de %s encontrada para Minecraft %s."
-
-msgid "Loader"
-msgstr "Carregador"
-
-msgid "Loader Version"
-msgstr "Versão do carregador"
-
-msgid "Clear"
-msgstr "Claro"
-
-msgid "Search the log"
-msgstr "Pesquise o registro"
-
-msgid "Versions"
-msgstr "Versões"
-
-msgid "Show unstable Minecraft versions"
-msgstr "Mostrar versões instáveis ​​do Minecraft"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "Mostrar versões instáveis ​​do Mod Loader"
-
-msgid "Language"
-msgstr "Linguagem"
-
-msgid "Interface language"
-msgstr "Idioma da interface"
-
-msgid "Line Limit"
-msgstr "Limite de linha"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "Sobre o lançador Nuvasha Launcher"
-
-msgid "Keyboard Shortcuts"
-msgstr "Atalhos de teclado"
-
-msgid "Stop"
-msgstr "Parar"
-
-msgid "Play"
-msgstr "Jogar"
-
-msgid "Keep Playing"
-msgstr "Continue jogando"
-
-msgid "Downloads"
-msgstr "Transferências"
-
-msgid "Accounts"
-msgstr "Contas"
-
-msgid "No Instances Yet"
-msgstr "Nenhuma instância ainda"
-
-msgid "Use the + button in the header to create one"
-msgstr "Use o botão + no cabeçalho para criar um"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "o carregador não pode ser resolvido: %s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "Nenhuma versão compatível encontrada para Minecraft %s e %s."
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "Nenhuma versão compatível encontrada para Minecraft %s."
 
-msgid "Add Offline Account"
-msgstr "Adicionar conta off-line"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "Versões"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "um nome só pode conter letras, dígitos e sublinhados"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "A pasta não pode ser lida"
 
-msgid "a name cannot be empty"
-msgstr "um nome não pode estar vazio"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "um nome deve ter de 3 a 16 caracteres"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "O arquivo não pôde ser instalado"
 
-msgid "Add"
-msgstr "Adicionar"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "pedindo um código à Microsoft"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "A pasta não pode ser criada"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "aguardando o login no navegador"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "Conteúdo"
 
-msgid "Sign In"
-msgstr "Entrar"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "Instalação"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "Abra a página em seu navegador e digite este código:"
-
-msgid "Try Again"
-msgstr "Tente novamente"
-
-msgid "Remove"
-msgstr "Remover"
-
-msgid "Add Microsoft Account"
-msgstr "Adicionar conta da Microsoft"
-
-msgid "Minecraft Version"
-msgstr "Versão do Minecraft"
-
-msgid "Install the selected %s?"
-msgstr "Instalar os %s selecionados?"
-
-msgid "%s \"%s\""
-msgstr "%s \"%s\""
-
-msgid "Search"
-msgstr "Procurar"
-
-msgid "Update"
-msgstr "Atualizar"
-
-msgid "Update the following %s"
-msgstr "Atualize o seguinte %s"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "Dependências:"
 
-msgid "The following mods depend on %s:\n%s"
-msgstr "Os seguintes mods dependem de %s:\n%s"
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "Conflitos\n"
 
-msgid "Cache"
-msgstr "Cache"
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "%s está sendo instalado"
 
-msgid "Cache Modrinth API responses"
-msgstr "Cache de respostas da API Modrinth"
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "Atualizar"
 
-msgid "Cache expiration"
-msgstr "Expiração do cache"
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s “%s”"
 
-msgid "1 hour"
-msgstr "1 hora"
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "Cancelar"
 
-msgid "6 hours"
-msgstr "6 horas"
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "Este projeto não publica nada que se enquadre nesta instância."
 
-msgid "1 day"
-msgstr "1 dia"
+#: src/nuvashalauncher-content-page-install.c:1003
+#, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "%u mod está sendo instalado"
+msgstr[1] "%u mods estão sendo instalados"
 
-msgid "7 days"
-msgstr "7 dias"
+#: src/nuvashalauncher-content-page-install.c:1006
+#, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "%u pacote de recursos está sendo instalado"
+msgstr[1] "%u pacotes de recursos estão sendo instalados"
 
-msgid "Show Shortcuts"
-msgstr "Mostrar atalhos"
+#: src/nuvashalauncher-content-page-install.c:1009
+#, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "%u shader está sendo instalado"
+msgstr[1] "%u shaders estão sendo instalados"
 
-msgid "Quit"
-msgstr "Desistir"
+#: src/nuvashalauncher-content-page-install.c:1012
+#, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "%u item está sendo instalado"
+msgstr[1] "%u itens estão sendo instalados"
 
-msgid "Import Modpack"
-msgstr "Importar Modpack"
+#: src/nuvashalauncher-content-page-install.c:1038
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "Instalar o seguinte mod?"
+msgstr[1] "Instalar os seguintes mods?"
 
-msgid "Modpack exported"
-msgstr "Modpack exportado"
+#: src/nuvashalauncher-content-page-install.c:1041
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "Instalar o seguinte pacote de recursos?"
+msgstr[1] "Instalar os seguintes pacotes de recursos?"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
+#: src/nuvashalauncher-content-page-install.c:1044
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "Instalar o seguinte shader?"
+msgstr[1] "Instalar os seguintes shaders?"
 
-msgid "The export location is not a local file"
-msgstr "O local de exportação não é um arquivo local"
+#: src/nuvashalauncher-content-page-install.c:1047
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "Instalar o seguinte item?"
+msgstr[1] "Instalar os seguintes itens?"
 
-msgid "Export Modpack"
-msgstr "Exportar Modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "O arquivo não pode ser excluído"
 
-msgid "Importing modpack…"
-msgstr "Importando modpack…"
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "Ativar"
 
-msgid "Reading modpack"
-msgstr "Lendo modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "Um mod dependente não pode ser excluído"
 
-msgid "Exporting modpack"
-msgstr "Exportando modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "O arquivo não pode ser renomeado"
 
-msgid "Modpack export"
-msgstr "Exportação de modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "Excluído"
 
-msgid "Include transient files?"
-msgstr "Incluir arquivos temporários?"
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "Excluir “%s”?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Logs, relatórios de falhas, capturas de tela, caches e downloads são normalmente excluídos."
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Os seguintes mods dependem de %s:\n"
+"%s"
 
-msgid "Clean Export"
-msgstr "Exportação limpa"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "Excluir"
 
-msgid "Include All Files"
-msgstr "Incluir todos os arquivos"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "Habilitado"
 
-msgid "Pack Name"
-msgstr "Nome do pacote"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "Desabilitado"
 
-msgid "Summary"
-msgstr "Resumo"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "Desativar"
 
-msgid "Version ID"
-msgstr "ID da versão"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "Procurar"
 
-msgid "Downloading files"
-msgstr "Baixando arquivos"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "Atualizar tudo"
 
-msgid "Extracting files"
-msgstr "Extraindo arquivos"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "A obter atualizações"
 
-msgid "Optional files"
-msgstr "Arquivos opcionais"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "Progresso"
 
-msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
-msgstr "O pacote lista esses arquivos, mas diz que eles não são necessários. Nenhum deles está instalado a menos que você pergunte. O padrão está desativado"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "Abrir pasta"
 
-msgid "Pack could not be fetched"
-msgstr "Não foi possível buscar o pacote"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "Nada instalado ainda"
 
-msgid "Invalid pack"
-msgstr "Pacote inválido"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Procure algo para colocar na pasta desta instância"
 
-msgid "The pack does not define its install"
-msgstr "O pacote não define sua instalação"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "Navegar"
 
-msgid "Downloading Modpack"
-msgstr "Baixando Modpack"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "Instalado"
 
-msgid "Writing archive"
-msgstr "Arquivo de escrita"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "Carregando mais…"
 
-msgid "Export modpack metadata"
-msgstr "Exportar metadados do modpack"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "Filtrar por categoria"
 
-msgid "Ask for export metadata"
-msgstr "Solicite metadados de exportação"
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "Nada para mostrar ainda"
 
-msgid "Pack information"
-msgstr "Informações do pacote"
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Digite o que procurar ou navegue por tudo que Modrinth tem para esta "
+"instância"
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "Mostre os campos de nome, resumo e versão antes de exportar."
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "Ignorar"
 
-msgid "Export complete"
-msgstr "Exportação concluída"
-
-msgid "Export"
-msgstr "Exportar"
-
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "%u item instalado"
-msgstr[1] "%u itens instalados"
-
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
 msgid "Updated %u item"
 msgid_plural "Updated %u items"
 msgstr[0] "Item %u atualizado"
 msgstr[1] "%u itens atualizados"
 
-msgid "The icon must be a file on this computer"
-msgstr "O ícone deve ser um arquivo neste computador"
-
-msgid "The game is running; stop it before moving its directory"
-msgstr "O jogo está rodando; pare-o antes de mover seu diretório"
-
-msgid "%s is being installed"
-msgstr "%s está sendo instalado"
-
-msgid "no compatible version"
-msgstr "nenhuma versão compatível"
-
-msgid "Enabled"
-msgstr "Habilitado"
-
-msgid "Disabled"
-msgstr "Desabilitado"
-
-msgid "Deleted"
-msgstr "Excluído"
-
+#: src/nuvashalauncher-content-page-updates.c:246
 msgid "Everything is up to date"
 msgstr "Está tudo atualizado"
 
-msgid "Cannot create \"%s\": %s"
-msgstr "Não foi possível criar \"%s\": %s"
-
-msgid "This project publishes nothing that fits this instance."
-msgstr "Este projeto não publica nada que se enquadre nesta instância."
-
-msgid "Unknown"
-msgstr "Desconhecido"
-
-msgid "%s (unstable)"
-msgstr "%s (instável)"
-
-msgid "the next page could not be loaded"
-msgstr "a próxima página não pôde ser carregada"
-
-msgid "Other"
-msgstr "Outro"
-
-msgid "%.1fM downloads"
-msgstr "%.1fM downloads"
-
-msgid "%.1fk downloads"
-msgstr "%.1fpara as transferências"
-
-msgid "%s  ·  by %s"
-msgstr "%s · por %s"
-
-msgid "by %s"
-msgstr "por %s"
-
-msgid "%s downloads"
-msgstr "%s transferências"
-
-msgid "Cache Cleared"
-msgstr "Cache limpo"
-
-msgid "Cache Cleanup Failed"
-msgstr "Falha na limpeza do cache"
-
-msgid "The cache could not be cleared."
-msgstr "Não foi possível limpar o cache."
-
-msgid "the versions of this loader could not be read"
-msgstr "as versões deste carregador não puderam ser lidas"
-
-msgid "Minecraft crashed"
-msgstr "Minecraft travou"
-
-msgid "Minecraft could not start"
-msgstr "Minecraft não pôde iniciar"
-
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft precisa de login"
-
-msgid "The file cannot be renamed"
-msgstr "O arquivo não pode ser renomeado"
-
-msgid "The file cannot be deleted"
-msgstr "O arquivo não pode ser excluído"
-
-msgid "The folder cannot be read"
-msgstr "A pasta não pode ser lida"
-
-msgid "The file could not be installed"
-msgstr "O arquivo não pôde ser instalado"
-
-msgid "The folder cannot be created"
-msgstr "A pasta não pode ser criada"
-
-msgid "This cannot be installed"
-msgstr "Isso não pode ser instalado"
-
-msgid "Pick a Minecraft version first"
-msgstr "Escolha uma versão do Minecraft primeiro"
-
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "Excluir uma dependência exclui o mod que dependia dela"
-
-msgid "A dependent mod cannot be deleted"
-msgstr "Um mod dependente não pode ser excluído"
-
-msgid "Slim model"
-msgstr "Modelo fino"
-
-msgid "OK"
-msgstr "Tudo bem"
-
-msgid "Export skin…"
-msgstr "Exportar skin…"
-
-msgid "Classic model"
-msgstr "Modelo clássico"
-
-msgid "PNG skin texture"
-msgstr "Textura de pele em formato PNG"
-
-msgid "Invalid skin"
-msgstr "Pele inválida"
-
-msgid "No cape"
-msgstr "Sem capa"
-
-msgid "Import skin…"
-msgstr "Importar skin…"
-
-msgid "Delete skin?"
-msgstr "Excluir skin?"
-
-msgid "This skin will be removed from the skin library."
-msgstr "Este skin será removido da biblioteca de skins."
-
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "As imagens de skin devem ser arquivos PNG de 64x64 ou 64x32"
-
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "Explorar Modpacks"
-
-msgid "Choose Files"
-msgstr "Selecionar ficheiros"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "Limpar a cache do Nuvasha Launcher"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Limpar a cache do Nuvasha Launcher?"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"Conflitos\n"
-
-msgid "Content"
-msgstr "Conteúdo"
-
-msgid "Could not install"
-msgstr "Não foi possível instalar"
-
-msgid "Could not install the modpack"
-msgstr "Não foi possível instalar o modpack"
-
-msgid "Could not load categories"
-msgstr "Não foi possível carregar as categorias"
-
-msgid "Could not search Modrinth"
-msgstr "Não foi possível pesquisar «Modrinth»"
-
-msgid "Could not understand the answer"
-msgstr "Não consegui compreender a resposta"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "Desativar"
-
-msgid "Dismiss"
-msgstr "Ignorar"
-
-msgid "Enable"
-msgstr "Ativar"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "Imagens"
-
-msgid "Installing"
-msgstr "Instalação"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "As instâncias não podem conter %s no seu nome"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "Contém ficheiros que o Nuvasha Launcher não reconhece."
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "A Microsoft devolveu um endereço de verificação não seguro"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "A Microsoft não forneceu um código para iniciar sessão"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · É necessário iniciar sessão"
-
-msgid "Modrinth does not know this file"
-msgstr "O Modrinth não reconhece este ficheiro"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "A Modrinth está a pedir à Nuvasha Launcher para abrandar, há demasiados pedidos"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No compatible Java runtime was found."
-msgstr "Não foi encontrado nenhum ambiente de execução Java compatível."
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "Não há nenhum modpack que corresponda ao que foi pedido. Tenta outra palavra"
-
-msgid "None"
-msgstr "Nenhum"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Os dados da cache do Nuvasha Launcher foram apagados com sucesso."
-
-msgid "Offline"
-msgstr "Offline"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "Escolhe uma versão do Minecraft da lista."
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "Escolha uma versão do carregador ou escolha outro carregador."
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
-msgid "Remove %s?"
-msgstr "Remover %s?"
-
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Pesquise no Modrinth e instale um modpack"
-
-msgid "Skin"
-msgstr "Pele"
-
-msgid "Stop %s?"
-msgstr "Parar %s?"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "Predefinição do sistema"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "A conta é removida do Nuvasha Launcher e os dados de início de sessão guardados são apagados. O jogo em si não é afetado."
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "O jogo está a ser executado e vai encerrar. O progresso desde o último guardado será perdido."
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "Este projeto não disponibiliza nenhum ficheiro de pacote que o Nuvasha Launcher possa instalar."
-
-msgid "This version has no pack file"
-msgstr "Esta versão não tem ficheiro de pacote"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Unavailable"
-msgstr "Indisponível"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "O Xbox Live não está disponível no país em que esta conta está registada"
-
-msgid "the game"
-msgstr "o jogo"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "O nome da instância não pode ser utilizado como nome de diretório"
-
-msgid "the instance name is empty"
-msgstr "o nome da instância está em branco"
-
-msgid "the sign-in did not finish"
-msgstr "O processo de início de sessão não foi concluído"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "Esta conta da Microsoft ainda não tem nenhum perfil Xbox associado: inicie sessão no xbox.com uma vez com essa conta e, em seguida, inicie sessão aqui novamente"
-
-msgid "this account"
-msgstr "esta conta"
-
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "Esta conta precisa de ser verificada por um adulto antes de poder jogar, tal como acontece com as contas sul-coreanas"
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "Esta é uma conta de criança: tem de ser adicionada a uma família Microsoft por um adulto antes de poder jogar"
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "O Minecraft Services rejeitou o pedido (HTTP %u)%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Erro do Minecraft Services"
-
-msgid "Application menu"
-msgstr "Application menu"
-
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "Atualize o seguinte %s"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "Confirmar"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
 msgid "The folder could not be opened: %s"
 msgstr "The folder could not be opened: %s"
 
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "Abrir no navegador"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "%u/%u selecionadas"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "As seguintes instâncias serão eliminadas:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "Modo de edição"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "A obter atualizações"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "Progresso"
-
-msgid "Enter Edit Mode"
-msgstr "Entrar no modo de edição"
-
-msgid "Delete Selected"
-msgstr "Eliminar selecionados"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "Foi criado um relatório de falha. Abra os registos para ver os detalhes."
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "Acesso negado. Verifique as permissões da pasta."
-
-msgid "An offline account with this name already exists."
-msgstr "Já existe uma conta offline com este nome."
-
-msgid "Choose another instance name or directory."
-msgstr "Escolha outro nome ou diretório para a instância."
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "Não foi possível instalar este carregador de mods. Escolha outra versão ou consulte os detalhes técnicos."
-
-msgid "Could not load project details. Try again."
-msgstr "Não foi possível carregar os detalhes do projeto. Tente novamente."
-
-msgid "Could not load versions. Try again."
-msgstr "Não foi possível carregar as versões. Tente novamente."
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "Não foi possível abrir o navegador. Abra manualmente o endereço apresentado."
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "Não foi possível ler ou escrever ficheiros. Verifique a localização, as permissões e o espaço livre."
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "Não foi possível guardar a conta. Verifique o porta-chaves do sistema e as permissões dos ficheiros."
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "A Microsoft devolveu um endereço de acesso inseguro. Atualize o lançador antes de tentar novamente."
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "O acesso com a Microsoft não está configurado nesta compilação. Atualize o lançador."
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "Selecione um ambiente Java com suporte gráfico, não uma instalação sem interface gráfica."
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "Crie um perfil do Minecraft: Java Edition em minecraft.net e tente novamente."
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "O acesso foi recusado. Recomece se pretender iniciar sessão."
-
-msgid "Technical Details"
-msgstr "Detalhes técnicos"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "Não foi possível usar o executável Java. Selecione um ambiente Java funcional."
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "O arquivo é inválido ou inseguro. Transfira-o novamente de uma fonte fidedigna."
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "A ligação falhou. Verifique a ligação à internet e tente novamente."
-
-msgid "The destination already exists. Choose another location."
-msgstr "O destino já existe. Escolha outra localização."
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "O ficheiro transferido falhou na verificação e não foi instalado. Transfira-o novamente."
-
-msgid "The file or folder was not found. Check its location."
-msgstr "O ficheiro ou pasta não foi encontrado. Verifique a localização."
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "Os metadados do jogo são inválidos ou indisponíveis. Atualize a lista de versões e tente novamente."
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "A operação falhou. Consulte os detalhes técnicos para obter mais informações."
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "O ficheiro, projeto ou versão compatível solicitado não foi encontrado."
-
-msgid "The service rejected the request. Try again later."
-msgstr "O serviço rejeitou o pedido. Tente mais tarde."
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "O serviço devolveu uma resposta inválida. Tente mais tarde."
-
-msgid "There is not enough free disk space."
-msgstr "Não há espaço livre suficiente no disco."
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "Esta conta não possui Minecraft: Java Edition."
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "Esta instância já não está disponível. Atualize a lista de instâncias."
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "Demasiados pedidos. Aguarde um momento e tente novamente."
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "As definições da instância são inválidas. Verifique a versão selecionada e os argumentos JVM."
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "O acesso guardado já não é válido. Inicie sessão novamente."
-
-msgid "Minecraft launcher for Linux"
-msgstr "Inicializador de Minecraft para Linux"
-
-msgid "Services & Ecosystem"
-msgstr "Serviços e ecossistema"
-
-msgid "Minecraft Disclaimer"
-msgstr "Aviso legal do Minecraft"
-
-msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
-msgstr ""
-"NÃO É UM PRODUTO OFICIAL DO MINECRAFT. NÃO APROVADO OU ASSOCIADO À MOJANG OU MICROSOFT.\n"
-"\n"
-"Minecraft é uma marca registada da Mojang AB. O inicializador é desenvolvido de forma independente e não está associado à Mojang Studios ou Microsoft."
-
-msgid "Modrinth & Mod Loaders"
-msgstr "Modrinth e carregadores de mods"
-
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"Modpacks, mods, pacotes de recursos e shaders são alojados pelo Modrinth e criados pelos respetivos autores.\n"
-"\n"
-"Os carregadores de mods são desenvolvidos de forma independente pelos projetos Fabric, Quilt, Forge e NeoForge."
-
-msgid "AppStream Metadata"
-msgstr "Metadados do AppStream"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "Os metadados do AppStream (descrições, resumos e notas de versão) são lançados sob a Creative Commons CC0 1.0 Universal Public Domain Dedication."
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "Copiar"
-
-msgid "Rename"
-msgstr "Mudar o nome"
-
-msgid "Reset Icon"
-msgstr "Repor ícone"
-
-msgid "Delete World"
-msgstr "Eliminar mundo"
-
-msgid "Seed copied to clipboard"
-msgstr "Semente copiada para a área de transferência"
-
-msgid "Remove server \"%s\"?"
-msgstr "Remover o servidor \"%s\"?"
-
-msgid "Refresh"
-msgstr "Atualizar"
-
-msgid "Remove Server"
-msgstr "Remover servidor"
-
-msgid "Survival"
-msgstr "Sobrevivência"
-
-msgid "Edit"
-msgstr "Editar"
-
-msgid "Ask to download"
-msgstr "Perguntar antes de transferir"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Os mundos guardados pelo Minecraft ou importados aqui aparecerão nesta lista."
-
-msgid "Rename World"
-msgstr "Mudar o nome do mundo"
-
-msgid "Servers"
-msgstr "Servidores"
-
-msgid "Save"
-msgstr "Guardar"
-
-msgid "Add World"
-msgstr "Adicionar mundo"
-
-msgid "Spectator"
-msgstr "Espectador"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "Eliminar o mundo \"%s\"? Esta ação é irreversível."
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Os servidores adicionados aqui são guardados em servers.dat para esta instância."
-
-msgid "Add Server"
-msgstr "Adicionar servidor"
-
-msgid "Edit Server"
-msgstr "Editar servidor"
-
-msgid "Address"
-msgstr "Endereço"
-
-msgid "Datapacks"
-msgstr "Pacotes de dados"
-
-msgid "No Worlds"
-msgstr "Sem mundos"
-
-msgid "Creative"
-msgstr "Criativo"
-
-msgid "Move Up"
-msgstr "Mover para cima"
-
-msgid "No Servers"
-msgstr "Sem servidores"
-
-msgid "Never download"
-msgstr "Nunca transferir"
-
-msgid "Worlds"
-msgstr "Mundos"
-
-msgid "Always download"
-msgstr "Transferir sempre"
-
-msgid "Move Down"
-msgstr "Mover para baixo"
-
-msgid "Copy Seed"
-msgstr "Copiar semente"
-
-msgid "Stats"
-msgstr "Estatísticas"
-
-msgid "Playtime"
-msgstr "Tempo de jogo"
-
-msgid "Time played"
-msgstr "Tempo jogado"
-
-msgid "Not played yet"
-msgstr "Ainda não jogado"
-
-msgid "Less than a minute"
-msgstr "Menos de um minuto"
-
-msgid "%llu min"
-msgstr "%llu min"
-
-msgid "%llu h %llu min"
-msgstr "%llu h %llu min"
-
-msgid "Runs on"
-msgstr "Executa em"
-
-msgid "Activity"
-msgstr "Atividade"
-
-msgid "Last session"
-msgstr "Última sessão"
-
-msgid "Last played"
-msgstr "Última vez"
-
-msgid "Total launches"
-msgstr "Total de inícios"
-
-msgid "Total crashes"
-msgstr "Total de falhas"
-
-msgid "Server joins"
-msgstr "Entradas em servidores"
-
-msgid "World loads"
-msgstr "Mundos carregados"
-
-msgid "Player Profile"
-msgstr "Perfil de Jogador"
-
-msgid "Player type"
-msgstr "Tipo de jogador"
-
-msgid "Pack style"
-msgstr "Estilo do pacote"
-
-msgid "Average session"
-msgstr "Sessão média"
-
-msgid "Stability"
-msgstr "Estabilidade"
-
-msgid "Instance"
-msgstr "Instância"
-
-msgid "Total size"
-msgstr "Tamanho total"
-
-msgid "Created on"
-msgstr "Criada em"
-
-msgid "Calculating…"
-msgstr "A calcular…"
-
-msgid "Never"
-msgstr "Nunca"
-
-msgid "Today, %s"
-msgstr "Hoje, %s"
-
-msgid "Hybrid"
-msgstr "Híbrido"
-
-msgid "Server Player"
-msgstr "Jogador de Servidores"
-
-msgid "Singleplayer"
-msgstr "Um Jogador"
-
-msgid "Unplayed"
-msgstr "Não jogado"
-
-msgid "Modpack"
-msgstr "Modpack"
-
-msgid "Lightweight"
-msgstr "Leve"
-
-msgid "Kitchen Sink"
-msgstr "Completo"
-
-msgid "Quick"
-msgstr "Rápida"
-
-msgid "Standard"
-msgstr "Padrão"
-
-msgid "Marathon"
-msgstr "Maratona"
-
-msgid "Stable"
-msgstr "Estável"
-
-msgid "%u%% crash rate"
-msgstr "%u%% de falhas"
-
-msgid "A name cannot be empty."
-msgstr "um nome não pode estar vazio."
-
-msgid "Remove server"
-msgstr "Remover servidor"
-
-msgid "Download modpack"
-msgstr "Baixar Modpack"
-
-msgid "%s “%s”"
-msgstr "%s “%s”"
-
-msgid "Delete instance"
-msgstr "Excluir instância"
-
-msgid "No worlds"
-msgstr "Sem mundos"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "aguardando o login no navegador…"
-
-msgid "Choose files"
-msgstr "Selecionar ficheiros"
-
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
 msgid "Cannot create “%s”: %s"
 msgstr "Não foi possível criar “%s”: %s"
 
-msgid "Cache cleanup failed"
-msgstr "Falha na limpeza do cache"
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "Sem carregador de mod"
 
-msgid "Español"
-msgstr "Español"
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Os mods precisam de um carregador de mods. Escolha Fabric, Quilt, Forge ou "
+"NeoForge nas configurações desta instância primeiro"
 
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth e carregadores de mods"
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "Escolhe uma versão do Minecraft da lista."
 
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "Eliminar o mundo “%s”? Esta ação é irreversível."
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Escolha uma versão do carregador ou escolha outro carregador."
 
-msgid "Português"
-msgstr "Português"
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "Diretório"
 
-msgid "Create an instance to start playing."
-msgstr "Crie uma instância para começar a jogar."
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "Escolha uma pasta"
 
-msgid "Duplicated to “%s”"
-msgstr "Duplicado para “%s”"
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "Criar"
 
-msgid "Downloading modpack"
-msgstr "Baixando Modpack"
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "%u modpack selecionado"
+msgstr[1] "%u modpacks selecionados"
 
-msgid "Try again"
-msgstr "Tente novamente"
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "O serviço devolveu uma resposta inválida. Tente mais tarde."
 
-msgid "Performance impact"
-msgstr "Impacto no desempenho"
-
-msgid "Add world"
-msgstr "Adicionar mundo"
-
-msgid "Create instance"
-msgstr "Criar instância"
-
-msgid "Browse modpacks"
-msgstr "Explorar Modpacks"
-
-msgid "Remove server “%s”?"
-msgstr "Remover o servidor “%s”?"
-
-msgid "Path tracing"
-msgstr "Traçado de caminhos"
-
-msgid "Clean export"
-msgstr "Exportação limpa"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "Mecânicas de jogo"
-
-msgid "Minecraft version"
-msgstr "Versão do Minecraft"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "Abrir pasta"
-
-msgid "AppStream metadata"
-msgstr "Metadados do AppStream"
-
-msgid "Add Java runtime"
-msgstr "Adicionar Java Runtime"
-
-msgid "World generation"
-msgstr "Geração de mundo"
-
-msgid "Keyboard shortcuts"
-msgstr "Atalhos de teclado"
-
-msgid "Resource packs"
-msgstr "Pacotes de recursos"
-
-msgid "Edit server"
-msgstr "Editar servidor"
-
-msgid "Keep playing"
-msgstr "Continue jogando"
-
-msgid "Technical details"
-msgstr "Detalhes técnicos"
-
-msgid "Pack name"
-msgstr "Nome do pacote"
-
-msgid "Colored lighting"
-msgstr "Iluminação colorida"
-
-msgid "Rename world"
-msgstr "Mudar o nome do mundo"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "um nome só pode conter letras, dígitos e sublinhados."
-
-msgid "Preferences"
-msgstr "Configurações"
-
-msgid "Delete world"
-msgstr "Eliminar mundo"
-
-msgid "Asking Microsoft for a code…"
-msgstr "pedindo um código à Microsoft…"
-
-msgid "Show unstable mod loader versions"
-msgstr "Mostrar versões instáveis ​​do Mod Loader"
-
-msgid "Move down"
-msgstr "Mover para baixo"
-
-msgid "Clear cache"
-msgstr "Limpar a cache do Nuvasha Launcher"
-
-msgid "Delete “%s”?"
-msgstr "Excluir “%s”?"
-
-msgid "Import modpack…"
-msgstr "Importar Modpack…"
-
-msgid "Delete selected"
-msgstr "Eliminar selecionados"
-
-msgid "Java runtime"
-msgstr "Tempo de execução Java"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "um nome deve ter de 3 a 16 caracteres."
-
-msgid "Import modpack"
-msgstr "Importar Modpack"
-
-msgid "Core shaders"
-msgstr "Shaders do jogo base"
-
-msgid "Sign in"
-msgstr "Entrar"
-
-msgid "Cache cleared"
-msgstr "Cache limpo"
-
-msgid "No instances yet"
-msgstr "Nenhuma instância ainda"
-
-msgid "Add offline account"
-msgstr "Adicionar conta off-line"
-
-msgid "Copy seed"
-msgstr "Copiar semente"
-
-msgid "Services & ecosystem"
-msgstr "Serviços e ecossistema"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "Não há nenhum modpack que corresponda ao que foi pedido. Tenta outra palavra."
-
-msgid "Line limit"
-msgstr "Limite de linha"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
-
-msgid "Add server"
-msgstr "Adicionar servidor"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
+#: src/nuvashalauncher-download-modpack-browser.c:763
 msgid "All versions"
 msgstr "Todas as versões"
 
-msgid "No servers"
-msgstr "Sem servidores"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "Transferências"
 
-msgid "Clear cache?"
-msgstr "Limpar a cache do Nuvasha Launcher?"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "Relevância"
 
-msgid "Loader version"
-msgstr "Versão do carregador"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "Mais recentes"
 
-msgid "translator-credits"
-msgstr "Flia"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "Atualizados recentemente"
 
-msgid "Include all files"
-msgstr "Incluir todos os arquivos"
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "Seguidores"
 
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "Filtrar modpacks"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "Explorar Modpacks"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr ""
+"O ficheiro, projeto ou versão compatível solicitado não foi encontrado."
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "Instalar o seguinte modpack?"
+msgstr[1] "Instalar os seguintes modpacks?"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
+msgid "Reading modpack"
+msgstr "Lendo modpack"
+
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
+msgid "Extracting files"
+msgstr "Extraindo arquivos"
+
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "Não foi possível instalar o modpack"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "Baixando arquivos"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
+msgid "Optional files"
+msgstr "Arquivos opcionais"
+
+#: src/nuvashalauncher-download-modpack-install.c:265
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr ""
+"O pacote lista esses arquivos, mas diz que eles não são necessários. Nenhum "
+"deles está instalado a menos que você pergunte. O padrão está desativado"
+
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
+msgid "Pack could not be fetched"
+msgstr "Não foi possível buscar o pacote"
+
+#: src/nuvashalauncher-download-modpack-install.c:422
+msgid "Invalid pack"
+msgstr "Pacote inválido"
+
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "Esta versão não tem ficheiro de pacote"
+
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"Este projeto não disponibiliza nenhum ficheiro de pacote que o Nuvasha "
+"Launcher possa instalar."
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
+msgstr "Baixando Modpack"
+
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "Descarregar"
+
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "A ligação falhou. Verifique a ligação à internet e tente novamente."
+
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "O serviço rejeitou o pedido. Tente mais tarde."
+
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Demasiados pedidos. Aguarde um momento e tente novamente."
+
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr ""
+"Não foi possível ler ou escrever ficheiros. Verifique a localização, as "
+"permissões e o espaço livre."
+
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr ""
+"O ficheiro transferido falhou na verificação e não foi instalado. Transfira-"
+"o novamente."
+
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr ""
+"O arquivo é inválido ou inseguro. Transfira-o novamente de uma fonte "
+"fidedigna."
+
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr ""
+"A operação falhou. Consulte os detalhes técnicos para obter mais informações."
+
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr ""
+"Não foi possível usar o executável Java. Selecione um ambiente Java "
+"funcional."
+
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "Acesso negado. Verifique as permissões da pasta."
+
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "Não há espaço livre suficiente no disco."
+
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "O ficheiro ou pasta não foi encontrado. Verifique a localização."
+
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "O destino já existe. Escolha outra localização."
+
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
+
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "O acesso guardado já não é válido. Inicie sessão novamente."
+
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "O acesso foi recusado. Recomece se pretender iniciar sessão."
+
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Esta conta não possui Minecraft: Java Edition."
+
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr ""
+"Crie um perfil do Minecraft: Java Edition em minecraft.net e tente novamente."
+
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr ""
+"O acesso com a Microsoft não está configurado nesta compilação. Atualize o "
+"lançador."
+
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
+
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"Não foi possível instalar este carregador de mods. Escolha outra versão ou "
+"consulte os detalhes técnicos."
+
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"Os metadados do jogo são inválidos ou indisponíveis. Atualize a lista de "
+"versões e tente novamente."
+
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Esta instância já não está disponível. Atualize a lista de instâncias."
+
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "Escolha outro nome ou diretório para a instância."
+
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr ""
+"As definições da instância são inválidas. Verifique a versão selecionada e "
+"os argumentos JVM."
+
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr ""
+"Não foi possível guardar a conta. Verifique o porta-chaves do sistema e as "
+"permissões dos ficheiros."
+
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "Claro"
+
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "Entrar"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "Abrir no navegador"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "Tente novamente"
+
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "Adicionar conta off-line"
+
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "Nome"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "Adicionar"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "Criar instância"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "Baixar Modpack"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "Importar Modpack"
+
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "Importando modpack…"
+
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "Pesquisar modpacks"
+
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "Fechar"
+
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr ""
+"Não há nenhum modpack que corresponda ao que foi pedido. Tenta outra palavra."
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "Selecionar ficheiros"
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "Não foi possível instalar"
+
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "Voltar"
+
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "Pesquise o registro"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
+msgid "Classic model"
+msgstr "Modelo clássico"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "Modelo fino"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "Personalizar"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
+msgid "Import skin…"
+msgstr "Importar skin…"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "Exportar skin…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Erro do Minecraft Services"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "Predefinição do sistema"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "Cópia de %s"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "o nome da instância está em branco"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "As instâncias não podem conter %s no seu nome"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "O nome da instância não pode ser utilizado como nome de diretório"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Modpack exportado"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "O local de exportação não é um arquivo local"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "Exportação de modpack"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "Exportando modpack"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
 msgid "Export modpack"
 msgstr "Exportar Modpack"
 
-msgid "Add world…"
-msgstr "Adicionar mundo…"
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
 
-msgid "Update all"
-msgstr "Atualizar tudo"
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "Informações do pacote"
 
-msgid "Add Microsoft account"
-msgstr "Adicionar conta da Microsoft"
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "Exportar"
 
-msgid "Move up"
-msgstr "Mover para cima"
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "Exportar metadados do modpack"
 
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "Nome do pacote"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "Resumo"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "ID da versão"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "Incluir arquivos temporários?"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Logs, relatórios de falhas, capturas de tela, caches e downloads são "
+"normalmente excluídos."
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "Exportação limpa"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "Incluir todos os arquivos"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "O jogo está rodando; pare-o antes de mover seu diretório"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "Escolha um diretório"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "Duplicado para “%s”"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"O Java configurado não foi detectado; certifique-se de que ainda seja um "
+"executável java utilizável"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Este jogo precisa de Java %d ou mais recente, o Java selecionado é %d"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr ""
+"Selecione um ambiente Java com suporte gráfico, não uma instalação sem "
+"interface gráfica."
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "O ícone deve ser um arquivo neste computador"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "Escolha um ícone"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "Imagens"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "Em geral"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "Ícone"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "Alterar o diretório"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "Argumentos JVM"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "Ações"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "Duplicado"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "Excluir instância"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "Menos de um minuto"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu min"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu h %llu min"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "Hoje, %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "Ainda não jogado"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "Nunca"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "A calcular…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "Atividade"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "Tempo jogado"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "Última vez"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "Total de inícios"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "Total de falhas"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "Instância"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "Tamanho total"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "Criada em"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "Desconhecido"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "Registros"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "Configurações"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "Pacotes de recursos"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "Pacotes de sombreadores"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "Modificações"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "Mundos"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "Servidores"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "Estatísticas"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "o arquivo escolhido não informa uma versão Java"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Escolha o executável Java"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "Carregando…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "Alfândega: %s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Adicionar Java Runtime"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Tempo de execução Java"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr ""
+"Foi criado um relatório de falha. Abra os registos para ver os detalhes."
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "o jogo foi interrompido pelo sinal %d"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "o jogo foi encerrado com o código %d"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "Não foi encontrado nenhum ambiente de execução Java compatível."
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "as versões deste carregador não puderam ser lidas"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s (instável)"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "Nenhum"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Nenhuma versão compatível de %s encontrada para Minecraft %s."
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "Escolha uma versão do Minecraft primeiro"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "Carregador"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "Versão do carregador"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "Detalhes técnicos"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Limpar a cache do Nuvasha Launcher?"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "Cache limpo"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "Falha na limpeza do cache"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "Solicite metadados de exportação"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "Mostre os campos de nome, resumo e versão antes de exportar."
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Excluir uma dependência exclui o mod que dependia dela"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "Mostrar versões instáveis ​​do Minecraft"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "Mostrar versões instáveis ​​do Mod Loader"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "Linguagem"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "Idioma da interface"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "Limite de linha"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "Cache"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Cache de respostas da API Modrinth"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1 hora"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6 horas"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1 dia"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7 dias"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "Expiração do cache"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "Limpar a cache do Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Inicializador de Minecraft para Linux"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "Serviços e ecossistema"
+
+#: src/nuvashalauncher-main-window-actions.c:626
 msgid "Minecraft disclaimer"
 msgstr "Aviso legal do Minecraft"
 
-msgid "Shader packs"
-msgstr "Pacotes de sombreadores"
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"NÃO É UM PRODUTO OFICIAL DO MINECRAFT. NÃO APROVADO OU ASSOCIADO À MOJANG OU "
+"MICROSOFT.\n"
+"\n"
+"Minecraft é uma marca registada da Mojang AB. O inicializador é desenvolvido "
+"de forma independente e não está associado à Mojang Studios ou Microsoft."
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth e carregadores de mods"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"Modpacks, mods, pacotes de recursos e shaders são alojados pelo Modrinth e "
+"criados pelos respetivos autores.\n"
+"\n"
+"Os carregadores de mods são desenvolvidos de forma independente pelos "
+"projetos Fabric, Quilt, Forge e NeoForge."
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "Metadados do AppStream"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"Os metadados do AppStream (descrições, resumos e notas de versão) são "
+"lançados sob a Creative Commons CC0 1.0 Universal Public Domain Dedication."
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "Sobre o lançador Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "Atalhos de teclado"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "Configurações"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "Desistir"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "Eliminar selecionados"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "Importar Modpack…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "Parar"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "Jogar"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "Parar %s?"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "o jogo"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"O jogo está a ser executado e vai encerrar. O progresso desde o último "
+"guardado será perdido."
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "Continue jogando"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "Contas"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "Nenhuma instância ainda"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "Crie uma instância para começar a jogar."
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraft travou"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Minecraft não pôde iniciar"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft precisa de login"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "O Minecraft Services rejeitou o pedido (HTTP %u)%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "Arquivo de escrita"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "Exportação concluída"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "o carregador não pode ser resolvido: %s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "Aventura"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "Atmosfera"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "Áudio"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "Blocos"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "Brilho difuso"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "Desenho animado"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "Categorias"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "Iluminação colorida"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "Combate"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "Shaders do jogo base"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "Bizarros"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "Decoração"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "Economia"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "Entidades"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "Ambiente"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "Equipamento"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "Fantasia"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "Funcionalidades"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "Folhagem"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "Tipos de letra"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "Comida"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "Mecânicas de jogo"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "Interface"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "Alto"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "Itens"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "Biblioteca"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "Baixo"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "Magia"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "Gestão"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "Médio"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "Minijogo"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "Criaturas"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "Com mods"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "Modelos"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "Otimização"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "Traçado de caminhos"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "Impacto no desempenho"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "Para computadores muito básicos"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "Realista"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "Reflexos"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "Resoluções"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "Captura de ecrã"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "Semirrealista"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "Sombras"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "Simples"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "Social"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "Armazenamento"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "Tecnologia"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "Temático"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "Transporte"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "Ajustes"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "Utilidades"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "Semelhante ao jogo base"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "Geração de mundo"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr ""
+"A Modrinth está a pedir à Nuvasha Launcher para abrandar, há demasiados "
+"pedidos"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "O Modrinth não reconhece este ficheiro"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Nenhuma versão compatível encontrada para Minecraft %s e %s."
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "Já existe uma conta offline com este nome."
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "Editar servidor"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "Adicionar servidor"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "Guardar"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "Endereço"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "Perguntar antes de transferir"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "Transferir sempre"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "Nunca transferir"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "Remover o servidor “%s”?"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "Remover servidor"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "Mover para cima"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "Mover para baixo"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "Editar"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "Atualizar"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "Sem servidores"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr ""
+"Os servidores adicionados aqui são guardados em servers.dat para esta "
+"instância."
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "pedindo um código à Microsoft…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "aguardando o login no navegador…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr ""
+"Não foi possível abrir o navegador. Abra manualmente o endereço apresentado."
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"A Microsoft devolveu um endereço de acesso inseguro. Atualize o lançador "
+"antes de tentar novamente."
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Abra a página em seu navegador e digite este código:"
+
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Pele"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "As imagens de skin devem ser arquivos PNG de 64x64 ou 64x32"
+
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "Pele inválida"
+
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "Tudo bem"
+
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "Textura de pele em formato PNG"
+
+#: src/nuvashalauncher-users-popover-skin.c:368
+msgid "Delete skin?"
+msgstr "Excluir skin?"
+
+#: src/nuvashalauncher-users-popover-skin.c:369
+msgid "This skin will be removed from the skin library."
+msgstr "Este skin será removido da biblioteca de skins."
+
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "Sem capa"
+
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
+msgid "Remove %s?"
+msgstr "Remover %s?"
+
+#: src/nuvashalauncher-users-popover.c:178
+msgid "this account"
+msgstr "esta conta"
+
+#: src/nuvashalauncher-users-popover.c:181
+msgid ""
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
+msgstr ""
+"A conta é removida do Nuvasha Launcher e os dados de início de sessão "
+"guardados são apagados. O jogo em si não é afetado."
+
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "Remover"
+
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · É necessário iniciar sessão"
+
+#: src/nuvashalauncher-users-popover.c:398
+msgid "Add Microsoft account"
+msgstr "Adicionar conta da Microsoft"
+
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Versão do Minecraft"
+
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "Sobrevivência"
+
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "Criativo"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "Espectador"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "Mudar o nome do mundo"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "Mudar o nome"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "Copiar"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "Semente copiada para a área de transferência"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Eliminar o mundo “%s”? Esta ação é irreversível."
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "Eliminar mundo"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "Copiar semente"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "Adicionar mundo"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "Adicionar mundo…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "Sem mundos"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr ""
+"Os mundos guardados pelo Minecraft ou importados aqui aparecerão nesta lista."
+
+#~ msgid "Colored Lighting"
+#~ msgstr "Iluminação colorida"
+
+#~ msgid "Core Shaders"
+#~ msgstr "Shaders do jogo base"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "Mecânicas de jogo"
+
+#~ msgid "Path Tracing"
+#~ msgstr "Traçado de caminhos"
+
+#~ msgid "Performance Impact"
+#~ msgstr "Impacto no desempenho"
+
+#~ msgid "World Generation"
+#~ msgstr "Geração de mundo"
+
+#~ msgid "All Versions"
+#~ msgstr "Todas as versões"
+
+#~ msgid "Update All"
+#~ msgstr "Atualizar tudo"
+
+#~ msgid "Open Folder"
+#~ msgstr "Abrir pasta"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "Nada está selecionado"
+
+#~ msgid "Create Instance"
+#~ msgstr "Criar instância"
+
+#~ msgid "Download Modpack"
+#~ msgstr "Baixar Modpack"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "Duplicado para \"%s\""
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "Excluir \"%s\"?"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Tempo de execução Java"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Adicionar Java Runtime"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "O Minecraft precisa de um Java sem cabeça: no Arch use o pacote jre-"
+#~ "openjdk, não o jre-openjdk-headless"
+
+#~ msgid "Delete Instance"
+#~ msgstr "Excluir instância"
+
+#~ msgid "Resource Packs"
+#~ msgstr "Pacotes de recursos"
+
+#~ msgid "Shader Packs"
+#~ msgstr "Pacotes de sombreadores"
+
+#~ msgid "Loader Version"
+#~ msgstr "Versão do carregador"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "Mostrar versões instáveis ​​do Mod Loader"
+
+#~ msgid "Line Limit"
+#~ msgstr "Limite de linha"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "Atalhos de teclado"
+
+#~ msgid "Keep Playing"
+#~ msgstr "Continue jogando"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "Nenhuma instância ainda"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "Use o botão + no cabeçalho para criar um"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "Adicionar conta off-line"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "um nome só pode conter letras, dígitos e sublinhados"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "um nome não pode estar vazio"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "um nome deve ter de 3 a 16 caracteres"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "pedindo um código à Microsoft"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "aguardando o login no navegador"
+
+#~ msgid "Sign In"
+#~ msgstr "Entrar"
+
+#~ msgid "Try Again"
+#~ msgstr "Tente novamente"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Adicionar conta da Microsoft"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Versão do Minecraft"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s \"%s\""
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "Mostrar atalhos"
+
+#~ msgid "Import Modpack"
+#~ msgstr "Importar Modpack"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Modrinth Modpacks (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "Exportar Modpack"
+
+#~ msgid "Clean Export"
+#~ msgstr "Exportação limpa"
+
+#~ msgid "Include All Files"
+#~ msgstr "Incluir todos os arquivos"
+
+#~ msgid "Pack Name"
+#~ msgstr "Nome do pacote"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "O pacote não define sua instalação"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "Baixando Modpack"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "%u item instalado"
+#~ msgstr[1] "%u itens instalados"
+
+#~ msgid "no compatible version"
+#~ msgstr "nenhuma versão compatível"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "Não foi possível criar \"%s\": %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "Cache limpo"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "Falha na limpeza do cache"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "Não foi possível limpar o cache."
+
+#~ msgid "This cannot be installed"
+#~ msgstr "Isso não pode ser instalado"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "Explorar Modpacks"
+
+#~ msgid "Choose Files"
+#~ msgstr "Selecionar ficheiros"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "Limpar a cache do Nuvasha Launcher"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Limpar a cache do Nuvasha Launcher?"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "Não consegui compreender a resposta"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "Contém ficheiros que o Nuvasha Launcher não reconhece."
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "A Microsoft devolveu um endereço de verificação não seguro"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr ""
+#~ "Não há nenhum modpack que corresponda ao que foi pedido. Tenta outra "
+#~ "palavra"
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Os dados da cache do Nuvasha Launcher foram apagados com sucesso."
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Pesquise no Modrinth e instale um modpack"
+
+#~ msgid "Unavailable"
+#~ msgstr "Indisponível"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "O processo de início de sessão não foi concluído"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "As seguintes instâncias serão eliminadas:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "Modo de edição"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "Entrar no modo de edição"
+
+#~ msgid "Delete Selected"
+#~ msgstr "Eliminar selecionados"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "Não foi possível carregar os detalhes do projeto. Tente novamente."
+
+#~ msgid "Technical Details"
+#~ msgstr "Detalhes técnicos"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "Serviços e ecossistema"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Aviso legal do Minecraft"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth e carregadores de mods"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "Metadados do AppStream"
+
+#~ msgid "Reset Icon"
+#~ msgstr "Repor ícone"
+
+#~ msgid "Delete World"
+#~ msgstr "Eliminar mundo"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "Remover o servidor \"%s\"?"
+
+#~ msgid "Remove Server"
+#~ msgstr "Remover servidor"
+
+#~ msgid "Rename World"
+#~ msgstr "Mudar o nome do mundo"
+
+#~ msgid "Add World"
+#~ msgstr "Adicionar mundo"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "Eliminar o mundo \"%s\"? Esta ação é irreversível."
+
+#~ msgid "Add Server"
+#~ msgstr "Adicionar servidor"
+
+#~ msgid "Edit Server"
+#~ msgstr "Editar servidor"
+
+#~ msgid "Datapacks"
+#~ msgstr "Pacotes de dados"
+
+#~ msgid "No Worlds"
+#~ msgstr "Sem mundos"
+
+#~ msgid "Move Up"
+#~ msgstr "Mover para cima"
+
+#~ msgid "No Servers"
+#~ msgstr "Sem servidores"
+
+#~ msgid "Move Down"
+#~ msgstr "Mover para baixo"
+
+#~ msgid "Copy Seed"
+#~ msgstr "Copiar semente"
+
+#~ msgid "Playtime"
+#~ msgstr "Tempo de jogo"
+
+#~ msgid "Runs on"
+#~ msgstr "Executa em"
+
+#~ msgid "Last session"
+#~ msgstr "Última sessão"
+
+#~ msgid "Server joins"
+#~ msgstr "Entradas em servidores"
+
+#~ msgid "World loads"
+#~ msgstr "Mundos carregados"
+
+#~ msgid "Player Profile"
+#~ msgstr "Perfil de Jogador"
+
+#~ msgid "Player type"
+#~ msgstr "Tipo de jogador"
+
+#~ msgid "Pack style"
+#~ msgstr "Estilo do pacote"
+
+#~ msgid "Average session"
+#~ msgstr "Sessão média"
+
+#~ msgid "Stability"
+#~ msgstr "Estabilidade"
+
+#~ msgid "Hybrid"
+#~ msgstr "Híbrido"
+
+#~ msgid "Server Player"
+#~ msgstr "Jogador de Servidores"
+
+#~ msgid "Singleplayer"
+#~ msgstr "Um Jogador"
+
+#~ msgid "Unplayed"
+#~ msgstr "Não jogado"
+
+#~ msgid "Modpack"
+#~ msgstr "Modpack"
+
+#~ msgid "Lightweight"
+#~ msgstr "Leve"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "Completo"
+
+#~ msgid "Quick"
+#~ msgstr "Rápida"
+
+#~ msgid "Standard"
+#~ msgstr "Padrão"
+
+#~ msgid "Marathon"
+#~ msgstr "Maratona"
+
+#~ msgid "Stable"
+#~ msgstr "Estável"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "%u%% de falhas"

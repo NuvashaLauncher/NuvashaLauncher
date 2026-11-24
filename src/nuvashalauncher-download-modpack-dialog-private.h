@@ -91,14 +91,22 @@ struct _NuvashaLauncherDownloadModpackDialog
 
   char *directory;     /* where the instance goes, NULL for the default */
   char *instance_name; /* name entered on the details page */
+  char *icon_url;      /* URL of the project icon, NULL when it has none */
   char *icon_path;     /* the fetched icon of the pack, NULL when it has
                           none; the new instance is given it */
+
+  GtkBox *selection_bar;
+  GtkLabel *selection_label;
+  GtkButton *selection_button;
+  GHashTable *selected_projects;
 };
 
 
 void operation_done (gpointer user_data);
 void details_watch (gpointer field, GtkWidget *widget);
 void build_browse_page (NuvashaLauncherDownloadModpackDialog *, gboolean start_search);
+void modpack_dialog_install_batch (NuvashaLauncherDownloadModpackDialog *self,
+                                  GPtrArray *projects);
 void modpack_quick_install_project (NuvashaLauncherDownloadModpackDialog *,
                                     NuvashaLauncherModrinthProject *);
 void modpack_choose_version (NuvashaLauncherDownloadModpackDialog *,

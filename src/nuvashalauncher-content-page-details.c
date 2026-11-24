@@ -170,16 +170,12 @@ append_version_rows (VersionPickerList *list,
       NuvashaLauncherModrinthVersion *v = g_ptr_array_index (list->versions, list->loaded);
       g_autofree char *label = version_label (v);
       AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
-      GtkWidget *icon = gtk_image_new_from_icon_name ("folder-download-symbolic");
-
       adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), label);
       if (v->version_number != NULL && *v->version_number != '\0' &&
           g_strcmp0 (label, v->version_number) != 0)
         adw_action_row_set_subtitle (ADW_ACTION_ROW (row), v->version_number);
 
-      gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-      adw_action_row_add_suffix (row, icon);
       gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
 
       g_object_set_data_full (G_OBJECT (row), "nuvashalauncher-version",

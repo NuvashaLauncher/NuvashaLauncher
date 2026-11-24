@@ -413,6 +413,39 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
   gtk_widget_set_visible (GTK_WIDGET (scroller), FALSE);
   gtk_box_append (GTK_BOX (box), GTK_WIDGET (content));
 
+  {
+    GtkBox *selection_bar = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12));
+    GtkLabel *selection_label = GTK_LABEL (gtk_label_new (NULL));
+    GtkButton *selection_button = GTK_BUTTON (gtk_button_new_with_label (_("Install")));
+
+    gtk_widget_set_visible (GTK_WIDGET (selection_bar), FALSE);
+    gtk_widget_add_css_class (GTK_WIDGET (selection_bar), "toolbar");
+    gtk_widget_set_margin_start (GTK_WIDGET (selection_bar), 12);
+    gtk_widget_set_margin_end (GTK_WIDGET (selection_bar), 12);
+    gtk_widget_set_margin_top (GTK_WIDGET (selection_bar), 8);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (selection_bar), 8);
+
+    gtk_widget_set_hexpand (GTK_WIDGET (selection_label), TRUE);
+    gtk_widget_set_halign (GTK_WIDGET (selection_label), GTK_ALIGN_START);
+    gtk_label_set_wrap (selection_label, TRUE);
+
+    gtk_widget_add_css_class (GTK_WIDGET (selection_button), "suggested-action");
+    gtk_widget_add_css_class (GTK_WIDGET (selection_button), "pill");
+
+    gtk_box_append (selection_bar, GTK_WIDGET (selection_label));
+    gtk_box_append (selection_bar, GTK_WIDGET (selection_button));
+
+    self->browse.selection_bar = selection_bar;
+    self->browse.selection_label = selection_label;
+    self->browse.selection_button = selection_button;
+
+    g_signal_connect_object (selection_button, "clicked",
+                             G_CALLBACK (nuvashalauncher_content_page_on_batch_install_clicked),
+                             self, 0);
+
+    gtk_box_append (box, GTK_WIDGET (selection_bar));
+  }
+
   /* The bottom of the list: a spinner while the next page is on its way
      and a retry row when one failed. Neither is a button the user has to
      press to see more: the list asks for the next page itself when it is

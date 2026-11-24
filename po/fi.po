@@ -1,1623 +1,2525 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: fi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-msgid "Adventure"
-msgstr "Seikkailu"
-msgid "Atmosphere"
-msgstr "Tunnelma"
-msgid "Audio"
-msgstr "Ääni"
-msgid "Blocks"
-msgstr "Palikat"
-msgid "Bloom"
-msgstr "Hohto"
-msgid "Cartoon"
-msgstr "Sarjakuvamainen"
-msgid "Categories"
-msgstr "Luokat"
-msgid "Colored Lighting"
-msgstr "Värillinen valaistus"
-msgid "Combat"
-msgstr "Taistelu"
-msgid "Core Shaders"
-msgstr "Peruspelin varjostimet"
-msgid "Cursed"
-msgstr "Omituiset"
-msgid "Decoration"
-msgstr "Koristelu"
-msgid "Economy"
-msgstr "Talous"
-msgid "Entities"
-msgstr "Entiteetit"
-msgid "Environment"
-msgstr "Ympäristö"
-msgid "Equipment"
-msgstr "Varusteet"
-msgid "Fantasy"
-msgstr "Fantasia"
-msgid "Features"
-msgstr "Ominaisuudet"
-msgid "Foliage"
-msgstr "Kasvillisuus"
-msgid "Fonts"
-msgstr "Fontit"
-msgid "Food"
-msgstr "Ruoka"
-msgid "Game Mechanics"
-msgstr "Pelimekaniikat"
-msgid "Interface"
-msgstr "Käyttöliittymä"
-msgid "High"
-msgstr "Suuri"
-msgid "Items"
-msgstr "Esineet"
-msgid "Library"
-msgstr "Kirjasto"
-msgid "Low"
-msgstr "Pieni"
-msgid "Magic"
-msgstr "Taikuus"
-msgid "Management"
-msgstr "Hallinta"
-msgid "Medium"
-msgstr "Keskitaso"
-msgid "Minigame"
-msgstr "Minipeli"
-msgid "Mobs"
-msgstr "Olennot"
-msgid "Modded"
-msgstr "Modeille"
-msgid "Models"
-msgstr "Mallit"
-msgid "Optimization"
-msgstr "Optimointi"
-msgid "Path Tracing"
-msgstr "Polunseuranta"
-msgid "Performance Impact"
-msgstr "Vaikutus suorituskykyyn"
-msgid "Potato"
-msgstr "Erittäin heikoille tietokoneille"
-msgid "Realistic"
-msgstr "Realistinen"
-msgid "Reflections"
-msgstr "Heijastukset"
-msgid "Resolutions"
-msgstr "Tarkkuudet"
-msgid "Screenshot"
-msgstr "Kuvakaappaus"
-msgid "Semi-realistic"
-msgstr "Puolirealistinen"
-msgid "Shadows"
-msgstr "Varjot"
-msgid "Simplistic"
-msgstr "Yksinkertainen"
-msgid "Social"
-msgstr "Sosiaalinen"
-msgid "Storage"
-msgstr "Varastointi"
-msgid "Technology"
-msgstr "Teknologia"
-msgid "Themed"
-msgstr "Teemallinen"
-msgid "Transportation"
-msgstr "Kuljetus"
-msgid "Tweaks"
-msgstr "Hienosäädöt"
-msgid "Utility"
-msgstr "Apuvälineet"
-msgid "Vanilla-like"
-msgstr "Peruspelin kaltainen"
-msgid "World Generation"
-msgstr "Maailman luonti"
 
-msgid "All Versions"
-msgstr "Kaikki versiot"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "Osuvuus"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "Offline"
 
-msgid "Newest"
-msgstr "Uusimmat"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "nimi ei voi olla tyhjä."
 
-msgid "Recently updated"
-msgstr "Äskettäin päivitetyt"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "Nimen on oltava 3–16 merkkiä pitkä."
 
-msgid "Followers"
-msgstr "Seuraajat"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "nimi voi sisältää vain kirjaimia, numeroita ja alaviivoja."
 
-msgid "Filter modpacks"
-msgstr "Suodata modipaketteja"
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
+msgid ""
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
+msgstr ""
+"Tähän Microsoft-tiliin ei ole vielä liitetty Xbox-profiilia: kirjaudu sillä "
+"kerran sisään osoitteessa xbox.com ja kirjaudu sitten uudelleen sisään täällä"
 
-msgid "Cancel"
-msgstr "Peruuttaa"
-msgid "Confirm"
-msgstr "Vahvistaa"
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
+msgid ""
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
+msgstr ""
+"Tämä on lapsitili: aikuisen on lisättävä se Microsoft-perheeseen, ennen kuin "
+"lapsi voi pelata"
 
-msgid "Customize"
-msgstr "Mukauta"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr ""
+"Xbox Live ei ole käytettävissä siinä maassa, johon tämä tili on rekisteröity"
 
-msgid "Delete"
-msgstr "Poistaa"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"Tämä tili vaatii aikuisen vahvistuksen ennen kuin sillä voi pelata, mikä on "
+"sama menettely kuin Etelä-Korean tileillä"
 
-msgid "Retry"
-msgstr "Yritä uudelleen"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Microsoft ei antanut koodia, jolla olisi voinut kirjautua sisään"
 
-msgid "Loading…"
-msgstr "Ladataan…"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1fM lataukset"
 
-msgid "Download"
-msgstr "Lataa"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1fk lataukset"
 
-msgid "Update All"
-msgstr "Päivitä kaikki"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s latausta"
 
-msgid "Open Folder"
-msgstr "Avaa kansio"
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s · kirjoittaja %s"
 
-msgid "Nothing installed yet"
-msgstr "Mitään ei ole vielä asennettu"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "kirjoittaja %s"
 
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Selaa, mitä haluat lisätä tämän ilmentymän kansioon"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, fuzzy, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "%u/%u valittu"
+msgstr[1] "%u/%u valittu"
 
-msgid "Installed"
-msgstr "Asennettu"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, fuzzy, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "Resurssipaketit"
+msgstr[1] "Resurssipaketit"
 
-msgid "Loading more…"
-msgstr "Ladataan lisää…"
+#: src/nuvashalauncher-content-page-browser.c:98
+#, fuzzy, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "%u/%u valittu"
+msgstr[1] "%u/%u valittu"
 
-msgid "Nothing is selected"
-msgstr "Mitään ei ole valittu"
+#: src/nuvashalauncher-content-page-browser.c:101
+#, fuzzy, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "%u/%u valittu"
+msgstr[1] "%u/%u valittu"
 
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr ""
 
-msgid "Filter by category"
-msgstr "Suodata luokan mukaan"
-
-msgid "Nothing to show yet"
-msgstr "Ei vielä mitään näytettävää"
-
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Kirjoita mitä etsiä, tai selaa kaikkea, mitä Modrinth tarjoaa tähän tapaukseen"
-
-msgid "Browse"
-msgstr "Selaa"
-
-msgid "No mod loader"
-msgstr "Ei mod loaderia"
-
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Modit tarvitsevat modloaderin. Valitse ensin Fabric, Quilt, Forge tai NeoForge tämän esiintymän asetuksista"
-
-msgid "Create Instance"
-msgstr "Luo ilmentymä"
-
-msgid "Name"
-msgstr "Nimi"
-
-msgid "Directory"
-msgstr "Hakemisto"
-
-msgid "Choose a folder"
-msgstr "Valitse kansio"
-
-msgid "Create"
-msgstr "Luoda"
-
-msgid "Download Modpack"
-msgstr "Lataa Modpack"
-
-
-msgid "Search modpacks"
-msgstr "Etsi modpackeja"
-
-msgid "Close"
-msgstr "Lähellä"
-
-msgid "Back"
-msgstr "Takaisin"
-
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "Asentaa"
 
-msgid "Copy of %s"
-msgstr "Kopio %s:sta"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "seuraavaa sivua ei voitu ladata"
 
-msgid "Choose Java executable"
-msgstr "Valitse Java-suoritettava tiedosto"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Modrinthia ei löytynyt"
 
-msgid "the chosen file does not report a Java version"
-msgstr "valittu tiedosto ei ilmoita Java-versiota"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "Muut"
 
-msgid "Choose an Icon"
-msgstr "Valitse kuvake"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "Kategorioita ei voitu ladata"
 
-msgid "Choose a Directory"
-msgstr "Valitse hakemisto"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "Yritä uudelleen"
 
-msgid "Duplicated to \"%s\""
-msgstr "Kopioitu kohteeseen \"%s\""
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "Versioita ei voitu ladata. Yritä uudelleen."
 
-msgid "Delete \"%s\"?"
-msgstr "Poistetaanko \"%s\"?"
-
-msgid "General"
-msgstr "Kenraali"
-
-msgid "Icon"
-msgstr "Kuvake"
-
-msgid "Change the Directory"
-msgstr "Muuta hakemistoa"
-
-msgid "Minecraft"
-msgstr "Minecraft"
-
-msgid "Java"
-msgstr "Java"
-
-msgid "Java Runtime"
-msgstr "Java-ajoympäristö"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "Tämä peli vaatii Java %d tai uudemman, valittu Java on %d"
-
-msgid "Add Java Runtime"
-msgstr "Lisää Java Runtime"
-
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft tarvitsee päättömän Javan: Archissa käytä pakettia jre-openjdk, ei jre-openjdk-headless"
-
-msgid "JVM Arguments"
-msgstr "JVM:n argumentit"
-
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "Määritettyä Javaa ei havaittu; varmista, että se on edelleen käyttökelpoinen Java-suoritettava tiedosto"
-
-msgid "Actions"
-msgstr "Toiminnot"
-
-msgid "Duplicate"
-msgstr "Kopioi"
-
-msgid "Delete Instance"
-msgstr "Poista ilmentymä"
-
-msgid "Settings"
-msgstr "Asetukset"
-
-msgid "Resource Packs"
-msgstr "Resurssipaketit"
-
-msgid "Shader Packs"
-msgstr "Shader-paketit"
-
-msgid "Mods"
-msgstr "Modit"
-
-msgid "Logs"
-msgstr "Lokit"
-
-msgid "Custom: %s"
-msgstr "Mukautettu: %s"
-
-msgid "the game was stopped by signal %d"
-msgstr "peli pysäytettiin signaalilla %d"
-
-msgid "the game exited with code %d"
-msgstr "peli poistui koodilla %d"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "Minecraftille %s ei löytynyt yhteensopivaa %s-versiota."
-
-msgid "Loader"
-msgstr "Lataaja"
-
-msgid "Loader Version"
-msgstr "Loader-versio"
-
-msgid "Clear"
-msgstr "Selkeä"
-
-msgid "Search the log"
-msgstr "Etsi lokista"
-
-msgid "Versions"
-msgstr "Versiot"
-
-msgid "Show unstable Minecraft versions"
-msgstr "Näytä epävakaat Minecraft-versiot"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "Näytä epävakaat Mod Loader -versiot"
-
-msgid "Language"
-msgstr "Kieli"
-
-msgid "Interface language"
-msgstr "Käyttöliittymän kieli"
-
-msgid "Line Limit"
-msgstr "Linjarajoitus"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "Tietoja Nuvasha Launcherista"
-
-msgid "Keyboard Shortcuts"
-msgstr "Pikanäppäimet"
-
-msgid "Stop"
-msgstr "Pysähdy"
-
-msgid "Play"
-msgstr "Pelata"
-
-msgid "Keep Playing"
-msgstr "Jatka pelaamista"
-
-msgid "Downloads"
-msgstr "Lataukset"
-
-msgid "Accounts"
-msgstr "Tilit"
-
-msgid "No Instances Yet"
-msgstr "Ei vielä tapauksia"
-
-msgid "Use the + button in the header to create one"
-msgstr "Käytä otsikon + -painiketta luodaksesi sellaisen"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "lataajaa ei voida ratkaista: %s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "Minecraftille %s ja %s ei löytynyt yhteensopivaa versiota."
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "Minecraftille %s ei löytynyt yhteensopivaa versiota."
 
-msgid "Add Offline Account"
-msgstr "Lisää offline-tili"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "Versiot"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "nimi voi sisältää vain kirjaimia, numeroita ja alaviivoja"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "Kansiota ei voi lukea"
 
-msgid "a name cannot be empty"
-msgstr "nimi ei voi olla tyhjä"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "Nimen on oltava 3–16 merkkiä pitkä"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "Tiedostoa ei voitu asentaa"
 
-msgid "Add"
-msgstr "Lisätä"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "pyytää Microsoftilta koodia"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "Kansiota ei voi luoda"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "odottaa sisäänkirjautumista selaimessa"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "Sisältö"
 
-msgid "Sign In"
-msgstr "Kirjaudu sisään"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "Asennus"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "Avaa sivu selaimessasi ja kirjoita tämä koodi:"
-
-msgid "Try Again"
-msgstr "Yritä uudelleen"
-
-msgid "Remove"
-msgstr "Poistaa"
-
-msgid "Add Microsoft Account"
-msgstr "Lisää Microsoft-tili"
-
-msgid "Minecraft Version"
-msgstr "Minecraft versio"
-
-msgid "Install the selected %s?"
-msgstr "Asennetaanko valittu %s?"
-
-msgid "%s \"%s\""
-msgstr "%s \"%s\""
-
-msgid "Search"
-msgstr "Haku"
-
-msgid "Update"
-msgstr "Päivittää"
-
-msgid "Update the following %s"
-msgstr "Päivitä seuraava %s"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "Riippuvuudet:"
 
-msgid "The following mods depend on %s:\n%s"
-msgstr "Seuraavat modit riippuvat %s:sta:\n%s"
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "Konfliktit\n"
 
-msgid "Cache"
-msgstr "Välimuisti"
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "%s asennetaan"
 
-msgid "Cache Modrinth API responses"
-msgstr "Tallenna Modrinth API -vastaukset välimuistiin"
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "Päivittää"
 
-msgid "Cache expiration"
-msgstr "Välimuistin vanheneminen"
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s “%s”"
 
-msgid "1 hour"
-msgstr "1 tunti"
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "Peruuttaa"
 
-msgid "6 hours"
-msgstr "6 tuntia"
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "Tämä projekti ei julkaise mitään, mikä sopii tähän tapaukseen."
 
-msgid "1 day"
-msgstr "1 päivä"
+#: src/nuvashalauncher-content-page-install.c:1003
+#, fuzzy, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "%s asennetaan"
+msgstr[1] "%s asennetaan"
 
-msgid "7 days"
-msgstr "7 päivää"
+#: src/nuvashalauncher-content-page-install.c:1006
+#, fuzzy, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "%s asennetaan"
+msgstr[1] "%s asennetaan"
 
-msgid "Show Shortcuts"
-msgstr "Näytä pikakuvakkeet"
+#: src/nuvashalauncher-content-page-install.c:1009
+#, fuzzy, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "%s asennetaan"
+msgstr[1] "%s asennetaan"
 
-msgid "Quit"
-msgstr "Lopettaa"
+#: src/nuvashalauncher-content-page-install.c:1012
+#, fuzzy, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "%s asennetaan"
+msgstr[1] "%s asennetaan"
 
-msgid "Import Modpack"
-msgstr "Tuo Modpack"
+#: src/nuvashalauncher-content-page-install.c:1038
+#, fuzzy
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "Päivitä seuraava %s"
+msgstr[1] "Päivitä seuraava %s"
 
-msgid "Modpack exported"
-msgstr "Modpack vietiin"
+#: src/nuvashalauncher-content-page-install.c:1041
+#, fuzzy
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "Asennetaanko valittu %s?"
+msgstr[1] "Asennetaanko valittu %s?"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth-modipaketit (*.mrpack)"
+#: src/nuvashalauncher-content-page-install.c:1044
+#, fuzzy
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "Päivitä seuraava %s"
+msgstr[1] "Päivitä seuraava %s"
 
-msgid "The export location is not a local file"
-msgstr "Vientisijainti ei ole paikallinen tiedosto"
+#: src/nuvashalauncher-content-page-install.c:1047
+#, fuzzy
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "Päivitä seuraava %s"
+msgstr[1] "Päivitä seuraava %s"
 
-msgid "Export Modpack"
-msgstr "Vie Modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "Tiedostoa ei voi poistaa"
 
-msgid "Importing modpack…"
-msgstr "Tuodaan modpackia…"
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "Ota käyttöön"
 
-msgid "Reading modpack"
-msgstr "Modpackin lukeminen"
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "Riippuvaista modia ei voi poistaa"
 
-msgid "Exporting modpack"
-msgstr "Viedään modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "Tiedostoa ei voi nimetä uudelleen"
 
-msgid "Modpack export"
-msgstr "Modpack vienti"
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "Poistettu"
 
-msgid "Include transient files?"
-msgstr "Sisällytetäänkö ohimenevät tiedostot?"
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "Poistetaanko “%s”?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Lokit, virheraportit, kuvakaappaukset, välimuistit ja lataukset jätetään yleensä pois."
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Seuraavat modit riippuvat %s:sta:\n"
+"%s"
 
-msgid "Clean Export"
-msgstr "Puhdas vienti"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "Poistaa"
 
-msgid "Include All Files"
-msgstr "Sisällytä kaikki tiedostot"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "Käytössä"
 
-msgid "Pack Name"
-msgstr "Pakkauksen nimi"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "Ei käytössä"
 
-msgid "Summary"
-msgstr "Yhteenveto"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "Poista käytöstä"
 
-msgid "Version ID"
-msgstr "Version tunnus"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "Haku"
 
-msgid "Downloading files"
-msgstr "Tiedostojen lataaminen"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "Päivitä kaikki"
 
-msgid "Extracting files"
-msgstr "Tiedostojen purkaminen"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "Haetaan päivityksiä"
 
-msgid "Optional files"
-msgstr "Valinnaiset tiedostot"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "Edistyminen"
 
-msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
-msgstr "Paketissa luetellaan nämä tiedostot, mutta sanotaan, että niitä ei tarvita. Mitään niistä ei asenneta, ellet pyydä. Oletus on pois päältä"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "Avaa kansio"
 
-msgid "Pack could not be fetched"
-msgstr "Pakettia ei voitu noutaa"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "Mitään ei ole vielä asennettu"
 
-msgid "Invalid pack"
-msgstr "Virheellinen paketti"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Selaa, mitä haluat lisätä tämän ilmentymän kansioon"
 
-msgid "The pack does not define its install"
-msgstr "Paketti ei määrittele asennusta"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "Selaa"
 
-msgid "Downloading Modpack"
-msgstr "Ladataan Modpackia"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "Asennettu"
 
-msgid "Writing archive"
-msgstr "Kirjoitusarkisto"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "Ladataan lisää…"
 
-msgid "Export modpack metadata"
-msgstr "Vie modpack-metatiedot"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "Suodata luokan mukaan"
 
-msgid "Ask for export metadata"
-msgstr "Pyydä viemään metatietoja"
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "Ei vielä mitään näytettävää"
 
-msgid "Pack information"
-msgstr "Pakkauksen tiedot"
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Kirjoita mitä etsiä, tai selaa kaikkea, mitä Modrinth tarjoaa tähän "
+"tapaukseen"
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "Näytä nimi-, yhteenveto- ja versiokentät ennen vientiä."
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "Hylkää"
 
-msgid "Export complete"
-msgstr "Vienti valmis"
-
-msgid "Export"
-msgstr "Viedä"
-
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "%u kohde asennettu"
-msgstr[1] "%u kohdetta asennettu"
-
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
 msgid "Updated %u item"
 msgid_plural "Updated %u items"
 msgstr[0] "Päivitetty %u kohdetta"
 msgstr[1] "Päivitetty %u kohdetta"
 
-msgid "The icon must be a file on this computer"
-msgstr "Kuvakkeen on oltava tällä tietokoneella oleva tiedosto"
-
-msgid "The game is running; stop it before moving its directory"
-msgstr "Peli on käynnissä; pysäytä se ennen hakemiston siirtämistä"
-
-msgid "%s is being installed"
-msgstr "%s asennetaan"
-
-msgid "no compatible version"
-msgstr "ei yhteensopivaa versiota"
-
-msgid "Enabled"
-msgstr "Käytössä"
-
-msgid "Disabled"
-msgstr "Ei käytössä"
-
-msgid "Deleted"
-msgstr "Poistettu"
-
+#: src/nuvashalauncher-content-page-updates.c:246
 msgid "Everything is up to date"
 msgstr "Kaikki on ajan tasalla"
 
-msgid "Cannot create \"%s\": %s"
-msgstr "Ei voida luoda \"%s\": %s"
-
-msgid "This project publishes nothing that fits this instance."
-msgstr "Tämä projekti ei julkaise mitään, mikä sopii tähän tapaukseen."
-
-msgid "Unknown"
-msgstr "Tuntematon"
-
-msgid "%s (unstable)"
-msgstr "%s (epävakaa)"
-
-msgid "the next page could not be loaded"
-msgstr "seuraavaa sivua ei voitu ladata"
-
-msgid "Other"
-msgstr "Muut"
-
-msgid "%.1fM downloads"
-msgstr "%.1fM lataukset"
-
-msgid "%.1fk downloads"
-msgstr "%.1fk lataukset"
-
-msgid "%s  ·  by %s"
-msgstr "%s · kirjoittaja %s"
-
-msgid "by %s"
-msgstr "kirjoittaja %s"
-
-msgid "%s downloads"
-msgstr "%s latausta"
-
-msgid "Cache Cleared"
-msgstr "Välimuisti tyhjennetty"
-
-msgid "Cache Cleanup Failed"
-msgstr "Välimuistin puhdistus epäonnistui"
-
-msgid "The cache could not be cleared."
-msgstr "Välimuistia ei voitu tyhjentää."
-
-msgid "the versions of this loader could not be read"
-msgstr "tämän latausohjelman versioita ei voitu lukea"
-
-msgid "Minecraft crashed"
-msgstr "Minecraft kaatui"
-
-msgid "Minecraft could not start"
-msgstr "Minecraft ei voinut käynnistyä"
-
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft tarvitsee kirjautumisen"
-
-msgid "The file cannot be renamed"
-msgstr "Tiedostoa ei voi nimetä uudelleen"
-
-msgid "The file cannot be deleted"
-msgstr "Tiedostoa ei voi poistaa"
-
-msgid "The folder cannot be read"
-msgstr "Kansiota ei voi lukea"
-
-msgid "The file could not be installed"
-msgstr "Tiedostoa ei voitu asentaa"
-
-msgid "The folder cannot be created"
-msgstr "Kansiota ei voi luoda"
-
-msgid "This cannot be installed"
-msgstr "Tätä ei voi asentaa"
-
-msgid "Pick a Minecraft version first"
-msgstr "Valitse ensin Minecraft-versio"
-
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "Riippuvuuden poistaminen poistaa siitä riippuvan modin"
-
-msgid "A dependent mod cannot be deleted"
-msgstr "Riippuvaista modia ei voi poistaa"
-
-msgid "Slim model"
-msgstr "Ohut malli"
-
-msgid "OK"
-msgstr "Selvä"
-
-msgid "Export skin…"
-msgstr "Vie ihoa…"
-
-msgid "Classic model"
-msgstr "Klassinen malli"
-
-msgid "PNG skin texture"
-msgstr "PNG-kuvan pintarakenne"
-
-msgid "Invalid skin"
-msgstr "Virheellinen iho"
-
-msgid "No cape"
-msgstr "Ei viitta"
-
-msgid "Import skin…"
-msgstr "Tuo iho…"
-
-msgid "Delete skin?"
-msgstr "Poista iho?"
-
-msgid "This skin will be removed from the skin library."
-msgstr "Tämä iho poistetaan ihokirjastosta."
-
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "Skin kuvien tulee olla 64 x 64 tai 64 x 32 PNG-tiedostoja"
-
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "Selaa modpaketteja"
-
-msgid "Choose Files"
-msgstr "Valitse tiedostot"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "Tyhjennä Nuvasha Launchern välimuisti"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Tyhjennetäänkö Nuvasha Launchern välimuisti?"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"Konfliktit\n"
-
-msgid "Content"
-msgstr "Sisältö"
-
-msgid "Could not install"
-msgstr "Asennusta ei voitu suorittaa"
-
-msgid "Could not install the modpack"
-msgstr "Modpakettia ei voitu asentaa"
-
-msgid "Could not load categories"
-msgstr "Kategorioita ei voitu ladata"
-
-msgid "Could not search Modrinth"
-msgstr "Modrinthia ei löytynyt"
-
-msgid "Could not understand the answer"
-msgstr "En ymmärtänyt vastausta"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "Poista käytöstä"
-
-msgid "Dismiss"
-msgstr "Hylkää"
-
-msgid "Enable"
-msgstr "Ota käyttöön"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "Kuvat"
-
-msgid "Installing"
-msgstr "Asennus"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "Nimissä ei saa esiintyä %s"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "Siinä on tiedostoja, joita Nuvasha Launcher ei tunnista."
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "Microsoft palautti epäluotettavan vahvistusosoitteen"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "Microsoft ei antanut koodia, jolla olisi voinut kirjautua sisään"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · Kirjautuminen vaaditaan"
-
-msgid "Modrinth does not know this file"
-msgstr "Modrinth ei tunne tätä tiedostoa"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "Modrinth pyytää Nuvasha Launchera hidastamaan vauhtia, pyyntöjä on liikaa"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No compatible Java runtime was found."
-msgstr "Yhteensopivaa Java-ajoympäristöä ei löytynyt."
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "Yhtään modpakettia ei löytynyt haetun mukaisena. Kokeile toista hakusanaa"
-
-msgid "None"
-msgstr "Ei mitään"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Nuvasha Launchern välimuistitiedot tyhjennettiin onnistuneesti."
-
-msgid "Offline"
-msgstr "Offline"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "Valitse Minecraft-versio luettelosta."
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "Valitse latausohjelman versio tai valitse toinen latausohjelma."
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
-msgid "Remove %s?"
-msgstr "Poista %s?"
-
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Etsi Modrinth ja asenna modipaketti"
-
-msgid "Skin"
-msgstr "Iho"
-
-msgid "Stop %s?"
-msgstr "Pysähdytäänkö %s?"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "Järjestelmän oletusasetus"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Tili poistetaan Nuvasha Launchersta ja sen tallennetut kirjautumistiedot nollataan. Itse peliin ei tehdä muutoksia."
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "Peli on käynnissä ja sulkeutuu. Edistyksesi viimeisimmän tallennuksen jälkeen menetetään."
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "Tämä projekti ei julkaise mitään pakettitiedostoa, jonka Nuvasha Launcher voisi asentaa."
-
-msgid "This version has no pack file"
-msgstr "Tässä versiossa ei ole pakettitiedostoa"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Unavailable"
-msgstr "Ei saatavilla"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "Xbox Live ei ole käytettävissä siinä maassa, johon tämä tili on rekisteröity"
-
-msgid "the game"
-msgstr "peli"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "instanssin nimeä ei voi käyttää hakemiston nimenä"
-
-msgid "the instance name is empty"
-msgstr "instanssin nimi on tyhjä"
-
-msgid "the sign-in did not finish"
-msgstr "kirjautuminen ei onnistunut"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "Tähän Microsoft-tiliin ei ole vielä liitetty Xbox-profiilia: kirjaudu sillä kerran sisään osoitteessa xbox.com ja kirjaudu sitten uudelleen sisään täällä"
-
-msgid "this account"
-msgstr "tämä tili"
-
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "Tämä tili vaatii aikuisen vahvistuksen ennen kuin sillä voi pelata, mikä on sama menettely kuin Etelä-Korean tileillä"
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "Tämä on lapsitili: aikuisen on lisättävä se Microsoft-perheeseen, ennen kuin lapsi voi pelata"
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "Minecraft Services hylkäsi pyynnön (HTTP %u)%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Minecraft Services -virhe"
-
-msgid "Application menu"
-msgstr "Application menu"
-
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "Päivitä seuraava %s"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "Vahvistaa"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
 msgid "The folder could not be opened: %s"
 msgstr "The folder could not be opened: %s"
 
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "Avaa selaimessa"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "%u/%u valittu"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "Seuraavat instanssit poistetaan:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "Muokkaustila"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "Haetaan päivityksiä"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "Edistyminen"
-
-msgid "Enter Edit Mode"
-msgstr "Siirry muokkaustilaan"
-
-msgid "Delete Selected"
-msgstr "Poista valitut"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "Uusi kaatumisraportti luotiin. Avaa lokit nähdäksesi lisätiedot."
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "Käyttö estetty. Tarkista kansion oikeudet."
-
-msgid "An offline account with this name already exists."
-msgstr "Samanniminen offline-tili on jo olemassa."
-
-msgid "Choose another instance name or directory."
-msgstr "Valitse toinen instanssin nimi tai kansio."
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "Modilataajaa ei voitu asentaa. Valitse toinen versio tai katso tekniset tiedot."
-
-msgid "Could not load project details. Try again."
-msgstr "Projektin tietoja ei voitu ladata. Yritä uudelleen."
-
-msgid "Could not load versions. Try again."
-msgstr "Versioita ei voitu ladata. Yritä uudelleen."
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "Selainta ei voitu avata. Avaa näytetty osoite käsin."
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "Tiedostoja ei voitu lukea tai kirjoittaa. Tarkista sijainti, oikeudet ja vapaa levytila."
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "Tiliä ei voitu tallentaa. Tarkista järjestelmän avainnippu ja tiedostojen oikeudet."
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "Microsoft palautti turvattoman kirjautumisosoitteen. Päivitä käynnistin ennen uutta yritystä."
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "Microsoft-kirjautumista ei ole määritetty tässä koosteessa. Päivitä käynnistin."
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "Valitse työpöytätuella varustettu Java-ympäristö, ei headless-asennusta."
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "Luo Minecraft: Java Edition -profiili osoitteessa minecraft.net ja yritä uudelleen."
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "Kirjautuminen hylättiin. Aloita uudelleen, jos haluat kirjautua."
-
-msgid "Technical Details"
-msgstr "Tekniset tiedot"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "Java-ohjelmaa ei voitu käyttää. Valitse toimiva Java-ympäristö."
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "Arkisto on virheellinen tai turvaton. Lataa se uudelleen luotetusta lähteestä."
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "Yhteys epäonnistui. Tarkista internetyhteys ja yritä uudelleen."
-
-msgid "The destination already exists. Choose another location."
-msgstr "Kohde on jo olemassa. Valitse toinen sijainti."
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "Ladattu tiedosto ei läpäissyt tarkistusta eikä sitä asennettu. Lataa se uudelleen."
-
-msgid "The file or folder was not found. Check its location."
-msgstr "Tiedostoa tai kansiota ei löytynyt. Tarkista sijainti."
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "Pelin metatiedot ovat virheelliset tai eivät ole saatavilla. Päivitä versioluettelo ja yritä uudelleen."
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "Toiminto epäonnistui. Katso lisätietoja teknisistä tiedoista."
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "Pyydettyä tiedostoa, projektia tai yhteensopivaa versiota ei löytynyt."
-
-msgid "The service rejected the request. Try again later."
-msgstr "Palvelu hylkäsi pyynnön. Yritä myöhemmin."
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "Palvelu palautti virheellisen vastauksen. Yritä myöhemmin."
-
-msgid "There is not enough free disk space."
-msgstr "Vapaata levytilaa ei ole riittävästi."
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "Tämä tili ei omista Minecraft: Java Editionia."
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "Tämä instanssi ei ole enää saatavilla. Päivitä instanssiluettelo."
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "Liikaa pyyntöjä. Odota hetki ja yritä uudelleen."
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "Instanssin asetukset ovat virheelliset. Tarkista valittu versio ja JVM-argumentit."
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "Tallennettu kirjautuminen ei ole enää voimassa. Kirjaudu uudelleen."
-
-msgid "Minecraft launcher for Linux"
-msgstr "Minecraft-käynnistin Linuxille"
-
-msgid "Services & Ecosystem"
-msgstr "Palvelut ja ekosysteemi"
-
-msgid "Minecraft Disclaimer"
-msgstr "Minecraft-vastuuvapauslauseke"
-
-msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
-msgstr ""
-"EI VIRALLINEN MINECRAFT-TUOTE. EI MOJANGIN TAI MICROSOFTIN HYVÄKSYMÄ TAI NIIDEN KANSSA LIITTEESSÄ.\n"
-"\n"
-"Minecraft on Mojang AB:n tavaramerkki. Käynnistin on kehitetty itsenäisesti, eikä se ole sidoksissa Mojang Studiosiin tai Microsoftiin."
-
-msgid "Modrinth & Mod Loaders"
-msgstr "Modrinth ja modilataajat"
-
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"Modipaketit, modit, resurssipaketit ja varjostimet ovat Modrinthin isännöimiä ja niiden tekijöiden luomia.\n"
-"\n"
-"Modilataajia kehittävät itsenäisesti Fabric-, Quilt-, Forge- ja NeoForge-projektit."
-
-msgid "AppStream Metadata"
-msgstr "AppStream-metatiedot"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "AppStream-metatiedot (kuvaukset, yhteenvedot ja julkaisutiedot) julkaistaan Creative Commons CC0 1.0 Universal Public Domain Dedication -omistuksella."
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "Kopioi"
-
-msgid "Rename"
-msgstr "Nimeä uudelleen"
-
-msgid "Reset Icon"
-msgstr "Nollaa kuvake"
-
-msgid "Delete World"
-msgstr "Poista maailma"
-
-msgid "Seed copied to clipboard"
-msgstr "Siemen kopioitu leikepöydälle"
-
-msgid "Remove server \"%s\"?"
-msgstr "Poistetaanko palvelin \"%s\"?"
-
-msgid "Refresh"
-msgstr "Päivitä"
-
-msgid "Remove Server"
-msgstr "Poista palvelin"
-
-msgid "Survival"
-msgstr "Selviytyminen"
-
-msgid "Edit"
-msgstr "Muokkaa"
-
-msgid "Ask to download"
-msgstr "Kysy ennen lataamista"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Minecraftin tallentamat tai tänne tuodut maailmat näkyvät tässä luettelossa."
-
-msgid "Rename World"
-msgstr "Nimeä maailma uudelleen"
-
-msgid "Servers"
-msgstr "Palvelimet"
-
-msgid "Save"
-msgstr "Tallenna"
-
-msgid "Add World"
-msgstr "Lisää maailma"
-
-msgid "Spectator"
-msgstr "Katsoja"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "Poistetaanko maailma \"%s\"? Tätä ei voi kumota."
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Tänne lisätyt palvelimet tallennetaan tämän instanssin servers.dat-tiedostoon."
-
-msgid "Add Server"
-msgstr "Lisää palvelin"
-
-msgid "Edit Server"
-msgstr "Muokkaa palvelinta"
-
-msgid "Address"
-msgstr "Osoite"
-
-msgid "Datapacks"
-msgstr "Datapaketit"
-
-msgid "No Worlds"
-msgstr "Ei maailmoja"
-
-msgid "Creative"
-msgstr "Luova"
-
-msgid "Move Up"
-msgstr "Siirrä ylös"
-
-msgid "No Servers"
-msgstr "Ei palvelimia"
-
-msgid "Never download"
-msgstr "Älä lataa koskaan"
-
-msgid "Worlds"
-msgstr "Maailmat"
-
-msgid "Always download"
-msgstr "Lataa aina"
-
-msgid "Move Down"
-msgstr "Siirrä alas"
-
-msgid "Copy Seed"
-msgstr "Kopioi siemen"
-
-msgid "Stats"
-msgstr "Tilastot"
-
-msgid "Playtime"
-msgstr "Peliaika"
-
-msgid "Time played"
-msgstr "Pelattu aika"
-
-msgid "Not played yet"
-msgstr "Ei vielä pelattu"
-
-msgid "Less than a minute"
-msgstr "Alle minuutti"
-
-msgid "%llu min"
-msgstr "%llu min"
-
-msgid "%llu h %llu min"
-msgstr "%llu t %llu min"
-
-msgid "Runs on"
-msgstr "Alusta"
-
-msgid "Activity"
-msgstr "Toiminta"
-
-msgid "Last session"
-msgstr "Viimeisin istunto"
-
-msgid "Last played"
-msgstr "Viimeksi pelattu"
-
-msgid "Total launches"
-msgstr "Käynnistykset yhteensä"
-
-msgid "Total crashes"
-msgstr "Kaatumiset yhteensä"
-
-msgid "Server joins"
-msgstr "Palvelinliittymiset"
-
-msgid "World loads"
-msgstr "Maailman lataukset"
-
-msgid "Player Profile"
-msgstr "Pelaajaprofiili"
-
-msgid "Player type"
-msgstr "Pelaajatyyppi"
-
-msgid "Pack style"
-msgstr "Paketin tyyli"
-
-msgid "Average session"
-msgstr "Keskimääräinen istunto"
-
-msgid "Stability"
-msgstr "Vakaus"
-
-msgid "Instance"
-msgstr "Instanssi"
-
-msgid "Total size"
-msgstr "Kokonaiskoko"
-
-msgid "Created on"
-msgstr "Luotu"
-
-msgid "Calculating…"
-msgstr "Lasketaan…"
-
-msgid "Never"
-msgstr "Ei koskaan"
-
-msgid "Today, %s"
-msgstr "Tänään, %s"
-
-msgid "Hybrid"
-msgstr "Hybridi"
-
-msgid "Server Player"
-msgstr "Palvelinpelaaja"
-
-msgid "Singleplayer"
-msgstr "Yksinpeli"
-
-msgid "Unplayed"
-msgstr "Pelaamaton"
-
-msgid "Modpack"
-msgstr "Modipaketti"
-
-msgid "Lightweight"
-msgstr "Kevyt"
-
-msgid "Kitchen Sink"
-msgstr "Kaikki mukana"
-
-msgid "Quick"
-msgstr "Lyhyt"
-
-msgid "Standard"
-msgstr "Tavallinen"
-
-msgid "Marathon"
-msgstr "Maraton"
-
-msgid "Stable"
-msgstr "Vakaa"
-
-msgid "%u%% crash rate"
-msgstr "%u%% kaatumisaste"
-
-msgid "A name cannot be empty."
-msgstr "nimi ei voi olla tyhjä."
-
-msgid "Remove server"
-msgstr "Poista palvelin"
-
-msgid "Download modpack"
-msgstr "Lataa Modpack"
-
-msgid "%s “%s”"
-msgstr "%s “%s”"
-
-msgid "Delete instance"
-msgstr "Poista ilmentymä"
-
-msgid "No worlds"
-msgstr "Ei maailmoja"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "odottaa sisäänkirjautumista selaimessa…"
-
-msgid "Choose files"
-msgstr "Valitse tiedostot"
-
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
 msgid "Cannot create “%s”: %s"
 msgstr "Ei voida luoda “%s”: %s"
 
-msgid "Cache cleanup failed"
-msgstr "Välimuistin puhdistus epäonnistui"
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "Ei mod loaderia"
 
-msgid "Español"
-msgstr "Español"
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Modit tarvitsevat modloaderin. Valitse ensin Fabric, Quilt, Forge tai "
+"NeoForge tämän esiintymän asetuksista"
 
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth ja modilataajat"
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "Valitse Minecraft-versio luettelosta."
 
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "Poistetaanko maailma “%s”? Tätä ei voi kumota."
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Valitse latausohjelman versio tai valitse toinen latausohjelma."
 
-msgid "Português"
-msgstr "Português"
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "Hakemisto"
 
-msgid "Create an instance to start playing."
-msgstr "Luo ilmentymä aloittaaksesi pelaamisen."
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "Valitse kansio"
 
-msgid "Duplicated to “%s”"
-msgstr "Kopioitu kohteeseen “%s”"
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "Luoda"
 
-msgid "Downloading modpack"
-msgstr "Ladataan Modpackia"
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, fuzzy, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "%u/%u valittu"
+msgstr[1] "%u/%u valittu"
 
-msgid "Try again"
-msgstr "Yritä uudelleen"
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "Palvelu palautti virheellisen vastauksen. Yritä myöhemmin."
 
-msgid "Performance impact"
-msgstr "Vaikutus suorituskykyyn"
-
-msgid "Add world"
-msgstr "Lisää maailma"
-
-msgid "Create instance"
-msgstr "Luo ilmentymä"
-
-msgid "Browse modpacks"
-msgstr "Selaa modpaketteja"
-
-msgid "Remove server “%s”?"
-msgstr "Poistetaanko palvelin “%s”?"
-
-msgid "Path tracing"
-msgstr "Polunseuranta"
-
-msgid "Clean export"
-msgstr "Puhdas vienti"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "Pelimekaniikat"
-
-msgid "Minecraft version"
-msgstr "Minecraft versio"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "Avaa kansio"
-
-msgid "AppStream metadata"
-msgstr "AppStream-metatiedot"
-
-msgid "Add Java runtime"
-msgstr "Lisää Java Runtime"
-
-msgid "World generation"
-msgstr "Maailman luonti"
-
-msgid "Keyboard shortcuts"
-msgstr "Pikanäppäimet"
-
-msgid "Resource packs"
-msgstr "Resurssipaketit"
-
-msgid "Edit server"
-msgstr "Muokkaa palvelinta"
-
-msgid "Keep playing"
-msgstr "Jatka pelaamista"
-
-msgid "Technical details"
-msgstr "Tekniset tiedot"
-
-msgid "Pack name"
-msgstr "Pakkauksen nimi"
-
-msgid "Colored lighting"
-msgstr "Värillinen valaistus"
-
-msgid "Rename world"
-msgstr "Nimeä maailma uudelleen"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "nimi voi sisältää vain kirjaimia, numeroita ja alaviivoja."
-
-msgid "Preferences"
-msgstr "Asetukset"
-
-msgid "Delete world"
-msgstr "Poista maailma"
-
-msgid "Asking Microsoft for a code…"
-msgstr "pyytää Microsoftilta koodia…"
-
-msgid "Show unstable mod loader versions"
-msgstr "Näytä epävakaat Mod Loader -versiot"
-
-msgid "Move down"
-msgstr "Siirrä alas"
-
-msgid "Clear cache"
-msgstr "Tyhjennä Nuvasha Launchern välimuisti"
-
-msgid "Delete “%s”?"
-msgstr "Poistetaanko “%s”?"
-
-msgid "Import modpack…"
-msgstr "Tuo Modpack…"
-
-msgid "Delete selected"
-msgstr "Poista valitut"
-
-msgid "Java runtime"
-msgstr "Java-ajoympäristö"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "Nimen on oltava 3–16 merkkiä pitkä."
-
-msgid "Import modpack"
-msgstr "Tuo Modpack"
-
-msgid "Core shaders"
-msgstr "Peruspelin varjostimet"
-
-msgid "Sign in"
-msgstr "Kirjaudu sisään"
-
-msgid "Cache cleared"
-msgstr "Välimuisti tyhjennetty"
-
-msgid "No instances yet"
-msgstr "Ei vielä tapauksia"
-
-msgid "Add offline account"
-msgstr "Lisää offline-tili"
-
-msgid "Copy seed"
-msgstr "Kopioi siemen"
-
-msgid "Services & ecosystem"
-msgstr "Palvelut ja ekosysteemi"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "Yhtään modpakettia ei löytynyt haetun mukaisena. Kokeile toista hakusanaa."
-
-msgid "Line limit"
-msgstr "Linjarajoitus"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Modrinth-modipaketit (*.mrpack)"
-
-msgid "Add server"
-msgstr "Lisää palvelin"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
+#: src/nuvashalauncher-download-modpack-browser.c:763
 msgid "All versions"
 msgstr "Kaikki versiot"
 
-msgid "No servers"
-msgstr "Ei palvelimia"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "Lataukset"
 
-msgid "Clear cache?"
-msgstr "Tyhjennetäänkö Nuvasha Launchern välimuisti?"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "Osuvuus"
 
-msgid "Loader version"
-msgstr "Loader-versio"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "Uusimmat"
 
-msgid "translator-credits"
-msgstr "Flia"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "Äskettäin päivitetyt"
 
-msgid "Include all files"
-msgstr "Sisällytä kaikki tiedostot"
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "Seuraajat"
 
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "Suodata modipaketteja"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "Selaa modpaketteja"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Pyydettyä tiedostoa, projektia tai yhteensopivaa versiota ei löytynyt."
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+#, fuzzy
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "Modpakettia ei voitu asentaa"
+msgstr[1] "Modpakettia ei voitu asentaa"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
+msgid "Reading modpack"
+msgstr "Modpackin lukeminen"
+
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
+msgid "Extracting files"
+msgstr "Tiedostojen purkaminen"
+
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "Modpakettia ei voitu asentaa"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "Tiedostojen lataaminen"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
+msgid "Optional files"
+msgstr "Valinnaiset tiedostot"
+
+#: src/nuvashalauncher-download-modpack-install.c:265
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr ""
+"Paketissa luetellaan nämä tiedostot, mutta sanotaan, että niitä ei tarvita. "
+"Mitään niistä ei asenneta, ellet pyydä. Oletus on pois päältä"
+
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
+msgid "Pack could not be fetched"
+msgstr "Pakettia ei voitu noutaa"
+
+#: src/nuvashalauncher-download-modpack-install.c:422
+msgid "Invalid pack"
+msgstr "Virheellinen paketti"
+
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "Tässä versiossa ei ole pakettitiedostoa"
+
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"Tämä projekti ei julkaise mitään pakettitiedostoa, jonka Nuvasha Launcher "
+"voisi asentaa."
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
+msgstr "Ladataan Modpackia"
+
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "Lataa"
+
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Yhteys epäonnistui. Tarkista internetyhteys ja yritä uudelleen."
+
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "Palvelu hylkäsi pyynnön. Yritä myöhemmin."
+
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Liikaa pyyntöjä. Odota hetki ja yritä uudelleen."
+
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr ""
+"Tiedostoja ei voitu lukea tai kirjoittaa. Tarkista sijainti, oikeudet ja "
+"vapaa levytila."
+
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr ""
+"Ladattu tiedosto ei läpäissyt tarkistusta eikä sitä asennettu. Lataa se "
+"uudelleen."
+
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr ""
+"Arkisto on virheellinen tai turvaton. Lataa se uudelleen luotetusta "
+"lähteestä."
+
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "Toiminto epäonnistui. Katso lisätietoja teknisistä tiedoista."
+
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Java-ohjelmaa ei voitu käyttää. Valitse toimiva Java-ympäristö."
+
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "Käyttö estetty. Tarkista kansion oikeudet."
+
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "Vapaata levytilaa ei ole riittävästi."
+
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "Tiedostoa tai kansiota ei löytynyt. Tarkista sijainti."
+
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "Kohde on jo olemassa. Valitse toinen sijainti."
+
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
+
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Tallennettu kirjautuminen ei ole enää voimassa. Kirjaudu uudelleen."
+
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Kirjautuminen hylättiin. Aloita uudelleen, jos haluat kirjautua."
+
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Tämä tili ei omista Minecraft: Java Editionia."
+
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr ""
+"Luo Minecraft: Java Edition -profiili osoitteessa minecraft.net ja yritä "
+"uudelleen."
+
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr ""
+"Microsoft-kirjautumista ei ole määritetty tässä koosteessa. Päivitä "
+"käynnistin."
+
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
+
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"Modilataajaa ei voitu asentaa. Valitse toinen versio tai katso tekniset "
+"tiedot."
+
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"Pelin metatiedot ovat virheelliset tai eivät ole saatavilla. Päivitä "
+"versioluettelo ja yritä uudelleen."
+
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Tämä instanssi ei ole enää saatavilla. Päivitä instanssiluettelo."
+
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "Valitse toinen instanssin nimi tai kansio."
+
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr ""
+"Instanssin asetukset ovat virheelliset. Tarkista valittu versio ja JVM-"
+"argumentit."
+
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr ""
+"Tiliä ei voitu tallentaa. Tarkista järjestelmän avainnippu ja tiedostojen "
+"oikeudet."
+
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "Selkeä"
+
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "Kirjaudu sisään"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "Avaa selaimessa"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "Yritä uudelleen"
+
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "Lisää offline-tili"
+
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "Nimi"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "Lisätä"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "Luo ilmentymä"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "Lataa Modpack"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "Tuo Modpack"
+
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "Tuodaan modpackia…"
+
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "Etsi modpackeja"
+
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "Lähellä"
+
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr ""
+"Yhtään modpakettia ei löytynyt haetun mukaisena. Kokeile toista hakusanaa."
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "Valitse tiedostot"
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "Asennusta ei voitu suorittaa"
+
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "Takaisin"
+
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "Etsi lokista"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
+msgid "Classic model"
+msgstr "Klassinen malli"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "Ohut malli"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "Mukauta"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
+msgid "Import skin…"
+msgstr "Tuo iho…"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "Vie ihoa…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Minecraft Services -virhe"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "Järjestelmän oletusasetus"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "Kopio %s:sta"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "instanssin nimi on tyhjä"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "Nimissä ei saa esiintyä %s"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "instanssin nimeä ei voi käyttää hakemiston nimenä"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Modpack vietiin"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "Vientisijainti ei ole paikallinen tiedosto"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "Modpack vienti"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "Viedään modpack"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
 msgid "Export modpack"
 msgstr "Vie Modpack"
 
-msgid "Add world…"
-msgstr "Lisää maailma…"
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth-modipaketit (*.mrpack)"
 
-msgid "Update all"
-msgstr "Päivitä kaikki"
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "Pakkauksen tiedot"
 
-msgid "Add Microsoft account"
-msgstr "Lisää Microsoft-tili"
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "Viedä"
 
-msgid "Move up"
-msgstr "Siirrä ylös"
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "Vie modpack-metatiedot"
 
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "Pakkauksen nimi"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "Yhteenveto"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "Version tunnus"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "Sisällytetäänkö ohimenevät tiedostot?"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Lokit, virheraportit, kuvakaappaukset, välimuistit ja lataukset jätetään "
+"yleensä pois."
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "Puhdas vienti"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "Sisällytä kaikki tiedostot"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "Peli on käynnissä; pysäytä se ennen hakemiston siirtämistä"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "Valitse hakemisto"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "Kopioitu kohteeseen “%s”"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Määritettyä Javaa ei havaittu; varmista, että se on edelleen käyttökelpoinen "
+"Java-suoritettava tiedosto"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Tämä peli vaatii Java %d tai uudemman, valittu Java on %d"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr ""
+"Valitse työpöytätuella varustettu Java-ympäristö, ei headless-asennusta."
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "Kuvakkeen on oltava tällä tietokoneella oleva tiedosto"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "Valitse kuvake"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "Kuvat"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "Kenraali"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "Kuvake"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "Muuta hakemistoa"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "JVM:n argumentit"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "Toiminnot"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "Kopioi"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "Poista ilmentymä"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "Alle minuutti"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu min"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu t %llu min"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "Tänään, %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "Ei vielä pelattu"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "Ei koskaan"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "Lasketaan…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "Toiminta"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "Pelattu aika"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "Viimeksi pelattu"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "Käynnistykset yhteensä"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "Kaatumiset yhteensä"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "Instanssi"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "Kokonaiskoko"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "Luotu"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "Tuntematon"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "Lokit"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "Asetukset"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "Resurssipaketit"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "Shader-paketit"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "Modit"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "Maailmat"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "Palvelimet"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "Tilastot"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "valittu tiedosto ei ilmoita Java-versiota"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Valitse Java-suoritettava tiedosto"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "Ladataan…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "Mukautettu: %s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Lisää Java Runtime"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Java-ajoympäristö"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Uusi kaatumisraportti luotiin. Avaa lokit nähdäksesi lisätiedot."
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "peli pysäytettiin signaalilla %d"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "peli poistui koodilla %d"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "Yhteensopivaa Java-ajoympäristöä ei löytynyt."
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "tämän latausohjelman versioita ei voitu lukea"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s (epävakaa)"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "Ei mitään"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Minecraftille %s ei löytynyt yhteensopivaa %s-versiota."
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "Valitse ensin Minecraft-versio"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "Lataaja"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "Loader-versio"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "Tekniset tiedot"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Tyhjennetäänkö Nuvasha Launchern välimuisti?"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "Välimuisti tyhjennetty"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "Välimuistin puhdistus epäonnistui"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "Pyydä viemään metatietoja"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "Näytä nimi-, yhteenveto- ja versiokentät ennen vientiä."
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Riippuvuuden poistaminen poistaa siitä riippuvan modin"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "Näytä epävakaat Minecraft-versiot"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "Näytä epävakaat Mod Loader -versiot"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "Kieli"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "Käyttöliittymän kieli"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "Linjarajoitus"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "Välimuisti"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Tallenna Modrinth API -vastaukset välimuistiin"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1 tunti"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6 tuntia"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1 päivä"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7 päivää"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "Välimuistin vanheneminen"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "Tyhjennä Nuvasha Launchern välimuisti"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Minecraft-käynnistin Linuxille"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "Palvelut ja ekosysteemi"
+
+#: src/nuvashalauncher-main-window-actions.c:626
 msgid "Minecraft disclaimer"
 msgstr "Minecraft-vastuuvapauslauseke"
 
-msgid "Shader packs"
-msgstr "Shader-paketit"
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"EI VIRALLINEN MINECRAFT-TUOTE. EI MOJANGIN TAI MICROSOFTIN HYVÄKSYMÄ TAI "
+"NIIDEN KANSSA LIITTEESSÄ.\n"
+"\n"
+"Minecraft on Mojang AB:n tavaramerkki. Käynnistin on kehitetty itsenäisesti, "
+"eikä se ole sidoksissa Mojang Studiosiin tai Microsoftiin."
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth ja modilataajat"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"Modipaketit, modit, resurssipaketit ja varjostimet ovat Modrinthin "
+"isännöimiä ja niiden tekijöiden luomia.\n"
+"\n"
+"Modilataajia kehittävät itsenäisesti Fabric-, Quilt-, Forge- ja NeoForge-"
+"projektit."
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "AppStream-metatiedot"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"AppStream-metatiedot (kuvaukset, yhteenvedot ja julkaisutiedot) julkaistaan "
+"Creative Commons CC0 1.0 Universal Public Domain Dedication -omistuksella."
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "Tietoja Nuvasha Launcherista"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "Pikanäppäimet"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "Asetukset"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "Lopettaa"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "Poista valitut"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "Tuo Modpack…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "Pysähdy"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "Pelata"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "Pysähdytäänkö %s?"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "peli"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"Peli on käynnissä ja sulkeutuu. Edistyksesi viimeisimmän tallennuksen "
+"jälkeen menetetään."
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "Jatka pelaamista"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "Tilit"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "Ei vielä tapauksia"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "Luo ilmentymä aloittaaksesi pelaamisen."
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraft kaatui"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Minecraft ei voinut käynnistyä"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft tarvitsee kirjautumisen"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "Minecraft Services hylkäsi pyynnön (HTTP %u)%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "Kirjoitusarkisto"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "Vienti valmis"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "lataajaa ei voida ratkaista: %s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "Seikkailu"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "Tunnelma"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "Ääni"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "Palikat"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "Hohto"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "Sarjakuvamainen"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "Luokat"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "Värillinen valaistus"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "Taistelu"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "Peruspelin varjostimet"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "Omituiset"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "Koristelu"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "Talous"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "Entiteetit"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "Ympäristö"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "Varusteet"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "Fantasia"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "Ominaisuudet"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "Kasvillisuus"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "Fontit"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "Ruoka"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "Pelimekaniikat"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "Käyttöliittymä"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "Suuri"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "Esineet"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "Kirjasto"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "Pieni"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "Taikuus"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "Hallinta"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "Keskitaso"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "Minipeli"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "Olennot"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "Modeille"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "Mallit"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "Optimointi"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "Polunseuranta"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "Vaikutus suorituskykyyn"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "Erittäin heikoille tietokoneille"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "Realistinen"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "Heijastukset"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "Tarkkuudet"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "Kuvakaappaus"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "Puolirealistinen"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "Varjot"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "Yksinkertainen"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "Sosiaalinen"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "Varastointi"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "Teknologia"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "Teemallinen"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "Kuljetus"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "Hienosäädöt"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "Apuvälineet"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "Peruspelin kaltainen"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "Maailman luonti"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr ""
+"Modrinth pyytää Nuvasha Launchera hidastamaan vauhtia, pyyntöjä on liikaa"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "Modrinth ei tunne tätä tiedostoa"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Minecraftille %s ja %s ei löytynyt yhteensopivaa versiota."
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "Samanniminen offline-tili on jo olemassa."
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "Muokkaa palvelinta"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "Lisää palvelin"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "Tallenna"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "Osoite"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "Kysy ennen lataamista"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "Lataa aina"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "Älä lataa koskaan"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "Poistetaanko palvelin “%s”?"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "Poista palvelin"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "Siirrä ylös"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "Siirrä alas"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "Muokkaa"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "Päivitä"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "Ei palvelimia"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr ""
+"Tänne lisätyt palvelimet tallennetaan tämän instanssin servers.dat-"
+"tiedostoon."
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "pyytää Microsoftilta koodia…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "odottaa sisäänkirjautumista selaimessa…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Selainta ei voitu avata. Avaa näytetty osoite käsin."
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"Microsoft palautti turvattoman kirjautumisosoitteen. Päivitä käynnistin "
+"ennen uutta yritystä."
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Avaa sivu selaimessasi ja kirjoita tämä koodi:"
+
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Iho"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Skin kuvien tulee olla 64 x 64 tai 64 x 32 PNG-tiedostoja"
+
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "Virheellinen iho"
+
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "Selvä"
+
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "PNG-kuvan pintarakenne"
+
+#: src/nuvashalauncher-users-popover-skin.c:368
+msgid "Delete skin?"
+msgstr "Poista iho?"
+
+#: src/nuvashalauncher-users-popover-skin.c:369
+msgid "This skin will be removed from the skin library."
+msgstr "Tämä iho poistetaan ihokirjastosta."
+
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "Ei viitta"
+
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
+msgid "Remove %s?"
+msgstr "Poista %s?"
+
+#: src/nuvashalauncher-users-popover.c:178
+msgid "this account"
+msgstr "tämä tili"
+
+#: src/nuvashalauncher-users-popover.c:181
+msgid ""
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
+msgstr ""
+"Tili poistetaan Nuvasha Launchersta ja sen tallennetut kirjautumistiedot "
+"nollataan. Itse peliin ei tehdä muutoksia."
+
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "Poistaa"
+
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Kirjautuminen vaaditaan"
+
+#: src/nuvashalauncher-users-popover.c:398
+msgid "Add Microsoft account"
+msgstr "Lisää Microsoft-tili"
+
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Minecraft versio"
+
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "Selviytyminen"
+
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "Luova"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "Katsoja"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "Nimeä maailma uudelleen"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "Nimeä uudelleen"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "Kopioi"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "Siemen kopioitu leikepöydälle"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Poistetaanko maailma “%s”? Tätä ei voi kumota."
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "Poista maailma"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "Kopioi siemen"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "Lisää maailma"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "Lisää maailma…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "Ei maailmoja"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr ""
+"Minecraftin tallentamat tai tänne tuodut maailmat näkyvät tässä luettelossa."
+
+#~ msgid "Colored Lighting"
+#~ msgstr "Värillinen valaistus"
+
+#~ msgid "Core Shaders"
+#~ msgstr "Peruspelin varjostimet"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "Pelimekaniikat"
+
+#~ msgid "Path Tracing"
+#~ msgstr "Polunseuranta"
+
+#~ msgid "Performance Impact"
+#~ msgstr "Vaikutus suorituskykyyn"
+
+#~ msgid "World Generation"
+#~ msgstr "Maailman luonti"
+
+#~ msgid "All Versions"
+#~ msgstr "Kaikki versiot"
+
+#~ msgid "Update All"
+#~ msgstr "Päivitä kaikki"
+
+#~ msgid "Open Folder"
+#~ msgstr "Avaa kansio"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "Mitään ei ole valittu"
+
+#~ msgid "Create Instance"
+#~ msgstr "Luo ilmentymä"
+
+#~ msgid "Download Modpack"
+#~ msgstr "Lataa Modpack"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "Kopioitu kohteeseen \"%s\""
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "Poistetaanko \"%s\"?"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Java-ajoympäristö"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Lisää Java Runtime"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "Minecraft tarvitsee päättömän Javan: Archissa käytä pakettia jre-openjdk, "
+#~ "ei jre-openjdk-headless"
+
+#~ msgid "Delete Instance"
+#~ msgstr "Poista ilmentymä"
+
+#~ msgid "Resource Packs"
+#~ msgstr "Resurssipaketit"
+
+#~ msgid "Shader Packs"
+#~ msgstr "Shader-paketit"
+
+#~ msgid "Loader Version"
+#~ msgstr "Loader-versio"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "Näytä epävakaat Mod Loader -versiot"
+
+#~ msgid "Line Limit"
+#~ msgstr "Linjarajoitus"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "Pikanäppäimet"
+
+#~ msgid "Keep Playing"
+#~ msgstr "Jatka pelaamista"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "Ei vielä tapauksia"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "Käytä otsikon + -painiketta luodaksesi sellaisen"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "Lisää offline-tili"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "nimi voi sisältää vain kirjaimia, numeroita ja alaviivoja"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "nimi ei voi olla tyhjä"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "Nimen on oltava 3–16 merkkiä pitkä"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "pyytää Microsoftilta koodia"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "odottaa sisäänkirjautumista selaimessa"
+
+#~ msgid "Sign In"
+#~ msgstr "Kirjaudu sisään"
+
+#~ msgid "Try Again"
+#~ msgstr "Yritä uudelleen"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Lisää Microsoft-tili"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Minecraft versio"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s \"%s\""
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "Näytä pikakuvakkeet"
+
+#~ msgid "Import Modpack"
+#~ msgstr "Tuo Modpack"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Modrinth-modipaketit (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "Vie Modpack"
+
+#~ msgid "Clean Export"
+#~ msgstr "Puhdas vienti"
+
+#~ msgid "Include All Files"
+#~ msgstr "Sisällytä kaikki tiedostot"
+
+#~ msgid "Pack Name"
+#~ msgstr "Pakkauksen nimi"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "Paketti ei määrittele asennusta"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "Ladataan Modpackia"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "%u kohde asennettu"
+#~ msgstr[1] "%u kohdetta asennettu"
+
+#~ msgid "no compatible version"
+#~ msgstr "ei yhteensopivaa versiota"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "Ei voida luoda \"%s\": %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "Välimuisti tyhjennetty"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "Välimuistin puhdistus epäonnistui"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "Välimuistia ei voitu tyhjentää."
+
+#~ msgid "This cannot be installed"
+#~ msgstr "Tätä ei voi asentaa"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "Selaa modpaketteja"
+
+#~ msgid "Choose Files"
+#~ msgstr "Valitse tiedostot"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "Tyhjennä Nuvasha Launchern välimuisti"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Tyhjennetäänkö Nuvasha Launchern välimuisti?"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "En ymmärtänyt vastausta"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "Siinä on tiedostoja, joita Nuvasha Launcher ei tunnista."
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "Microsoft palautti epäluotettavan vahvistusosoitteen"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr ""
+#~ "Yhtään modpakettia ei löytynyt haetun mukaisena. Kokeile toista hakusanaa"
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Nuvasha Launchern välimuistitiedot tyhjennettiin onnistuneesti."
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Etsi Modrinth ja asenna modipaketti"
+
+#~ msgid "Unavailable"
+#~ msgstr "Ei saatavilla"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "kirjautuminen ei onnistunut"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Seuraavat instanssit poistetaan:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "Muokkaustila"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "Siirry muokkaustilaan"
+
+#~ msgid "Delete Selected"
+#~ msgstr "Poista valitut"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "Projektin tietoja ei voitu ladata. Yritä uudelleen."
+
+#~ msgid "Technical Details"
+#~ msgstr "Tekniset tiedot"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "Palvelut ja ekosysteemi"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Minecraft-vastuuvapauslauseke"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth ja modilataajat"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "AppStream-metatiedot"
+
+#~ msgid "Reset Icon"
+#~ msgstr "Nollaa kuvake"
+
+#~ msgid "Delete World"
+#~ msgstr "Poista maailma"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "Poistetaanko palvelin \"%s\"?"
+
+#~ msgid "Remove Server"
+#~ msgstr "Poista palvelin"
+
+#~ msgid "Rename World"
+#~ msgstr "Nimeä maailma uudelleen"
+
+#~ msgid "Add World"
+#~ msgstr "Lisää maailma"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "Poistetaanko maailma \"%s\"? Tätä ei voi kumota."
+
+#~ msgid "Add Server"
+#~ msgstr "Lisää palvelin"
+
+#~ msgid "Edit Server"
+#~ msgstr "Muokkaa palvelinta"
+
+#~ msgid "Datapacks"
+#~ msgstr "Datapaketit"
+
+#~ msgid "No Worlds"
+#~ msgstr "Ei maailmoja"
+
+#~ msgid "Move Up"
+#~ msgstr "Siirrä ylös"
+
+#~ msgid "No Servers"
+#~ msgstr "Ei palvelimia"
+
+#~ msgid "Move Down"
+#~ msgstr "Siirrä alas"
+
+#~ msgid "Copy Seed"
+#~ msgstr "Kopioi siemen"
+
+#~ msgid "Playtime"
+#~ msgstr "Peliaika"
+
+#~ msgid "Runs on"
+#~ msgstr "Alusta"
+
+#~ msgid "Last session"
+#~ msgstr "Viimeisin istunto"
+
+#~ msgid "Server joins"
+#~ msgstr "Palvelinliittymiset"
+
+#~ msgid "World loads"
+#~ msgstr "Maailman lataukset"
+
+#~ msgid "Player Profile"
+#~ msgstr "Pelaajaprofiili"
+
+#~ msgid "Player type"
+#~ msgstr "Pelaajatyyppi"
+
+#~ msgid "Pack style"
+#~ msgstr "Paketin tyyli"
+
+#~ msgid "Average session"
+#~ msgstr "Keskimääräinen istunto"
+
+#~ msgid "Stability"
+#~ msgstr "Vakaus"
+
+#~ msgid "Hybrid"
+#~ msgstr "Hybridi"
+
+#~ msgid "Server Player"
+#~ msgstr "Palvelinpelaaja"
+
+#~ msgid "Singleplayer"
+#~ msgstr "Yksinpeli"
+
+#~ msgid "Unplayed"
+#~ msgstr "Pelaamaton"
+
+#~ msgid "Modpack"
+#~ msgstr "Modipaketti"
+
+#~ msgid "Lightweight"
+#~ msgstr "Kevyt"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "Kaikki mukana"
+
+#~ msgid "Quick"
+#~ msgstr "Lyhyt"
+
+#~ msgid "Standard"
+#~ msgstr "Tavallinen"
+
+#~ msgid "Marathon"
+#~ msgstr "Maraton"
+
+#~ msgid "Stable"
+#~ msgstr "Vakaa"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "%u%% kaatumisaste"

@@ -1,1625 +1,2531 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: cs\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-msgid "Adventure"
-msgstr "Dobrodružství"
-msgid "Atmosphere"
-msgstr "Atmosféra"
-msgid "Audio"
-msgstr "Zvuk"
-msgid "Blocks"
-msgstr "Bloky"
-msgid "Bloom"
-msgstr "Záře"
-msgid "Cartoon"
-msgstr "Kreslené"
-msgid "Categories"
-msgstr "Kategorie"
-msgid "Colored Lighting"
-msgstr "Barevné osvětlení"
-msgid "Combat"
-msgstr "Boj"
-msgid "Core Shaders"
-msgstr "Shadery základní hry"
-msgid "Cursed"
-msgstr "Bizarní"
-msgid "Decoration"
-msgstr "Dekorace"
-msgid "Economy"
-msgstr "Ekonomika"
-msgid "Entities"
-msgstr "Entity"
-msgid "Environment"
-msgstr "Prostředí"
-msgid "Equipment"
-msgstr "Vybavení"
-msgid "Fantasy"
-msgstr "Fantasy"
-msgid "Features"
-msgstr "Funkce"
-msgid "Foliage"
-msgstr "Vegetace"
-msgid "Fonts"
-msgstr "Písma"
-msgid "Food"
-msgstr "Jídlo"
-msgid "Game Mechanics"
-msgstr "Herní mechaniky"
-msgid "Interface"
-msgstr "Rozhraní"
-msgid "High"
-msgstr "Vysoký"
-msgid "Items"
-msgstr "Předměty"
-msgid "Library"
-msgstr "Knihovna"
-msgid "Low"
-msgstr "Nízký"
-msgid "Magic"
-msgstr "Magie"
-msgid "Management"
-msgstr "Správa"
-msgid "Medium"
-msgstr "Střední"
-msgid "Minigame"
-msgstr "Minihra"
-msgid "Mobs"
-msgstr "Tvorové"
-msgid "Modded"
-msgstr "Pro mody"
-msgid "Models"
-msgstr "Modely"
-msgid "Optimization"
-msgstr "Optimalizace"
-msgid "Path Tracing"
-msgstr "Sledování cest"
-msgid "Performance Impact"
-msgstr "Dopad na výkon"
-msgid "Potato"
-msgstr "Pro velmi slabé počítače"
-msgid "Realistic"
-msgstr "Realistické"
-msgid "Reflections"
-msgstr "Odrazy"
-msgid "Resolutions"
-msgstr "Rozlišení"
-msgid "Screenshot"
-msgstr "Snímek obrazovky"
-msgid "Semi-realistic"
-msgstr "Polorealistické"
-msgid "Shadows"
-msgstr "Stíny"
-msgid "Simplistic"
-msgstr "Jednoduché"
-msgid "Social"
-msgstr "Společenské"
-msgid "Storage"
-msgstr "Skladování"
-msgid "Technology"
-msgstr "Technologie"
-msgid "Themed"
-msgstr "Tematické"
-msgid "Transportation"
-msgstr "Doprava"
-msgid "Tweaks"
-msgstr "Drobné úpravy"
-msgid "Utility"
-msgstr "Nástroje"
-msgid "Vanilla-like"
-msgstr "Podobné základní hře"
-msgid "World Generation"
-msgstr "Generování světa"
 
-msgid "All Versions"
-msgstr "Všechny verze"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "Relevance"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "Offline"
 
-msgid "Newest"
-msgstr "Nejnovější"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "jméno nemůže být prázdné."
 
-msgid "Recently updated"
-msgstr "Nedávno aktualizované"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "název musí mít 3 až 16 znaků."
 
-msgid "Followers"
-msgstr "Sledující"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "jméno může obsahovat pouze písmena, číslice a podtržítka."
 
-msgid "Filter modpacks"
-msgstr "Filtrovat balíčky modů"
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
+msgid ""
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
+msgstr ""
+"Tento účet Microsoft zatím nemá přiřazený žádný profil Xbox: přihlaste se s "
+"ním jednou na webu xbox.com a poté se zde přihlaste znovu"
 
-msgid "Cancel"
-msgstr "Zrušit"
-msgid "Confirm"
-msgstr "Potvrdit"
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
+msgid ""
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
+msgstr ""
+"Toto je dětský účet: než bude moci hrát, musí jej dospělá osoba přidat do "
+"rodiny Microsoft."
 
-msgid "Customize"
-msgstr "Přizpůsobit"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr ""
+"Služba Xbox Live není dostupná v zemi, ve které je tento účet registrován"
 
-msgid "Delete"
-msgstr "Vymazat"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"Tento účet musí nejprve ověřit dospělá osoba, než bude možné hrát – to samé "
+"platí i pro účty v Jižní Koreji"
 
-msgid "Retry"
-msgstr "Zkuste to znovu"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Společnost Microsoft neposkytla kód pro přihlášení"
 
-msgid "Loading…"
-msgstr "Načítání…"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1fM stažení"
 
-msgid "Download"
-msgstr "Stáhnout"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1fk stažení"
 
-msgid "Update All"
-msgstr "Aktualizovat vše"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s stažení"
 
-msgid "Open Folder"
-msgstr "Otevřete složku"
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s · od %s"
 
-msgid "Nothing installed yet"
-msgstr "Zatím nic nainstalováno"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "od %s"
 
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Vyhledejte něco, co chcete vložit do složky této instance"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, fuzzy, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "%u/%u vybráno"
+msgstr[1] "%u/%u vybráno"
+msgstr[2] "%u/%u vybráno"
 
-msgid "Installed"
-msgstr "Instalováno"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, fuzzy, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "Balíčky zdrojů"
+msgstr[1] "Balíčky zdrojů"
+msgstr[2] "Balíčky zdrojů"
 
-msgid "Loading more…"
-msgstr "Načítání dalších…"
+#: src/nuvashalauncher-content-page-browser.c:98
+#, fuzzy, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "%u/%u vybráno"
+msgstr[1] "%u/%u vybráno"
+msgstr[2] "%u/%u vybráno"
 
-msgid "Nothing is selected"
-msgstr "Není vybráno nic"
+#: src/nuvashalauncher-content-page-browser.c:101
+#, fuzzy, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "%u/%u vybráno"
+msgstr[1] "%u/%u vybráno"
+msgstr[2] "%u/%u vybráno"
 
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr ""
 
-msgid "Filter by category"
-msgstr "Filtrujte podle kategorie"
-
-msgid "Nothing to show yet"
-msgstr "Zatím není co ukázat"
-
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Napište, co hledat, nebo procházejte vše, co má Modrinth pro tento případ"
-
-msgid "Browse"
-msgstr "Prohlížet"
-
-msgid "No mod loader"
-msgstr "Žádný zavaděč modů"
-
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Mody potřebují nakladač modů. Nejprve v nastavení této instance vyberte Fabric, Quilt, Forge nebo NeoForge"
-
-msgid "Create Instance"
-msgstr "Vytvořit instanci"
-
-msgid "Name"
-msgstr "Jméno"
-
-msgid "Directory"
-msgstr "Adresář"
-
-msgid "Choose a folder"
-msgstr "Vyberte složku"
-
-msgid "Create"
-msgstr "Vytvořit"
-
-msgid "Download Modpack"
-msgstr "Stáhněte si Modpack"
-
-
-msgid "Search modpacks"
-msgstr "Prohledejte modpacky"
-
-msgid "Close"
-msgstr "Blízko"
-
-msgid "Back"
-msgstr "Zadní"
-
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "Instalovat"
 
-msgid "Copy of %s"
-msgstr "Kopie %s"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "další stránku nelze načíst"
 
-msgid "Choose Java executable"
-msgstr "Vyberte spustitelný soubor Java"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Prohledání Modrinthu se nezdařilo"
 
-msgid "the chosen file does not report a Java version"
-msgstr "vybraný soubor nehlásí verzi Java"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "Ostatní"
 
-msgid "Choose an Icon"
-msgstr "Vyberte ikonu"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "Nelze načíst kategorie"
 
-msgid "Choose a Directory"
-msgstr "Vyberte adresář"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "Zkuste to znovu"
 
-msgid "Duplicated to \"%s\""
-msgstr "Duplikováno do „%s“"
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "Verze se nepodařilo načíst. Zkuste to znovu."
 
-msgid "Delete \"%s\"?"
-msgstr "Smazat \"%s\"?"
-
-msgid "General"
-msgstr "Generál"
-
-msgid "Icon"
-msgstr "Ikona"
-
-msgid "Change the Directory"
-msgstr "Změňte adresář"
-
-msgid "Minecraft"
-msgstr "Minecraft"
-
-msgid "Java"
-msgstr "Jáva"
-
-msgid "Java Runtime"
-msgstr "Java Runtime"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "Tato hra vyžaduje Java %d nebo novější, vybraná Java je %d"
-
-msgid "Add Java Runtime"
-msgstr "Přidat Java Runtime"
-
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft potřebuje bezhlavou Javu: na Archu použijte balíček jre-openjdk, ne jre-openjdk-headless"
-
-msgid "JVM Arguments"
-msgstr "Argumenty JVM"
-
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "Konfigurovaná Java nebyla detekována; ujistěte se, že je to stále použitelný spustitelný soubor Java"
-
-msgid "Actions"
-msgstr "Akce"
-
-msgid "Duplicate"
-msgstr "Duplikát"
-
-msgid "Delete Instance"
-msgstr "Smazat instanci"
-
-msgid "Settings"
-msgstr "Nastavení"
-
-msgid "Resource Packs"
-msgstr "Balíčky zdrojů"
-
-msgid "Shader Packs"
-msgstr "Balíčky shaderů"
-
-msgid "Mods"
-msgstr "Modifikace"
-
-msgid "Logs"
-msgstr "Protokoly"
-
-msgid "Custom: %s"
-msgstr "Vlastní: %s"
-
-msgid "the game was stopped by signal %d"
-msgstr "hra byla zastavena signálem %d"
-
-msgid "the game exited with code %d"
-msgstr "hra skončila s kódem %d"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "Pro Minecraft %s nebyla nalezena žádná kompatibilní verze %s."
-
-msgid "Loader"
-msgstr "Nakladač"
-
-msgid "Loader Version"
-msgstr "Verze nakladače"
-
-msgid "Clear"
-msgstr "Jasný"
-
-msgid "Search the log"
-msgstr "Prohledejte protokol"
-
-msgid "Versions"
-msgstr "Verze"
-
-msgid "Show unstable Minecraft versions"
-msgstr "Zobrazit nestabilní verze Minecraftu"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "Zobrazit nestabilní verze Mod Loader"
-
-msgid "Language"
-msgstr "Jazyk"
-
-msgid "Interface language"
-msgstr "Jazyk rozhraní"
-
-msgid "Line Limit"
-msgstr "Limit linky"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "O Nuvasha Launcher"
-
-msgid "Keyboard Shortcuts"
-msgstr "Klávesové zkratky"
-
-msgid "Stop"
-msgstr "Zastávka"
-
-msgid "Play"
-msgstr "Hrát"
-
-msgid "Keep Playing"
-msgstr "Pokračujte ve hře"
-
-msgid "Downloads"
-msgstr "Stahování"
-
-msgid "Accounts"
-msgstr "Účty"
-
-msgid "No Instances Yet"
-msgstr "Zatím žádné instance"
-
-msgid "Use the + button in the header to create one"
-msgstr "K vytvoření použijte tlačítko + v záhlaví"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "zavaděč nelze vyřešit: %s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "Pro Minecraft %s a %s nebyla nalezena žádná kompatibilní verze."
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "Pro Minecraft %s nebyla nalezena žádná kompatibilní verze."
 
-msgid "Add Offline Account"
-msgstr "Přidat účet offline"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "Verze"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "jméno může obsahovat pouze písmena, číslice a podtržítka"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "Složku nelze číst"
 
-msgid "a name cannot be empty"
-msgstr "jméno nemůže být prázdné"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "název musí mít 3 až 16 znaků"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "Soubor nelze nainstalovat"
 
-msgid "Add"
-msgstr "Přidat"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "požádat Microsoft o kód"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "Složku nelze vytvořit"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "čekání na přihlášení v prohlížeči"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "Obsah"
 
-msgid "Sign In"
-msgstr "Přihlaste se"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "Instalace"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "Otevřete stránku v prohlížeči a zadejte tento kód:"
-
-msgid "Try Again"
-msgstr "Zkuste to znovu"
-
-msgid "Remove"
-msgstr "Odstranit"
-
-msgid "Add Microsoft Account"
-msgstr "Přidat účet Microsoft"
-
-msgid "Minecraft Version"
-msgstr "Verze Minecraft"
-
-msgid "Install the selected %s?"
-msgstr "Instalovat vybrané %s?"
-
-msgid "%s \"%s\""
-msgstr "%s „%s“"
-
-msgid "Search"
-msgstr "Vyhledávání"
-
-msgid "Update"
-msgstr "Aktualizovat"
-
-msgid "Update the following %s"
-msgstr "Aktualizujte následující %s"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "Závislosti:"
 
-msgid "The following mods depend on %s:\n%s"
-msgstr "Následující mody závisí na %s:\n%s"
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "Konflikty\n"
 
-msgid "Cache"
-msgstr "Cache"
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "%s se instaluje"
 
-msgid "Cache Modrinth API responses"
-msgstr "Uložte odpovědi Modrinth API do mezipaměti"
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "Aktualizovat"
 
-msgid "Cache expiration"
-msgstr "Vypršení platnosti mezipaměti"
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s „%s“"
 
-msgid "1 hour"
-msgstr "1 hodina"
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "Zrušit"
 
-msgid "6 hours"
-msgstr "6 hodin"
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "Tento projekt nepublikuje nic, co by odpovídalo této instanci."
 
-msgid "1 day"
-msgstr "1 den"
+#: src/nuvashalauncher-content-page-install.c:1003
+#, fuzzy, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "%s se instaluje"
+msgstr[1] "%s se instaluje"
+msgstr[2] "%s se instaluje"
 
-msgid "7 days"
-msgstr "7 dní"
+#: src/nuvashalauncher-content-page-install.c:1006
+#, fuzzy, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "%s se instaluje"
+msgstr[1] "%s se instaluje"
+msgstr[2] "%s se instaluje"
 
-msgid "Show Shortcuts"
-msgstr "Zobrazit zkratky"
+#: src/nuvashalauncher-content-page-install.c:1009
+#, fuzzy, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "%s se instaluje"
+msgstr[1] "%s se instaluje"
+msgstr[2] "%s se instaluje"
 
-msgid "Quit"
-msgstr "Přestat"
+#: src/nuvashalauncher-content-page-install.c:1012
+#, fuzzy, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "%s se instaluje"
+msgstr[1] "%s se instaluje"
+msgstr[2] "%s se instaluje"
 
-msgid "Import Modpack"
-msgstr "Importujte Modpack"
+#: src/nuvashalauncher-content-page-install.c:1038
+#, fuzzy
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "Aktualizujte následující %s"
+msgstr[1] "Aktualizujte následující %s"
+msgstr[2] "Aktualizujte následující %s"
 
-msgid "Modpack exported"
-msgstr "Modpack exportován"
+#: src/nuvashalauncher-content-page-install.c:1041
+#, fuzzy
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "Instalovat vybrané %s?"
+msgstr[1] "Instalovat vybrané %s?"
+msgstr[2] "Instalovat vybrané %s?"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
+#: src/nuvashalauncher-content-page-install.c:1044
+#, fuzzy
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "Aktualizujte následující %s"
+msgstr[1] "Aktualizujte následující %s"
+msgstr[2] "Aktualizujte následující %s"
 
-msgid "The export location is not a local file"
-msgstr "Místo exportu není místní soubor"
+#: src/nuvashalauncher-content-page-install.c:1047
+#, fuzzy
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "Aktualizujte následující %s"
+msgstr[1] "Aktualizujte následující %s"
+msgstr[2] "Aktualizujte následující %s"
 
-msgid "Export Modpack"
-msgstr "Exportujte Modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "Soubor nelze smazat"
 
-msgid "Importing modpack…"
-msgstr "Import modpacku…"
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "Povolit"
 
-msgid "Reading modpack"
-msgstr "Čtení modpacku"
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "Závislý mod nelze smazat"
 
-msgid "Exporting modpack"
-msgstr "Export modpacku"
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "Soubor nelze přejmenovat"
 
-msgid "Modpack export"
-msgstr "Export modpacku"
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "Smazáno"
 
-msgid "Include transient files?"
-msgstr "Zahrnout přechodné soubory?"
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "Smazat “%s”?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Protokoly, zprávy o selhání, snímky obrazovky, mezipaměti a stahování jsou obvykle vyloučeny."
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Následující mody závisí na %s:\n"
+"%s"
 
-msgid "Clean Export"
-msgstr "Čistý export"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "Vymazat"
 
-msgid "Include All Files"
-msgstr "Zahrnout všechny soubory"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "Povoleno"
 
-msgid "Pack Name"
-msgstr "Název balíčku"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "Zakázáno"
 
-msgid "Summary"
-msgstr "Shrnutí"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "Zakázat"
 
-msgid "Version ID"
-msgstr "ID verze"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "Vyhledávání"
 
-msgid "Downloading files"
-msgstr "Stahování souborů"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "Aktualizovat vše"
 
-msgid "Extracting files"
-msgstr "Extrahování souborů"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "Načítání aktualizací"
 
-msgid "Optional files"
-msgstr "Volitelné soubory"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "Průběh"
 
-msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
-msgstr "Balíček uvádí tyto soubory, ale říká, že nejsou potřeba. Nic z nich není nainstalováno, pokud o to nepožádáte. Výchozí nastavení je vypnuto"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "Otevřete složku"
 
-msgid "Pack could not be fetched"
-msgstr "Balíček se nepodařilo načíst"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "Zatím nic nainstalováno"
 
-msgid "Invalid pack"
-msgstr "Neplatný balíček"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Vyhledejte něco, co chcete vložit do složky této instance"
 
-msgid "The pack does not define its install"
-msgstr "Balíček nedefinuje jeho instalaci"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "Prohlížet"
 
-msgid "Downloading Modpack"
-msgstr "Stahování Modpacku"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "Instalováno"
 
-msgid "Writing archive"
-msgstr "Psaní archivu"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "Načítání dalších…"
 
-msgid "Export modpack metadata"
-msgstr "Exportujte metadata modpacku"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "Filtrujte podle kategorie"
 
-msgid "Ask for export metadata"
-msgstr "Požádejte o export metadat"
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "Zatím není co ukázat"
 
-msgid "Pack information"
-msgstr "Informace o balení"
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Napište, co hledat, nebo procházejte vše, co má Modrinth pro tento případ"
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "Před exportem zobrazit pole pro název, souhrn a verzi."
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "Zavřít"
 
-msgid "Export complete"
-msgstr "Export dokončen"
-
-msgid "Export"
-msgstr "Vývozní"
-
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "Nainstalována položka %u"
-msgstr[1] "Nainstalováno %u položek"
-msgstr[2] "Nainstalováno %u položek"
-
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
 msgid "Updated %u item"
 msgid_plural "Updated %u items"
 msgstr[0] "Aktualizováno %u položky"
 msgstr[1] "Aktualizováno %u položek"
 msgstr[2] "Aktualizováno %u položek"
 
-msgid "The icon must be a file on this computer"
-msgstr "Ikona musí být soubor v tomto počítači"
-
-msgid "The game is running; stop it before moving its directory"
-msgstr "Hra běží; zastavte jej před přesunem jeho adresáře"
-
-msgid "%s is being installed"
-msgstr "%s se instaluje"
-
-msgid "no compatible version"
-msgstr "žádná kompatibilní verze"
-
-msgid "Enabled"
-msgstr "Povoleno"
-
-msgid "Disabled"
-msgstr "Zakázáno"
-
-msgid "Deleted"
-msgstr "Smazáno"
-
+#: src/nuvashalauncher-content-page-updates.c:246
 msgid "Everything is up to date"
 msgstr "Vše je aktuální"
 
-msgid "Cannot create \"%s\": %s"
-msgstr "Nelze vytvořit \"%s\": %s"
-
-msgid "This project publishes nothing that fits this instance."
-msgstr "Tento projekt nepublikuje nic, co by odpovídalo této instanci."
-
-msgid "Unknown"
-msgstr "Neznámý"
-
-msgid "%s (unstable)"
-msgstr "%s (nestabilní)"
-
-msgid "the next page could not be loaded"
-msgstr "další stránku nelze načíst"
-
-msgid "Other"
-msgstr "Ostatní"
-
-msgid "%.1fM downloads"
-msgstr "%.1fM stažení"
-
-msgid "%.1fk downloads"
-msgstr "%.1fk stažení"
-
-msgid "%s  ·  by %s"
-msgstr "%s · od %s"
-
-msgid "by %s"
-msgstr "od %s"
-
-msgid "%s downloads"
-msgstr "%s stažení"
-
-msgid "Cache Cleared"
-msgstr "Cache vymazána"
-
-msgid "Cache Cleanup Failed"
-msgstr "Vyčištění mezipaměti se nezdařilo"
-
-msgid "The cache could not be cleared."
-msgstr "Mezipaměť se nepodařilo vymazat."
-
-msgid "the versions of this loader could not be read"
-msgstr "verze tohoto zavaděče nelze přečíst"
-
-msgid "Minecraft crashed"
-msgstr "Minecraft havaroval"
-
-msgid "Minecraft could not start"
-msgstr "Minecraft nelze spustit"
-
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft potřebuje přihlášení"
-
-msgid "The file cannot be renamed"
-msgstr "Soubor nelze přejmenovat"
-
-msgid "The file cannot be deleted"
-msgstr "Soubor nelze smazat"
-
-msgid "The folder cannot be read"
-msgstr "Složku nelze číst"
-
-msgid "The file could not be installed"
-msgstr "Soubor nelze nainstalovat"
-
-msgid "The folder cannot be created"
-msgstr "Složku nelze vytvořit"
-
-msgid "This cannot be installed"
-msgstr "Toto nelze nainstalovat"
-
-msgid "Pick a Minecraft version first"
-msgstr "Nejprve si vyberte verzi Minecraftu"
-
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "Smazáním závislosti se smaže mod, který na ní závisel"
-
-msgid "A dependent mod cannot be deleted"
-msgstr "Závislý mod nelze smazat"
-
-msgid "Slim model"
-msgstr "Štíhlý model"
-
-msgid "OK"
-msgstr "Dobře"
-
-msgid "Export skin…"
-msgstr "Export skinu…"
-
-msgid "Classic model"
-msgstr "Klasický model"
-
-msgid "PNG skin texture"
-msgstr "Textura kůže PNG"
-
-msgid "Invalid skin"
-msgstr "Neplatný vzhled"
-
-msgid "No cape"
-msgstr "Bez pláštěnky"
-
-msgid "Import skin…"
-msgstr "Importovat vzhled…"
-
-msgid "Delete skin?"
-msgstr "Smazat skin?"
-
-msgid "This skin will be removed from the skin library."
-msgstr "Tento vzhled bude odstraněn z knihovny vzhledů."
-
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "Obrázky vzhledu musí mít velikost 64x64 nebo 64x32 PNG"
-
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "Procházet modpacky"
-
-msgid "Choose Files"
-msgstr "Vybrat soubory"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "Vymazat mezipaměť Nuvasha Launcher"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Vymazat mezipaměť Nuvasha Launcher?"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"Konflikty\n"
-
-msgid "Content"
-msgstr "Obsah"
-
-msgid "Could not install"
-msgstr "Instalace se nezdařila"
-
-msgid "Could not install the modpack"
-msgstr "Modpack se nepodařilo nainstalovat"
-
-msgid "Could not load categories"
-msgstr "Nelze načíst kategorie"
-
-msgid "Could not search Modrinth"
-msgstr "Prohledání Modrinthu se nezdařilo"
-
-msgid "Could not understand the answer"
-msgstr "Nerozuměl jsem té odpovědi"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "Zakázat"
-
-msgid "Dismiss"
-msgstr "Zavřít"
-
-msgid "Enable"
-msgstr "Povolit"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "Obrázky"
-
-msgid "Installing"
-msgstr "Instalace"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "Instance nesmí obsahovat %s ve svém názvu"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "Obsahuje soubory, které Nuvasha Launcher nerozpozná."
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "Společnost Microsoft vrátila nebezpečnou ověřovací adresu"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "Společnost Microsoft neposkytla kód pro přihlášení"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · Je nutné se přihlásit"
-
-msgid "Modrinth does not know this file"
-msgstr "Modrinth tento soubor nezná"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "Modrinth žádá Nuvashu, aby zpomalila, je tu příliš mnoho požadavků"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No compatible Java runtime was found."
-msgstr "Nebylo nalezeno žádné kompatibilní prostředí Java Runtime."
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "Žádný modpack neodpovídá zadanému požadavku. Zkuste jiné slovo."
-
-msgid "None"
-msgstr "Žádné"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Data z mezipaměti Nuvasha Launcher byla úspěšně vymazána."
-
-msgid "Offline"
-msgstr "Offline"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "Vyberte si verzi Minecraftu ze seznamu."
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "Vyberte si verzi zavaděče nebo jiný zavaděč."
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
-msgid "Remove %s?"
-msgstr "Odstranit %s?"
-
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Vyhledejte Modrinth a nainstalujte balíček modů"
-
-msgid "Skin"
-msgstr "Kůže"
-
-msgid "Stop %s?"
-msgstr "Stop %s?"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "Výchozí nastavení systému"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Účet je odstraněn ze služby Nuvasha Launcher a uložené přihlašovací údaje jsou smazány. Samotná hra tím není nijak ovlivněna."
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "Hra právě běží a bude ukončena. Pokrok od posledního uložení bude ztracen."
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "Tento projekt nezveřejňuje žádný balíček, který by Nuvasha Launcher mohla nainstalovat."
-
-msgid "This version has no pack file"
-msgstr "Tato verze neobsahuje žádný balíček"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Unavailable"
-msgstr "Není k dispozici"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "Služba Xbox Live není dostupná v zemi, ve které je tento účet registrován"
-
-msgid "the game"
-msgstr "hra"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "název instance nelze použít jako název adresáře"
-
-msgid "the instance name is empty"
-msgstr "název instance je prázdný"
-
-msgid "the sign-in did not finish"
-msgstr "přihlášení nebylo dokončeno"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "Tento účet Microsoft zatím nemá přiřazený žádný profil Xbox: přihlaste se s ním jednou na webu xbox.com a poté se zde přihlaste znovu"
-
-msgid "this account"
-msgstr "tento účet"
-
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "Tento účet musí nejprve ověřit dospělá osoba, než bude možné hrát – to samé platí i pro účty v Jižní Koreji"
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "Toto je dětský účet: než bude moci hrát, musí jej dospělá osoba přidat do rodiny Microsoft."
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "Minecraft Services požadavek odmítly (HTTP %u)%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Chyba Minecraft Services"
-
-msgid "Application menu"
-msgstr "Application menu"
-
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "Aktualizujte následující %s"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "Potvrdit"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
 msgid "The folder could not be opened: %s"
 msgstr "The folder could not be opened: %s"
 
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "Otevřít v prohlížeči"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "%u/%u vybráno"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "Následující instance budou odstraněny:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "Režim úprav"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "Načítání aktualizací"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "Průběh"
-
-msgid "Enter Edit Mode"
-msgstr "Vstoupit do režimu úprav"
-
-msgid "Delete Selected"
-msgstr "Smazat vybrané"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "Bylo vytvořeno nové hlášení pádu. Podrobnosti najdete v protokolech."
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "Přístup odepřen. Zkontrolujte oprávnění složky."
-
-msgid "An offline account with this name already exists."
-msgstr "Offline účet s tímto jménem již existuje."
-
-msgid "Choose another instance name or directory."
-msgstr "Zvolte jiný název nebo složku instance."
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "Tento zavaděč modů se nepodařilo nainstalovat. Zvolte jinou verzi nebo zobrazte technické podrobnosti."
-
-msgid "Could not load project details. Try again."
-msgstr "Podrobnosti projektu se nepodařilo načíst. Zkuste to znovu."
-
-msgid "Could not load versions. Try again."
-msgstr "Verze se nepodařilo načíst. Zkuste to znovu."
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "Prohlížeč se nepodařilo otevřít. Otevřete zobrazenou adresu ručně."
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "Soubory nelze číst nebo zapisovat. Zkontrolujte umístění, oprávnění a volné místo."
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "Účet se nepodařilo uložit. Zkontrolujte systémovou klíčenku a oprávnění souborů."
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "Microsoft vrátil nebezpečnou přihlašovací adresu. Před dalším pokusem aktualizujte launcher."
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "Přihlášení Microsoft není v tomto sestavení nastaveno. Aktualizujte launcher."
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "Vyberte prostředí Java s grafickou podporou, nikoli bezhlavou instalaci."
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "Vytvořte profil Minecraft: Java Edition na minecraft.net a zkuste to znovu."
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "Přihlášení bylo odmítnuto. Chcete-li se přihlásit, začněte znovu."
-
-msgid "Technical Details"
-msgstr "Technické podrobnosti"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "Spustitelný soubor Java nelze použít. Vyberte funkční prostředí Java."
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "Archiv je neplatný nebo nebezpečný. Stáhněte jej znovu z důvěryhodného zdroje."
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "Připojení selhalo. Zkontrolujte internet a zkuste to znovu."
-
-msgid "The destination already exists. Choose another location."
-msgstr "Cíl již existuje. Zvolte jiné umístění."
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "Stažený soubor neprošel ověřením a nebyl nainstalován. Stáhněte jej znovu."
-
-msgid "The file or folder was not found. Check its location."
-msgstr "Soubor nebo složka nenalezena. Zkontrolujte umístění."
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "Metadata hry jsou neplatná nebo nedostupná. Obnovte seznam verzí a zkuste to znovu."
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "Operace selhala. Více informací najdete v technických podrobnostech."
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "Požadovaný soubor, projekt nebo kompatibilní verze nenalezena."
-
-msgid "The service rejected the request. Try again later."
-msgstr "Služba odmítla požadavek. Zkuste to později."
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "Služba vrátila neplatnou odpověď. Zkuste to později."
-
-msgid "There is not enough free disk space."
-msgstr "Na disku není dostatek volného místa."
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "Tento účet nevlastní Minecraft: Java Edition."
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "Tato instance již není dostupná. Obnovte seznam instancí."
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "Příliš mnoho požadavků. Chvíli počkejte a zkuste to znovu."
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "Nastavení instance je neplatné. Zkontrolujte zvolenou verzi a argumenty JVM."
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "Uložené přihlášení již není platné. Přihlaste se znovu."
-
-msgid "Minecraft launcher for Linux"
-msgstr "Spouštěč Minecraftu pro Linux"
-
-msgid "Services & Ecosystem"
-msgstr "Služby a ekosystém"
-
-msgid "Minecraft Disclaimer"
-msgstr "Zřeknutí se odpovědnosti za Minecraft"
-
-msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
-msgstr ""
-"NENÍ OFICIÁLNÍ PRODUKT MINECRAFTU. NENÍ SCHVÁLENO SPOLEČNOSTÍ MOJANG ANI MICROSOFT A NENÍ S NIMI SPOJENO.\n"
-"\n"
-"Minecraft je ochranná známka společnosti Mojang AB. Tento spouštěč je vyvíjen nezávisle a není přidružen ke společnostem Mojang Studios ani Microsoft."
-
-msgid "Modrinth & Mod Loaders"
-msgstr "Modrinth a zavaděče modů"
-
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"Modpacky, mody, balíčky prostředků a shadery jsou hostovány na Modrinthu a vytvořeny příslušnými autory.\n"
-"\n"
-"Zavaděče modů jsou vyvíjeny nezávisle projekty Fabric, Quilt, Forge a NeoForge."
-
-msgid "AppStream Metadata"
-msgstr "Metadata AppStream"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "Metadata AppStream (popisy, souhrny a poznámky k vydání) jsou vydána pod licencí Creative Commons CC0 1.0 Universal Public Domain Dedication."
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "Kopírovat"
-
-msgid "Rename"
-msgstr "Přejmenovat"
-
-msgid "Reset Icon"
-msgstr "Obnovit ikonu"
-
-msgid "Delete World"
-msgstr "Smazat svět"
-
-msgid "Seed copied to clipboard"
-msgstr "Seed zkopírován do schránky"
-
-msgid "Remove server \"%s\"?"
-msgstr "Odebrat server „%s“?"
-
-msgid "Refresh"
-msgstr "Obnovit"
-
-msgid "Remove Server"
-msgstr "Odebrat server"
-
-msgid "Survival"
-msgstr "Přežití"
-
-msgid "Edit"
-msgstr "Upravit"
-
-msgid "Ask to download"
-msgstr "Zeptat se před stažením"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Světy uložené hrou Minecraft nebo importované zde se zobrazí v tomto seznamu."
-
-msgid "Rename World"
-msgstr "Přejmenovat svět"
-
-msgid "Servers"
-msgstr "Servery"
-
-msgid "Save"
-msgstr "Uložit"
-
-msgid "Add World"
-msgstr "Přidat svět"
-
-msgid "Spectator"
-msgstr "Pozorovatel"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "Smazat svět „%s“? Tuto akci nelze vrátit zpět."
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Zde přidané servery se ukládají do servers.dat této instance."
-
-msgid "Add Server"
-msgstr "Přidat server"
-
-msgid "Edit Server"
-msgstr "Upravit server"
-
-msgid "Address"
-msgstr "Adresa"
-
-msgid "Datapacks"
-msgstr "Datapacky"
-
-msgid "No Worlds"
-msgstr "Žádné světy"
-
-msgid "Creative"
-msgstr "Tvořivý"
-
-msgid "Move Up"
-msgstr "Posunout nahoru"
-
-msgid "No Servers"
-msgstr "Žádné servery"
-
-msgid "Never download"
-msgstr "Nikdy nestahovat"
-
-msgid "Worlds"
-msgstr "Světy"
-
-msgid "Always download"
-msgstr "Vždy stahovat"
-
-msgid "Move Down"
-msgstr "Posunout dolů"
-
-msgid "Copy Seed"
-msgstr "Kopírovat seed"
-
-msgid "Stats"
-msgstr "Statistiky"
-
-msgid "Playtime"
-msgstr "Doba hraní"
-
-msgid "Time played"
-msgstr "Odehraný čas"
-
-msgid "Not played yet"
-msgstr "Zatím nehráno"
-
-msgid "Less than a minute"
-msgstr "Méně než minuta"
-
-msgid "%llu min"
-msgstr "%llu min"
-
-msgid "%llu h %llu min"
-msgstr "%llu h %llu min"
-
-msgid "Runs on"
-msgstr "Běží na"
-
-msgid "Activity"
-msgstr "Aktivita"
-
-msgid "Last session"
-msgstr "Poslední relace"
-
-msgid "Last played"
-msgstr "Naposledy hráno"
-
-msgid "Total launches"
-msgstr "Celkem spuštění"
-
-msgid "Total crashes"
-msgstr "Celkem pádů"
-
-msgid "Server joins"
-msgstr "Připojení k serveru"
-
-msgid "World loads"
-msgstr "Načtení světů"
-
-msgid "Player Profile"
-msgstr "Profil hráče"
-
-msgid "Player type"
-msgstr "Typ hráče"
-
-msgid "Pack style"
-msgstr "Styl balíčku"
-
-msgid "Average session"
-msgstr "Průměrná relace"
-
-msgid "Stability"
-msgstr "Stabilita"
-
-msgid "Instance"
-msgstr "Instance"
-
-msgid "Total size"
-msgstr "Celková velikost"
-
-msgid "Created on"
-msgstr "Vytvořeno"
-
-msgid "Calculating…"
-msgstr "Výpočet…"
-
-msgid "Never"
-msgstr "Nikdy"
-
-msgid "Today, %s"
-msgstr "Dnes, %s"
-
-msgid "Hybrid"
-msgstr "Hybridní"
-
-msgid "Server Player"
-msgstr "Hráč na serverech"
-
-msgid "Singleplayer"
-msgstr "Hra pro jednoho"
-
-msgid "Unplayed"
-msgstr "Nehráno"
-
-msgid "Modpack"
-msgstr "Modpack"
-
-msgid "Lightweight"
-msgstr "Lehký"
-
-msgid "Kitchen Sink"
-msgstr "Vše v jednom"
-
-msgid "Quick"
-msgstr "Krátké"
-
-msgid "Standard"
-msgstr "Standardní"
-
-msgid "Marathon"
-msgstr "Maraton"
-
-msgid "Stable"
-msgstr "Stabilní"
-
-msgid "%u%% crash rate"
-msgstr "%u%% pádů"
-
-msgid "A name cannot be empty."
-msgstr "jméno nemůže být prázdné."
-
-msgid "Remove server"
-msgstr "Odebrat server"
-
-msgid "Download modpack"
-msgstr "Stáhněte si Modpack"
-
-msgid "%s “%s”"
-msgstr "%s „%s“"
-
-msgid "Delete instance"
-msgstr "Smazat instanci"
-
-msgid "No worlds"
-msgstr "Žádné světy"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "čekání na přihlášení v prohlížeči…"
-
-msgid "Choose files"
-msgstr "Vybrat soubory"
-
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
 msgid "Cannot create “%s”: %s"
 msgstr "Nelze vytvořit “%s”: %s"
 
-msgid "Cache cleanup failed"
-msgstr "Vyčištění mezipaměti se nezdařilo"
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "Žádný zavaděč modů"
 
-msgid "Español"
-msgstr "Español"
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Mody potřebují nakladač modů. Nejprve v nastavení této instance vyberte "
+"Fabric, Quilt, Forge nebo NeoForge"
 
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth a zavaděče modů"
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "Vyberte si verzi Minecraftu ze seznamu."
 
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "Smazat svět „%s“? Tuto akci nelze vrátit zpět."
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Vyberte si verzi zavaděče nebo jiný zavaděč."
 
-msgid "Português"
-msgstr "Português"
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "Adresář"
 
-msgid "Create an instance to start playing."
-msgstr "Vytvořte instanci a začněte hrát."
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "Vyberte složku"
 
-msgid "Duplicated to “%s”"
-msgstr "Duplikováno do „%s“"
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "Vytvořit"
 
-msgid "Downloading modpack"
-msgstr "Stahování Modpacku"
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, fuzzy, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "%u/%u vybráno"
+msgstr[1] "%u/%u vybráno"
+msgstr[2] "%u/%u vybráno"
 
-msgid "Try again"
-msgstr "Zkuste to znovu"
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "Služba vrátila neplatnou odpověď. Zkuste to později."
 
-msgid "Performance impact"
-msgstr "Dopad na výkon"
-
-msgid "Add world"
-msgstr "Přidat svět"
-
-msgid "Create instance"
-msgstr "Vytvořit instanci"
-
-msgid "Browse modpacks"
-msgstr "Procházet modpacky"
-
-msgid "Remove server “%s”?"
-msgstr "Odebrat server „%s“?"
-
-msgid "Path tracing"
-msgstr "Sledování cest"
-
-msgid "Clean export"
-msgstr "Čistý export"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "Herní mechaniky"
-
-msgid "Minecraft version"
-msgstr "Verze Minecraft"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "Otevřete složku"
-
-msgid "AppStream metadata"
-msgstr "Metadata AppStream"
-
-msgid "Add Java runtime"
-msgstr "Přidat Java Runtime"
-
-msgid "World generation"
-msgstr "Generování světa"
-
-msgid "Keyboard shortcuts"
-msgstr "Klávesové zkratky"
-
-msgid "Resource packs"
-msgstr "Balíčky zdrojů"
-
-msgid "Edit server"
-msgstr "Upravit server"
-
-msgid "Keep playing"
-msgstr "Pokračujte ve hře"
-
-msgid "Technical details"
-msgstr "Technické podrobnosti"
-
-msgid "Pack name"
-msgstr "Název balíčku"
-
-msgid "Colored lighting"
-msgstr "Barevné osvětlení"
-
-msgid "Rename world"
-msgstr "Přejmenovat svět"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "jméno může obsahovat pouze písmena, číslice a podtržítka."
-
-msgid "Preferences"
-msgstr "Nastavení"
-
-msgid "Delete world"
-msgstr "Smazat svět"
-
-msgid "Asking Microsoft for a code…"
-msgstr "požádat Microsoft o kód…"
-
-msgid "Show unstable mod loader versions"
-msgstr "Zobrazit nestabilní verze Mod Loader"
-
-msgid "Move down"
-msgstr "Posunout dolů"
-
-msgid "Clear cache"
-msgstr "Vymazat mezipaměť Nuvasha Launcher"
-
-msgid "Delete “%s”?"
-msgstr "Smazat “%s”?"
-
-msgid "Import modpack…"
-msgstr "Importujte Modpack…"
-
-msgid "Delete selected"
-msgstr "Smazat vybrané"
-
-msgid "Java runtime"
-msgstr "Java Runtime"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "název musí mít 3 až 16 znaků."
-
-msgid "Import modpack"
-msgstr "Importujte Modpack"
-
-msgid "Core shaders"
-msgstr "Shadery základní hry"
-
-msgid "Sign in"
-msgstr "Přihlaste se"
-
-msgid "Cache cleared"
-msgstr "Cache vymazána"
-
-msgid "No instances yet"
-msgstr "Zatím žádné instance"
-
-msgid "Add offline account"
-msgstr "Přidat účet offline"
-
-msgid "Copy seed"
-msgstr "Kopírovat seed"
-
-msgid "Services & ecosystem"
-msgstr "Služby a ekosystém"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "Žádný modpack neodpovídá zadanému požadavku. Zkuste jiné slovo."
-
-msgid "Line limit"
-msgstr "Limit linky"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Modrinth Modpacks (*.mrpack)"
-
-msgid "Add server"
-msgstr "Přidat server"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
+#: src/nuvashalauncher-download-modpack-browser.c:763
 msgid "All versions"
 msgstr "Všechny verze"
 
-msgid "No servers"
-msgstr "Žádné servery"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "Stahování"
 
-msgid "Clear cache?"
-msgstr "Vymazat mezipaměť Nuvasha Launcher?"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "Relevance"
 
-msgid "Loader version"
-msgstr "Verze nakladače"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "Nejnovější"
 
-msgid "translator-credits"
-msgstr "Flia"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "Nedávno aktualizované"
 
-msgid "Include all files"
-msgstr "Zahrnout všechny soubory"
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "Sledující"
 
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "Filtrovat balíčky modů"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "Procházet modpacky"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Požadovaný soubor, projekt nebo kompatibilní verze nenalezena."
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+#, fuzzy
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "Modpack se nepodařilo nainstalovat"
+msgstr[1] "Modpack se nepodařilo nainstalovat"
+msgstr[2] "Modpack se nepodařilo nainstalovat"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
+msgid "Reading modpack"
+msgstr "Čtení modpacku"
+
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
+msgid "Extracting files"
+msgstr "Extrahování souborů"
+
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "Modpack se nepodařilo nainstalovat"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "Stahování souborů"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
+msgid "Optional files"
+msgstr "Volitelné soubory"
+
+#: src/nuvashalauncher-download-modpack-install.c:265
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr ""
+"Balíček uvádí tyto soubory, ale říká, že nejsou potřeba. Nic z nich není "
+"nainstalováno, pokud o to nepožádáte. Výchozí nastavení je vypnuto"
+
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
+msgid "Pack could not be fetched"
+msgstr "Balíček se nepodařilo načíst"
+
+#: src/nuvashalauncher-download-modpack-install.c:422
+msgid "Invalid pack"
+msgstr "Neplatný balíček"
+
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "Tato verze neobsahuje žádný balíček"
+
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"Tento projekt nezveřejňuje žádný balíček, který by Nuvasha Launcher mohla "
+"nainstalovat."
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
+msgstr "Stahování Modpacku"
+
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "Stáhnout"
+
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Připojení selhalo. Zkontrolujte internet a zkuste to znovu."
+
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "Služba odmítla požadavek. Zkuste to později."
+
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Příliš mnoho požadavků. Chvíli počkejte a zkuste to znovu."
+
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr ""
+"Soubory nelze číst nebo zapisovat. Zkontrolujte umístění, oprávnění a volné "
+"místo."
+
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr ""
+"Stažený soubor neprošel ověřením a nebyl nainstalován. Stáhněte jej znovu."
+
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr ""
+"Archiv je neplatný nebo nebezpečný. Stáhněte jej znovu z důvěryhodného "
+"zdroje."
+
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "Operace selhala. Více informací najdete v technických podrobnostech."
+
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Spustitelný soubor Java nelze použít. Vyberte funkční prostředí Java."
+
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "Přístup odepřen. Zkontrolujte oprávnění složky."
+
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "Na disku není dostatek volného místa."
+
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "Soubor nebo složka nenalezena. Zkontrolujte umístění."
+
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "Cíl již existuje. Zvolte jiné umístění."
+
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
+
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Uložené přihlášení již není platné. Přihlaste se znovu."
+
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Přihlášení bylo odmítnuto. Chcete-li se přihlásit, začněte znovu."
+
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Tento účet nevlastní Minecraft: Java Edition."
+
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr ""
+"Vytvořte profil Minecraft: Java Edition na minecraft.net a zkuste to znovu."
+
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr ""
+"Přihlášení Microsoft není v tomto sestavení nastaveno. Aktualizujte launcher."
+
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
+
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"Tento zavaděč modů se nepodařilo nainstalovat. Zvolte jinou verzi nebo "
+"zobrazte technické podrobnosti."
+
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"Metadata hry jsou neplatná nebo nedostupná. Obnovte seznam verzí a zkuste to "
+"znovu."
+
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Tato instance již není dostupná. Obnovte seznam instancí."
+
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "Zvolte jiný název nebo složku instance."
+
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr ""
+"Nastavení instance je neplatné. Zkontrolujte zvolenou verzi a argumenty JVM."
+
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr ""
+"Účet se nepodařilo uložit. Zkontrolujte systémovou klíčenku a oprávnění "
+"souborů."
+
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "Jasný"
+
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "Přihlaste se"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "Otevřít v prohlížeči"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "Zkuste to znovu"
+
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "Přidat účet offline"
+
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "Jméno"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "Přidat"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "Vytvořit instanci"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "Stáhněte si Modpack"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "Importujte Modpack"
+
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "Import modpacku…"
+
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "Prohledejte modpacky"
+
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "Blízko"
+
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Žádný modpack neodpovídá zadanému požadavku. Zkuste jiné slovo."
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "Vybrat soubory"
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "Instalace se nezdařila"
+
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "Zadní"
+
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "Prohledejte protokol"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
+msgid "Classic model"
+msgstr "Klasický model"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "Štíhlý model"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "Přizpůsobit"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
+msgid "Import skin…"
+msgstr "Importovat vzhled…"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "Export skinu…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Chyba Minecraft Services"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "Výchozí nastavení systému"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "Kopie %s"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "název instance je prázdný"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "Instance nesmí obsahovat %s ve svém názvu"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "název instance nelze použít jako název adresáře"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Modpack exportován"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "Místo exportu není místní soubor"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "Export modpacku"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "Export modpacku"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
 msgid "Export modpack"
 msgstr "Exportujte Modpack"
 
-msgid "Add world…"
-msgstr "Přidat svět…"
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth Modpacks (*.mrpack)"
 
-msgid "Update all"
-msgstr "Aktualizovat vše"
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "Informace o balení"
 
-msgid "Add Microsoft account"
-msgstr "Přidat účet Microsoft"
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "Vývozní"
 
-msgid "Move up"
-msgstr "Posunout nahoru"
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "Exportujte metadata modpacku"
 
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "Název balíčku"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "Shrnutí"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "ID verze"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "Zahrnout přechodné soubory?"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Protokoly, zprávy o selhání, snímky obrazovky, mezipaměti a stahování jsou "
+"obvykle vyloučeny."
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "Čistý export"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "Zahrnout všechny soubory"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "Hra běží; zastavte jej před přesunem jeho adresáře"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "Vyberte adresář"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "Duplikováno do „%s“"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Konfigurovaná Java nebyla detekována; ujistěte se, že je to stále použitelný "
+"spustitelný soubor Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Tato hra vyžaduje Java %d nebo novější, vybraná Java je %d"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr ""
+"Vyberte prostředí Java s grafickou podporou, nikoli bezhlavou instalaci."
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "Ikona musí být soubor v tomto počítači"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "Vyberte ikonu"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "Obrázky"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "Generál"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "Ikona"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "Změňte adresář"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Jáva"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "Argumenty JVM"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "Akce"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "Duplikát"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "Smazat instanci"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "Méně než minuta"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu min"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu h %llu min"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "Dnes, %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "Zatím nehráno"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "Nikdy"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "Výpočet…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "Aktivita"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "Odehraný čas"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "Naposledy hráno"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "Celkem spuštění"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "Celkem pádů"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "Instance"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "Celková velikost"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "Vytvořeno"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "Neznámý"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "Protokoly"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "Nastavení"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "Balíčky zdrojů"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "Balíčky shaderů"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "Modifikace"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "Světy"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "Servery"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "Statistiky"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "vybraný soubor nehlásí verzi Java"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Vyberte spustitelný soubor Java"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "Načítání…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "Vlastní: %s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Přidat Java Runtime"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Java Runtime"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Bylo vytvořeno nové hlášení pádu. Podrobnosti najdete v protokolech."
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "hra byla zastavena signálem %d"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "hra skončila s kódem %d"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "Nebylo nalezeno žádné kompatibilní prostředí Java Runtime."
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "verze tohoto zavaděče nelze přečíst"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s (nestabilní)"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "Žádné"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Pro Minecraft %s nebyla nalezena žádná kompatibilní verze %s."
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "Nejprve si vyberte verzi Minecraftu"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "Nakladač"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "Verze nakladače"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "Technické podrobnosti"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Vymazat mezipaměť Nuvasha Launcher?"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "Cache vymazána"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "Vyčištění mezipaměti se nezdařilo"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "Požádejte o export metadat"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "Před exportem zobrazit pole pro název, souhrn a verzi."
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Smazáním závislosti se smaže mod, který na ní závisel"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "Zobrazit nestabilní verze Minecraftu"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "Zobrazit nestabilní verze Mod Loader"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "Jazyk"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "Jazyk rozhraní"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "Limit linky"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "Cache"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Uložte odpovědi Modrinth API do mezipaměti"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1 hodina"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6 hodin"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1 den"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7 dní"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "Vypršení platnosti mezipaměti"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "Vymazat mezipaměť Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Spouštěč Minecraftu pro Linux"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "Služby a ekosystém"
+
+#: src/nuvashalauncher-main-window-actions.c:626
 msgid "Minecraft disclaimer"
 msgstr "Zřeknutí se odpovědnosti za Minecraft"
 
-msgid "Shader packs"
-msgstr "Balíčky shaderů"
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"NENÍ OFICIÁLNÍ PRODUKT MINECRAFTU. NENÍ SCHVÁLENO SPOLEČNOSTÍ MOJANG ANI "
+"MICROSOFT A NENÍ S NIMI SPOJENO.\n"
+"\n"
+"Minecraft je ochranná známka společnosti Mojang AB. Tento spouštěč je "
+"vyvíjen nezávisle a není přidružen ke společnostem Mojang Studios ani "
+"Microsoft."
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth a zavaděče modů"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"Modpacky, mody, balíčky prostředků a shadery jsou hostovány na Modrinthu a "
+"vytvořeny příslušnými autory.\n"
+"\n"
+"Zavaděče modů jsou vyvíjeny nezávisle projekty Fabric, Quilt, Forge a "
+"NeoForge."
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "Metadata AppStream"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"Metadata AppStream (popisy, souhrny a poznámky k vydání) jsou vydána pod "
+"licencí Creative Commons CC0 1.0 Universal Public Domain Dedication."
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "O Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "Klávesové zkratky"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "Nastavení"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "Přestat"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "Smazat vybrané"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "Importujte Modpack…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "Zastávka"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "Hrát"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "Stop %s?"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "hra"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"Hra právě běží a bude ukončena. Pokrok od posledního uložení bude ztracen."
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "Pokračujte ve hře"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "Účty"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "Zatím žádné instance"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "Vytvořte instanci a začněte hrát."
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraft havaroval"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Minecraft nelze spustit"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft potřebuje přihlášení"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "Minecraft Services požadavek odmítly (HTTP %u)%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "Psaní archivu"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "Export dokončen"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "zavaděč nelze vyřešit: %s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "Dobrodružství"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "Atmosféra"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "Zvuk"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "Bloky"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "Záře"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "Kreslené"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "Kategorie"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "Barevné osvětlení"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "Boj"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "Shadery základní hry"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "Bizarní"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "Dekorace"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "Ekonomika"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "Entity"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "Prostředí"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "Vybavení"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "Fantasy"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "Funkce"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "Vegetace"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "Písma"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "Jídlo"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "Herní mechaniky"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "Rozhraní"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "Vysoký"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "Předměty"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "Knihovna"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "Nízký"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "Magie"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "Správa"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "Střední"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "Minihra"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "Tvorové"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "Pro mody"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "Modely"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "Optimalizace"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "Sledování cest"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "Dopad na výkon"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "Pro velmi slabé počítače"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "Realistické"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "Odrazy"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "Rozlišení"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "Snímek obrazovky"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "Polorealistické"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "Stíny"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "Jednoduché"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "Společenské"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "Skladování"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "Technologie"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "Tematické"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "Doprava"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "Drobné úpravy"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "Nástroje"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "Podobné základní hře"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "Generování světa"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr "Modrinth žádá Nuvashu, aby zpomalila, je tu příliš mnoho požadavků"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "Modrinth tento soubor nezná"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Pro Minecraft %s a %s nebyla nalezena žádná kompatibilní verze."
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "Offline účet s tímto jménem již existuje."
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "Upravit server"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "Přidat server"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "Uložit"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "Adresa"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "Zeptat se před stažením"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "Vždy stahovat"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "Nikdy nestahovat"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "Odebrat server „%s“?"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "Odebrat server"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "Posunout nahoru"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "Posunout dolů"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "Upravit"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "Obnovit"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "Žádné servery"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Zde přidané servery se ukládají do servers.dat této instance."
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "požádat Microsoft o kód…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "čekání na přihlášení v prohlížeči…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Prohlížeč se nepodařilo otevřít. Otevřete zobrazenou adresu ručně."
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"Microsoft vrátil nebezpečnou přihlašovací adresu. Před dalším pokusem "
+"aktualizujte launcher."
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Otevřete stránku v prohlížeči a zadejte tento kód:"
+
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Kůže"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Obrázky vzhledu musí mít velikost 64x64 nebo 64x32 PNG"
+
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "Neplatný vzhled"
+
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "Dobře"
+
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "Textura kůže PNG"
+
+#: src/nuvashalauncher-users-popover-skin.c:368
+msgid "Delete skin?"
+msgstr "Smazat skin?"
+
+#: src/nuvashalauncher-users-popover-skin.c:369
+msgid "This skin will be removed from the skin library."
+msgstr "Tento vzhled bude odstraněn z knihovny vzhledů."
+
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "Bez pláštěnky"
+
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
+msgid "Remove %s?"
+msgstr "Odstranit %s?"
+
+#: src/nuvashalauncher-users-popover.c:178
+msgid "this account"
+msgstr "tento účet"
+
+#: src/nuvashalauncher-users-popover.c:181
+msgid ""
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
+msgstr ""
+"Účet je odstraněn ze služby Nuvasha Launcher a uložené přihlašovací údaje "
+"jsou smazány. Samotná hra tím není nijak ovlivněna."
+
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "Odstranit"
+
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Je nutné se přihlásit"
+
+#: src/nuvashalauncher-users-popover.c:398
+msgid "Add Microsoft account"
+msgstr "Přidat účet Microsoft"
+
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Verze Minecraft"
+
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "Přežití"
+
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "Tvořivý"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "Pozorovatel"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "Přejmenovat svět"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "Přejmenovat"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "Kopírovat"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "Seed zkopírován do schránky"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Smazat svět „%s“? Tuto akci nelze vrátit zpět."
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "Smazat svět"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "Kopírovat seed"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "Přidat svět"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "Přidat svět…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "Žádné světy"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr ""
+"Světy uložené hrou Minecraft nebo importované zde se zobrazí v tomto seznamu."
+
+#~ msgid "Colored Lighting"
+#~ msgstr "Barevné osvětlení"
+
+#~ msgid "Core Shaders"
+#~ msgstr "Shadery základní hry"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "Herní mechaniky"
+
+#~ msgid "Path Tracing"
+#~ msgstr "Sledování cest"
+
+#~ msgid "Performance Impact"
+#~ msgstr "Dopad na výkon"
+
+#~ msgid "World Generation"
+#~ msgstr "Generování světa"
+
+#~ msgid "All Versions"
+#~ msgstr "Všechny verze"
+
+#~ msgid "Update All"
+#~ msgstr "Aktualizovat vše"
+
+#~ msgid "Open Folder"
+#~ msgstr "Otevřete složku"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "Není vybráno nic"
+
+#~ msgid "Create Instance"
+#~ msgstr "Vytvořit instanci"
+
+#~ msgid "Download Modpack"
+#~ msgstr "Stáhněte si Modpack"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "Duplikováno do „%s“"
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "Smazat \"%s\"?"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Java Runtime"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Přidat Java Runtime"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "Minecraft potřebuje bezhlavou Javu: na Archu použijte balíček jre-"
+#~ "openjdk, ne jre-openjdk-headless"
+
+#~ msgid "Delete Instance"
+#~ msgstr "Smazat instanci"
+
+#~ msgid "Resource Packs"
+#~ msgstr "Balíčky zdrojů"
+
+#~ msgid "Shader Packs"
+#~ msgstr "Balíčky shaderů"
+
+#~ msgid "Loader Version"
+#~ msgstr "Verze nakladače"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "Zobrazit nestabilní verze Mod Loader"
+
+#~ msgid "Line Limit"
+#~ msgstr "Limit linky"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "Klávesové zkratky"
+
+#~ msgid "Keep Playing"
+#~ msgstr "Pokračujte ve hře"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "Zatím žádné instance"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "K vytvoření použijte tlačítko + v záhlaví"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "Přidat účet offline"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "jméno může obsahovat pouze písmena, číslice a podtržítka"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "jméno nemůže být prázdné"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "název musí mít 3 až 16 znaků"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "požádat Microsoft o kód"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "čekání na přihlášení v prohlížeči"
+
+#~ msgid "Sign In"
+#~ msgstr "Přihlaste se"
+
+#~ msgid "Try Again"
+#~ msgstr "Zkuste to znovu"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Přidat účet Microsoft"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Verze Minecraft"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s „%s“"
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "Zobrazit zkratky"
+
+#~ msgid "Import Modpack"
+#~ msgstr "Importujte Modpack"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Modrinth Modpacks (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "Exportujte Modpack"
+
+#~ msgid "Clean Export"
+#~ msgstr "Čistý export"
+
+#~ msgid "Include All Files"
+#~ msgstr "Zahrnout všechny soubory"
+
+#~ msgid "Pack Name"
+#~ msgstr "Název balíčku"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "Balíček nedefinuje jeho instalaci"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "Stahování Modpacku"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "Nainstalována položka %u"
+#~ msgstr[1] "Nainstalováno %u položek"
+#~ msgstr[2] "Nainstalováno %u položek"
+
+#~ msgid "no compatible version"
+#~ msgstr "žádná kompatibilní verze"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "Nelze vytvořit \"%s\": %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "Cache vymazána"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "Vyčištění mezipaměti se nezdařilo"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "Mezipaměť se nepodařilo vymazat."
+
+#~ msgid "This cannot be installed"
+#~ msgstr "Toto nelze nainstalovat"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "Procházet modpacky"
+
+#~ msgid "Choose Files"
+#~ msgstr "Vybrat soubory"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "Vymazat mezipaměť Nuvasha Launcher"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Vymazat mezipaměť Nuvasha Launcher?"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "Nerozuměl jsem té odpovědi"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "Obsahuje soubory, které Nuvasha Launcher nerozpozná."
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "Společnost Microsoft vrátila nebezpečnou ověřovací adresu"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr "Žádný modpack neodpovídá zadanému požadavku. Zkuste jiné slovo."
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Data z mezipaměti Nuvasha Launcher byla úspěšně vymazána."
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Vyhledejte Modrinth a nainstalujte balíček modů"
+
+#~ msgid "Unavailable"
+#~ msgstr "Není k dispozici"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "přihlášení nebylo dokončeno"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Následující instance budou odstraněny:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "Režim úprav"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "Vstoupit do režimu úprav"
+
+#~ msgid "Delete Selected"
+#~ msgstr "Smazat vybrané"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "Podrobnosti projektu se nepodařilo načíst. Zkuste to znovu."
+
+#~ msgid "Technical Details"
+#~ msgstr "Technické podrobnosti"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "Služby a ekosystém"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Zřeknutí se odpovědnosti za Minecraft"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth a zavaděče modů"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "Metadata AppStream"
+
+#~ msgid "Reset Icon"
+#~ msgstr "Obnovit ikonu"
+
+#~ msgid "Delete World"
+#~ msgstr "Smazat svět"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "Odebrat server „%s“?"
+
+#~ msgid "Remove Server"
+#~ msgstr "Odebrat server"
+
+#~ msgid "Rename World"
+#~ msgstr "Přejmenovat svět"
+
+#~ msgid "Add World"
+#~ msgstr "Přidat svět"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "Smazat svět „%s“? Tuto akci nelze vrátit zpět."
+
+#~ msgid "Add Server"
+#~ msgstr "Přidat server"
+
+#~ msgid "Edit Server"
+#~ msgstr "Upravit server"
+
+#~ msgid "Datapacks"
+#~ msgstr "Datapacky"
+
+#~ msgid "No Worlds"
+#~ msgstr "Žádné světy"
+
+#~ msgid "Move Up"
+#~ msgstr "Posunout nahoru"
+
+#~ msgid "No Servers"
+#~ msgstr "Žádné servery"
+
+#~ msgid "Move Down"
+#~ msgstr "Posunout dolů"
+
+#~ msgid "Copy Seed"
+#~ msgstr "Kopírovat seed"
+
+#~ msgid "Playtime"
+#~ msgstr "Doba hraní"
+
+#~ msgid "Runs on"
+#~ msgstr "Běží na"
+
+#~ msgid "Last session"
+#~ msgstr "Poslední relace"
+
+#~ msgid "Server joins"
+#~ msgstr "Připojení k serveru"
+
+#~ msgid "World loads"
+#~ msgstr "Načtení světů"
+
+#~ msgid "Player Profile"
+#~ msgstr "Profil hráče"
+
+#~ msgid "Player type"
+#~ msgstr "Typ hráče"
+
+#~ msgid "Pack style"
+#~ msgstr "Styl balíčku"
+
+#~ msgid "Average session"
+#~ msgstr "Průměrná relace"
+
+#~ msgid "Stability"
+#~ msgstr "Stabilita"
+
+#~ msgid "Hybrid"
+#~ msgstr "Hybridní"
+
+#~ msgid "Server Player"
+#~ msgstr "Hráč na serverech"
+
+#~ msgid "Singleplayer"
+#~ msgstr "Hra pro jednoho"
+
+#~ msgid "Unplayed"
+#~ msgstr "Nehráno"
+
+#~ msgid "Modpack"
+#~ msgstr "Modpack"
+
+#~ msgid "Lightweight"
+#~ msgstr "Lehký"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "Vše v jednom"
+
+#~ msgid "Quick"
+#~ msgstr "Krátké"
+
+#~ msgid "Standard"
+#~ msgstr "Standardní"
+
+#~ msgid "Marathon"
+#~ msgstr "Maraton"
+
+#~ msgid "Stable"
+#~ msgstr "Stabilní"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "%u%% pádů"

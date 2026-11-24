@@ -1,1623 +1,2519 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: id\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-msgid "Adventure"
-msgstr "Petualangan"
-msgid "Atmosphere"
-msgstr "Suasana"
-msgid "Audio"
-msgstr "Audio"
-msgid "Blocks"
-msgstr "Blok"
-msgid "Bloom"
-msgstr "Pendar cahaya"
-msgid "Cartoon"
-msgstr "Kartun"
-msgid "Categories"
-msgstr "Kategori"
-msgid "Colored Lighting"
-msgstr "Pencahayaan berwarna"
-msgid "Combat"
-msgstr "Pertempuran"
-msgid "Core Shaders"
-msgstr "Shader inti"
-msgid "Cursed"
-msgstr "Aneh"
-msgid "Decoration"
-msgstr "Dekorasi"
-msgid "Economy"
-msgstr "Ekonomi"
-msgid "Entities"
-msgstr "Entitas"
-msgid "Environment"
-msgstr "Lingkungan"
-msgid "Equipment"
-msgstr "Perlengkapan"
-msgid "Fantasy"
-msgstr "Fantasi"
-msgid "Features"
-msgstr "Fitur"
-msgid "Foliage"
-msgstr "Dedaunan"
-msgid "Fonts"
-msgstr "Fon"
-msgid "Food"
-msgstr "Makanan"
-msgid "Game Mechanics"
-msgstr "Mekanika permainan"
-msgid "Interface"
-msgstr "Antarmuka"
-msgid "High"
-msgstr "Tinggi"
-msgid "Items"
-msgstr "Barang"
-msgid "Library"
-msgstr "Pustaka"
-msgid "Low"
-msgstr "Rendah"
-msgid "Magic"
-msgstr "Sihir"
-msgid "Management"
-msgstr "Pengelolaan"
-msgid "Medium"
-msgstr "Sedang"
-msgid "Minigame"
-msgstr "Permainan mini"
-msgid "Mobs"
-msgstr "Makhluk"
-msgid "Modded"
-msgstr "Dengan mod"
-msgid "Models"
-msgstr "Model"
-msgid "Optimization"
-msgstr "Optimasi"
-msgid "Path Tracing"
-msgstr "Pelacakan jalur"
-msgid "Performance Impact"
-msgstr "Dampak kinerja"
-msgid "Potato"
-msgstr "Untuk PC berspesifikasi sangat rendah"
-msgid "Realistic"
-msgstr "Realistis"
-msgid "Reflections"
-msgstr "Pantulan"
-msgid "Resolutions"
-msgstr "Resolusi"
-msgid "Screenshot"
-msgstr "Tangkapan layar"
-msgid "Semi-realistic"
-msgstr "Semirealistis"
-msgid "Shadows"
-msgstr "Bayangan"
-msgid "Simplistic"
-msgstr "Sederhana"
-msgid "Social"
-msgstr "Sosial"
-msgid "Storage"
-msgstr "Penyimpanan"
-msgid "Technology"
-msgstr "Teknologi"
-msgid "Themed"
-msgstr "Bertema"
-msgid "Transportation"
-msgstr "Transportasi"
-msgid "Tweaks"
-msgstr "Penyesuaian"
-msgid "Utility"
-msgstr "Utilitas"
-msgid "Vanilla-like"
-msgstr "Mirip gim asli"
-msgid "World Generation"
-msgstr "Pembuatan dunia"
 
-msgid "All Versions"
-msgstr "Semua versi"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "Relevansi"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "Offline"
 
-msgid "Newest"
-msgstr "Terbaru"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "sebuah nama tidak boleh kosong."
 
-msgid "Recently updated"
-msgstr "Baru diperbarui"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "sebuah nama harus terdiri dari 3 hingga 16 karakter."
 
-msgid "Followers"
-msgstr "Pengikut"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "sebuah nama hanya dapat memuat huruf, angka, dan garis bawah."
 
-msgid "Filter modpacks"
-msgstr "Filter paket mod"
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
+msgid ""
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
+msgstr ""
+"Akun Microsoft ini belum terhubung dengan profil Xbox apa pun: silakan masuk "
+"ke xbox.com sekali menggunakan akun tersebut, lalu masuk kembali di sini"
 
-msgid "Cancel"
-msgstr "Membatalkan"
-msgid "Confirm"
-msgstr "Mengonfirmasi"
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
+msgid ""
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
+msgstr ""
+"Ini adalah akun anak: akun ini harus ditambahkan ke Microsoft Family oleh "
+"orang dewasa sebelum si anak dapat bermain"
 
-msgid "Customize"
-msgstr "Sesuaikan"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr "Xbox Live tidak tersedia di negara tempat akun ini terdaftar"
 
-msgid "Delete"
-msgstr "Menghapus"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"Akun ini perlu diverifikasi oleh orang dewasa sebelum dapat digunakan, "
+"seperti halnya yang harus dilakukan oleh akun-akun asal Korea Selatan"
 
-msgid "Retry"
-msgstr "Mencoba kembali"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Microsoft tidak memberikan kode untuk masuk"
 
-msgid "Loading…"
-msgstr "Memuat…"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1fM unduhan"
 
-msgid "Download"
-msgstr "Unduh"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1fk unduhan"
 
-msgid "Update All"
-msgstr "Perbarui Semua"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s unduhan"
 
-msgid "Open Folder"
-msgstr "Buka Folder"
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s · oleh %s"
 
-msgid "Nothing installed yet"
-msgstr "Belum ada yang terpasang"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "oleh %s"
 
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Telusuri sesuatu untuk dimasukkan ke dalam folder contoh ini"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, fuzzy, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "%u/%u dipilih"
+msgstr[1] "%u/%u dipilih"
 
-msgid "Installed"
-msgstr "Dipasang"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, fuzzy, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "Paket Sumber Daya"
+msgstr[1] "Paket Sumber Daya"
 
-msgid "Loading more…"
-msgstr "Memuat lebih banyak…"
+#: src/nuvashalauncher-content-page-browser.c:98
+#, fuzzy, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "%u/%u dipilih"
+msgstr[1] "%u/%u dipilih"
 
-msgid "Nothing is selected"
-msgstr "Tidak ada yang dipilih"
+#: src/nuvashalauncher-content-page-browser.c:101
+#, fuzzy, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "%u/%u dipilih"
+msgstr[1] "%u/%u dipilih"
 
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr ""
 
-msgid "Filter by category"
-msgstr "Filter berdasarkan kategori"
-
-msgid "Nothing to show yet"
-msgstr "Belum ada yang bisa ditampilkan"
-
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Ketik apa yang ingin dicari, atau telusuri semua yang dimiliki Modrinth untuk contoh ini"
-
-msgid "Browse"
-msgstr "Jelajahi"
-
-msgid "No mod loader"
-msgstr "Tidak ada pemuat mod"
-
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Mod memerlukan pemuat mod. Pilih Fabric, Quilt, Forge atau NeoForge di pengaturan instance ini terlebih dahulu"
-
-msgid "Create Instance"
-msgstr "Buat Contoh"
-
-msgid "Name"
-msgstr "Nama"
-
-msgid "Directory"
-msgstr "Direktori"
-
-msgid "Choose a folder"
-msgstr "Pilih folder"
-
-msgid "Create"
-msgstr "Membuat"
-
-msgid "Download Modpack"
-msgstr "Unduh Modpack"
-
-
-msgid "Search modpacks"
-msgstr "Cari modpack"
-
-msgid "Close"
-msgstr "Menutup"
-
-msgid "Back"
-msgstr "Kembali"
-
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "Memasang"
 
-msgid "Copy of %s"
-msgstr "Salinan %s"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "halaman berikutnya tidak dapat dimuat"
 
-msgid "Choose Java executable"
-msgstr "Pilih Java yang dapat dieksekusi"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Tidak dapat mencari Modrinth"
 
-msgid "the chosen file does not report a Java version"
-msgstr "file yang dipilih tidak melaporkan versi Java"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "Lainnya"
 
-msgid "Choose an Icon"
-msgstr "Pilih Ikon"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "Tidak dapat memuat kategori"
 
-msgid "Choose a Directory"
-msgstr "Pilih Direktori"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "Mencoba kembali"
 
-msgid "Duplicated to \"%s\""
-msgstr "Digandakan menjadi \"%s\""
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "Versi tidak dapat dimuat. Coba lagi."
 
-msgid "Delete \"%s\"?"
-msgstr "Hapus \"%s\"?"
-
-msgid "General"
-msgstr "Umum"
-
-msgid "Icon"
-msgstr "Ikon"
-
-msgid "Change the Directory"
-msgstr "Ubah Direktori"
-
-msgid "Minecraft"
-msgstr "Minecraft"
-
-msgid "Java"
-msgstr "Jawa"
-
-msgid "Java Runtime"
-msgstr "Waktu Proses Java"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "Game ini memerlukan Java %d atau lebih baru, Java yang dipilih adalah %d"
-
-msgid "Add Java Runtime"
-msgstr "Tambahkan Waktu Proses Java"
-
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft memerlukan Java tanpa kepala: di Arch gunakan paket jre-openjdk, bukan jre-openjdk-headless"
-
-msgid "JVM Arguments"
-msgstr "Argumen JVM"
-
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "Java yang dikonfigurasi tidak terdeteksi; pastikan itu masih merupakan java executable yang dapat digunakan"
-
-msgid "Actions"
-msgstr "Tindakan"
-
-msgid "Duplicate"
-msgstr "Duplikat"
-
-msgid "Delete Instance"
-msgstr "Hapus Instans"
-
-msgid "Settings"
-msgstr "Pengaturan"
-
-msgid "Resource Packs"
-msgstr "Paket Sumber Daya"
-
-msgid "Shader Packs"
-msgstr "Paket Shader"
-
-msgid "Mods"
-msgstr "Modifikasi"
-
-msgid "Logs"
-msgstr "Log"
-
-msgid "Custom: %s"
-msgstr "Khusus: %s"
-
-msgid "the game was stopped by signal %d"
-msgstr "permainan dihentikan oleh sinyal %d"
-
-msgid "the game exited with code %d"
-msgstr "permainan keluar dengan kode %d"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "Tidak ditemukan versi %s yang kompatibel untuk Minecraft %s."
-
-msgid "Loader"
-msgstr "Pemuat"
-
-msgid "Loader Version"
-msgstr "Versi Pemuat"
-
-msgid "Clear"
-msgstr "Jernih"
-
-msgid "Search the log"
-msgstr "Cari lognya"
-
-msgid "Versions"
-msgstr "Versi"
-
-msgid "Show unstable Minecraft versions"
-msgstr "Tampilkan versi Minecraft yang tidak stabil"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "Tampilkan versi Mod Loader yang tidak stabil"
-
-msgid "Language"
-msgstr "Bahasa"
-
-msgid "Interface language"
-msgstr "Bahasa antarmuka"
-
-msgid "Line Limit"
-msgstr "Batas Garis"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "Tentang Peluncur Nuvasha Launcher"
-
-msgid "Keyboard Shortcuts"
-msgstr "Pintasan Papan Ketik"
-
-msgid "Stop"
-msgstr "Berhenti"
-
-msgid "Play"
-msgstr "Bermain"
-
-msgid "Keep Playing"
-msgstr "Terus Bermain"
-
-msgid "Downloads"
-msgstr "Unduhan"
-
-msgid "Accounts"
-msgstr "Akun"
-
-msgid "No Instances Yet"
-msgstr "Belum Ada Contoh"
-
-msgid "Use the + button in the header to create one"
-msgstr "Gunakan tombol + di header untuk membuatnya"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "pemuat tidak dapat diselesaikan: %s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "Tidak ditemukan versi kompatibel untuk Minecraft %s dan %s."
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "Tidak ditemukan versi kompatibel untuk Minecraft %s."
 
-msgid "Add Offline Account"
-msgstr "Tambahkan Akun Offline"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "Versi"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "sebuah nama hanya dapat memuat huruf, angka, dan garis bawah"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "Foldernya tidak dapat dibaca"
 
-msgid "a name cannot be empty"
-msgstr "sebuah nama tidak boleh kosong"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "sebuah nama harus terdiri dari 3 hingga 16 karakter"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "File tidak dapat diinstal"
 
-msgid "Add"
-msgstr "Menambahkan"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "meminta kode kepada Microsoft"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "Folder tidak dapat dibuat"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "menunggu masuk di browser"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "Isi"
 
-msgid "Sign In"
-msgstr "Masuk"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "Menginstal"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "Buka halaman tersebut di browser Anda, lalu masukkan kode ini:"
-
-msgid "Try Again"
-msgstr "Coba Lagi"
-
-msgid "Remove"
-msgstr "Menghapus"
-
-msgid "Add Microsoft Account"
-msgstr "Tambahkan Akun Microsoft"
-
-msgid "Minecraft Version"
-msgstr "Versi Minecraft"
-
-msgid "Install the selected %s?"
-msgstr "Instal %s yang dipilih?"
-
-msgid "%s \"%s\""
-msgstr "%s \"%s\""
-
-msgid "Search"
-msgstr "Mencari"
-
-msgid "Update"
-msgstr "Memperbarui"
-
-msgid "Update the following %s"
-msgstr "Perbarui %s berikut"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "Ketergantungan:"
 
-msgid "The following mods depend on %s:\n%s"
-msgstr "Mod berikut bergantung pada %s:\n%s"
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "Konflik\n"
 
-msgid "Cache"
-msgstr "Cache"
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "%s sedang dipasang"
 
-msgid "Cache Modrinth API responses"
-msgstr "Tembolok respons API Modrinth"
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "Memperbarui"
 
-msgid "Cache expiration"
-msgstr "Kedaluwarsa cache"
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s “%s”"
 
-msgid "1 hour"
-msgstr "1 jam"
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "Membatalkan"
 
-msgid "6 hours"
-msgstr "6 jam"
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "Proyek ini tidak menerbitkan apa pun yang sesuai dengan contoh ini."
 
-msgid "1 day"
-msgstr "1 hari"
+#: src/nuvashalauncher-content-page-install.c:1003
+#, fuzzy, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "%s sedang dipasang"
+msgstr[1] "%s sedang dipasang"
 
-msgid "7 days"
-msgstr "7 hari"
+#: src/nuvashalauncher-content-page-install.c:1006
+#, fuzzy, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "%s sedang dipasang"
+msgstr[1] "%s sedang dipasang"
 
-msgid "Show Shortcuts"
-msgstr "Tampilkan Pintasan"
+#: src/nuvashalauncher-content-page-install.c:1009
+#, fuzzy, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "%s sedang dipasang"
+msgstr[1] "%s sedang dipasang"
 
-msgid "Quit"
-msgstr "Berhenti"
+#: src/nuvashalauncher-content-page-install.c:1012
+#, fuzzy, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "%s sedang dipasang"
+msgstr[1] "%s sedang dipasang"
 
-msgid "Import Modpack"
-msgstr "Impor Modpack"
+#: src/nuvashalauncher-content-page-install.c:1038
+#, fuzzy
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "Perbarui %s berikut"
+msgstr[1] "Perbarui %s berikut"
 
-msgid "Modpack exported"
-msgstr "Modpack diekspor"
+#: src/nuvashalauncher-content-page-install.c:1041
+#, fuzzy
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "Instal %s yang dipilih?"
+msgstr[1] "Instal %s yang dipilih?"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modpack Modrinth (*.mrpack)"
+#: src/nuvashalauncher-content-page-install.c:1044
+#, fuzzy
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "Perbarui %s berikut"
+msgstr[1] "Perbarui %s berikut"
 
-msgid "The export location is not a local file"
-msgstr "Lokasi ekspor bukan file lokal"
+#: src/nuvashalauncher-content-page-install.c:1047
+#, fuzzy
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "Perbarui %s berikut"
+msgstr[1] "Perbarui %s berikut"
 
-msgid "Export Modpack"
-msgstr "Ekspor Modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "File tidak dapat dihapus"
 
-msgid "Importing modpack…"
-msgstr "Mengimpor modpack…"
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "Aktifkan"
 
-msgid "Reading modpack"
-msgstr "Membaca modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "Mod yang bergantung tidak dapat dihapus"
 
-msgid "Exporting modpack"
-msgstr "Mengekspor modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "File tidak dapat diganti namanya"
 
-msgid "Modpack export"
-msgstr "Ekspor modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "Dihapus"
 
-msgid "Include transient files?"
-msgstr "Sertakan file sementara?"
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "Hapus “%s”?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Log, laporan kerusakan, tangkapan layar, cache, dan unduhan biasanya dikecualikan."
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Mod berikut bergantung pada %s:\n"
+"%s"
 
-msgid "Clean Export"
-msgstr "Ekspor Bersih"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "Menghapus"
 
-msgid "Include All Files"
-msgstr "Sertakan Semua File"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "Diaktifkan"
 
-msgid "Pack Name"
-msgstr "Nama Paket"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "Dengan disabilitas"
 
-msgid "Summary"
-msgstr "Ringkasan"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "Nonaktifkan"
 
-msgid "Version ID"
-msgstr "ID Versi"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "Mencari"
 
-msgid "Downloading files"
-msgstr "Mengunduh file"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "Perbarui Semua"
 
-msgid "Extracting files"
-msgstr "Mengekstrak file"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "Mengambil pembaruan"
 
-msgid "Optional files"
-msgstr "File opsional"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "Progres"
 
-msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
-msgstr "Paket tersebut berisi daftar file-file ini tetapi mengatakan bahwa file-file tersebut tidak diperlukan. Tidak ada satupun yang diinstal kecuali Anda memintanya. Defaultnya tidak aktif"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "Buka Folder"
 
-msgid "Pack could not be fetched"
-msgstr "Paket tidak dapat diambil"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "Belum ada yang terpasang"
 
-msgid "Invalid pack"
-msgstr "Paket tidak valid"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Telusuri sesuatu untuk dimasukkan ke dalam folder contoh ini"
 
-msgid "The pack does not define its install"
-msgstr "Paket tidak menentukan pemasangannya"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "Jelajahi"
 
-msgid "Downloading Modpack"
-msgstr "Mengunduh Modpack"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "Dipasang"
 
-msgid "Writing archive"
-msgstr "Arsip penulisan"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "Memuat lebih banyak…"
 
-msgid "Export modpack metadata"
-msgstr "Ekspor metadata modpack"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "Filter berdasarkan kategori"
 
-msgid "Ask for export metadata"
-msgstr "Minta metadata ekspor"
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "Belum ada yang bisa ditampilkan"
 
-msgid "Pack information"
-msgstr "Kemas informasi"
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Ketik apa yang ingin dicari, atau telusuri semua yang dimiliki Modrinth "
+"untuk contoh ini"
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "Tampilkan bidang nama, ringkasan, dan versi sebelum mengekspor."
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "Tutup"
 
-msgid "Export complete"
-msgstr "Ekspor selesai"
-
-msgid "Export"
-msgstr "Ekspor"
-
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "Menginstal %u item"
-msgstr[1] "Menginstal %u item"
-
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
 msgid "Updated %u item"
 msgid_plural "Updated %u items"
 msgstr[0] "Memperbarui %u item"
 msgstr[1] "Memperbarui %u item"
 
-msgid "The icon must be a file on this computer"
-msgstr "Ikonnya harus berupa file di komputer ini"
-
-msgid "The game is running; stop it before moving its directory"
-msgstr "Permainan sedang berjalan; hentikan sebelum memindahkan direktorinya"
-
-msgid "%s is being installed"
-msgstr "%s sedang dipasang"
-
-msgid "no compatible version"
-msgstr "tidak ada versi yang kompatibel"
-
-msgid "Enabled"
-msgstr "Diaktifkan"
-
-msgid "Disabled"
-msgstr "Dengan disabilitas"
-
-msgid "Deleted"
-msgstr "Dihapus"
-
+#: src/nuvashalauncher-content-page-updates.c:246
 msgid "Everything is up to date"
 msgstr "Semuanya mutakhir"
 
-msgid "Cannot create \"%s\": %s"
-msgstr "Tidak dapat membuat \"%s\": %s"
-
-msgid "This project publishes nothing that fits this instance."
-msgstr "Proyek ini tidak menerbitkan apa pun yang sesuai dengan contoh ini."
-
-msgid "Unknown"
-msgstr "Tidak dikenal"
-
-msgid "%s (unstable)"
-msgstr "%s (tidak stabil)"
-
-msgid "the next page could not be loaded"
-msgstr "halaman berikutnya tidak dapat dimuat"
-
-msgid "Other"
-msgstr "Lainnya"
-
-msgid "%.1fM downloads"
-msgstr "%.1fM unduhan"
-
-msgid "%.1fk downloads"
-msgstr "%.1fk unduhan"
-
-msgid "%s  ·  by %s"
-msgstr "%s · oleh %s"
-
-msgid "by %s"
-msgstr "oleh %s"
-
-msgid "%s downloads"
-msgstr "%s unduhan"
-
-msgid "Cache Cleared"
-msgstr "Tembolok Dihapus"
-
-msgid "Cache Cleanup Failed"
-msgstr "Pembersihan Cache Gagal"
-
-msgid "The cache could not be cleared."
-msgstr "Cache tidak dapat dihapus."
-
-msgid "the versions of this loader could not be read"
-msgstr "versi pemuat ini tidak dapat dibaca"
-
-msgid "Minecraft crashed"
-msgstr "Minecraft jatuh"
-
-msgid "Minecraft could not start"
-msgstr "Minecraft tidak dapat dimulai"
-
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft perlu masuk"
-
-msgid "The file cannot be renamed"
-msgstr "File tidak dapat diganti namanya"
-
-msgid "The file cannot be deleted"
-msgstr "File tidak dapat dihapus"
-
-msgid "The folder cannot be read"
-msgstr "Foldernya tidak dapat dibaca"
-
-msgid "The file could not be installed"
-msgstr "File tidak dapat diinstal"
-
-msgid "The folder cannot be created"
-msgstr "Folder tidak dapat dibuat"
-
-msgid "This cannot be installed"
-msgstr "Ini tidak dapat diinstal"
-
-msgid "Pick a Minecraft version first"
-msgstr "Pilih versi Minecraft terlebih dahulu"
-
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "Menghapus ketergantungan akan menghapus mod yang bergantung padanya"
-
-msgid "A dependent mod cannot be deleted"
-msgstr "Mod yang bergantung tidak dapat dihapus"
-
-msgid "Slim model"
-msgstr "Modelnya ramping"
-
-msgid "OK"
-msgstr "OKE"
-
-msgid "Export skin…"
-msgstr "Ekspor kulit…"
-
-msgid "Classic model"
-msgstr "Model klasik"
-
-msgid "PNG skin texture"
-msgstr "Tekstur kulit PNG"
-
-msgid "Invalid skin"
-msgstr "Kulit tidak valid"
-
-msgid "No cape"
-msgstr "Tanpa jubah"
-
-msgid "Import skin…"
-msgstr "Impor kulit…"
-
-msgid "Delete skin?"
-msgstr "Hapus kulit?"
-
-msgid "This skin will be removed from the skin library."
-msgstr "Kulit ini akan dihapus dari perpustakaan kulit."
-
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "Gambar kulit harus berupa file PNG 64x64 atau 64x32"
-
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "Jelajahi Modpack"
-
-msgid "Choose Files"
-msgstr "Pilih Berkas"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "Hapus Cache Nuvasha Launcher"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Hapus Cache Nuvasha Launcher?"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"Konflik\n"
-
-msgid "Content"
-msgstr "Isi"
-
-msgid "Could not install"
-msgstr "Tidak dapat menginstal"
-
-msgid "Could not install the modpack"
-msgstr "Tidak dapat menginstal modpack"
-
-msgid "Could not load categories"
-msgstr "Tidak dapat memuat kategori"
-
-msgid "Could not search Modrinth"
-msgstr "Tidak dapat mencari Modrinth"
-
-msgid "Could not understand the answer"
-msgstr "Tidak bisa memahami jawabannya"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "Nonaktifkan"
-
-msgid "Dismiss"
-msgstr "Tutup"
-
-msgid "Enable"
-msgstr "Aktifkan"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "Gambar"
-
-msgid "Installing"
-msgstr "Menginstal"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "Nama instance tidak boleh mengandung %s"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "File-file tersebut tidak dikenali oleh Nuvasha Launcher."
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "Microsoft mengembalikan alamat verifikasi yang tidak aman"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "Microsoft tidak memberikan kode untuk masuk"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · Harus masuk"
-
-msgid "Modrinth does not know this file"
-msgstr "Modrinth tidak mengenal berkas ini"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "Modrinth meminta Nuvasha Launcher untuk melambat, terlalu banyak permintaan"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No compatible Java runtime was found."
-msgstr "Tidak ditemukan runtime Java yang kompatibel."
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "Tidak ada modpack yang sesuai dengan yang diminta. Coba gunakan kata lain"
-
-msgid "None"
-msgstr "Tidak ada"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Data cache Nuvasha Launcher telah dihapus dengan sukses."
-
-msgid "Offline"
-msgstr "Offline"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "Pilih versi Minecraft dari daftar berikut."
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "Pilih salah satu versi loader, atau pilih loader yang lain."
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
-msgid "Remove %s?"
-msgstr "Hapus %s?"
-
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Cari Modrinth dan pasang modpack"
-
-msgid "Skin"
-msgstr "Kulit"
-
-msgid "Stop %s?"
-msgstr "Berhenti %s?"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "Pengaturan default sistem"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Akun tersebut dihapus dari Nuvasha Launcher dan data login yang tersimpan pun terhapus. Game itu sendiri tidak terpengaruh."
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "Permainan sedang berjalan dan akan ditutup. Kemajuan sejak penyimpanan terakhir akan hilang."
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "Proyek ini tidak menerbitkan berkas paket apa pun yang dapat diinstal oleh Nuvasha Launcher."
-
-msgid "This version has no pack file"
-msgstr "Versi ini tidak memiliki berkas paket"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Unavailable"
-msgstr "Tidak tersedia"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "Xbox Live tidak tersedia di negara tempat akun ini terdaftar"
-
-msgid "the game"
-msgstr "permainan itu"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "Nama instance tidak dapat digunakan sebagai nama direktori"
-
-msgid "the instance name is empty"
-msgstr "Nama instance kosong"
-
-msgid "the sign-in did not finish"
-msgstr "proses masuk belum selesai"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "Akun Microsoft ini belum terhubung dengan profil Xbox apa pun: silakan masuk ke xbox.com sekali menggunakan akun tersebut, lalu masuk kembali di sini"
-
-msgid "this account"
-msgstr "akun ini"
-
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "Akun ini perlu diverifikasi oleh orang dewasa sebelum dapat digunakan, seperti halnya yang harus dilakukan oleh akun-akun asal Korea Selatan"
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "Ini adalah akun anak: akun ini harus ditambahkan ke Microsoft Family oleh orang dewasa sebelum si anak dapat bermain"
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "Minecraft Services menolak permintaan (HTTP %u)%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Kesalahan Minecraft Services"
-
-msgid "Application menu"
-msgstr "Application menu"
-
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "Perbarui %s berikut"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "Mengonfirmasi"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
 msgid "The folder could not be opened: %s"
 msgstr "The folder could not be opened: %s"
 
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "Buka di browser"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "%u/%u dipilih"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "Instans berikut akan dihapus:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "Mode edit"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "Mengambil pembaruan"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "Progres"
-
-msgid "Enter Edit Mode"
-msgstr "Masuk Mode Edit"
-
-msgid "Delete Selected"
-msgstr "Hapus yang Dipilih"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "Laporan kerusakan baru telah dibuat. Buka log untuk rinciannya."
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "Akses ditolak. Periksa izin folder."
-
-msgid "An offline account with this name already exists."
-msgstr "Akun luring dengan nama ini sudah ada."
-
-msgid "Choose another instance name or directory."
-msgstr "Pilih nama atau direktori instans lain."
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "Pemuat mod ini tidak dapat dipasang. Pilih versi lain atau lihat rincian teknis."
-
-msgid "Could not load project details. Try again."
-msgstr "Rincian proyek tidak dapat dimuat. Coba lagi."
-
-msgid "Could not load versions. Try again."
-msgstr "Versi tidak dapat dimuat. Coba lagi."
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "Peramban tidak dapat dibuka. Buka alamat yang ditampilkan secara manual."
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "Berkas tidak dapat dibaca atau ditulis. Periksa lokasi, izin, dan ruang kosong."
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "Akun tidak dapat disimpan. Periksa gantungan kunci sistem dan izin berkas."
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "Microsoft mengembalikan alamat masuk yang tidak aman. Perbarui peluncur sebelum mencoba lagi."
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "Masuk Microsoft belum dikonfigurasi dalam build ini. Perbarui peluncur."
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "Pilih lingkungan Java dengan dukungan desktop, bukan instalasi headless."
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "Buat profil Minecraft: Java Edition di minecraft.net, lalu coba lagi."
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "Masuk ditolak. Mulai lagi jika ingin masuk."
-
-msgid "Technical Details"
-msgstr "Rincian teknis"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "Program Java tidak dapat digunakan. Pilih lingkungan Java yang berfungsi."
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "Arsip tidak valid atau tidak aman. Unduh ulang dari sumber tepercaya."
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "Koneksi gagal. Periksa koneksi internet dan coba lagi."
-
-msgid "The destination already exists. Choose another location."
-msgstr "Tujuan sudah ada. Pilih lokasi lain."
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "Berkas unduhan gagal diverifikasi dan tidak dipasang. Unduh lagi."
-
-msgid "The file or folder was not found. Check its location."
-msgstr "Berkas atau folder tidak ditemukan. Periksa lokasinya."
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "Metadata gim tidak valid atau tidak tersedia. Segarkan daftar versi dan coba lagi."
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "Operasi gagal. Lihat rincian teknis untuk informasi lebih lanjut."
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "Berkas, proyek, atau versi kompatibel yang diminta tidak ditemukan."
-
-msgid "The service rejected the request. Try again later."
-msgstr "Layanan menolak permintaan. Coba lagi nanti."
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "Layanan mengembalikan respons tidak valid. Coba lagi nanti."
-
-msgid "There is not enough free disk space."
-msgstr "Ruang kosong pada disk tidak cukup."
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "Akun ini tidak memiliki Minecraft: Java Edition."
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "Instans ini tidak lagi tersedia. Segarkan daftar instans."
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "Terlalu banyak permintaan. Tunggu sebentar dan coba lagi."
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "Pengaturan instans tidak valid. Periksa versi yang dipilih dan argumen JVM."
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "Informasi masuk tersimpan tidak lagi valid. Masuk lagi."
-
-msgid "Minecraft launcher for Linux"
-msgstr "Peluncur Minecraft untuk Linux"
-
-msgid "Services & Ecosystem"
-msgstr "Layanan & Ekosistem"
-
-msgid "Minecraft Disclaimer"
-msgstr "Pernyataan Penyangkalan Minecraft"
-
-msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
-msgstr ""
-"BUKAN PRODUK RESMI MINECRAFT. TIDAK DISETUJUI OLEH ATAU TERKAIT DENGAN MOJANG ATAU MICROSOFT.\n"
-"\n"
-"Minecraft adalah merek dagang dari Mojang AB. Peluncur ini dikembangkan secara independen dan tidak berafiliasi dengan Mojang Studios atau Microsoft."
-
-msgid "Modrinth & Mod Loaders"
-msgstr "Modrinth & Pemuat Mod"
-
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"Modpack, mod, paket sumber daya, dan shader dihosting oleh Modrinth dan dibuat oleh pembuatnya masing-masing.\n"
-"\n"
-"Pemuat mod dikembangkan secara independen oleh proyek Fabric, Quilt, Forge, dan NeoForge."
-
-msgid "AppStream Metadata"
-msgstr "Metadata AppStream"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "Metadata AppStream (deskripsi, ringkasan, dan catatan rilis) dirilis di bawah Creative Commons CC0 1.0 Universal Public Domain Dedication."
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "Salin"
-
-msgid "Rename"
-msgstr "Ubah Nama"
-
-msgid "Reset Icon"
-msgstr "Atur Ulang Ikon"
-
-msgid "Delete World"
-msgstr "Hapus Dunia"
-
-msgid "Seed copied to clipboard"
-msgstr "Seed disalin ke papan klip"
-
-msgid "Remove server \"%s\"?"
-msgstr "Hapus server \"%s\"?"
-
-msgid "Refresh"
-msgstr "Segarkan"
-
-msgid "Remove Server"
-msgstr "Hapus Server"
-
-msgid "Survival"
-msgstr "Bertahan Hidup"
-
-msgid "Edit"
-msgstr "Sunting"
-
-msgid "Ask to download"
-msgstr "Tanya sebelum mengunduh"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Dunia yang disimpan oleh Minecraft atau diimpor ke sini akan muncul di daftar ini."
-
-msgid "Rename World"
-msgstr "Ubah Nama Dunia"
-
-msgid "Servers"
-msgstr "Server"
-
-msgid "Save"
-msgstr "Simpan"
-
-msgid "Add World"
-msgstr "Tambah Dunia"
-
-msgid "Spectator"
-msgstr "Penonton"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "Hapus dunia \"%s\"? Tindakan ini tidak dapat dibatalkan."
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Server yang ditambahkan di sini disimpan ke servers.dat untuk instans ini."
-
-msgid "Add Server"
-msgstr "Tambah Server"
-
-msgid "Edit Server"
-msgstr "Sunting Server"
-
-msgid "Address"
-msgstr "Alamat"
-
-msgid "Datapacks"
-msgstr "Paket Data"
-
-msgid "No Worlds"
-msgstr "Tidak Ada Dunia"
-
-msgid "Creative"
-msgstr "Kreatif"
-
-msgid "Move Up"
-msgstr "Pindah ke Atas"
-
-msgid "No Servers"
-msgstr "Tidak Ada Server"
-
-msgid "Never download"
-msgstr "Jangan pernah mengunduh"
-
-msgid "Worlds"
-msgstr "Dunia"
-
-msgid "Always download"
-msgstr "Selalu unduh"
-
-msgid "Move Down"
-msgstr "Pindah ke Bawah"
-
-msgid "Copy Seed"
-msgstr "Salin Seed"
-
-msgid "Stats"
-msgstr "Statistik"
-
-msgid "Playtime"
-msgstr "Waktu bermain"
-
-msgid "Time played"
-msgstr "Lama dimainkan"
-
-msgid "Not played yet"
-msgstr "Belum dimainkan"
-
-msgid "Less than a minute"
-msgstr "Kurang dari semenit"
-
-msgid "%llu min"
-msgstr "%llu mnt"
-
-msgid "%llu h %llu min"
-msgstr "%llu j %llu mnt"
-
-msgid "Runs on"
-msgstr "Berjalan di"
-
-msgid "Activity"
-msgstr "Aktivitas"
-
-msgid "Last session"
-msgstr "Sesi terakhir"
-
-msgid "Last played"
-msgstr "Terakhir dimainkan"
-
-msgid "Total launches"
-msgstr "Total peluncuran"
-
-msgid "Total crashes"
-msgstr "Total crash"
-
-msgid "Server joins"
-msgstr "Gabung server"
-
-msgid "World loads"
-msgstr "Muat dunia"
-
-msgid "Player Profile"
-msgstr "Profil Pemain"
-
-msgid "Player type"
-msgstr "Tipe pemain"
-
-msgid "Pack style"
-msgstr "Gaya paket"
-
-msgid "Average session"
-msgstr "Rata-rata sesi"
-
-msgid "Stability"
-msgstr "Stabilitas"
-
-msgid "Instance"
-msgstr "Instans"
-
-msgid "Total size"
-msgstr "Ukuran total"
-
-msgid "Created on"
-msgstr "Dibuat pada"
-
-msgid "Calculating…"
-msgstr "Menghitung…"
-
-msgid "Never"
-msgstr "Tidak pernah"
-
-msgid "Today, %s"
-msgstr "Hari ini, %s"
-
-msgid "Hybrid"
-msgstr "Hibrida"
-
-msgid "Server Player"
-msgstr "Pemain Server"
-
-msgid "Singleplayer"
-msgstr "Pemain Tunggal"
-
-msgid "Unplayed"
-msgstr "Belum dimainkan"
-
-msgid "Modpack"
-msgstr "Modpack"
-
-msgid "Lightweight"
-msgstr "Ringan"
-
-msgid "Kitchen Sink"
-msgstr "Lengkap"
-
-msgid "Quick"
-msgstr "Singkat"
-
-msgid "Standard"
-msgstr "Standar"
-
-msgid "Marathon"
-msgstr "Maraton"
-
-msgid "Stable"
-msgstr "Stabil"
-
-msgid "%u%% crash rate"
-msgstr "%u%% tingkat crash"
-
-msgid "A name cannot be empty."
-msgstr "sebuah nama tidak boleh kosong."
-
-msgid "Remove server"
-msgstr "Hapus Server"
-
-msgid "Download modpack"
-msgstr "Unduh Modpack"
-
-msgid "%s “%s”"
-msgstr "%s “%s”"
-
-msgid "Delete instance"
-msgstr "Hapus Instans"
-
-msgid "No worlds"
-msgstr "Tidak Ada Dunia"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "menunggu masuk di browser…"
-
-msgid "Choose files"
-msgstr "Pilih Berkas"
-
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
 msgid "Cannot create “%s”: %s"
 msgstr "Tidak dapat membuat “%s”: %s"
 
-msgid "Cache cleanup failed"
-msgstr "Pembersihan Cache Gagal"
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "Tidak ada pemuat mod"
 
-msgid "Español"
-msgstr "Español"
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Mod memerlukan pemuat mod. Pilih Fabric, Quilt, Forge atau NeoForge di "
+"pengaturan instance ini terlebih dahulu"
 
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth & Pemuat Mod"
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "Pilih versi Minecraft dari daftar berikut."
 
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "Hapus dunia “%s”? Tindakan ini tidak dapat dibatalkan."
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Pilih salah satu versi loader, atau pilih loader yang lain."
 
-msgid "Português"
-msgstr "Português"
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "Direktori"
 
-msgid "Create an instance to start playing."
-msgstr "Buat instans untuk mulai bermain."
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "Pilih folder"
 
-msgid "Duplicated to “%s”"
-msgstr "Digandakan menjadi “%s”"
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "Membuat"
 
-msgid "Downloading modpack"
-msgstr "Mengunduh Modpack"
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, fuzzy, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "%u/%u dipilih"
+msgstr[1] "%u/%u dipilih"
 
-msgid "Try again"
-msgstr "Coba Lagi"
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "Layanan mengembalikan respons tidak valid. Coba lagi nanti."
 
-msgid "Performance impact"
-msgstr "Dampak kinerja"
-
-msgid "Add world"
-msgstr "Tambah Dunia"
-
-msgid "Create instance"
-msgstr "Buat Contoh"
-
-msgid "Browse modpacks"
-msgstr "Jelajahi Modpack"
-
-msgid "Remove server “%s”?"
-msgstr "Hapus server “%s”?"
-
-msgid "Path tracing"
-msgstr "Pelacakan jalur"
-
-msgid "Clean export"
-msgstr "Ekspor Bersih"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "Mekanika permainan"
-
-msgid "Minecraft version"
-msgstr "Versi Minecraft"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "Buka Folder"
-
-msgid "AppStream metadata"
-msgstr "Metadata AppStream"
-
-msgid "Add Java runtime"
-msgstr "Tambahkan Waktu Proses Java"
-
-msgid "World generation"
-msgstr "Pembuatan dunia"
-
-msgid "Keyboard shortcuts"
-msgstr "Pintasan Papan Ketik"
-
-msgid "Resource packs"
-msgstr "Paket Sumber Daya"
-
-msgid "Edit server"
-msgstr "Sunting Server"
-
-msgid "Keep playing"
-msgstr "Terus Bermain"
-
-msgid "Technical details"
-msgstr "Rincian teknis"
-
-msgid "Pack name"
-msgstr "Nama Paket"
-
-msgid "Colored lighting"
-msgstr "Pencahayaan berwarna"
-
-msgid "Rename world"
-msgstr "Ubah Nama Dunia"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "sebuah nama hanya dapat memuat huruf, angka, dan garis bawah."
-
-msgid "Preferences"
-msgstr "Pengaturan"
-
-msgid "Delete world"
-msgstr "Hapus Dunia"
-
-msgid "Asking Microsoft for a code…"
-msgstr "meminta kode kepada Microsoft…"
-
-msgid "Show unstable mod loader versions"
-msgstr "Tampilkan versi Mod Loader yang tidak stabil"
-
-msgid "Move down"
-msgstr "Pindah ke Bawah"
-
-msgid "Clear cache"
-msgstr "Hapus Cache Nuvasha Launcher"
-
-msgid "Delete “%s”?"
-msgstr "Hapus “%s”?"
-
-msgid "Import modpack…"
-msgstr "Impor Modpack…"
-
-msgid "Delete selected"
-msgstr "Hapus yang Dipilih"
-
-msgid "Java runtime"
-msgstr "Waktu Proses Java"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "sebuah nama harus terdiri dari 3 hingga 16 karakter."
-
-msgid "Import modpack"
-msgstr "Impor Modpack"
-
-msgid "Core shaders"
-msgstr "Shader inti"
-
-msgid "Sign in"
-msgstr "Masuk"
-
-msgid "Cache cleared"
-msgstr "Tembolok Dihapus"
-
-msgid "No instances yet"
-msgstr "Belum Ada Contoh"
-
-msgid "Add offline account"
-msgstr "Tambahkan Akun Offline"
-
-msgid "Copy seed"
-msgstr "Salin Seed"
-
-msgid "Services & ecosystem"
-msgstr "Layanan & Ekosistem"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "Tidak ada modpack yang sesuai dengan yang diminta. Coba gunakan kata lain."
-
-msgid "Line limit"
-msgstr "Batas Garis"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Modpack Modrinth (*.mrpack)"
-
-msgid "Add server"
-msgstr "Tambah Server"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
+#: src/nuvashalauncher-download-modpack-browser.c:763
 msgid "All versions"
 msgstr "Semua versi"
 
-msgid "No servers"
-msgstr "Tidak Ada Server"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "Unduhan"
 
-msgid "Clear cache?"
-msgstr "Hapus Cache Nuvasha Launcher?"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "Relevansi"
 
-msgid "Loader version"
-msgstr "Versi Pemuat"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "Terbaru"
 
-msgid "translator-credits"
-msgstr "Flia"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "Baru diperbarui"
 
-msgid "Include all files"
-msgstr "Sertakan Semua File"
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "Pengikut"
 
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "Filter paket mod"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "Jelajahi Modpack"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Berkas, proyek, atau versi kompatibel yang diminta tidak ditemukan."
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+#, fuzzy
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "Tidak dapat menginstal modpack"
+msgstr[1] "Tidak dapat menginstal modpack"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
+msgid "Reading modpack"
+msgstr "Membaca modpack"
+
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
+msgid "Extracting files"
+msgstr "Mengekstrak file"
+
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "Tidak dapat menginstal modpack"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "Mengunduh file"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
+msgid "Optional files"
+msgstr "File opsional"
+
+#: src/nuvashalauncher-download-modpack-install.c:265
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr ""
+"Paket tersebut berisi daftar file-file ini tetapi mengatakan bahwa file-file "
+"tersebut tidak diperlukan. Tidak ada satupun yang diinstal kecuali Anda "
+"memintanya. Defaultnya tidak aktif"
+
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
+msgid "Pack could not be fetched"
+msgstr "Paket tidak dapat diambil"
+
+#: src/nuvashalauncher-download-modpack-install.c:422
+msgid "Invalid pack"
+msgstr "Paket tidak valid"
+
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "Versi ini tidak memiliki berkas paket"
+
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"Proyek ini tidak menerbitkan berkas paket apa pun yang dapat diinstal oleh "
+"Nuvasha Launcher."
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
+msgstr "Mengunduh Modpack"
+
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "Unduh"
+
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Koneksi gagal. Periksa koneksi internet dan coba lagi."
+
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "Layanan menolak permintaan. Coba lagi nanti."
+
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Terlalu banyak permintaan. Tunggu sebentar dan coba lagi."
+
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr ""
+"Berkas tidak dapat dibaca atau ditulis. Periksa lokasi, izin, dan ruang "
+"kosong."
+
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr "Berkas unduhan gagal diverifikasi dan tidak dipasang. Unduh lagi."
+
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "Arsip tidak valid atau tidak aman. Unduh ulang dari sumber tepercaya."
+
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "Operasi gagal. Lihat rincian teknis untuk informasi lebih lanjut."
+
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr ""
+"Program Java tidak dapat digunakan. Pilih lingkungan Java yang berfungsi."
+
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "Akses ditolak. Periksa izin folder."
+
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "Ruang kosong pada disk tidak cukup."
+
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "Berkas atau folder tidak ditemukan. Periksa lokasinya."
+
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "Tujuan sudah ada. Pilih lokasi lain."
+
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
+
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Informasi masuk tersimpan tidak lagi valid. Masuk lagi."
+
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Masuk ditolak. Mulai lagi jika ingin masuk."
+
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Akun ini tidak memiliki Minecraft: Java Edition."
+
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "Buat profil Minecraft: Java Edition di minecraft.net, lalu coba lagi."
+
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr ""
+"Masuk Microsoft belum dikonfigurasi dalam build ini. Perbarui peluncur."
+
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
+
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"Pemuat mod ini tidak dapat dipasang. Pilih versi lain atau lihat rincian "
+"teknis."
+
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"Metadata gim tidak valid atau tidak tersedia. Segarkan daftar versi dan coba "
+"lagi."
+
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Instans ini tidak lagi tersedia. Segarkan daftar instans."
+
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "Pilih nama atau direktori instans lain."
+
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr ""
+"Pengaturan instans tidak valid. Periksa versi yang dipilih dan argumen JVM."
+
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr ""
+"Akun tidak dapat disimpan. Periksa gantungan kunci sistem dan izin berkas."
+
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "Jernih"
+
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "Masuk"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "Buka di browser"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "Coba Lagi"
+
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "Tambahkan Akun Offline"
+
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "Nama"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "Menambahkan"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "Buat Contoh"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "Unduh Modpack"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "Impor Modpack"
+
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "Mengimpor modpack…"
+
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "Cari modpack"
+
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "Menutup"
+
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr ""
+"Tidak ada modpack yang sesuai dengan yang diminta. Coba gunakan kata lain."
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "Pilih Berkas"
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "Tidak dapat menginstal"
+
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "Kembali"
+
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "Cari lognya"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
+msgid "Classic model"
+msgstr "Model klasik"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "Modelnya ramping"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "Sesuaikan"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
+msgid "Import skin…"
+msgstr "Impor kulit…"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "Ekspor kulit…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Kesalahan Minecraft Services"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "Pengaturan default sistem"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "Salinan %s"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "Nama instance kosong"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "Nama instance tidak boleh mengandung %s"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "Nama instance tidak dapat digunakan sebagai nama direktori"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Modpack diekspor"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "Lokasi ekspor bukan file lokal"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "Ekspor modpack"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "Mengekspor modpack"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
 msgid "Export modpack"
 msgstr "Ekspor Modpack"
 
-msgid "Add world…"
-msgstr "Tambah Dunia…"
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modpack Modrinth (*.mrpack)"
 
-msgid "Update all"
-msgstr "Perbarui Semua"
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "Kemas informasi"
 
-msgid "Add Microsoft account"
-msgstr "Tambahkan Akun Microsoft"
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "Ekspor"
 
-msgid "Move up"
-msgstr "Pindah ke Atas"
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "Ekspor metadata modpack"
 
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "Nama Paket"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "Ringkasan"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "ID Versi"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "Sertakan file sementara?"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Log, laporan kerusakan, tangkapan layar, cache, dan unduhan biasanya "
+"dikecualikan."
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "Ekspor Bersih"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "Sertakan Semua File"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "Permainan sedang berjalan; hentikan sebelum memindahkan direktorinya"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "Pilih Direktori"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "Digandakan menjadi “%s”"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Java yang dikonfigurasi tidak terdeteksi; pastikan itu masih merupakan java "
+"executable yang dapat digunakan"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr ""
+"Game ini memerlukan Java %d atau lebih baru, Java yang dipilih adalah %d"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr ""
+"Pilih lingkungan Java dengan dukungan desktop, bukan instalasi headless."
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "Ikonnya harus berupa file di komputer ini"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "Pilih Ikon"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "Gambar"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "Umum"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "Ikon"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "Ubah Direktori"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Jawa"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "Argumen JVM"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "Tindakan"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "Duplikat"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "Hapus Instans"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "Kurang dari semenit"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu mnt"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu j %llu mnt"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "Hari ini, %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "Belum dimainkan"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "Tidak pernah"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "Menghitung…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "Aktivitas"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "Lama dimainkan"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "Terakhir dimainkan"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "Total peluncuran"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "Total crash"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "Instans"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "Ukuran total"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "Dibuat pada"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "Tidak dikenal"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "Log"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "Pengaturan"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "Paket Sumber Daya"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "Paket Shader"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "Modifikasi"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "Dunia"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "Server"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "Statistik"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "file yang dipilih tidak melaporkan versi Java"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Pilih Java yang dapat dieksekusi"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "Memuat…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "Khusus: %s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Tambahkan Waktu Proses Java"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Waktu Proses Java"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Laporan kerusakan baru telah dibuat. Buka log untuk rinciannya."
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "permainan dihentikan oleh sinyal %d"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "permainan keluar dengan kode %d"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "Tidak ditemukan runtime Java yang kompatibel."
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "versi pemuat ini tidak dapat dibaca"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s (tidak stabil)"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "Tidak ada"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Tidak ditemukan versi %s yang kompatibel untuk Minecraft %s."
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "Pilih versi Minecraft terlebih dahulu"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "Pemuat"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "Versi Pemuat"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "Rincian teknis"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Hapus Cache Nuvasha Launcher?"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "Tembolok Dihapus"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "Pembersihan Cache Gagal"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "Minta metadata ekspor"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "Tampilkan bidang nama, ringkasan, dan versi sebelum mengekspor."
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Menghapus ketergantungan akan menghapus mod yang bergantung padanya"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "Tampilkan versi Minecraft yang tidak stabil"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "Tampilkan versi Mod Loader yang tidak stabil"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "Bahasa"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "Bahasa antarmuka"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "Batas Garis"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "Cache"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Tembolok respons API Modrinth"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1 jam"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6 jam"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1 hari"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7 hari"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "Kedaluwarsa cache"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "Hapus Cache Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Peluncur Minecraft untuk Linux"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "Layanan & Ekosistem"
+
+#: src/nuvashalauncher-main-window-actions.c:626
 msgid "Minecraft disclaimer"
 msgstr "Pernyataan Penyangkalan Minecraft"
 
-msgid "Shader packs"
-msgstr "Paket Shader"
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"BUKAN PRODUK RESMI MINECRAFT. TIDAK DISETUJUI OLEH ATAU TERKAIT DENGAN "
+"MOJANG ATAU MICROSOFT.\n"
+"\n"
+"Minecraft adalah merek dagang dari Mojang AB. Peluncur ini dikembangkan "
+"secara independen dan tidak berafiliasi dengan Mojang Studios atau Microsoft."
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth & Pemuat Mod"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"Modpack, mod, paket sumber daya, dan shader dihosting oleh Modrinth dan "
+"dibuat oleh pembuatnya masing-masing.\n"
+"\n"
+"Pemuat mod dikembangkan secara independen oleh proyek Fabric, Quilt, Forge, "
+"dan NeoForge."
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "Metadata AppStream"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"Metadata AppStream (deskripsi, ringkasan, dan catatan rilis) dirilis di "
+"bawah Creative Commons CC0 1.0 Universal Public Domain Dedication."
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "Tentang Peluncur Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "Pintasan Papan Ketik"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "Pengaturan"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "Berhenti"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "Hapus yang Dipilih"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "Impor Modpack…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "Berhenti"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "Bermain"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "Berhenti %s?"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "permainan itu"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"Permainan sedang berjalan dan akan ditutup. Kemajuan sejak penyimpanan "
+"terakhir akan hilang."
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "Terus Bermain"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "Akun"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "Belum Ada Contoh"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "Buat instans untuk mulai bermain."
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraft jatuh"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Minecraft tidak dapat dimulai"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft perlu masuk"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "Minecraft Services menolak permintaan (HTTP %u)%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "Arsip penulisan"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "Ekspor selesai"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "pemuat tidak dapat diselesaikan: %s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "Petualangan"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "Suasana"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "Audio"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "Blok"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "Pendar cahaya"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "Kartun"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "Kategori"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "Pencahayaan berwarna"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "Pertempuran"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "Shader inti"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "Aneh"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "Dekorasi"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "Ekonomi"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "Entitas"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "Lingkungan"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "Perlengkapan"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "Fantasi"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "Fitur"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "Dedaunan"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "Fon"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "Makanan"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "Mekanika permainan"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "Antarmuka"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "Tinggi"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "Barang"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "Pustaka"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "Rendah"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "Sihir"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "Pengelolaan"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "Sedang"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "Permainan mini"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "Makhluk"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "Dengan mod"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "Model"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "Optimasi"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "Pelacakan jalur"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "Dampak kinerja"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "Untuk PC berspesifikasi sangat rendah"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "Realistis"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "Pantulan"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "Resolusi"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "Tangkapan layar"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "Semirealistis"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "Bayangan"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "Sederhana"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "Sosial"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "Penyimpanan"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "Teknologi"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "Bertema"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "Transportasi"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "Penyesuaian"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "Utilitas"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "Mirip gim asli"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "Pembuatan dunia"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr ""
+"Modrinth meminta Nuvasha Launcher untuk melambat, terlalu banyak permintaan"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "Modrinth tidak mengenal berkas ini"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Tidak ditemukan versi kompatibel untuk Minecraft %s dan %s."
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "Akun luring dengan nama ini sudah ada."
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "Sunting Server"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "Tambah Server"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "Simpan"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "Alamat"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "Tanya sebelum mengunduh"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "Selalu unduh"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "Jangan pernah mengunduh"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "Hapus server “%s”?"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "Hapus Server"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "Pindah ke Atas"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "Pindah ke Bawah"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "Sunting"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "Segarkan"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "Tidak Ada Server"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr ""
+"Server yang ditambahkan di sini disimpan ke servers.dat untuk instans ini."
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "meminta kode kepada Microsoft…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "menunggu masuk di browser…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr ""
+"Peramban tidak dapat dibuka. Buka alamat yang ditampilkan secara manual."
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"Microsoft mengembalikan alamat masuk yang tidak aman. Perbarui peluncur "
+"sebelum mencoba lagi."
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Buka halaman tersebut di browser Anda, lalu masukkan kode ini:"
+
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Kulit"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Gambar kulit harus berupa file PNG 64x64 atau 64x32"
+
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "Kulit tidak valid"
+
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "OKE"
+
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "Tekstur kulit PNG"
+
+#: src/nuvashalauncher-users-popover-skin.c:368
+msgid "Delete skin?"
+msgstr "Hapus kulit?"
+
+#: src/nuvashalauncher-users-popover-skin.c:369
+msgid "This skin will be removed from the skin library."
+msgstr "Kulit ini akan dihapus dari perpustakaan kulit."
+
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "Tanpa jubah"
+
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
+msgid "Remove %s?"
+msgstr "Hapus %s?"
+
+#: src/nuvashalauncher-users-popover.c:178
+msgid "this account"
+msgstr "akun ini"
+
+#: src/nuvashalauncher-users-popover.c:181
+msgid ""
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
+msgstr ""
+"Akun tersebut dihapus dari Nuvasha Launcher dan data login yang tersimpan "
+"pun terhapus. Game itu sendiri tidak terpengaruh."
+
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "Menghapus"
+
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Harus masuk"
+
+#: src/nuvashalauncher-users-popover.c:398
+msgid "Add Microsoft account"
+msgstr "Tambahkan Akun Microsoft"
+
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Versi Minecraft"
+
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "Bertahan Hidup"
+
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "Kreatif"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "Penonton"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "Ubah Nama Dunia"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "Ubah Nama"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "Salin"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "Seed disalin ke papan klip"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Hapus dunia “%s”? Tindakan ini tidak dapat dibatalkan."
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "Hapus Dunia"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "Salin Seed"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "Tambah Dunia"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "Tambah Dunia…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "Tidak Ada Dunia"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr ""
+"Dunia yang disimpan oleh Minecraft atau diimpor ke sini akan muncul di "
+"daftar ini."
+
+#~ msgid "Colored Lighting"
+#~ msgstr "Pencahayaan berwarna"
+
+#~ msgid "Core Shaders"
+#~ msgstr "Shader inti"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "Mekanika permainan"
+
+#~ msgid "Path Tracing"
+#~ msgstr "Pelacakan jalur"
+
+#~ msgid "Performance Impact"
+#~ msgstr "Dampak kinerja"
+
+#~ msgid "World Generation"
+#~ msgstr "Pembuatan dunia"
+
+#~ msgid "All Versions"
+#~ msgstr "Semua versi"
+
+#~ msgid "Update All"
+#~ msgstr "Perbarui Semua"
+
+#~ msgid "Open Folder"
+#~ msgstr "Buka Folder"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "Tidak ada yang dipilih"
+
+#~ msgid "Create Instance"
+#~ msgstr "Buat Contoh"
+
+#~ msgid "Download Modpack"
+#~ msgstr "Unduh Modpack"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "Digandakan menjadi \"%s\""
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "Hapus \"%s\"?"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Waktu Proses Java"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Tambahkan Waktu Proses Java"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "Minecraft memerlukan Java tanpa kepala: di Arch gunakan paket jre-"
+#~ "openjdk, bukan jre-openjdk-headless"
+
+#~ msgid "Delete Instance"
+#~ msgstr "Hapus Instans"
+
+#~ msgid "Resource Packs"
+#~ msgstr "Paket Sumber Daya"
+
+#~ msgid "Shader Packs"
+#~ msgstr "Paket Shader"
+
+#~ msgid "Loader Version"
+#~ msgstr "Versi Pemuat"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "Tampilkan versi Mod Loader yang tidak stabil"
+
+#~ msgid "Line Limit"
+#~ msgstr "Batas Garis"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "Pintasan Papan Ketik"
+
+#~ msgid "Keep Playing"
+#~ msgstr "Terus Bermain"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "Belum Ada Contoh"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "Gunakan tombol + di header untuk membuatnya"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "Tambahkan Akun Offline"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "sebuah nama hanya dapat memuat huruf, angka, dan garis bawah"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "sebuah nama tidak boleh kosong"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "sebuah nama harus terdiri dari 3 hingga 16 karakter"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "meminta kode kepada Microsoft"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "menunggu masuk di browser"
+
+#~ msgid "Sign In"
+#~ msgstr "Masuk"
+
+#~ msgid "Try Again"
+#~ msgstr "Coba Lagi"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Tambahkan Akun Microsoft"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Versi Minecraft"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s \"%s\""
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "Tampilkan Pintasan"
+
+#~ msgid "Import Modpack"
+#~ msgstr "Impor Modpack"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Modpack Modrinth (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "Ekspor Modpack"
+
+#~ msgid "Clean Export"
+#~ msgstr "Ekspor Bersih"
+
+#~ msgid "Include All Files"
+#~ msgstr "Sertakan Semua File"
+
+#~ msgid "Pack Name"
+#~ msgstr "Nama Paket"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "Paket tidak menentukan pemasangannya"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "Mengunduh Modpack"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "Menginstal %u item"
+#~ msgstr[1] "Menginstal %u item"
+
+#~ msgid "no compatible version"
+#~ msgstr "tidak ada versi yang kompatibel"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "Tidak dapat membuat \"%s\": %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "Tembolok Dihapus"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "Pembersihan Cache Gagal"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "Cache tidak dapat dihapus."
+
+#~ msgid "This cannot be installed"
+#~ msgstr "Ini tidak dapat diinstal"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "Jelajahi Modpack"
+
+#~ msgid "Choose Files"
+#~ msgstr "Pilih Berkas"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "Hapus Cache Nuvasha Launcher"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Hapus Cache Nuvasha Launcher?"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "Tidak bisa memahami jawabannya"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "File-file tersebut tidak dikenali oleh Nuvasha Launcher."
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "Microsoft mengembalikan alamat verifikasi yang tidak aman"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr ""
+#~ "Tidak ada modpack yang sesuai dengan yang diminta. Coba gunakan kata lain"
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Data cache Nuvasha Launcher telah dihapus dengan sukses."
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Cari Modrinth dan pasang modpack"
+
+#~ msgid "Unavailable"
+#~ msgstr "Tidak tersedia"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "proses masuk belum selesai"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Instans berikut akan dihapus:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "Mode edit"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "Masuk Mode Edit"
+
+#~ msgid "Delete Selected"
+#~ msgstr "Hapus yang Dipilih"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "Rincian proyek tidak dapat dimuat. Coba lagi."
+
+#~ msgid "Technical Details"
+#~ msgstr "Rincian teknis"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "Layanan & Ekosistem"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Pernyataan Penyangkalan Minecraft"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth & Pemuat Mod"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "Metadata AppStream"
+
+#~ msgid "Reset Icon"
+#~ msgstr "Atur Ulang Ikon"
+
+#~ msgid "Delete World"
+#~ msgstr "Hapus Dunia"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "Hapus server \"%s\"?"
+
+#~ msgid "Remove Server"
+#~ msgstr "Hapus Server"
+
+#~ msgid "Rename World"
+#~ msgstr "Ubah Nama Dunia"
+
+#~ msgid "Add World"
+#~ msgstr "Tambah Dunia"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "Hapus dunia \"%s\"? Tindakan ini tidak dapat dibatalkan."
+
+#~ msgid "Add Server"
+#~ msgstr "Tambah Server"
+
+#~ msgid "Edit Server"
+#~ msgstr "Sunting Server"
+
+#~ msgid "Datapacks"
+#~ msgstr "Paket Data"
+
+#~ msgid "No Worlds"
+#~ msgstr "Tidak Ada Dunia"
+
+#~ msgid "Move Up"
+#~ msgstr "Pindah ke Atas"
+
+#~ msgid "No Servers"
+#~ msgstr "Tidak Ada Server"
+
+#~ msgid "Move Down"
+#~ msgstr "Pindah ke Bawah"
+
+#~ msgid "Copy Seed"
+#~ msgstr "Salin Seed"
+
+#~ msgid "Playtime"
+#~ msgstr "Waktu bermain"
+
+#~ msgid "Runs on"
+#~ msgstr "Berjalan di"
+
+#~ msgid "Last session"
+#~ msgstr "Sesi terakhir"
+
+#~ msgid "Server joins"
+#~ msgstr "Gabung server"
+
+#~ msgid "World loads"
+#~ msgstr "Muat dunia"
+
+#~ msgid "Player Profile"
+#~ msgstr "Profil Pemain"
+
+#~ msgid "Player type"
+#~ msgstr "Tipe pemain"
+
+#~ msgid "Pack style"
+#~ msgstr "Gaya paket"
+
+#~ msgid "Average session"
+#~ msgstr "Rata-rata sesi"
+
+#~ msgid "Stability"
+#~ msgstr "Stabilitas"
+
+#~ msgid "Hybrid"
+#~ msgstr "Hibrida"
+
+#~ msgid "Server Player"
+#~ msgstr "Pemain Server"
+
+#~ msgid "Singleplayer"
+#~ msgstr "Pemain Tunggal"
+
+#~ msgid "Unplayed"
+#~ msgstr "Belum dimainkan"
+
+#~ msgid "Modpack"
+#~ msgstr "Modpack"
+
+#~ msgid "Lightweight"
+#~ msgstr "Ringan"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "Lengkap"
+
+#~ msgid "Quick"
+#~ msgstr "Singkat"
+
+#~ msgid "Standard"
+#~ msgstr "Standar"
+
+#~ msgid "Marathon"
+#~ msgstr "Maraton"
+
+#~ msgid "Stable"
+#~ msgstr "Stabil"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "%u%% tingkat crash"

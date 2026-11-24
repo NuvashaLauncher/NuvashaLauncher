@@ -116,19 +116,27 @@ dialog_dispose (GObject *object)
   g_clear_pointer (&self->filter_versions, g_ptr_array_unref);
   g_clear_pointer (&self->filter_loaders, g_ptr_array_unref);
   g_clear_pointer (&self->sort, g_free);
-   remove_pack_file (self);
-   /* Imported archives belong to the caller and are not deleted, but the
-    * dialog still owns the path string it stored. */
-   g_clear_pointer (&self->pack_path, g_free);
-   g_free (self->directory);
-  g_free (self->instance_name);
-  self->instance_name = NULL;
-  g_free (self->icon_path);
-  self->icon_path = NULL;
 
   gtk_widget_dispose_template (GTK_WIDGET (self), NUVASHALAUNCHER_TYPE_DOWNLOAD_MODPACK_DIALOG);
 
   G_OBJECT_CLASS (nuvashalauncher_download_modpack_dialog_parent_class)->dispose (object);
+}
+
+static void
+dialog_finalize (GObject *object)
+{
+  NuvashaLauncherDownloadModpackDialog *self =
+    NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (object);
+
+  remove_pack_file (self);
+  g_clear_pointer (&self->pack_path, g_free);
+  g_clear_pointer (&self->directory, g_free);
+  g_clear_pointer (&self->instance_name, g_free);
+  g_clear_pointer (&self->icon_path, g_free);
+  g_clear_pointer (&self->icon_url, g_free);
+  g_clear_pointer (&self->selected_projects, g_hash_table_unref);
+
+  G_OBJECT_CLASS (nuvashalauncher_download_modpack_dialog_parent_class)->finalize (object);
 }
 
 static void
@@ -143,6 +151,7 @@ nuvashalauncher_download_modpack_dialog_class_init (NuvashaLauncherDownloadModpa
                                         NuvashaLauncherDownloadModpackDialog, nav);
 
   object_class->dispose = dialog_dispose;
+  object_class->finalize = dialog_finalize;
 }
 
 static void

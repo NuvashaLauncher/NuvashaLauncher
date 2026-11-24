@@ -70,13 +70,106 @@ nuvashalauncher_content_page_on_retry_page_clicked (GtkButton *button G_GNUC_UNU
  * new filter, which starts the list over, and TRUE for the next page,
  * which is added to what is already there. */
 static void
-on_row_quick_install_clicked (GtkButton *button, gpointer user_data)
+update_selection_ui (NuvashaLauncherContentPage *self)
+{
+  if (self->browse.selection_bar == NULL)
+    return;
+
+  guint count = self->browse.selected_projects != NULL
+                  ? g_hash_table_size (self->browse.selected_projects)
+                  : 0;
+
+  if (count == 0)
+    {
+      gtk_widget_set_visible (GTK_WIDGET (self->browse.selection_bar), FALSE);
+      return;
+    }
+
+  const char *format = NULL;
+  switch (self->type)
+    {
+    case NUVASHALAUNCHER_CONTENT_MOD:
+      format = ngettext ("%u mod selected", "%u mods selected", count);
+      break;
+    case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
+      format = ngettext ("%u resource pack selected", "%u resource packs selected", count);
+      break;
+    case NUVASHALAUNCHER_CONTENT_SHADER:
+      format = ngettext ("%u shader selected", "%u shaders selected", count);
+      break;
+    default:
+      format = ngettext ("%u item selected", "%u items selected", count);
+      break;
+    }
+
+  g_autofree char *text = g_strdup_printf (format, count);
+  gtk_label_set_text (self->browse.selection_label, text);
+  gtk_widget_set_visible (GTK_WIDGET (self->browse.selection_bar), TRUE);
+}
+
+static void
+on_row_check_toggled (GtkCheckButton *check, gpointer user_data)
 {
   NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
-  NuvashaLauncherModrinthProject *project =
-    g_object_get_data (G_OBJECT (button), "nuvashalauncher-project");
+  const NuvashaLauncherModrinthProject *project =
+    g_object_get_data (G_OBJECT (check), "nuvashalauncher-project");
 
-  nuvashalauncher_content_page_quick_install_project (self, project);
+  if (project == NULL || project->project_id == NULL)
+    return;
+
+  if (self->browse.selected_projects == NULL)
+    self->browse.selected_projects =
+      g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                             (GDestroyNotify) nuvashalauncher_modrinth_project_free);
+
+  if (gtk_check_button_get_active (check))
+    {
+      if (!g_hash_table_contains (self->browse.selected_projects, project->project_id))
+        g_hash_table_insert (self->browse.selected_projects,
+                             g_strdup (project->project_id),
+                             nuvashalauncher_modrinth_project_copy (project));
+    }
+  else
+    {
+      g_hash_table_remove (self->browse.selected_projects, project->project_id);
+    }
+
+  update_selection_ui (self);
+}
+
+void
+nuvashalauncher_content_page_on_batch_install_clicked (GtkButton *button G_GNUC_UNUSED,
+                                                      gpointer user_data)
+{
+  NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
+  if (self->browse.selected_projects == NULL ||
+      g_hash_table_size (self->browse.selected_projects) == 0)
+    return;
+
+  GPtrArray *projects = g_ptr_array_new_with_free_func (
+    (GDestroyNotify) nuvashalauncher_modrinth_project_free);
+
+  GHashTableIter iter;
+  gpointer key, value;
+  g_hash_table_iter_init (&iter, self->browse.selected_projects);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+    g_ptr_array_add (projects, nuvashalauncher_modrinth_project_copy (value));
+
+  g_hash_table_remove_all (self->browse.selected_projects);
+  update_selection_ui (self);
+
+  if (self->browse.result_rows != NULL)
+    {
+      for (GList *l = self->browse.result_rows; l != NULL; l = l->next)
+        {
+          GtkWidget *row = GTK_WIDGET (l->data);
+          GtkWidget *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-check");
+          if (check != NULL && GTK_IS_CHECK_BUTTON (check))
+            gtk_check_button_set_active (GTK_CHECK_BUTTON (check), FALSE);
+        }
+    }
+
+  nuvashalauncher_content_page_start_batch_plan (self, projects);
 }
 
 static void
@@ -175,14 +268,28 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
 
       adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
 
-      adw_action_row_add_suffix (
-        ADW_ACTION_ROW (row),
-        row_action_button ("pan-down-symbolic", _("Versions"), stored,
-                           G_CALLBACK (on_row_versions_clicked), self));
-      adw_action_row_add_suffix (
-        ADW_ACTION_ROW (row),
-        row_action_button ("folder-download-symbolic", _("Install"), stored,
-                           G_CALLBACK (on_row_quick_install_clicked), self));
+      {
+        GtkWidget *check = gtk_check_button_new ();
+        gtk_widget_set_valign (check, GTK_ALIGN_CENTER);
+        gtk_widget_set_tooltip_text (check, _("Select"));
+        g_object_set_data (G_OBJECT (check), "nuvashalauncher-project", (gpointer) stored);
+        g_object_set_data (G_OBJECT (row), "nuvashalauncher-check", check);
+
+        if (self->browse.selected_projects != NULL &&
+            g_hash_table_contains (self->browse.selected_projects, stored->project_id))
+          gtk_check_button_set_active (GTK_CHECK_BUTTON (check), TRUE);
+
+        g_signal_connect_object (check, "toggled",
+                                 G_CALLBACK (on_row_check_toggled), self, 0);
+
+        GtkWidget *button =
+          row_action_button ("folder-download-symbolic", _("Install"), stored,
+                             G_CALLBACK (on_row_versions_clicked), self);
+
+        adw_action_row_add_suffix (ADW_ACTION_ROW (row), check);
+        adw_action_row_add_suffix (ADW_ACTION_ROW (row), button);
+        adw_action_row_set_activatable_widget (ADW_ACTION_ROW (row), button);
+      }
 
       adw_preferences_group_add (ADW_PREFERENCES_GROUP (self->browse.results_group),
                                  row);

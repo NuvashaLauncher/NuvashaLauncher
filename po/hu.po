@@ -1,1623 +1,2534 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: hu\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-msgid "Adventure"
-msgstr "Kaland"
-msgid "Atmosphere"
-msgstr "Hangulat"
-msgid "Audio"
-msgstr "Hang"
-msgid "Blocks"
-msgstr "Blokkok"
-msgid "Bloom"
-msgstr "Ragyogás"
-msgid "Cartoon"
-msgstr "Rajzfilmszerű"
-msgid "Categories"
-msgstr "Kategóriák"
-msgid "Colored Lighting"
-msgstr "Színes megvilágítás"
-msgid "Combat"
-msgstr "Harc"
-msgid "Core Shaders"
-msgstr "Alapjáték-shaderek"
-msgid "Cursed"
-msgstr "Bizarr"
-msgid "Decoration"
-msgstr "Díszítés"
-msgid "Economy"
-msgstr "Gazdaság"
-msgid "Entities"
-msgstr "Entitások"
-msgid "Environment"
-msgstr "Környezet"
-msgid "Equipment"
-msgstr "Felszerelés"
-msgid "Fantasy"
-msgstr "Fantázia"
-msgid "Features"
-msgstr "Funkciók"
-msgid "Foliage"
-msgstr "Növényzet"
-msgid "Fonts"
-msgstr "Betűtípusok"
-msgid "Food"
-msgstr "Étel"
-msgid "Game Mechanics"
-msgstr "Játékmechanikák"
-msgid "Interface"
-msgstr "Kezelőfelület"
-msgid "High"
-msgstr "Magas"
-msgid "Items"
-msgstr "Tárgyak"
-msgid "Library"
-msgstr "Könyvtár"
-msgid "Low"
-msgstr "Alacsony"
-msgid "Magic"
-msgstr "Mágia"
-msgid "Management"
-msgstr "Kezelés"
-msgid "Medium"
-msgstr "Közepes"
-msgid "Minigame"
-msgstr "Minijáték"
-msgid "Mobs"
-msgstr "Lények"
-msgid "Modded"
-msgstr "Modokhoz"
-msgid "Models"
-msgstr "Modellek"
-msgid "Optimization"
-msgstr "Optimalizálás"
-msgid "Path Tracing"
-msgstr "Útvonalkövetés"
-msgid "Performance Impact"
-msgstr "Teljesítményre gyakorolt hatás"
-msgid "Potato"
-msgstr "Nagyon gyenge gépekhez"
-msgid "Realistic"
-msgstr "Valósághű"
-msgid "Reflections"
-msgstr "Tükröződések"
-msgid "Resolutions"
-msgstr "Felbontások"
-msgid "Screenshot"
-msgstr "Képernyőkép"
-msgid "Semi-realistic"
-msgstr "Félig valósághű"
-msgid "Shadows"
-msgstr "Árnyékok"
-msgid "Simplistic"
-msgstr "Egyszerű"
-msgid "Social"
-msgstr "Közösségi"
-msgid "Storage"
-msgstr "Tárolás"
-msgid "Technology"
-msgstr "Technológia"
-msgid "Themed"
-msgstr "Tematikus"
-msgid "Transportation"
-msgstr "Közlekedés"
-msgid "Tweaks"
-msgstr "Finomhangolások"
-msgid "Utility"
-msgstr "Segédeszközök"
-msgid "Vanilla-like"
-msgstr "Az alapjátékhoz hasonló"
-msgid "World Generation"
-msgstr "Világgenerálás"
 
-msgid "All Versions"
-msgstr "Összes verzió"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "Relevancia"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "Offline"
 
-msgid "Newest"
-msgstr "Legújabbak"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "a név nem lehet üres."
 
-msgid "Recently updated"
-msgstr "Nemrég frissítettek"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "a névnek 3-16 karakter hosszúságúnak kell lennie."
 
-msgid "Followers"
-msgstr "Követők"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "egy név csak betűket, számokat és aláhúzásjelet tartalmazhat."
 
-msgid "Filter modpacks"
-msgstr "Modcsomagok szűrése"
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
+msgid ""
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
+msgstr ""
+"Ehhez a Microsoft-fiókhoz még nincs társítva Xbox-profil: jelentkezz be vele "
+"egyszer az xbox.com oldalon, majd jelentkezz be újra ide"
 
-msgid "Cancel"
-msgstr "Mégsem"
-msgid "Confirm"
-msgstr "Erősítse meg"
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
+msgid ""
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
+msgstr ""
+"Ez egy gyermekfiók: ahhoz, hogy a gyermek játszani tudjon, egy felnőttnek "
+"hozzá kell adnia egy Microsoft-családhoz."
 
-msgid "Customize"
-msgstr "Testreszabás"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr ""
+"Az Xbox Live nem érhető el abban az országban, ahol ezt a fiókot "
+"regisztrálták"
 
-msgid "Delete"
-msgstr "Töröl"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"Ezt a fiókot egy felnőttnek kell igazolnia, mielőtt játékra használhatóvá "
+"válik; ez a dél-koreai fiókok esetében is így van."
 
-msgid "Retry"
-msgstr "Próbálja újra"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "A Microsoft nem adott meg bejelentkezéshez szükséges kódot"
 
-msgid "Loading…"
-msgstr "Terhelés…"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1fM letöltések"
 
-msgid "Download"
-msgstr "Letöltés"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1fk letöltések"
 
-msgid "Update All"
-msgstr "Összes frissítése"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s letöltés"
 
-msgid "Open Folder"
-msgstr "Nyissa meg a mappát"
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s · szerző: %s"
 
-msgid "Nothing installed yet"
-msgstr "Még nincs telepítve"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "készítette: %s"
 
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Keressen valamit, amelyet a példány mappájába helyezhet"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, fuzzy, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "%u/%u kiválasztva"
+msgstr[1] "%u/%u kiválasztva"
 
-msgid "Installed"
-msgstr "Telepítve"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, fuzzy, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "Erőforrás csomagok"
+msgstr[1] "Erőforrás csomagok"
 
-msgid "Loading more…"
-msgstr "Továbbiak betöltése…"
+#: src/nuvashalauncher-content-page-browser.c:98
+#, fuzzy, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "%u/%u kiválasztva"
+msgstr[1] "%u/%u kiválasztva"
 
-msgid "Nothing is selected"
-msgstr "Semmi sincs kiválasztva"
+#: src/nuvashalauncher-content-page-browser.c:101
+#, fuzzy, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "%u/%u kiválasztva"
+msgstr[1] "%u/%u kiválasztva"
 
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr ""
 
-msgid "Filter by category"
-msgstr "Szűrés kategória szerint"
-
-msgid "Nothing to show yet"
-msgstr "Még nincs mit mutatni"
-
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Írja be, hogy mit keressen, vagy böngésszen mindent, amit a Modrinth kínál ehhez a példányhoz"
-
-msgid "Browse"
-msgstr "Tallózás"
-
-msgid "No mod loader"
-msgstr "Nincs mod betöltő"
-
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "A modokhoz mod betöltőre van szükség. A példány beállításainál először válassza ki a Fabric, Quilt, Forge vagy NeoForge elemet"
-
-msgid "Create Instance"
-msgstr "Példány létrehozása"
-
-msgid "Name"
-msgstr "Név"
-
-msgid "Directory"
-msgstr "Címtár"
-
-msgid "Choose a folder"
-msgstr "Válasszon egy mappát"
-
-msgid "Create"
-msgstr "Teremt"
-
-msgid "Download Modpack"
-msgstr "Modpack letöltése"
-
-
-msgid "Search modpacks"
-msgstr "Modpackok keresése"
-
-msgid "Close"
-msgstr "Közeli"
-
-msgid "Back"
-msgstr "Vissza"
-
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "Telepítés"
 
-msgid "Copy of %s"
-msgstr "%s másolata"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "a következő oldalt nem sikerült betölteni"
 
-msgid "Choose Java executable"
-msgstr "Válassza a Java végrehajtható fájlt"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Nem sikerült keresni a „Modrinth” kifejezést"
 
-msgid "the chosen file does not report a Java version"
-msgstr "a kiválasztott fájl nem jelent Java verziót"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "Más"
 
-msgid "Choose an Icon"
-msgstr "Válasszon egy ikont"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "A kategóriák betöltése nem sikerült"
 
-msgid "Choose a Directory"
-msgstr "Válasszon egy könyvtárat"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "Próbálja újra"
 
-msgid "Duplicated to \"%s\""
-msgstr "Megkettőzve ide: \"%s\""
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "A verziók nem tölthetők be. Próbálja újra."
 
-msgid "Delete \"%s\"?"
-msgstr "Törli a \"%s\" fájlt?"
-
-msgid "General"
-msgstr "Általános"
-
-msgid "Icon"
-msgstr "Ikon"
-
-msgid "Change the Directory"
-msgstr "Módosítsa a címtárat"
-
-msgid "Minecraft"
-msgstr "Minecraft"
-
-msgid "Java"
-msgstr "Jáva"
-
-msgid "Java Runtime"
-msgstr "Java Runtime"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "Ehhez a játékhoz %d vagy újabb Java szükséges, a kiválasztott Java %d"
-
-msgid "Add Java Runtime"
-msgstr "Java Runtime hozzáadása"
-
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "A Minecraftnak nem fej nélküli Java kell: Archon a jre-openjdk csomagot használja, ne a jre-openjdk-headlesst"
-
-msgid "JVM Arguments"
-msgstr "JVM érvek"
-
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "A beállított Java nem észlelhető; győződjön meg róla, hogy továbbra is használható java futtatható fájl"
-
-msgid "Actions"
-msgstr "Akciók"
-
-msgid "Duplicate"
-msgstr "Másolat"
-
-msgid "Delete Instance"
-msgstr "Példány törlése"
-
-msgid "Settings"
-msgstr "Beállítások elemre"
-
-msgid "Resource Packs"
-msgstr "Erőforrás csomagok"
-
-msgid "Shader Packs"
-msgstr "Shader-csomagok"
-
-msgid "Mods"
-msgstr "Modok"
-
-msgid "Logs"
-msgstr "Naplók"
-
-msgid "Custom: %s"
-msgstr "Egyéni: %s"
-
-msgid "the game was stopped by signal %d"
-msgstr "a játékot %d jel leállította"
-
-msgid "the game exited with code %d"
-msgstr "a játék a %d kóddal kilépett"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "Nem található a Minecraft %s kompatibilis %s verziója."
-
-msgid "Loader"
-msgstr "Rakodó"
-
-msgid "Loader Version"
-msgstr "Betöltő verzió"
-
-msgid "Clear"
-msgstr "Világos"
-
-msgid "Search the log"
-msgstr "Keresse meg a naplót"
-
-msgid "Versions"
-msgstr "Verziók"
-
-msgid "Show unstable Minecraft versions"
-msgstr "Instabil Minecraft verziók megjelenítése"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "Instabil Mod Loader verziók megjelenítése"
-
-msgid "Language"
-msgstr "Nyelv"
-
-msgid "Interface language"
-msgstr "Interfész nyelve"
-
-msgid "Line Limit"
-msgstr "Vonalkorlát"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "A Nuvasha Launcherről"
-
-msgid "Keyboard Shortcuts"
-msgstr "Billentyűparancsok"
-
-msgid "Stop"
-msgstr "Stop"
-
-msgid "Play"
-msgstr "Játék"
-
-msgid "Keep Playing"
-msgstr "Játssz tovább"
-
-msgid "Downloads"
-msgstr "Letöltések"
-
-msgid "Accounts"
-msgstr "Fiókok"
-
-msgid "No Instances Yet"
-msgstr "Még nincsenek példányok"
-
-msgid "Use the + button in the header to create one"
-msgstr "A fejlécben található + gombbal hozzon létre egyet"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "a betöltő nem oldható fel: %s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "Nem található kompatibilis verzió a Minecraft %s és %s számára."
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "Nem található a Minecraft %s kompatibilis verziója."
 
-msgid "Add Offline Account"
-msgstr "Offline fiók hozzáadása"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "Verziók"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "egy név csak betűket, számokat és aláhúzásjelet tartalmazhat"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "A mappa nem olvasható"
 
-msgid "a name cannot be empty"
-msgstr "a név nem lehet üres"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "a névnek 3-16 karakter hosszúságúnak kell lennie"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "A fájl nem telepíthető"
 
-msgid "Add"
-msgstr "Hozzáadás"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "kódot kér a Microsofttól"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "A mappa nem hozható létre"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "várja a bejelentkezést a böngészőben"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "Tartalom"
 
-msgid "Sign In"
-msgstr "Jelentkezzen be"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "Telepítés"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "Nyissa meg az oldalt a böngészőjében, majd írja be ezt a kódot:"
-
-msgid "Try Again"
-msgstr "Próbáld újra"
-
-msgid "Remove"
-msgstr "Távolítsa el"
-
-msgid "Add Microsoft Account"
-msgstr "Microsoft-fiók hozzáadása"
-
-msgid "Minecraft Version"
-msgstr "Minecraft verzió"
-
-msgid "Install the selected %s?"
-msgstr "Telepíti a kiválasztott %s-t?"
-
-msgid "%s \"%s\""
-msgstr "%s „%s”"
-
-msgid "Search"
-msgstr "Keresés"
-
-msgid "Update"
-msgstr "Frissítés"
-
-msgid "Update the following %s"
-msgstr "Frissítse a következőt: %s"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "Függőségek:"
 
-msgid "The following mods depend on %s:\n%s"
-msgstr "A következő modok a %s-tól függenek:\n%s"
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "Konfliktusok\n"
 
-msgid "Cache"
-msgstr "Gyorsítótár"
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "%s telepítése folyamatban van"
 
-msgid "Cache Modrinth API responses"
-msgstr "Gyorsítótárazza a Modrinth API válaszait"
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "Frissítés"
 
-msgid "Cache expiration"
-msgstr "A gyorsítótár lejárata"
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s „%s”"
 
-msgid "1 hour"
-msgstr "1 óra"
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "Mégsem"
 
-msgid "6 hours"
-msgstr "6 óra"
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "Ez a projekt nem tesz közzé semmit, ami ehhez a példányhoz illik."
 
-msgid "1 day"
-msgstr "1 nap"
+#: src/nuvashalauncher-content-page-install.c:1003
+#, fuzzy, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "%s telepítése folyamatban van"
+msgstr[1] "%s telepítése folyamatban van"
 
-msgid "7 days"
-msgstr "7 nap"
+#: src/nuvashalauncher-content-page-install.c:1006
+#, fuzzy, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "%s telepítése folyamatban van"
+msgstr[1] "%s telepítése folyamatban van"
 
-msgid "Show Shortcuts"
-msgstr "Parancsikonok megjelenítése"
+#: src/nuvashalauncher-content-page-install.c:1009
+#, fuzzy, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "%s telepítése folyamatban van"
+msgstr[1] "%s telepítése folyamatban van"
 
-msgid "Quit"
-msgstr "Kilép"
+#: src/nuvashalauncher-content-page-install.c:1012
+#, fuzzy, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "%s telepítése folyamatban van"
+msgstr[1] "%s telepítése folyamatban van"
 
-msgid "Import Modpack"
-msgstr "Modpack importálása"
+#: src/nuvashalauncher-content-page-install.c:1038
+#, fuzzy
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "Frissítse a következőt: %s"
+msgstr[1] "Frissítse a következőt: %s"
 
-msgid "Modpack exported"
-msgstr "Modpack exportálva"
+#: src/nuvashalauncher-content-page-install.c:1041
+#, fuzzy
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "Telepíti a kiválasztott %s-t?"
+msgstr[1] "Telepíti a kiválasztott %s-t?"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpack (*.mrpack)"
+#: src/nuvashalauncher-content-page-install.c:1044
+#, fuzzy
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "Frissítse a következőt: %s"
+msgstr[1] "Frissítse a következőt: %s"
 
-msgid "The export location is not a local file"
-msgstr "Az exportálási hely nem helyi fájl"
+#: src/nuvashalauncher-content-page-install.c:1047
+#, fuzzy
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "Frissítse a következőt: %s"
+msgstr[1] "Frissítse a következőt: %s"
 
-msgid "Export Modpack"
-msgstr "Modpack exportálása"
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "A fájl nem törölhető"
 
-msgid "Importing modpack…"
-msgstr "Modpack importálása…"
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "Engedélyezés"
 
-msgid "Reading modpack"
-msgstr "Modpack olvasása"
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "Egy függő mod nem törölhető"
 
-msgid "Exporting modpack"
-msgstr "Modpack exportálása"
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "A fájl nem nevezhető át"
 
-msgid "Modpack export"
-msgstr "Modpack exportálása"
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "Törölve"
 
-msgid "Include transient files?"
-msgstr "Tartalmaz átmeneti fájlokat?"
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "Törli a “%s” fájlt?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "A naplók, hibajelentések, képernyőképek, gyorsítótárak és letöltések általában nem tartoznak ide."
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"A következő modok a %s-tól függenek:\n"
+"%s"
 
-msgid "Clean Export"
-msgstr "Tiszta exportálás"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "Töröl"
 
-msgid "Include All Files"
-msgstr "Minden fájl szerepeltetése"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "Engedélyezve"
 
-msgid "Pack Name"
-msgstr "Csomag neve"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "Letiltva"
 
-msgid "Summary"
-msgstr "Összegzés"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "Letiltás"
 
-msgid "Version ID"
-msgstr "Verzióazonosító"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "Keresés"
 
-msgid "Downloading files"
-msgstr "Fájlok letöltése"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "Összes frissítése"
 
-msgid "Extracting files"
-msgstr "Fájlok kibontása"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "Frissítések lekérése"
 
-msgid "Optional files"
-msgstr "Választható fájlok"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "Folyamat"
 
-msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
-msgstr "A csomag felsorolja ezeket a fájlokat, de azt mondja, hogy nincs rájuk szükség. Ezek közül semmi nincs telepítve, hacsak nem kéred. Az alapértelmezett ki van kapcsolva"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "Nyissa meg a mappát"
 
-msgid "Pack could not be fetched"
-msgstr "A csomagot nem sikerült letölteni"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "Még nincs telepítve"
 
-msgid "Invalid pack"
-msgstr "Érvénytelen csomag"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Keressen valamit, amelyet a példány mappájába helyezhet"
 
-msgid "The pack does not define its install"
-msgstr "A csomag nem határozza meg a telepítést"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "Tallózás"
 
-msgid "Downloading Modpack"
-msgstr "Modpack letöltése"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "Telepítve"
 
-msgid "Writing archive"
-msgstr "Írási archívum"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "Továbbiak betöltése…"
 
-msgid "Export modpack metadata"
-msgstr "Exportálja a modpack metaadatokat"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "Szűrés kategória szerint"
 
-msgid "Ask for export metadata"
-msgstr "Kérjen metaadatok exportálását"
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "Még nincs mit mutatni"
 
-msgid "Pack information"
-msgstr "Csomag információ"
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Írja be, hogy mit keressen, vagy böngésszen mindent, amit a Modrinth kínál "
+"ehhez a példányhoz"
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "Exportálás előtt jelenítse meg a név, az összefoglaló és a verzió mezőket."
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "Elutasítás"
 
-msgid "Export complete"
-msgstr "Az exportálás befejeződött"
-
-msgid "Export"
-msgstr "Exportálás"
-
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "%u elem telepítve"
-msgstr[1] "%u elem telepítve"
-
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
 msgid "Updated %u item"
 msgid_plural "Updated %u items"
 msgstr[0] "%u elem frissítve"
 msgstr[1] "%u elem frissítve"
 
-msgid "The icon must be a file on this computer"
-msgstr "Az ikonnak egy fájlnak kell lennie ezen a számítógépen"
-
-msgid "The game is running; stop it before moving its directory"
-msgstr "A játék fut; állítsa le, mielőtt áthelyezi a könyvtárát"
-
-msgid "%s is being installed"
-msgstr "%s telepítése folyamatban van"
-
-msgid "no compatible version"
-msgstr "nincs kompatibilis verzió"
-
-msgid "Enabled"
-msgstr "Engedélyezve"
-
-msgid "Disabled"
-msgstr "Letiltva"
-
-msgid "Deleted"
-msgstr "Törölve"
-
+#: src/nuvashalauncher-content-page-updates.c:246
 msgid "Everything is up to date"
 msgstr "Minden naprakész"
 
-msgid "Cannot create \"%s\": %s"
-msgstr "„%s” nem hozható létre: %s"
-
-msgid "This project publishes nothing that fits this instance."
-msgstr "Ez a projekt nem tesz közzé semmit, ami ehhez a példányhoz illik."
-
-msgid "Unknown"
-msgstr "Ismeretlen"
-
-msgid "%s (unstable)"
-msgstr "%s (instabil)"
-
-msgid "the next page could not be loaded"
-msgstr "a következő oldalt nem sikerült betölteni"
-
-msgid "Other"
-msgstr "Más"
-
-msgid "%.1fM downloads"
-msgstr "%.1fM letöltések"
-
-msgid "%.1fk downloads"
-msgstr "%.1fk letöltések"
-
-msgid "%s  ·  by %s"
-msgstr "%s · szerző: %s"
-
-msgid "by %s"
-msgstr "készítette: %s"
-
-msgid "%s downloads"
-msgstr "%s letöltés"
-
-msgid "Cache Cleared"
-msgstr "Gyorsítótár törölve"
-
-msgid "Cache Cleanup Failed"
-msgstr "A gyorsítótár tisztítása nem sikerült"
-
-msgid "The cache could not be cleared."
-msgstr "A gyorsítótár nem törölhető."
-
-msgid "the versions of this loader could not be read"
-msgstr "ennek a betöltőnek a verziói nem olvashatók"
-
-msgid "Minecraft crashed"
-msgstr "A Minecraft lezuhant"
-
-msgid "Minecraft could not start"
-msgstr "A Minecraft nem tudott elindulni"
-
-msgid "Minecraft needs a sign-in"
-msgstr "A Minecraftnak be kell jelentkeznie"
-
-msgid "The file cannot be renamed"
-msgstr "A fájl nem nevezhető át"
-
-msgid "The file cannot be deleted"
-msgstr "A fájl nem törölhető"
-
-msgid "The folder cannot be read"
-msgstr "A mappa nem olvasható"
-
-msgid "The file could not be installed"
-msgstr "A fájl nem telepíthető"
-
-msgid "The folder cannot be created"
-msgstr "A mappa nem hozható létre"
-
-msgid "This cannot be installed"
-msgstr "Ez nem telepíthető"
-
-msgid "Pick a Minecraft version first"
-msgstr "Először válasszon Minecraft verziót"
-
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "Egy függőség törlése törli a tőle függő modot"
-
-msgid "A dependent mod cannot be deleted"
-msgstr "Egy függő mod nem törölhető"
-
-msgid "Slim model"
-msgstr "Vékony modell"
-
-msgid "OK"
-msgstr "RENDBEN"
-
-msgid "Export skin…"
-msgstr "Bőr exportálása…"
-
-msgid "Classic model"
-msgstr "Klasszikus modell"
-
-msgid "PNG skin texture"
-msgstr "PNG bőrtextúra"
-
-msgid "Invalid skin"
-msgstr "Érvénytelen bőr"
-
-msgid "No cape"
-msgstr "Nincs köpeny"
-
-msgid "Import skin…"
-msgstr "Import bőr…"
-
-msgid "Delete skin?"
-msgstr "Törli a bőrt?"
-
-msgid "This skin will be removed from the skin library."
-msgstr "Ezt a bőrt eltávolítjuk a bőrkönyvtárból."
-
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "A felszíni képeknek 64x64-es vagy 64x32-es PNG-fájloknak kell lenniük"
-
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "Modcsomagok böngészése"
-
-msgid "Choose Files"
-msgstr "Fájlok kiválasztása"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "A Nuvasha Launcher gyorsítótárának törlése"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Törölni kell a Nuvasha Launcher gyorsítótárat?"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"Konfliktusok\n"
-
-msgid "Content"
-msgstr "Tartalom"
-
-msgid "Could not install"
-msgstr "A telepítés nem sikerült"
-
-msgid "Could not install the modpack"
-msgstr "A modcsomag telepítése nem sikerült"
-
-msgid "Could not load categories"
-msgstr "A kategóriák betöltése nem sikerült"
-
-msgid "Could not search Modrinth"
-msgstr "Nem sikerült keresni a „Modrinth” kifejezést"
-
-msgid "Could not understand the answer"
-msgstr "Nem értettem a választ"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "Letiltás"
-
-msgid "Dismiss"
-msgstr "Elutasítás"
-
-msgid "Enable"
-msgstr "Engedélyezés"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "Képek"
-
-msgid "Installing"
-msgstr "Telepítés"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "Az példányok neve nem tartalmazhatja %s"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "Olyan fájlokat tartalmaz, amelyeket a Nuvasha Launcher nem ismer fel."
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "A Microsoft nem biztonságos ellenőrzési címet adott vissza"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "A Microsoft nem adott meg bejelentkezéshez szükséges kódot"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · Bejelentkezés szükséges"
-
-msgid "Modrinth does not know this file"
-msgstr "A Modrinth nem ismeri ezt a fájlt"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "Modrinth arra kéri Nuvashát, hogy lassítson, túl sok a kérés"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No compatible Java runtime was found."
-msgstr "Nem találtunk kompatibilis Java futtatókörnyezetet."
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "Nincs olyan modpack, amely megfelelne a keresési feltételeknek. Próbálkozzon egy másik szóval!"
-
-msgid "None"
-msgstr "Nincs"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "A Nuvasha Launcher gyorsítótár adatai sikeresen törölve lettek."
-
-msgid "Offline"
-msgstr "Offline"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "Válassz ki egy Minecraft-verziót a listából!"
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "Válasszon egy betöltő verziót, vagy válasszon egy másik betöltőt."
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
-msgid "Remove %s?"
-msgstr "Eltávolítani %s?"
-
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Keress rá a Modrinth-re, és telepíts egy modcsomagot"
-
-msgid "Skin"
-msgstr "Bőr"
-
-msgid "Stop %s?"
-msgstr "Megállunk %s?"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "A rendszer alapértelmezett beállítása"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "A fiókot eltávolítják a Nuvasha Launcher-ból, és a mentett bejelentkezési adatok törlődnek. Maga a játék nem változik."
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "A játék fut, és hamarosan bezárul. Az utolsó mentés óta elért eredmények elvesznek."
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "Ez a projekt nem tesz közzé olyan csomagfájlt, amelyet a Nuvasha Launcher telepíthetne."
-
-msgid "This version has no pack file"
-msgstr "Ennek a verziónak nincs csomagfájlja"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Unavailable"
-msgstr "Nem elérhető"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "Az Xbox Live nem érhető el abban az országban, ahol ezt a fiókot regisztrálták"
-
-msgid "the game"
-msgstr "a játék"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "az instancia neve nem használható könyvtárnévként"
-
-msgid "the instance name is empty"
-msgstr "az példány neve üres"
-
-msgid "the sign-in did not finish"
-msgstr "a bejelentkezés nem fejeződött be"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "Ehhez a Microsoft-fiókhoz még nincs társítva Xbox-profil: jelentkezz be vele egyszer az xbox.com oldalon, majd jelentkezz be újra ide"
-
-msgid "this account"
-msgstr "ez a fiók"
-
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "Ezt a fiókot egy felnőttnek kell igazolnia, mielőtt játékra használhatóvá válik; ez a dél-koreai fiókok esetében is így van."
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "Ez egy gyermekfiók: ahhoz, hogy a gyermek játszani tudjon, egy felnőttnek hozzá kell adnia egy Microsoft-családhoz."
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "A Minecraft Services elutasította a kérést (HTTP %u)%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Minecraft Services-hiba"
-
-msgid "Application menu"
-msgstr "Application menu"
-
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "Frissítse a következőt: %s"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "Erősítse meg"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
 msgid "The folder could not be opened: %s"
 msgstr "The folder could not be opened: %s"
 
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "Megnyitás böngészőben"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "%u/%u kiválasztva"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "A következő példányok törölve lesznek:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "Szerkesztési mód"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "Frissítések lekérése"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "Folyamat"
-
-msgid "Enter Edit Mode"
-msgstr "Szerkesztési mód bekapcsolása"
-
-msgid "Delete Selected"
-msgstr "Kijelöltek törlése"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "Új összeomlási jelentés készült. A részletekhez nyissa meg a naplókat."
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "Hozzáférés megtagadva. Ellenőrizze a mappa jogosultságait."
-
-msgid "An offline account with this name already exists."
-msgstr "Már létezik ilyen nevű offline fiók."
-
-msgid "Choose another instance name or directory."
-msgstr "Válasszon másik példánynevet vagy mappát."
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "A modbetöltő telepítése sikertelen. Válasszon másik verziót, vagy tekintse meg a technikai részleteket."
-
-msgid "Could not load project details. Try again."
-msgstr "A projekt részletei nem tölthetők be. Próbálja újra."
-
-msgid "Could not load versions. Try again."
-msgstr "A verziók nem tölthetők be. Próbálja újra."
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "A böngésző nem nyitható meg. Nyissa meg kézzel a megjelenített címet."
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "A fájlok nem olvashatók vagy írhatók. Ellenőrizze a helyet, a jogosultságokat és a szabad tárhelyet."
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "A fiók nem menthető. Ellenőrizze a rendszer kulcstartóját és a fájljogosultságokat."
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "A Microsoft nem biztonságos bejelentkezési címet küldött. Frissítse az indítót az újrapróbálás előtt."
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "Ebben a buildben nincs beállítva a Microsoft-bejelentkezés. Frissítse az indítót."
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "Grafikus támogatású Java-környezetet válasszon, ne headless telepítést."
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "Hozzon létre Minecraft: Java Edition-profilt a minecraft.net oldalon, majd próbálja újra."
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "A bejelentkezést elutasították. Ha be szeretne jelentkezni, kezdje újra."
-
-msgid "Technical Details"
-msgstr "Technikai részletek"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "A Java futtatható fájl nem használható. Válasszon működő Java-környezetet."
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "Az archívum érvénytelen vagy nem biztonságos. Töltse le újra megbízható forrásból."
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "A kapcsolat sikertelen. Ellenőrizze az internetkapcsolatot, majd próbálja újra."
-
-msgid "The destination already exists. Choose another location."
-msgstr "A cél már létezik. Válasszon másik helyet."
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "A letöltött fájl ellenőrzése sikertelen, ezért nem lett telepítve. Töltse le újra."
-
-msgid "The file or folder was not found. Check its location."
-msgstr "A fájl vagy mappa nem található. Ellenőrizze a helyét."
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "A játék metaadatai érvénytelenek vagy nem érhetők el. Frissítse a verziólistát, majd próbálja újra."
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "A művelet sikertelen. További információ a technikai részleteknél."
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "A kért fájl, projekt vagy kompatibilis verzió nem található."
-
-msgid "The service rejected the request. Try again later."
-msgstr "A szolgáltatás elutasította a kérést. Próbálja később."
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "A szolgáltatás érvénytelen választ küldött. Próbálja később."
-
-msgid "There is not enough free disk space."
-msgstr "Nincs elegendő szabad lemezterület."
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "Ez a fiók nem rendelkezik Minecraft: Java Editionnel."
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "Ez a példány már nem érhető el. Frissítse a példánylistát."
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "Túl sok kérés. Várjon egy kicsit, majd próbálja újra."
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "A példány beállításai érvénytelenek. Ellenőrizze a kiválasztott verziót és a JVM-argumentumokat."
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "A mentett bejelentkezés már nem érvényes. Jelentkezzen be újra."
-
-msgid "Minecraft launcher for Linux"
-msgstr "Minecraft indító Linuxra"
-
-msgid "Services & Ecosystem"
-msgstr "Szolgáltatások és ökoszisztéma"
-
-msgid "Minecraft Disclaimer"
-msgstr "Minecraft jogi nyilatkozat"
-
-msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
-msgstr ""
-"NEM HIVATALOS MINECRAFT TERMÉK. A MOJANG VAGY A MICROSOFT NEM HAGYTA JÓVÁ ÉS NEM KAPCSOLÓDIK HOZZÁJUK.\n"
-"\n"
-"A Minecraft a Mojang AB védjegye. Az indító fejlesztése függetlenül történik, és nem áll kapcsolatban a Mojang Studios-szal vagy a Microsofttal."
-
-msgid "Modrinth & Mod Loaders"
-msgstr "Modrinth és mod-betöltők"
-
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"A modcsomagokat, modokat, erőforráscsomagokat és árnyékolókat a Modrinth tárolja, és a megfelelő szerzők készítették.\n"
-"\n"
-"A mod-betöltőket függetlenül fejlesztik a Fabric, Quilt, Forge és NeoForge projektek."
-
-msgid "AppStream Metadata"
-msgstr "AppStream metaadatok"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "Az AppStream metaadatok (leírások, összegzések és kiadási megjegyzések) a Creative Commons CC0 1.0 Universal Public Domain Dedication licenc alatt jelennek meg."
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "Másolás"
-
-msgid "Rename"
-msgstr "Átnevezés"
-
-msgid "Reset Icon"
-msgstr "Ikon visszaállítása"
-
-msgid "Delete World"
-msgstr "Világ törlése"
-
-msgid "Seed copied to clipboard"
-msgstr "Mag a vágólapra másolva"
-
-msgid "Remove server \"%s\"?"
-msgstr "Eltávolítja a(z) „%s” szervert?"
-
-msgid "Refresh"
-msgstr "Frissítés"
-
-msgid "Remove Server"
-msgstr "Szerver eltávolítása"
-
-msgid "Survival"
-msgstr "Túlélő"
-
-msgid "Edit"
-msgstr "Szerkesztés"
-
-msgid "Ask to download"
-msgstr "Kérdezzen rá letöltés előtt"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "A Minecraft által mentett vagy ide importált világok jelennek meg ebben a listában."
-
-msgid "Rename World"
-msgstr "Világ átnevezése"
-
-msgid "Servers"
-msgstr "Szerverek"
-
-msgid "Save"
-msgstr "Mentés"
-
-msgid "Add World"
-msgstr "Világ hozzáadása"
-
-msgid "Spectator"
-msgstr "Szemlélő"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "Törli a(z) „%s” világot? Ez nem vonható vissza."
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Az itt hozzáadott szerverek a példány servers.dat fájljába kerülnek."
-
-msgid "Add Server"
-msgstr "Szerver hozzáadása"
-
-msgid "Edit Server"
-msgstr "Szerver szerkesztése"
-
-msgid "Address"
-msgstr "Cím"
-
-msgid "Datapacks"
-msgstr "Adatcsomagok"
-
-msgid "No Worlds"
-msgstr "Nincsenek világok"
-
-msgid "Creative"
-msgstr "Kreatív"
-
-msgid "Move Up"
-msgstr "Mozgatás felfelé"
-
-msgid "No Servers"
-msgstr "Nincsenek szerverek"
-
-msgid "Never download"
-msgstr "Soha ne töltse le"
-
-msgid "Worlds"
-msgstr "Világok"
-
-msgid "Always download"
-msgstr "Mindig töltse le"
-
-msgid "Move Down"
-msgstr "Mozgatás lefelé"
-
-msgid "Copy Seed"
-msgstr "Mag másolása"
-
-msgid "Stats"
-msgstr "Statisztikák"
-
-msgid "Playtime"
-msgstr "Játékidő"
-
-msgid "Time played"
-msgstr "Játszott idő"
-
-msgid "Not played yet"
-msgstr "Még nem játszott"
-
-msgid "Less than a minute"
-msgstr "Kevesebb mint egy perc"
-
-msgid "%llu min"
-msgstr "%llu perc"
-
-msgid "%llu h %llu min"
-msgstr "%llu ó %llu perc"
-
-msgid "Runs on"
-msgstr "Környezet"
-
-msgid "Activity"
-msgstr "Aktivitás"
-
-msgid "Last session"
-msgstr "Utolsó munkamenet"
-
-msgid "Last played"
-msgstr "Utoljára játszva"
-
-msgid "Total launches"
-msgstr "Összes indítás"
-
-msgid "Total crashes"
-msgstr "Összes összeomlás"
-
-msgid "Server joins"
-msgstr "Szervercsatlakozások"
-
-msgid "World loads"
-msgstr "Világbetöltések"
-
-msgid "Player Profile"
-msgstr "Játékosprofil"
-
-msgid "Player type"
-msgstr "Játékostípus"
-
-msgid "Pack style"
-msgstr "Csomag stílusa"
-
-msgid "Average session"
-msgstr "Átlagos munkamenet"
-
-msgid "Stability"
-msgstr "Stabilitás"
-
-msgid "Instance"
-msgstr "Példány"
-
-msgid "Total size"
-msgstr "Teljes méret"
-
-msgid "Created on"
-msgstr "Létrehozva"
-
-msgid "Calculating…"
-msgstr "Számítás…"
-
-msgid "Never"
-msgstr "Soha"
-
-msgid "Today, %s"
-msgstr "Ma, %s"
-
-msgid "Hybrid"
-msgstr "Hibrid"
-
-msgid "Server Player"
-msgstr "Szerverjátékos"
-
-msgid "Singleplayer"
-msgstr "Egyjátékos"
-
-msgid "Unplayed"
-msgstr "Nem játszott"
-
-msgid "Modpack"
-msgstr "Modpack"
-
-msgid "Lightweight"
-msgstr "Könnyű"
-
-msgid "Kitchen Sink"
-msgstr "Mindenes"
-
-msgid "Quick"
-msgstr "Gyors"
-
-msgid "Standard"
-msgstr "Normál"
-
-msgid "Marathon"
-msgstr "Maraton"
-
-msgid "Stable"
-msgstr "Stabil"
-
-msgid "%u%% crash rate"
-msgstr "%u%% összeomlási arány"
-
-msgid "A name cannot be empty."
-msgstr "a név nem lehet üres."
-
-msgid "Remove server"
-msgstr "Szerver eltávolítása"
-
-msgid "Download modpack"
-msgstr "Modpack letöltése"
-
-msgid "%s “%s”"
-msgstr "%s „%s”"
-
-msgid "Delete instance"
-msgstr "Példány törlése"
-
-msgid "No worlds"
-msgstr "Nincsenek világok"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "várja a bejelentkezést a böngészőben…"
-
-msgid "Choose files"
-msgstr "Fájlok kiválasztása"
-
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
 msgid "Cannot create “%s”: %s"
 msgstr "„%s” nem hozható létre: %s"
 
-msgid "Cache cleanup failed"
-msgstr "A gyorsítótár tisztítása nem sikerült"
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "Nincs mod betöltő"
 
-msgid "Español"
-msgstr "Español"
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"A modokhoz mod betöltőre van szükség. A példány beállításainál először "
+"válassza ki a Fabric, Quilt, Forge vagy NeoForge elemet"
 
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth és mod-betöltők"
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "Válassz ki egy Minecraft-verziót a listából!"
 
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "Törli a(z) „%s” világot? Ez nem vonható vissza."
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Válasszon egy betöltő verziót, vagy válasszon egy másik betöltőt."
 
-msgid "Português"
-msgstr "Português"
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "Címtár"
 
-msgid "Create an instance to start playing."
-msgstr "Hozzon létre egy példányt a játék megkezdéséhez."
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "Válasszon egy mappát"
 
-msgid "Duplicated to “%s”"
-msgstr "Megkettőzve ide: “%s”"
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "Teremt"
 
-msgid "Downloading modpack"
-msgstr "Modpack letöltése"
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, fuzzy, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "%u/%u kiválasztva"
+msgstr[1] "%u/%u kiválasztva"
 
-msgid "Try again"
-msgstr "Próbáld újra"
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "A szolgáltatás érvénytelen választ küldött. Próbálja később."
 
-msgid "Performance impact"
-msgstr "Teljesítményre gyakorolt hatás"
-
-msgid "Add world"
-msgstr "Világ hozzáadása"
-
-msgid "Create instance"
-msgstr "Példány létrehozása"
-
-msgid "Browse modpacks"
-msgstr "Modcsomagok böngészése"
-
-msgid "Remove server “%s”?"
-msgstr "Eltávolítja a(z) „%s” szervert?"
-
-msgid "Path tracing"
-msgstr "Útvonalkövetés"
-
-msgid "Clean export"
-msgstr "Tiszta exportálás"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "Játékmechanikák"
-
-msgid "Minecraft version"
-msgstr "Minecraft verzió"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "Nyissa meg a mappát"
-
-msgid "AppStream metadata"
-msgstr "AppStream metaadatok"
-
-msgid "Add Java runtime"
-msgstr "Java Runtime hozzáadása"
-
-msgid "World generation"
-msgstr "Világgenerálás"
-
-msgid "Keyboard shortcuts"
-msgstr "Billentyűparancsok"
-
-msgid "Resource packs"
-msgstr "Erőforrás csomagok"
-
-msgid "Edit server"
-msgstr "Szerver szerkesztése"
-
-msgid "Keep playing"
-msgstr "Játssz tovább"
-
-msgid "Technical details"
-msgstr "Technikai részletek"
-
-msgid "Pack name"
-msgstr "Csomag neve"
-
-msgid "Colored lighting"
-msgstr "Színes megvilágítás"
-
-msgid "Rename world"
-msgstr "Világ átnevezése"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "egy név csak betűket, számokat és aláhúzásjelet tartalmazhat."
-
-msgid "Preferences"
-msgstr "Beállítások elemre"
-
-msgid "Delete world"
-msgstr "Világ törlése"
-
-msgid "Asking Microsoft for a code…"
-msgstr "kódot kér a Microsofttól…"
-
-msgid "Show unstable mod loader versions"
-msgstr "Instabil Mod Loader verziók megjelenítése"
-
-msgid "Move down"
-msgstr "Mozgatás lefelé"
-
-msgid "Clear cache"
-msgstr "A Nuvasha Launcher gyorsítótárának törlése"
-
-msgid "Delete “%s”?"
-msgstr "Törli a “%s” fájlt?"
-
-msgid "Import modpack…"
-msgstr "Modpack importálása…"
-
-msgid "Delete selected"
-msgstr "Kijelöltek törlése"
-
-msgid "Java runtime"
-msgstr "Java Runtime"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "a névnek 3-16 karakter hosszúságúnak kell lennie."
-
-msgid "Import modpack"
-msgstr "Modpack importálása"
-
-msgid "Core shaders"
-msgstr "Alapjáték-shaderek"
-
-msgid "Sign in"
-msgstr "Jelentkezzen be"
-
-msgid "Cache cleared"
-msgstr "Gyorsítótár törölve"
-
-msgid "No instances yet"
-msgstr "Még nincsenek példányok"
-
-msgid "Add offline account"
-msgstr "Offline fiók hozzáadása"
-
-msgid "Copy seed"
-msgstr "Mag másolása"
-
-msgid "Services & ecosystem"
-msgstr "Szolgáltatások és ökoszisztéma"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "Nincs olyan modpack, amely megfelelne a keresési feltételeknek. Próbálkozzon egy másik szóval!."
-
-msgid "Line limit"
-msgstr "Vonalkorlát"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Modrinth Modpack (*.mrpack)"
-
-msgid "Add server"
-msgstr "Szerver hozzáadása"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
+#: src/nuvashalauncher-download-modpack-browser.c:763
 msgid "All versions"
 msgstr "Összes verzió"
 
-msgid "No servers"
-msgstr "Nincsenek szerverek"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "Letöltések"
 
-msgid "Clear cache?"
-msgstr "Törölni kell a Nuvasha Launcher gyorsítótárat?"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "Relevancia"
 
-msgid "Loader version"
-msgstr "Betöltő verzió"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "Legújabbak"
 
-msgid "translator-credits"
-msgstr "Flia"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "Nemrég frissítettek"
 
-msgid "Include all files"
-msgstr "Minden fájl szerepeltetése"
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "Követők"
 
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "Modcsomagok szűrése"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "Modcsomagok böngészése"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr "A kért fájl, projekt vagy kompatibilis verzió nem található."
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+#, fuzzy
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "A modcsomag telepítése nem sikerült"
+msgstr[1] "A modcsomag telepítése nem sikerült"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
+msgid "Reading modpack"
+msgstr "Modpack olvasása"
+
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
+msgid "Extracting files"
+msgstr "Fájlok kibontása"
+
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "A modcsomag telepítése nem sikerült"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "Fájlok letöltése"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
+msgid "Optional files"
+msgstr "Választható fájlok"
+
+#: src/nuvashalauncher-download-modpack-install.c:265
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr ""
+"A csomag felsorolja ezeket a fájlokat, de azt mondja, hogy nincs rájuk "
+"szükség. Ezek közül semmi nincs telepítve, hacsak nem kéred. Az "
+"alapértelmezett ki van kapcsolva"
+
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
+msgid "Pack could not be fetched"
+msgstr "A csomagot nem sikerült letölteni"
+
+#: src/nuvashalauncher-download-modpack-install.c:422
+msgid "Invalid pack"
+msgstr "Érvénytelen csomag"
+
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "Ennek a verziónak nincs csomagfájlja"
+
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"Ez a projekt nem tesz közzé olyan csomagfájlt, amelyet a Nuvasha Launcher "
+"telepíthetne."
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
+msgstr "Modpack letöltése"
+
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "Letöltés"
+
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr ""
+"A kapcsolat sikertelen. Ellenőrizze az internetkapcsolatot, majd próbálja "
+"újra."
+
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "A szolgáltatás elutasította a kérést. Próbálja később."
+
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Túl sok kérés. Várjon egy kicsit, majd próbálja újra."
+
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr ""
+"A fájlok nem olvashatók vagy írhatók. Ellenőrizze a helyet, a "
+"jogosultságokat és a szabad tárhelyet."
+
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr ""
+"A letöltött fájl ellenőrzése sikertelen, ezért nem lett telepítve. Töltse le "
+"újra."
+
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr ""
+"Az archívum érvénytelen vagy nem biztonságos. Töltse le újra megbízható "
+"forrásból."
+
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "A művelet sikertelen. További információ a technikai részleteknél."
+
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr ""
+"A Java futtatható fájl nem használható. Válasszon működő Java-környezetet."
+
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "Hozzáférés megtagadva. Ellenőrizze a mappa jogosultságait."
+
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "Nincs elegendő szabad lemezterület."
+
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "A fájl vagy mappa nem található. Ellenőrizze a helyét."
+
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "A cél már létezik. Válasszon másik helyet."
+
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
+
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "A mentett bejelentkezés már nem érvényes. Jelentkezzen be újra."
+
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr ""
+"A bejelentkezést elutasították. Ha be szeretne jelentkezni, kezdje újra."
+
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Ez a fiók nem rendelkezik Minecraft: Java Editionnel."
+
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr ""
+"Hozzon létre Minecraft: Java Edition-profilt a minecraft.net oldalon, majd "
+"próbálja újra."
+
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr ""
+"Ebben a buildben nincs beállítva a Microsoft-bejelentkezés. Frissítse az "
+"indítót."
+
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
+
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"A modbetöltő telepítése sikertelen. Válasszon másik verziót, vagy tekintse "
+"meg a technikai részleteket."
+
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"A játék metaadatai érvénytelenek vagy nem érhetők el. Frissítse a "
+"verziólistát, majd próbálja újra."
+
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Ez a példány már nem érhető el. Frissítse a példánylistát."
+
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "Válasszon másik példánynevet vagy mappát."
+
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr ""
+"A példány beállításai érvénytelenek. Ellenőrizze a kiválasztott verziót és a "
+"JVM-argumentumokat."
+
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr ""
+"A fiók nem menthető. Ellenőrizze a rendszer kulcstartóját és a "
+"fájljogosultságokat."
+
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "Világos"
+
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "Jelentkezzen be"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "Megnyitás böngészőben"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "Próbáld újra"
+
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "Offline fiók hozzáadása"
+
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "Név"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "Hozzáadás"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "Példány létrehozása"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "Modpack letöltése"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "Modpack importálása"
+
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "Modpack importálása…"
+
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "Modpackok keresése"
+
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "Közeli"
+
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr ""
+"Nincs olyan modpack, amely megfelelne a keresési feltételeknek. Próbálkozzon "
+"egy másik szóval!."
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "Fájlok kiválasztása"
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "A telepítés nem sikerült"
+
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "Vissza"
+
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "Keresse meg a naplót"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
+msgid "Classic model"
+msgstr "Klasszikus modell"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "Vékony modell"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "Testreszabás"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
+msgid "Import skin…"
+msgstr "Import bőr…"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "Bőr exportálása…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Minecraft Services-hiba"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "A rendszer alapértelmezett beállítása"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "%s másolata"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "az példány neve üres"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "Az példányok neve nem tartalmazhatja %s"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "az instancia neve nem használható könyvtárnévként"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Modpack exportálva"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "Az exportálási hely nem helyi fájl"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "Modpack exportálása"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "Modpack exportálása"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
 msgid "Export modpack"
 msgstr "Modpack exportálása"
 
-msgid "Add world…"
-msgstr "Világ hozzáadása…"
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth Modpack (*.mrpack)"
 
-msgid "Update all"
-msgstr "Összes frissítése"
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "Csomag információ"
 
-msgid "Add Microsoft account"
-msgstr "Microsoft-fiók hozzáadása"
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "Exportálás"
 
-msgid "Move up"
-msgstr "Mozgatás felfelé"
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "Exportálja a modpack metaadatokat"
 
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "Csomag neve"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "Összegzés"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "Verzióazonosító"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "Tartalmaz átmeneti fájlokat?"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"A naplók, hibajelentések, képernyőképek, gyorsítótárak és letöltések "
+"általában nem tartoznak ide."
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "Tiszta exportálás"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "Minden fájl szerepeltetése"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "A játék fut; állítsa le, mielőtt áthelyezi a könyvtárát"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "Válasszon egy könyvtárat"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "Megkettőzve ide: “%s”"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"A beállított Java nem észlelhető; győződjön meg róla, hogy továbbra is "
+"használható java futtatható fájl"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Ehhez a játékhoz %d vagy újabb Java szükséges, a kiválasztott Java %d"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr ""
+"Grafikus támogatású Java-környezetet válasszon, ne headless telepítést."
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "Az ikonnak egy fájlnak kell lennie ezen a számítógépen"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "Válasszon egy ikont"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "Képek"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "Általános"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "Ikon"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "Módosítsa a címtárat"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Jáva"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "JVM érvek"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "Akciók"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "Másolat"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "Példány törlése"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "Kevesebb mint egy perc"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu perc"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu ó %llu perc"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "Ma, %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "Még nem játszott"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "Soha"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "Számítás…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "Aktivitás"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "Játszott idő"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "Utoljára játszva"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "Összes indítás"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "Összes összeomlás"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "Példány"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "Teljes méret"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "Létrehozva"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "Ismeretlen"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "Naplók"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "Beállítások elemre"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "Erőforrás csomagok"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "Shader-csomagok"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "Modok"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "Világok"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "Szerverek"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "Statisztikák"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "a kiválasztott fájl nem jelent Java verziót"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Válassza a Java végrehajtható fájlt"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "Terhelés…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "Egyéni: %s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Java Runtime hozzáadása"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Java Runtime"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Új összeomlási jelentés készült. A részletekhez nyissa meg a naplókat."
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "a játékot %d jel leállította"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "a játék a %d kóddal kilépett"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "Nem találtunk kompatibilis Java futtatókörnyezetet."
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "ennek a betöltőnek a verziói nem olvashatók"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s (instabil)"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "Nincs"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Nem található a Minecraft %s kompatibilis %s verziója."
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "Először válasszon Minecraft verziót"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "Rakodó"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "Betöltő verzió"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "Technikai részletek"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Törölni kell a Nuvasha Launcher gyorsítótárat?"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "Gyorsítótár törölve"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "A gyorsítótár tisztítása nem sikerült"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "Kérjen metaadatok exportálását"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr ""
+"Exportálás előtt jelenítse meg a név, az összefoglaló és a verzió mezőket."
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Egy függőség törlése törli a tőle függő modot"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "Instabil Minecraft verziók megjelenítése"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "Instabil Mod Loader verziók megjelenítése"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "Nyelv"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "Interfész nyelve"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "Vonalkorlát"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "Gyorsítótár"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Gyorsítótárazza a Modrinth API válaszait"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1 óra"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6 óra"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1 nap"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7 nap"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "A gyorsítótár lejárata"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "A Nuvasha Launcher gyorsítótárának törlése"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Minecraft indító Linuxra"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "Szolgáltatások és ökoszisztéma"
+
+#: src/nuvashalauncher-main-window-actions.c:626
 msgid "Minecraft disclaimer"
 msgstr "Minecraft jogi nyilatkozat"
 
-msgid "Shader packs"
-msgstr "Shader-csomagok"
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"NEM HIVATALOS MINECRAFT TERMÉK. A MOJANG VAGY A MICROSOFT NEM HAGYTA JÓVÁ ÉS "
+"NEM KAPCSOLÓDIK HOZZÁJUK.\n"
+"\n"
+"A Minecraft a Mojang AB védjegye. Az indító fejlesztése függetlenül "
+"történik, és nem áll kapcsolatban a Mojang Studios-szal vagy a Microsofttal."
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth és mod-betöltők"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"A modcsomagokat, modokat, erőforráscsomagokat és árnyékolókat a Modrinth "
+"tárolja, és a megfelelő szerzők készítették.\n"
+"\n"
+"A mod-betöltőket függetlenül fejlesztik a Fabric, Quilt, Forge és NeoForge "
+"projektek."
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "AppStream metaadatok"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"Az AppStream metaadatok (leírások, összegzések és kiadási megjegyzések) a "
+"Creative Commons CC0 1.0 Universal Public Domain Dedication licenc alatt "
+"jelennek meg."
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "A Nuvasha Launcherről"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "Billentyűparancsok"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "Beállítások elemre"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "Kilép"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "Kijelöltek törlése"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "Modpack importálása…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "Stop"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "Játék"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "Megállunk %s?"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "a játék"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"A játék fut, és hamarosan bezárul. Az utolsó mentés óta elért eredmények "
+"elvesznek."
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "Játssz tovább"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "Fiókok"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "Még nincsenek példányok"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "Hozzon létre egy példányt a játék megkezdéséhez."
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "A Minecraft lezuhant"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "A Minecraft nem tudott elindulni"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "A Minecraftnak be kell jelentkeznie"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "A Minecraft Services elutasította a kérést (HTTP %u)%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "Írási archívum"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "Az exportálás befejeződött"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "a betöltő nem oldható fel: %s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "Kaland"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "Hangulat"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "Hang"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "Blokkok"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "Ragyogás"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "Rajzfilmszerű"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "Kategóriák"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "Színes megvilágítás"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "Harc"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "Alapjáték-shaderek"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "Bizarr"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "Díszítés"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "Gazdaság"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "Entitások"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "Környezet"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "Felszerelés"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "Fantázia"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "Funkciók"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "Növényzet"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "Betűtípusok"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "Étel"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "Játékmechanikák"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "Kezelőfelület"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "Magas"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "Tárgyak"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "Könyvtár"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "Alacsony"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "Mágia"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "Kezelés"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "Közepes"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "Minijáték"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "Lények"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "Modokhoz"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "Modellek"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "Optimalizálás"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "Útvonalkövetés"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "Teljesítményre gyakorolt hatás"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "Nagyon gyenge gépekhez"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "Valósághű"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "Tükröződések"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "Felbontások"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "Képernyőkép"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "Félig valósághű"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "Árnyékok"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "Egyszerű"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "Közösségi"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "Tárolás"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "Technológia"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "Tematikus"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "Közlekedés"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "Finomhangolások"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "Segédeszközök"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "Az alapjátékhoz hasonló"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "Világgenerálás"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr "Modrinth arra kéri Nuvashát, hogy lassítson, túl sok a kérés"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "A Modrinth nem ismeri ezt a fájlt"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Nem található kompatibilis verzió a Minecraft %s és %s számára."
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "Már létezik ilyen nevű offline fiók."
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "Szerver szerkesztése"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "Szerver hozzáadása"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "Mentés"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "Cím"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "Kérdezzen rá letöltés előtt"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "Mindig töltse le"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "Soha ne töltse le"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "Eltávolítja a(z) „%s” szervert?"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "Szerver eltávolítása"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "Mozgatás felfelé"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "Mozgatás lefelé"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "Szerkesztés"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "Frissítés"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "Nincsenek szerverek"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Az itt hozzáadott szerverek a példány servers.dat fájljába kerülnek."
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "kódot kér a Microsofttól…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "várja a bejelentkezést a böngészőben…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "A böngésző nem nyitható meg. Nyissa meg kézzel a megjelenített címet."
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"A Microsoft nem biztonságos bejelentkezési címet küldött. Frissítse az "
+"indítót az újrapróbálás előtt."
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Nyissa meg az oldalt a böngészőjében, majd írja be ezt a kódot:"
+
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Bőr"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "A felszíni képeknek 64x64-es vagy 64x32-es PNG-fájloknak kell lenniük"
+
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "Érvénytelen bőr"
+
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "RENDBEN"
+
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "PNG bőrtextúra"
+
+#: src/nuvashalauncher-users-popover-skin.c:368
+msgid "Delete skin?"
+msgstr "Törli a bőrt?"
+
+#: src/nuvashalauncher-users-popover-skin.c:369
+msgid "This skin will be removed from the skin library."
+msgstr "Ezt a bőrt eltávolítjuk a bőrkönyvtárból."
+
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "Nincs köpeny"
+
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
+msgid "Remove %s?"
+msgstr "Eltávolítani %s?"
+
+#: src/nuvashalauncher-users-popover.c:178
+msgid "this account"
+msgstr "ez a fiók"
+
+#: src/nuvashalauncher-users-popover.c:181
+msgid ""
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
+msgstr ""
+"A fiókot eltávolítják a Nuvasha Launcher-ból, és a mentett bejelentkezési "
+"adatok törlődnek. Maga a játék nem változik."
+
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "Távolítsa el"
+
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Bejelentkezés szükséges"
+
+#: src/nuvashalauncher-users-popover.c:398
+msgid "Add Microsoft account"
+msgstr "Microsoft-fiók hozzáadása"
+
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Minecraft verzió"
+
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "Túlélő"
+
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "Kreatív"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "Szemlélő"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "Világ átnevezése"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "Átnevezés"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "Másolás"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "Mag a vágólapra másolva"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Törli a(z) „%s” világot? Ez nem vonható vissza."
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "Világ törlése"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "Mag másolása"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "Világ hozzáadása"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "Világ hozzáadása…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "Nincsenek világok"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr ""
+"A Minecraft által mentett vagy ide importált világok jelennek meg ebben a "
+"listában."
+
+#~ msgid "Colored Lighting"
+#~ msgstr "Színes megvilágítás"
+
+#~ msgid "Core Shaders"
+#~ msgstr "Alapjáték-shaderek"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "Játékmechanikák"
+
+#~ msgid "Path Tracing"
+#~ msgstr "Útvonalkövetés"
+
+#~ msgid "Performance Impact"
+#~ msgstr "Teljesítményre gyakorolt hatás"
+
+#~ msgid "World Generation"
+#~ msgstr "Világgenerálás"
+
+#~ msgid "All Versions"
+#~ msgstr "Összes verzió"
+
+#~ msgid "Update All"
+#~ msgstr "Összes frissítése"
+
+#~ msgid "Open Folder"
+#~ msgstr "Nyissa meg a mappát"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "Semmi sincs kiválasztva"
+
+#~ msgid "Create Instance"
+#~ msgstr "Példány létrehozása"
+
+#~ msgid "Download Modpack"
+#~ msgstr "Modpack letöltése"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "Megkettőzve ide: \"%s\""
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "Törli a \"%s\" fájlt?"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Java Runtime"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Java Runtime hozzáadása"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "A Minecraftnak nem fej nélküli Java kell: Archon a jre-openjdk csomagot "
+#~ "használja, ne a jre-openjdk-headlesst"
+
+#~ msgid "Delete Instance"
+#~ msgstr "Példány törlése"
+
+#~ msgid "Resource Packs"
+#~ msgstr "Erőforrás csomagok"
+
+#~ msgid "Shader Packs"
+#~ msgstr "Shader-csomagok"
+
+#~ msgid "Loader Version"
+#~ msgstr "Betöltő verzió"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "Instabil Mod Loader verziók megjelenítése"
+
+#~ msgid "Line Limit"
+#~ msgstr "Vonalkorlát"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "Billentyűparancsok"
+
+#~ msgid "Keep Playing"
+#~ msgstr "Játssz tovább"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "Még nincsenek példányok"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "A fejlécben található + gombbal hozzon létre egyet"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "Offline fiók hozzáadása"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "egy név csak betűket, számokat és aláhúzásjelet tartalmazhat"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "a név nem lehet üres"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "a névnek 3-16 karakter hosszúságúnak kell lennie"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "kódot kér a Microsofttól"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "várja a bejelentkezést a böngészőben"
+
+#~ msgid "Sign In"
+#~ msgstr "Jelentkezzen be"
+
+#~ msgid "Try Again"
+#~ msgstr "Próbáld újra"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Microsoft-fiók hozzáadása"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Minecraft verzió"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s „%s”"
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "Parancsikonok megjelenítése"
+
+#~ msgid "Import Modpack"
+#~ msgstr "Modpack importálása"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Modrinth Modpack (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "Modpack exportálása"
+
+#~ msgid "Clean Export"
+#~ msgstr "Tiszta exportálás"
+
+#~ msgid "Include All Files"
+#~ msgstr "Minden fájl szerepeltetése"
+
+#~ msgid "Pack Name"
+#~ msgstr "Csomag neve"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "A csomag nem határozza meg a telepítést"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "Modpack letöltése"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "%u elem telepítve"
+#~ msgstr[1] "%u elem telepítve"
+
+#~ msgid "no compatible version"
+#~ msgstr "nincs kompatibilis verzió"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "„%s” nem hozható létre: %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "Gyorsítótár törölve"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "A gyorsítótár tisztítása nem sikerült"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "A gyorsítótár nem törölhető."
+
+#~ msgid "This cannot be installed"
+#~ msgstr "Ez nem telepíthető"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "Modcsomagok böngészése"
+
+#~ msgid "Choose Files"
+#~ msgstr "Fájlok kiválasztása"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "A Nuvasha Launcher gyorsítótárának törlése"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Törölni kell a Nuvasha Launcher gyorsítótárat?"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "Nem értettem a választ"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr ""
+#~ "Olyan fájlokat tartalmaz, amelyeket a Nuvasha Launcher nem ismer fel."
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "A Microsoft nem biztonságos ellenőrzési címet adott vissza"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr ""
+#~ "Nincs olyan modpack, amely megfelelne a keresési feltételeknek. "
+#~ "Próbálkozzon egy másik szóval!"
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "A Nuvasha Launcher gyorsítótár adatai sikeresen törölve lettek."
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Keress rá a Modrinth-re, és telepíts egy modcsomagot"
+
+#~ msgid "Unavailable"
+#~ msgstr "Nem elérhető"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "a bejelentkezés nem fejeződött be"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "A következő példányok törölve lesznek:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "Szerkesztési mód"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "Szerkesztési mód bekapcsolása"
+
+#~ msgid "Delete Selected"
+#~ msgstr "Kijelöltek törlése"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "A projekt részletei nem tölthetők be. Próbálja újra."
+
+#~ msgid "Technical Details"
+#~ msgstr "Technikai részletek"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "Szolgáltatások és ökoszisztéma"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Minecraft jogi nyilatkozat"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth és mod-betöltők"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "AppStream metaadatok"
+
+#~ msgid "Reset Icon"
+#~ msgstr "Ikon visszaállítása"
+
+#~ msgid "Delete World"
+#~ msgstr "Világ törlése"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "Eltávolítja a(z) „%s” szervert?"
+
+#~ msgid "Remove Server"
+#~ msgstr "Szerver eltávolítása"
+
+#~ msgid "Rename World"
+#~ msgstr "Világ átnevezése"
+
+#~ msgid "Add World"
+#~ msgstr "Világ hozzáadása"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "Törli a(z) „%s” világot? Ez nem vonható vissza."
+
+#~ msgid "Add Server"
+#~ msgstr "Szerver hozzáadása"
+
+#~ msgid "Edit Server"
+#~ msgstr "Szerver szerkesztése"
+
+#~ msgid "Datapacks"
+#~ msgstr "Adatcsomagok"
+
+#~ msgid "No Worlds"
+#~ msgstr "Nincsenek világok"
+
+#~ msgid "Move Up"
+#~ msgstr "Mozgatás felfelé"
+
+#~ msgid "No Servers"
+#~ msgstr "Nincsenek szerverek"
+
+#~ msgid "Move Down"
+#~ msgstr "Mozgatás lefelé"
+
+#~ msgid "Copy Seed"
+#~ msgstr "Mag másolása"
+
+#~ msgid "Playtime"
+#~ msgstr "Játékidő"
+
+#~ msgid "Runs on"
+#~ msgstr "Környezet"
+
+#~ msgid "Last session"
+#~ msgstr "Utolsó munkamenet"
+
+#~ msgid "Server joins"
+#~ msgstr "Szervercsatlakozások"
+
+#~ msgid "World loads"
+#~ msgstr "Világbetöltések"
+
+#~ msgid "Player Profile"
+#~ msgstr "Játékosprofil"
+
+#~ msgid "Player type"
+#~ msgstr "Játékostípus"
+
+#~ msgid "Pack style"
+#~ msgstr "Csomag stílusa"
+
+#~ msgid "Average session"
+#~ msgstr "Átlagos munkamenet"
+
+#~ msgid "Stability"
+#~ msgstr "Stabilitás"
+
+#~ msgid "Hybrid"
+#~ msgstr "Hibrid"
+
+#~ msgid "Server Player"
+#~ msgstr "Szerverjátékos"
+
+#~ msgid "Singleplayer"
+#~ msgstr "Egyjátékos"
+
+#~ msgid "Unplayed"
+#~ msgstr "Nem játszott"
+
+#~ msgid "Modpack"
+#~ msgstr "Modpack"
+
+#~ msgid "Lightweight"
+#~ msgstr "Könnyű"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "Mindenes"
+
+#~ msgid "Quick"
+#~ msgstr "Gyors"
+
+#~ msgid "Standard"
+#~ msgstr "Normál"
+
+#~ msgid "Marathon"
+#~ msgstr "Maraton"
+
+#~ msgid "Stable"
+#~ msgstr "Stabil"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "%u%% összeomlási arány"

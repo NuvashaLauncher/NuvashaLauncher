@@ -1,1623 +1,2508 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: vi\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-msgid "Adventure"
-msgstr "Phiêu lưu"
-msgid "Atmosphere"
-msgstr "Bầu không khí"
-msgid "Audio"
-msgstr "Âm thanh"
-msgid "Blocks"
-msgstr "Khối"
-msgid "Bloom"
-msgstr "Quầng sáng"
-msgid "Cartoon"
-msgstr "Hoạt hình"
-msgid "Categories"
-msgstr "Danh mục"
-msgid "Colored Lighting"
-msgstr "Ánh sáng màu"
-msgid "Combat"
-msgstr "Chiến đấu"
-msgid "Core Shaders"
-msgstr "Shader cốt lõi"
-msgid "Cursed"
-msgstr "Kỳ quái"
-msgid "Decoration"
-msgstr "Trang trí"
-msgid "Economy"
-msgstr "Kinh tế"
-msgid "Entities"
-msgstr "Thực thể"
-msgid "Environment"
-msgstr "Môi trường"
-msgid "Equipment"
-msgstr "Trang bị"
-msgid "Fantasy"
-msgstr "Giả tưởng"
-msgid "Features"
-msgstr "Tính năng"
-msgid "Foliage"
-msgstr "Cây cỏ"
-msgid "Fonts"
-msgstr "Phông chữ"
-msgid "Food"
-msgstr "Thức ăn"
-msgid "Game Mechanics"
-msgstr "Cơ chế trò chơi"
-msgid "Interface"
-msgstr "Giao diện"
-msgid "High"
-msgstr "Cao"
-msgid "Items"
-msgstr "Vật phẩm"
-msgid "Library"
-msgstr "Thư viện"
-msgid "Low"
-msgstr "Thấp"
-msgid "Magic"
-msgstr "Phép thuật"
-msgid "Management"
-msgstr "Quản lý"
-msgid "Medium"
-msgstr "Trung bình"
-msgid "Minigame"
-msgstr "Trò chơi nhỏ"
-msgid "Mobs"
-msgstr "Sinh vật"
-msgid "Modded"
-msgstr "Có mod"
-msgid "Models"
-msgstr "Mô hình"
-msgid "Optimization"
-msgstr "Tối ưu hóa"
-msgid "Path Tracing"
-msgstr "Truy vết đường đi"
-msgid "Performance Impact"
-msgstr "Ảnh hưởng đến hiệu năng"
-msgid "Potato"
-msgstr "Dành cho máy cấu hình rất thấp"
-msgid "Realistic"
-msgstr "Chân thực"
-msgid "Reflections"
-msgstr "Phản chiếu"
-msgid "Resolutions"
-msgstr "Độ phân giải"
-msgid "Screenshot"
-msgstr "Ảnh chụp màn hình"
-msgid "Semi-realistic"
-msgstr "Bán chân thực"
-msgid "Shadows"
-msgstr "Bóng đổ"
-msgid "Simplistic"
-msgstr "Đơn giản"
-msgid "Social"
-msgstr "Xã hội"
-msgid "Storage"
-msgstr "Lưu trữ"
-msgid "Technology"
-msgstr "Công nghệ"
-msgid "Themed"
-msgstr "Theo chủ đề"
-msgid "Transportation"
-msgstr "Vận chuyển"
-msgid "Tweaks"
-msgstr "Tinh chỉnh"
-msgid "Utility"
-msgstr "Tiện ích"
-msgid "Vanilla-like"
-msgstr "Giống bản gốc"
-msgid "World Generation"
-msgstr "Tạo thế giới"
 
-msgid "All Versions"
-msgstr "Tất cả phiên bản"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "Mức độ liên quan"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "Ngoại tuyến"
 
-msgid "Newest"
-msgstr "Mới nhất"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "tên không được để trống."
 
-msgid "Recently updated"
-msgstr "Cập nhật gần đây"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "tên phải dài từ 3 đến 16 ký tự."
 
-msgid "Followers"
-msgstr "Người theo dõi"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "tên chỉ có thể chứa các chữ cái, chữ số và dấu gạch dưới."
 
-msgid "Filter modpacks"
-msgstr "Lọc gói mod"
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
+msgid ""
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
+msgstr ""
+"tài khoản Microsoft này chưa có hồ sơ Xbox: hãy đăng nhập một lần tại "
+"xbox.com rồi đăng nhập lại tại đây"
 
-msgid "Cancel"
-msgstr "Hủy bỏ"
-msgid "Confirm"
-msgstr "Xác nhận"
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
+msgid ""
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
+msgstr ""
+"đây là tài khoản trẻ em: người lớn phải thêm tài khoản này vào gia đình "
+"Microsoft trước khi có thể chơi"
 
-msgid "Customize"
-msgstr "Tùy chỉnh"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr "Xbox Live không khả dụng tại quốc gia đăng ký tài khoản này"
 
-msgid "Delete"
-msgstr "Xóa bỏ"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"tài khoản này cần người lớn xác minh trước khi có thể chơi; đây là yêu cầu "
+"đối với tài khoản Hàn Quốc"
 
-msgid "Retry"
-msgstr "Thử lại"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Microsoft sẽ không cung cấp mã để đăng nhập bằng"
 
-msgid "Loading…"
-msgstr "Đang tải…"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1fM lượt tải xuống"
 
-msgid "Download"
-msgstr "Tải xuống"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%1fk lượt tải xuống"
 
-msgid "Update All"
-msgstr "Cập nhật tất cả"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s lượt tải xuống"
 
-msgid "Open Folder"
-msgstr "Mở thư mục"
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s · bởi %s"
 
-msgid "Nothing installed yet"
-msgstr "Chưa có gì được cài đặt"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "bởi %s"
 
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Duyệt tìm thứ gì đó để đưa vào thư mục của phiên bản này"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, fuzzy, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "Đã chọn %u/%u"
+msgstr[1] "Đã chọn %u/%u"
 
-msgid "Installed"
-msgstr "Đã cài đặt"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, fuzzy, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "Gói tài nguyên"
+msgstr[1] "Gói tài nguyên"
 
-msgid "Loading more…"
-msgstr "Đang tải thêm…"
+#: src/nuvashalauncher-content-page-browser.c:98
+#, fuzzy, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "Đã chọn %u/%u"
+msgstr[1] "Đã chọn %u/%u"
 
-msgid "Nothing is selected"
-msgstr "Không có gì được chọn"
+#: src/nuvashalauncher-content-page-browser.c:101
+#, fuzzy, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "Đã chọn %u/%u"
+msgstr[1] "Đã chọn %u/%u"
 
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr ""
 
-msgid "Filter by category"
-msgstr "Lọc theo danh mục"
-
-msgid "Nothing to show yet"
-msgstr "Chưa có gì để hiển thị"
-
-msgid "Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "Nhập nội dung cần tìm hoặc duyệt mọi thứ Modrinth có cho trường hợp này"
-
-msgid "Browse"
-msgstr "Duyệt qua"
-
-msgid "No mod loader"
-msgstr "Không có trình tải mod"
-
-msgid "Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the settings of this instance first"
-msgstr "Mod cần một trình tải mod. Trước tiên hãy chọn Fabric, Quilt, Forge hoặc NeoForge trong cài đặt của phiên bản này"
-
-msgid "Create Instance"
-msgstr "Tạo phiên bản"
-
-msgid "Name"
-msgstr "Tên"
-
-msgid "Directory"
-msgstr "Thư mục"
-
-msgid "Choose a folder"
-msgstr "Chọn một thư mục"
-
-msgid "Create"
-msgstr "Tạo nên"
-
-msgid "Download Modpack"
-msgstr "Tải xuống Modpack"
-
-
-msgid "Search modpacks"
-msgstr "Tìm kiếm modpack"
-
-msgid "Close"
-msgstr "Đóng"
-
-msgid "Back"
-msgstr "Mặt sau"
-
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "Cài đặt"
 
-msgid "Copy of %s"
-msgstr "Bản sao của %s"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "trang tiếp theo không thể tải được"
 
-msgid "Choose Java executable"
-msgstr "Chọn tệp thực thi Java"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Không thể tìm kiếm Modrinth"
 
-msgid "the chosen file does not report a Java version"
-msgstr "tệp đã chọn không báo cáo phiên bản Java"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "Khác"
 
-msgid "Choose an Icon"
-msgstr "Chọn một biểu tượng"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "Không thể tải danh mục"
 
-msgid "Choose a Directory"
-msgstr "Chọn một thư mục"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "Thử lại"
 
-msgid "Duplicated to \"%s\""
-msgstr "Đã sao chép vào \"%s\""
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "Không thể tải các phiên bản. Hãy thử lại."
 
-msgid "Delete \"%s\"?"
-msgstr "Xóa \"%s\"?"
-
-msgid "General"
-msgstr "Tổng quan"
-
-msgid "Icon"
-msgstr "Biểu tượng"
-
-msgid "Change the Directory"
-msgstr "Thay đổi thư mục"
-
-msgid "Minecraft"
-msgstr "Minecraft"
-
-msgid "Java"
-msgstr "Java"
-
-msgid "Java Runtime"
-msgstr "Thời gian chạy Java"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "Trò chơi này cần Java %d hoặc mới hơn, Java được chọn là %d"
-
-msgid "Add Java Runtime"
-msgstr "Thêm thời gian chạy Java"
-
-msgid "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, not jre-openjdk-headless"
-msgstr "Minecraft cần một non-headless Java: trên Arch sử dụng gói jre-openjdk, không phải jre-openjdk-headless"
-
-msgid "JVM Arguments"
-msgstr "Đối số JVM"
-
-msgid "The configured Java was not detected; make sure it is still a usable java executable"
-msgstr "Java được định cấu hình không được phát hiện; đảm bảo rằng nó vẫn là một tệp thực thi java có thể sử dụng được"
-
-msgid "Actions"
-msgstr "hành động"
-
-msgid "Duplicate"
-msgstr "Nhân bản"
-
-msgid "Delete Instance"
-msgstr "Xóa phiên bản"
-
-msgid "Settings"
-msgstr "Cài đặt"
-
-msgid "Resource Packs"
-msgstr "Gói tài nguyên"
-
-msgid "Shader Packs"
-msgstr "Gói đổ bóng"
-
-msgid "Mods"
-msgstr "mod"
-
-msgid "Logs"
-msgstr "Nhật ký"
-
-msgid "Custom: %s"
-msgstr "Tùy chỉnh: %s"
-
-msgid "the game was stopped by signal %d"
-msgstr "trò chơi đã bị dừng bởi tín hiệu %d"
-
-msgid "the game exited with code %d"
-msgstr "trò chơi đã thoát với mã %d"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "Không tìm thấy phiên bản %s tương thích cho Minecraft %s."
-
-msgid "Loader"
-msgstr "Trình tải"
-
-msgid "Loader Version"
-msgstr "Phiên bản tải"
-
-msgid "Clear"
-msgstr "Thông thoáng"
-
-msgid "Search the log"
-msgstr "Tìm kiếm nhật ký"
-
-msgid "Versions"
-msgstr "Phiên bản"
-
-msgid "Show unstable Minecraft versions"
-msgstr "Hiển thị các phiên bản Minecraft không ổn định"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "Hiển thị các phiên bản Mod Loader không ổn định"
-
-msgid "Language"
-msgstr "Ngôn ngữ"
-
-msgid "Interface language"
-msgstr "Ngôn ngữ giao diện"
-
-msgid "Line Limit"
-msgstr "Giới hạn dòng"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "Giới thiệu về Trình khởi chạy Nuvasha Launcher"
-
-msgid "Keyboard Shortcuts"
-msgstr "Phím tắt"
-
-msgid "Stop"
-msgstr "Dừng lại"
-
-msgid "Play"
-msgstr "Chơi"
-
-msgid "Keep Playing"
-msgstr "Tiếp tục chơi"
-
-msgid "Downloads"
-msgstr "Tải xuống"
-
-msgid "Accounts"
-msgstr "Tài khoản"
-
-msgid "No Instances Yet"
-msgstr "Chưa có trường hợp nào"
-
-msgid "Use the + button in the header to create one"
-msgstr "Sử dụng nút + trong tiêu đề để tạo một nút"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "trình tải không thể giải quyết được: %s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "Không tìm thấy phiên bản tương thích cho Minecraft %s và %s."
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "Không tìm thấy phiên bản tương thích cho Minecraft %s."
 
-msgid "Add Offline Account"
-msgstr "Thêm tài khoản ngoại tuyến"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "Phiên bản"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "tên chỉ có thể chứa các chữ cái, chữ số và dấu gạch dưới"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "Thư mục không thể đọc được"
 
-msgid "a name cannot be empty"
-msgstr "tên không được để trống"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "tên phải dài từ 3 đến 16 ký tự"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "Không thể cài đặt tập tin"
 
-msgid "Add"
-msgstr "Thêm vào"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "yêu cầu Microsoft cung cấp mã"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "Không thể tạo thư mục"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "chờ đăng nhập trên trình duyệt"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "Nội dung"
 
-msgid "Sign In"
-msgstr "Đăng nhập"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "Đang cài đặt"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "Mở trang trong trình duyệt của bạn, sau đó nhập mã này:"
-
-msgid "Try Again"
-msgstr "Thử lại"
-
-msgid "Remove"
-msgstr "Di dời"
-
-msgid "Add Microsoft Account"
-msgstr "Thêm tài khoản Microsoft"
-
-msgid "Minecraft Version"
-msgstr "Phiên bản Minecraft"
-
-msgid "Install the selected %s?"
-msgstr "Cài đặt %s đã chọn?"
-
-msgid "%s \"%s\""
-msgstr "%s \"%s\""
-
-msgid "Search"
-msgstr "Tìm kiếm"
-
-msgid "Update"
-msgstr "Cập nhật"
-
-msgid "Update the following %s"
-msgstr "Cập nhật %s sau"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "Phụ thuộc:"
 
-msgid "The following mods depend on %s:\n%s"
-msgstr "Các mod sau phụ thuộc vào %s:\n%s"
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "Xung đột\n"
 
-msgid "Cache"
-msgstr "Bộ nhớ đệm"
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "%s đang được cài đặt"
 
-msgid "Cache Modrinth API responses"
-msgstr "Phản hồi API Modrinth của bộ đệm"
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "Cập nhật"
 
-msgid "Cache expiration"
-msgstr "Hết hạn bộ nhớ đệm"
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s “%s”"
 
-msgid "1 hour"
-msgstr "1 giờ"
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "Hủy bỏ"
 
-msgid "6 hours"
-msgstr "6 giờ"
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "Dự án này không xuất bản gì phù hợp với trường hợp này."
 
-msgid "1 day"
-msgstr "1 ngày"
+#: src/nuvashalauncher-content-page-install.c:1003
+#, fuzzy, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "%s đang được cài đặt"
+msgstr[1] "%s đang được cài đặt"
 
-msgid "7 days"
-msgstr "7 ngày"
+#: src/nuvashalauncher-content-page-install.c:1006
+#, fuzzy, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "%s đang được cài đặt"
+msgstr[1] "%s đang được cài đặt"
 
-msgid "Show Shortcuts"
-msgstr "Hiển thị phím tắt"
+#: src/nuvashalauncher-content-page-install.c:1009
+#, fuzzy, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "%s đang được cài đặt"
+msgstr[1] "%s đang được cài đặt"
 
-msgid "Quit"
-msgstr "Từ bỏ"
+#: src/nuvashalauncher-content-page-install.c:1012
+#, fuzzy, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "%s đang được cài đặt"
+msgstr[1] "%s đang được cài đặt"
 
-msgid "Import Modpack"
-msgstr "Nhập khẩu Modpack"
+#: src/nuvashalauncher-content-page-install.c:1038
+#, fuzzy
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "Cập nhật %s sau"
+msgstr[1] "Cập nhật %s sau"
 
-msgid "Modpack exported"
-msgstr "Đã xuất modpack"
+#: src/nuvashalauncher-content-page-install.c:1041
+#, fuzzy
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "Cài đặt %s đã chọn?"
+msgstr[1] "Cài đặt %s đã chọn?"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Gói Modrinth (*.mrpack)"
+#: src/nuvashalauncher-content-page-install.c:1044
+#, fuzzy
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "Cập nhật %s sau"
+msgstr[1] "Cập nhật %s sau"
 
-msgid "The export location is not a local file"
-msgstr "Vị trí xuất không phải là tệp cục bộ"
+#: src/nuvashalauncher-content-page-install.c:1047
+#, fuzzy
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "Cập nhật %s sau"
+msgstr[1] "Cập nhật %s sau"
 
-msgid "Export Modpack"
-msgstr "Xuất Modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "Không thể xóa tập tin"
 
-msgid "Importing modpack…"
-msgstr "Đang nhập modpack…"
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "Bật"
 
-msgid "Reading modpack"
-msgstr "Đọc modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "Không thể xóa một mod phụ thuộc"
 
-msgid "Exporting modpack"
-msgstr "Xuất modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "Không thể đổi tên tập tin"
 
-msgid "Modpack export"
-msgstr "Xuất modpack"
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "Đã xóa"
 
-msgid "Include transient files?"
-msgstr "Bao gồm các tập tin tạm thời?"
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "Xóa “%s”?"
 
-msgid "Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "Nhật ký, báo cáo sự cố, ảnh chụp màn hình, bộ nhớ đệm và nội dung tải xuống thường bị loại trừ."
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
+msgid ""
+"The following mods depend on %s:\n"
+"%s"
+msgstr ""
+"Các mod sau phụ thuộc vào %s:\n"
+"%s"
 
-msgid "Clean Export"
-msgstr "Xuất khẩu sạch"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "Xóa bỏ"
 
-msgid "Include All Files"
-msgstr "Bao gồm tất cả các tệp"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "Đã bật"
 
-msgid "Pack Name"
-msgstr "Tên gói"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "Tàn tật"
 
-msgid "Summary"
-msgstr "Bản tóm tắt"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "Tắt"
 
-msgid "Version ID"
-msgstr "Mã phiên bản"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "Tìm kiếm"
 
-msgid "Downloading files"
-msgstr "Đang tải tập tin"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "Cập nhật tất cả"
 
-msgid "Extracting files"
-msgstr "Giải nén tập tin"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "Đang tải bản cập nhật"
 
-msgid "Optional files"
-msgstr "Tệp tùy chọn"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "Tiến trình"
 
-msgid "The pack lists these files but says they are not needed. Nothing of them is installed unless you ask. Default is off"
-msgstr "Gói liệt kê các tệp này nhưng cho biết chúng không cần thiết. Không có gì trong số chúng được cài đặt trừ khi bạn yêu cầu. Mặc định là tắt"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "Mở thư mục"
 
-msgid "Pack could not be fetched"
-msgstr "Không thể tìm nạp gói"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "Chưa có gì được cài đặt"
 
-msgid "Invalid pack"
-msgstr "Gói không hợp lệ"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Duyệt tìm thứ gì đó để đưa vào thư mục của phiên bản này"
 
-msgid "The pack does not define its install"
-msgstr "Gói không xác định cài đặt của nó"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "Duyệt qua"
 
-msgid "Downloading Modpack"
-msgstr "Đang tải xuống Modpack"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "Đã cài đặt"
 
-msgid "Writing archive"
-msgstr "Viết lưu trữ"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "Đang tải thêm…"
 
-msgid "Export modpack metadata"
-msgstr "Xuất siêu dữ liệu modpack"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "Lọc theo danh mục"
 
-msgid "Ask for export metadata"
-msgstr "Yêu cầu xuất siêu dữ liệu"
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "Chưa có gì để hiển thị"
 
-msgid "Pack information"
-msgstr "Thông tin gói"
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Nhập nội dung cần tìm hoặc duyệt mọi thứ Modrinth có cho trường hợp này"
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "Hiển thị các trường tên, tóm tắt và phiên bản trước khi xuất."
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "Bỏ qua"
 
-msgid "Export complete"
-msgstr "Xuất hoàn tất"
-
-msgid "Export"
-msgstr "Xuất khẩu"
-
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "Đã cài đặt %u mục"
-msgstr[1] "Đã cài đặt %u mục"
-
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
 msgid "Updated %u item"
 msgid_plural "Updated %u items"
 msgstr[0] "Đã cập nhật %u mục"
 msgstr[1] "Đã cập nhật %u mục"
 
-msgid "The icon must be a file on this computer"
-msgstr "Biểu tượng phải là một tập tin trên máy tính này"
-
-msgid "The game is running; stop it before moving its directory"
-msgstr "Trò chơi đang chạy; dừng nó lại trước khi di chuyển thư mục của nó"
-
-msgid "%s is being installed"
-msgstr "%s đang được cài đặt"
-
-msgid "no compatible version"
-msgstr "không có phiên bản tương thích"
-
-msgid "Enabled"
-msgstr "Đã bật"
-
-msgid "Disabled"
-msgstr "Tàn tật"
-
-msgid "Deleted"
-msgstr "Đã xóa"
-
+#: src/nuvashalauncher-content-page-updates.c:246
 msgid "Everything is up to date"
 msgstr "Mọi thứ đều được cập nhật"
 
-msgid "Cannot create \"%s\": %s"
-msgstr "Không thể tạo \"%s\": %s"
-
-msgid "This project publishes nothing that fits this instance."
-msgstr "Dự án này không xuất bản gì phù hợp với trường hợp này."
-
-msgid "Unknown"
-msgstr "Không xác định"
-
-msgid "%s (unstable)"
-msgstr "%s (không ổn định)"
-
-msgid "the next page could not be loaded"
-msgstr "trang tiếp theo không thể tải được"
-
-msgid "Other"
-msgstr "Khác"
-
-msgid "%.1fM downloads"
-msgstr "%.1fM lượt tải xuống"
-
-msgid "%.1fk downloads"
-msgstr "%1fk lượt tải xuống"
-
-msgid "%s  ·  by %s"
-msgstr "%s · bởi %s"
-
-msgid "by %s"
-msgstr "bởi %s"
-
-msgid "%s downloads"
-msgstr "%s lượt tải xuống"
-
-msgid "Cache Cleared"
-msgstr "Đã xóa bộ nhớ đệm"
-
-msgid "Cache Cleanup Failed"
-msgstr "Dọn dẹp bộ đệm không thành công"
-
-msgid "The cache could not be cleared."
-msgstr "Không thể xóa bộ nhớ đệm."
-
-msgid "the versions of this loader could not be read"
-msgstr "không thể đọc được các phiên bản của trình tải này"
-
-msgid "Minecraft crashed"
-msgstr "Minecraft bị rơi"
-
-msgid "Minecraft could not start"
-msgstr "Minecraft không thể bắt đầu"
-
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft cần đăng nhập"
-
-msgid "The file cannot be renamed"
-msgstr "Không thể đổi tên tập tin"
-
-msgid "The file cannot be deleted"
-msgstr "Không thể xóa tập tin"
-
-msgid "The folder cannot be read"
-msgstr "Thư mục không thể đọc được"
-
-msgid "The file could not be installed"
-msgstr "Không thể cài đặt tập tin"
-
-msgid "The folder cannot be created"
-msgstr "Không thể tạo thư mục"
-
-msgid "This cannot be installed"
-msgstr "Cái này không cài được"
-
-msgid "Pick a Minecraft version first"
-msgstr "Chọn phiên bản Minecraft trước"
-
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "Xóa một phần phụ thuộc sẽ xóa mod phụ thuộc vào nó"
-
-msgid "A dependent mod cannot be deleted"
-msgstr "Không thể xóa một mod phụ thuộc"
-
-msgid "Slim model"
-msgstr "mô hình mỏng"
-
-msgid "OK"
-msgstr "ĐƯỢC RỒI"
-
-msgid "Export skin…"
-msgstr "Xuất khẩu da…"
-
-msgid "Classic model"
-msgstr "Mô hình cổ điển"
-
-msgid "PNG skin texture"
-msgstr "Kết cấu skin PNG"
-
-msgid "Invalid skin"
-msgstr "Da không hợp lệ"
-
-msgid "No cape"
-msgstr "Không có áo choàng"
-
-msgid "Import skin…"
-msgstr "Da nhập khẩu…"
-
-msgid "Delete skin?"
-msgstr "Xóa da?"
-
-msgid "This skin will be removed from the skin library."
-msgstr "Da này sẽ bị xóa khỏi thư viện da."
-
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "Hình ảnh da phải là tệp PNG 64x64 hoặc 64x32"
-
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "Duyệt qua Modpacks"
-
-msgid "Choose Files"
-msgstr "Chọn Tệp"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "Xóa bộ nhớ cache Nuvasha Launcher"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Xóa Nuvasha Launcher Cache?"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"Xung đột\n"
-
-msgid "Content"
-msgstr "Nội dung"
-
-msgid "Could not install"
-msgstr "Không thể cài đặt"
-
-msgid "Could not install the modpack"
-msgstr "Không thể cài đặt modpack"
-
-msgid "Could not load categories"
-msgstr "Không thể tải danh mục"
-
-msgid "Could not search Modrinth"
-msgstr "Không thể tìm kiếm Modrinth"
-
-msgid "Could not understand the answer"
-msgstr "Không thể hiểu câu trả lời"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "Tắt"
-
-msgid "Dismiss"
-msgstr "Bỏ qua"
-
-msgid "Enable"
-msgstr "Bật"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "Hình ảnh"
-
-msgid "Installing"
-msgstr "Đang cài đặt"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "Các phiên bản không thể chứa %s trong tên của chúng"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "Nó mang các tệp mà Nuvasha Launcher không nhận ra."
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "Microsoft đã trả lại địa chỉ xác minh không an toàn"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "Microsoft sẽ không cung cấp mã để đăng nhập bằng"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · Cần đăng nhập"
-
-msgid "Modrinth does not know this file"
-msgstr "Modrinth không biết tệp này"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "Modrinth yêu cầu Nuvasha Launcher chậm lại vì có quá nhiều yêu cầu"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No compatible Java runtime was found."
-msgstr "Không tìm thấy môi trường chạy Java tương thích."
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "Không có modpack nào phù hợp. Hãy thử một từ khác"
-
-msgid "None"
-msgstr "Không có"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Đã xóa dữ liệu bộ nhớ đệm của Nuvasha Launcher thành công."
-
-msgid "Offline"
-msgstr "Ngoại tuyến"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "Hãy chọn một phiên bản Minecraft trong danh sách."
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "Hãy chọn phiên bản loader hoặc chọn loader khác."
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
-msgid "Remove %s?"
-msgstr "Xóa %s?"
-
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Tìm kiếm Modrinth và cài đặt modpack"
-
-msgid "Skin"
-msgstr "Giao diện"
-
-msgid "Stop %s?"
-msgstr "Dừng %s?"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "Mặc định hệ thống"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Tài khoản sẽ bị xóa khỏi Nuvasha Launcher và thông tin đăng nhập đã lưu sẽ bị quên. Trò chơi không bị ảnh hưởng."
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "Trò chơi đang chạy và sẽ đóng. Tiến trình kể từ lần lưu gần nhất sẽ bị mất."
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "Dự án này không phát hành tệp modpack nào mà Nuvasha Launcher có thể cài đặt."
-
-msgid "This version has no pack file"
-msgstr "Phiên bản này không có tệp modpack"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Unavailable"
-msgstr "Không khả dụng"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "Xbox Live không khả dụng tại quốc gia đăng ký tài khoản này"
-
-msgid "the game"
-msgstr "trò chơi"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "tên phiên bản không thể được dùng làm tên thư mục"
-
-msgid "the instance name is empty"
-msgstr "tên phiên bản đang trống"
-
-msgid "the sign-in did not finish"
-msgstr "quá trình đăng nhập chưa hoàn tất"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "tài khoản Microsoft này chưa có hồ sơ Xbox: hãy đăng nhập một lần tại xbox.com rồi đăng nhập lại tại đây"
-
-msgid "this account"
-msgstr "tài khoản này"
-
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "tài khoản này cần người lớn xác minh trước khi có thể chơi; đây là yêu cầu đối với tài khoản Hàn Quốc"
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "đây là tài khoản trẻ em: người lớn phải thêm tài khoản này vào gia đình Microsoft trước khi có thể chơi"
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "Minecraft Services đã từ chối yêu cầu (HTTP %u)%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Lỗi Minecraft Services"
-
-msgid "Application menu"
-msgstr "Application menu"
-
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "Cập nhật %s sau"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "Xác nhận"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
 msgid "The folder could not be opened: %s"
 msgstr "The folder could not be opened: %s"
 
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "Mở trong trình duyệt"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "Đã chọn %u/%u"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "Các phiên bản sau sẽ bị xóa:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "Chế độ chỉnh sửa"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "Đang tải bản cập nhật"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "Tiến trình"
-
-msgid "Enter Edit Mode"
-msgstr "Vào chế độ chỉnh sửa"
-
-msgid "Delete Selected"
-msgstr "Xóa mục đã chọn"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "Đã tạo báo cáo sự cố mới. Mở nhật ký để xem chi tiết."
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "Truy cập bị từ chối. Kiểm tra quyền của thư mục."
-
-msgid "An offline account with this name already exists."
-msgstr "Đã có tài khoản ngoại tuyến với tên này."
-
-msgid "Choose another instance name or directory."
-msgstr "Chọn tên hoặc thư mục khác cho phiên bản cài đặt."
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "Không thể cài bộ nạp mod này. Chọn phiên bản khác hoặc xem chi tiết kỹ thuật."
-
-msgid "Could not load project details. Try again."
-msgstr "Không thể tải chi tiết dự án. Hãy thử lại."
-
-msgid "Could not load versions. Try again."
-msgstr "Không thể tải các phiên bản. Hãy thử lại."
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "Không thể mở trình duyệt. Hãy tự mở địa chỉ được hiển thị."
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "Không thể đọc hoặc ghi tệp. Kiểm tra vị trí, quyền và dung lượng trống."
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "Không thể lưu tài khoản. Kiểm tra kho khóa hệ thống và quyền truy cập tệp."
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "Microsoft trả về địa chỉ đăng nhập không an toàn. Cập nhật trình khởi chạy trước khi thử lại."
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "Bản dựng này chưa cấu hình đăng nhập Microsoft. Hãy cập nhật trình khởi chạy."
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "Chọn môi trường Java có hỗ trợ giao diện đồ họa, không phải bản headless."
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "Tạo hồ sơ Minecraft: Java Edition trên minecraft.net, rồi thử lại."
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "Đăng nhập bị từ chối. Bắt đầu lại nếu bạn muốn đăng nhập."
-
-msgid "Technical Details"
-msgstr "Chi tiết kỹ thuật"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "Không thể dùng tệp thực thi Java. Chọn môi trường Java hoạt động được."
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "Tệp nén không hợp lệ hoặc không an toàn. Tải lại từ nguồn đáng tin cậy."
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "Kết nối thất bại. Kiểm tra kết nối internet rồi thử lại."
-
-msgid "The destination already exists. Choose another location."
-msgstr "Đích đã tồn tại. Chọn vị trí khác."
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "Tệp tải xuống không vượt qua xác minh và chưa được cài. Hãy tải lại."
-
-msgid "The file or folder was not found. Check its location."
-msgstr "Không tìm thấy tệp hoặc thư mục. Kiểm tra vị trí."
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "Siêu dữ liệu trò chơi không hợp lệ hoặc không có sẵn. Làm mới danh sách phiên bản rồi thử lại."
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "Thao tác thất bại. Xem chi tiết kỹ thuật để biết thêm."
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "Không tìm thấy tệp, dự án hoặc phiên bản tương thích được yêu cầu."
-
-msgid "The service rejected the request. Try again later."
-msgstr "Dịch vụ từ chối yêu cầu. Hãy thử lại sau."
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "Dịch vụ trả về phản hồi không hợp lệ. Hãy thử lại sau."
-
-msgid "There is not enough free disk space."
-msgstr "Không đủ dung lượng đĩa trống."
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "Tài khoản này không sở hữu Minecraft: Java Edition."
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "Phiên bản cài đặt này không còn khả dụng. Làm mới danh sách phiên bản cài đặt."
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "Quá nhiều yêu cầu. Đợi một chút rồi thử lại."
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "Cài đặt không hợp lệ. Kiểm tra phiên bản đã chọn và đối số JVM."
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "Phiên đăng nhập đã lưu không còn hợp lệ. Hãy đăng nhập lại."
-
-msgid "Minecraft launcher for Linux"
-msgstr "Trình khởi chạy Minecraft cho Linux"
-
-msgid "Services & Ecosystem"
-msgstr "Dịch vụ & Hệ sinh thái"
-
-msgid "Minecraft Disclaimer"
-msgstr "Tuyên bố từ chối trách nhiệm Minecraft"
-
-msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
-msgstr ""
-"KHÔNG PHẢI LÀ SẢN PHẨM MINECRAFT CHÍNH THỨC. KHÔNG ĐƯỢC PHÊ DUYỆT BỞI HOẶC LIÊN KẾT VỚI MOJANG HOẶC MICROSOFT.\n"
-"\n"
-"Minecraft là thương hiệu của Mojang AB. Trình khởi chạy được phát triển độc lập và không liên kết với Mojang Studios hoặc Microsoft."
-
-msgid "Modrinth & Mod Loaders"
-msgstr "Modrinth & Trình tải mod"
-
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"Modpack, mod, gói tài nguyên và shader được lưu trữ bởi Modrinth và do các tác giả tương ứng tạo ra.\n"
-"\n"
-"Trình tải mod được phát triển độc lập bởi các dự án Fabric, Quilt, Forge và NeoForge."
-
-msgid "AppStream Metadata"
-msgstr "Metadata AppStream"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "Metadata AppStream (mô tả, tóm tắt và ghi chú phát hành) được phát hành theo Creative Commons CC0 1.0 Universal Public Domain Dedication."
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "Sao chép"
-
-msgid "Rename"
-msgstr "Đổi tên"
-
-msgid "Reset Icon"
-msgstr "Đặt lại biểu tượng"
-
-msgid "Delete World"
-msgstr "Xóa thế giới"
-
-msgid "Seed copied to clipboard"
-msgstr "Đã sao chép seed vào khay nhớ tạm"
-
-msgid "Remove server \"%s\"?"
-msgstr "Xóa máy chủ \"%s\"?"
-
-msgid "Refresh"
-msgstr "Làm mới"
-
-msgid "Remove Server"
-msgstr "Xóa máy chủ"
-
-msgid "Survival"
-msgstr "Sinh tồn"
-
-msgid "Edit"
-msgstr "Chỉnh sửa"
-
-msgid "Ask to download"
-msgstr "Hỏi trước khi tải xuống"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Các thế giới được Minecraft lưu hoặc nhập vào đây sẽ xuất hiện trong danh sách này."
-
-msgid "Rename World"
-msgstr "Đổi tên thế giới"
-
-msgid "Servers"
-msgstr "Máy chủ"
-
-msgid "Save"
-msgstr "Lưu"
-
-msgid "Add World"
-msgstr "Thêm thế giới"
-
-msgid "Spectator"
-msgstr "Khán giả"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "Xóa thế giới \"%s\"? Không thể hoàn tác thao tác này."
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Máy chủ thêm ở đây được lưu vào servers.dat cho phiên bản này."
-
-msgid "Add Server"
-msgstr "Thêm máy chủ"
-
-msgid "Edit Server"
-msgstr "Chỉnh sửa máy chủ"
-
-msgid "Address"
-msgstr "Địa chỉ"
-
-msgid "Datapacks"
-msgstr "Gói dữ liệu"
-
-msgid "No Worlds"
-msgstr "Không có thế giới nào"
-
-msgid "Creative"
-msgstr "Sáng tạo"
-
-msgid "Move Up"
-msgstr "Di chuyển lên"
-
-msgid "No Servers"
-msgstr "Không có máy chủ nào"
-
-msgid "Never download"
-msgstr "Không bao giờ tải xuống"
-
-msgid "Worlds"
-msgstr "Thế giới"
-
-msgid "Always download"
-msgstr "Luôn tải xuống"
-
-msgid "Move Down"
-msgstr "Di chuyển xuống"
-
-msgid "Copy Seed"
-msgstr "Sao chép seed"
-
-msgid "Stats"
-msgstr "Thống kê"
-
-msgid "Playtime"
-msgstr "Thời gian chơi"
-
-msgid "Time played"
-msgstr "Đã chơi"
-
-msgid "Not played yet"
-msgstr "Chưa chơi lần nào"
-
-msgid "Less than a minute"
-msgstr "Dưới một phút"
-
-msgid "%llu min"
-msgstr "%llu phút"
-
-msgid "%llu h %llu min"
-msgstr "%llu giờ %llu phút"
-
-msgid "Runs on"
-msgstr "Chạy trên"
-
-msgid "Activity"
-msgstr "Hoạt động"
-
-msgid "Last session"
-msgstr "Phiên gần nhất"
-
-msgid "Last played"
-msgstr "Lần chơi cuối"
-
-msgid "Total launches"
-msgstr "Tổng số lần chạy"
-
-msgid "Total crashes"
-msgstr "Tổng số lần lỗi"
-
-msgid "Server joins"
-msgstr "Số lần vào máy chủ"
-
-msgid "World loads"
-msgstr "Số lần tải thế giới"
-
-msgid "Player Profile"
-msgstr "Hồ sơ người chơi"
-
-msgid "Player type"
-msgstr "Kiểu người chơi"
-
-msgid "Pack style"
-msgstr "Kiểu gói"
-
-msgid "Average session"
-msgstr "Phiên trung bình"
-
-msgid "Stability"
-msgstr "Độ ổn định"
-
-msgid "Instance"
-msgstr "Phiên bản"
-
-msgid "Total size"
-msgstr "Tổng dung lượng"
-
-msgid "Created on"
-msgstr "Ngày tạo"
-
-msgid "Calculating…"
-msgstr "Đang tính…"
-
-msgid "Never"
-msgstr "Chưa từng"
-
-msgid "Today, %s"
-msgstr "Hôm nay, %s"
-
-msgid "Hybrid"
-msgstr "Kết hợp"
-
-msgid "Server Player"
-msgstr "Người chơi máy chủ"
-
-msgid "Singleplayer"
-msgstr "Chơi đơn"
-
-msgid "Unplayed"
-msgstr "Chưa chơi"
-
-msgid "Modpack"
-msgstr "Modpack"
-
-msgid "Lightweight"
-msgstr "Nhẹ"
-
-msgid "Kitchen Sink"
-msgstr "Đầy đủ"
-
-msgid "Quick"
-msgstr "Nhanh"
-
-msgid "Standard"
-msgstr "Tiêu chuẩn"
-
-msgid "Marathon"
-msgstr "Dài"
-
-msgid "Stable"
-msgstr "Ổn định"
-
-msgid "%u%% crash rate"
-msgstr "%u%% tỉ lệ lỗi"
-
-msgid "A name cannot be empty."
-msgstr "tên không được để trống."
-
-msgid "Remove server"
-msgstr "Xóa máy chủ"
-
-msgid "Download modpack"
-msgstr "Tải xuống Modpack"
-
-msgid "%s “%s”"
-msgstr "%s “%s”"
-
-msgid "Delete instance"
-msgstr "Xóa phiên bản"
-
-msgid "No worlds"
-msgstr "Không có thế giới nào"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "chờ đăng nhập trên trình duyệt…"
-
-msgid "Choose files"
-msgstr "Chọn Tệp"
-
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
 msgid "Cannot create “%s”: %s"
 msgstr "Không thể tạo “%s”: %s"
 
-msgid "Cache cleanup failed"
-msgstr "Dọn dẹp bộ đệm không thành công"
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "Không có trình tải mod"
 
-msgid "Español"
-msgstr "Español"
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Mod cần một trình tải mod. Trước tiên hãy chọn Fabric, Quilt, Forge hoặc "
+"NeoForge trong cài đặt của phiên bản này"
 
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth & Trình tải mod"
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "Hãy chọn một phiên bản Minecraft trong danh sách."
 
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "Xóa thế giới “%s”? Không thể hoàn tác thao tác này."
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Hãy chọn phiên bản loader hoặc chọn loader khác."
 
-msgid "Português"
-msgstr "Português"
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "Thư mục"
 
-msgid "Create an instance to start playing."
-msgstr "Tạo một phiên bản để bắt đầu chơi."
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "Chọn một thư mục"
 
-msgid "Duplicated to “%s”"
-msgstr "Đã sao chép vào “%s”"
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "Tạo nên"
 
-msgid "Downloading modpack"
-msgstr "Đang tải xuống Modpack"
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, fuzzy, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "Đã chọn %u/%u"
+msgstr[1] "Đã chọn %u/%u"
 
-msgid "Try again"
-msgstr "Thử lại"
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "Dịch vụ trả về phản hồi không hợp lệ. Hãy thử lại sau."
 
-msgid "Performance impact"
-msgstr "Ảnh hưởng đến hiệu năng"
-
-msgid "Add world"
-msgstr "Thêm thế giới"
-
-msgid "Create instance"
-msgstr "Tạo phiên bản"
-
-msgid "Browse modpacks"
-msgstr "Duyệt qua Modpacks"
-
-msgid "Remove server “%s”?"
-msgstr "Xóa máy chủ “%s”?"
-
-msgid "Path tracing"
-msgstr "Truy vết đường đi"
-
-msgid "Clean export"
-msgstr "Xuất khẩu sạch"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "Cơ chế trò chơi"
-
-msgid "Minecraft version"
-msgstr "Phiên bản Minecraft"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "Mở thư mục"
-
-msgid "AppStream metadata"
-msgstr "Metadata AppStream"
-
-msgid "Add Java runtime"
-msgstr "Thêm thời gian chạy Java"
-
-msgid "World generation"
-msgstr "Tạo thế giới"
-
-msgid "Keyboard shortcuts"
-msgstr "Phím tắt"
-
-msgid "Resource packs"
-msgstr "Gói tài nguyên"
-
-msgid "Edit server"
-msgstr "Chỉnh sửa máy chủ"
-
-msgid "Keep playing"
-msgstr "Tiếp tục chơi"
-
-msgid "Technical details"
-msgstr "Chi tiết kỹ thuật"
-
-msgid "Pack name"
-msgstr "Tên gói"
-
-msgid "Colored lighting"
-msgstr "Ánh sáng màu"
-
-msgid "Rename world"
-msgstr "Đổi tên thế giới"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "tên chỉ có thể chứa các chữ cái, chữ số và dấu gạch dưới."
-
-msgid "Preferences"
-msgstr "Cài đặt"
-
-msgid "Delete world"
-msgstr "Xóa thế giới"
-
-msgid "Asking Microsoft for a code…"
-msgstr "yêu cầu Microsoft cung cấp mã…"
-
-msgid "Show unstable mod loader versions"
-msgstr "Hiển thị các phiên bản Mod Loader không ổn định"
-
-msgid "Move down"
-msgstr "Di chuyển xuống"
-
-msgid "Clear cache"
-msgstr "Xóa bộ nhớ cache Nuvasha Launcher"
-
-msgid "Delete “%s”?"
-msgstr "Xóa “%s”?"
-
-msgid "Import modpack…"
-msgstr "Nhập khẩu Modpack…"
-
-msgid "Delete selected"
-msgstr "Xóa mục đã chọn"
-
-msgid "Java runtime"
-msgstr "Thời gian chạy Java"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "tên phải dài từ 3 đến 16 ký tự."
-
-msgid "Import modpack"
-msgstr "Nhập khẩu Modpack"
-
-msgid "Core shaders"
-msgstr "Shader cốt lõi"
-
-msgid "Sign in"
-msgstr "Đăng nhập"
-
-msgid "Cache cleared"
-msgstr "Đã xóa bộ nhớ đệm"
-
-msgid "No instances yet"
-msgstr "Chưa có trường hợp nào"
-
-msgid "Add offline account"
-msgstr "Thêm tài khoản ngoại tuyến"
-
-msgid "Copy seed"
-msgstr "Sao chép seed"
-
-msgid "Services & ecosystem"
-msgstr "Dịch vụ & Hệ sinh thái"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "Không có modpack nào phù hợp. Hãy thử một từ khác."
-
-msgid "Line limit"
-msgstr "Giới hạn dòng"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Gói Modrinth (*.mrpack)"
-
-msgid "Add server"
-msgstr "Thêm máy chủ"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
+#: src/nuvashalauncher-download-modpack-browser.c:763
 msgid "All versions"
 msgstr "Tất cả phiên bản"
 
-msgid "No servers"
-msgstr "Không có máy chủ nào"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "Tải xuống"
 
-msgid "Clear cache?"
-msgstr "Xóa Nuvasha Launcher Cache?"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "Mức độ liên quan"
 
-msgid "Loader version"
-msgstr "Phiên bản tải"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "Mới nhất"
 
-msgid "translator-credits"
-msgstr "Flia"
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "Cập nhật gần đây"
 
-msgid "Include all files"
-msgstr "Bao gồm tất cả các tệp"
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "Người theo dõi"
 
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "Lọc gói mod"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "Duyệt qua Modpacks"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Không tìm thấy tệp, dự án hoặc phiên bản tương thích được yêu cầu."
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+#, fuzzy
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "Không thể cài đặt modpack"
+msgstr[1] "Không thể cài đặt modpack"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
+msgid "Reading modpack"
+msgstr "Đọc modpack"
+
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
+msgid "Extracting files"
+msgstr "Giải nén tập tin"
+
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "Không thể cài đặt modpack"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "Đang tải tập tin"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
+msgid "Optional files"
+msgstr "Tệp tùy chọn"
+
+#: src/nuvashalauncher-download-modpack-install.c:265
+msgid ""
+"The pack lists these files but says they are not needed. Nothing of them is "
+"installed unless you ask. Default is off"
+msgstr ""
+"Gói liệt kê các tệp này nhưng cho biết chúng không cần thiết. Không có gì "
+"trong số chúng được cài đặt trừ khi bạn yêu cầu. Mặc định là tắt"
+
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
+msgid "Pack could not be fetched"
+msgstr "Không thể tìm nạp gói"
+
+#: src/nuvashalauncher-download-modpack-install.c:422
+msgid "Invalid pack"
+msgstr "Gói không hợp lệ"
+
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "Phiên bản này không có tệp modpack"
+
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"Dự án này không phát hành tệp modpack nào mà Nuvasha Launcher có thể cài đặt."
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
+msgstr "Đang tải xuống Modpack"
+
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "Tải xuống"
+
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Kết nối thất bại. Kiểm tra kết nối internet rồi thử lại."
+
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "Dịch vụ từ chối yêu cầu. Hãy thử lại sau."
+
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Quá nhiều yêu cầu. Đợi một chút rồi thử lại."
+
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr ""
+"Không thể đọc hoặc ghi tệp. Kiểm tra vị trí, quyền và dung lượng trống."
+
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr "Tệp tải xuống không vượt qua xác minh và chưa được cài. Hãy tải lại."
+
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr ""
+"Tệp nén không hợp lệ hoặc không an toàn. Tải lại từ nguồn đáng tin cậy."
+
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "Thao tác thất bại. Xem chi tiết kỹ thuật để biết thêm."
+
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr "Không thể dùng tệp thực thi Java. Chọn môi trường Java hoạt động được."
+
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "Truy cập bị từ chối. Kiểm tra quyền của thư mục."
+
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "Không đủ dung lượng đĩa trống."
+
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "Không tìm thấy tệp hoặc thư mục. Kiểm tra vị trí."
+
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "Đích đã tồn tại. Chọn vị trí khác."
+
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
+
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Phiên đăng nhập đã lưu không còn hợp lệ. Hãy đăng nhập lại."
+
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Đăng nhập bị từ chối. Bắt đầu lại nếu bạn muốn đăng nhập."
+
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Tài khoản này không sở hữu Minecraft: Java Edition."
+
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr "Tạo hồ sơ Minecraft: Java Edition trên minecraft.net, rồi thử lại."
+
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr ""
+"Bản dựng này chưa cấu hình đăng nhập Microsoft. Hãy cập nhật trình khởi chạy."
+
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
+
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"Không thể cài bộ nạp mod này. Chọn phiên bản khác hoặc xem chi tiết kỹ thuật."
+
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"Siêu dữ liệu trò chơi không hợp lệ hoặc không có sẵn. Làm mới danh sách "
+"phiên bản rồi thử lại."
+
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr ""
+"Phiên bản cài đặt này không còn khả dụng. Làm mới danh sách phiên bản cài "
+"đặt."
+
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "Chọn tên hoặc thư mục khác cho phiên bản cài đặt."
+
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr "Cài đặt không hợp lệ. Kiểm tra phiên bản đã chọn và đối số JVM."
+
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr ""
+"Không thể lưu tài khoản. Kiểm tra kho khóa hệ thống và quyền truy cập tệp."
+
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "Thông thoáng"
+
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "Đăng nhập"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "Mở trong trình duyệt"
+
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "Thử lại"
+
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "Thêm tài khoản ngoại tuyến"
+
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "Tên"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "Thêm vào"
+
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "Tạo phiên bản"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "Tải xuống Modpack"
+
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "Nhập khẩu Modpack"
+
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "Đang nhập modpack…"
+
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "Tìm kiếm modpack"
+
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "Đóng"
+
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "Không có modpack nào phù hợp. Hãy thử một từ khác."
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "Chọn Tệp"
+
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "Không thể cài đặt"
+
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "Mặt sau"
+
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "Tìm kiếm nhật ký"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
+msgid "Classic model"
+msgstr "Mô hình cổ điển"
+
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "mô hình mỏng"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "Tùy chỉnh"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
+msgid "Import skin…"
+msgstr "Da nhập khẩu…"
+
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "Xuất khẩu da…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Lỗi Minecraft Services"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "Mặc định hệ thống"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "Bản sao của %s"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "tên phiên bản đang trống"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "Các phiên bản không thể chứa %s trong tên của chúng"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "tên phiên bản không thể được dùng làm tên thư mục"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Đã xuất modpack"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "Vị trí xuất không phải là tệp cục bộ"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "Xuất modpack"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "Xuất modpack"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
 msgid "Export modpack"
 msgstr "Xuất Modpack"
 
-msgid "Add world…"
-msgstr "Thêm thế giới…"
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Gói Modrinth (*.mrpack)"
 
-msgid "Update all"
-msgstr "Cập nhật tất cả"
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "Thông tin gói"
 
-msgid "Add Microsoft account"
-msgstr "Thêm tài khoản Microsoft"
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "Xuất khẩu"
 
-msgid "Move up"
-msgstr "Di chuyển lên"
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "Xuất siêu dữ liệu modpack"
 
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "Tên gói"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "Bản tóm tắt"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "Mã phiên bản"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "Bao gồm các tập tin tạm thời?"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Nhật ký, báo cáo sự cố, ảnh chụp màn hình, bộ nhớ đệm và nội dung tải xuống "
+"thường bị loại trừ."
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "Xuất khẩu sạch"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "Bao gồm tất cả các tệp"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "Trò chơi đang chạy; dừng nó lại trước khi di chuyển thư mục của nó"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "Chọn một thư mục"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "Đã sao chép vào “%s”"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Java được định cấu hình không được phát hiện; đảm bảo rằng nó vẫn là một tệp "
+"thực thi java có thể sử dụng được"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Trò chơi này cần Java %d hoặc mới hơn, Java được chọn là %d"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr ""
+"Chọn môi trường Java có hỗ trợ giao diện đồ họa, không phải bản headless."
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "Biểu tượng phải là một tập tin trên máy tính này"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "Chọn một biểu tượng"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "Hình ảnh"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "Tổng quan"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "Biểu tượng"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "Thay đổi thư mục"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "Đối số JVM"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "hành động"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "Nhân bản"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "Xóa phiên bản"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "Dưới một phút"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu phút"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu giờ %llu phút"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "Hôm nay, %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "Chưa chơi lần nào"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "Chưa từng"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "Đang tính…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "Hoạt động"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "Đã chơi"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "Lần chơi cuối"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "Tổng số lần chạy"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "Tổng số lần lỗi"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "Phiên bản"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "Tổng dung lượng"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "Ngày tạo"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "Không xác định"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "Nhật ký"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "Cài đặt"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "Gói tài nguyên"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "Gói đổ bóng"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "mod"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "Thế giới"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "Máy chủ"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "Thống kê"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "tệp đã chọn không báo cáo phiên bản Java"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Chọn tệp thực thi Java"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "Đang tải…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "Tùy chỉnh: %s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Thêm thời gian chạy Java"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Thời gian chạy Java"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Đã tạo báo cáo sự cố mới. Mở nhật ký để xem chi tiết."
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "trò chơi đã bị dừng bởi tín hiệu %d"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "trò chơi đã thoát với mã %d"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "Không tìm thấy môi trường chạy Java tương thích."
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "không thể đọc được các phiên bản của trình tải này"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s (không ổn định)"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "Không có"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Không tìm thấy phiên bản %s tương thích cho Minecraft %s."
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "Chọn phiên bản Minecraft trước"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "Trình tải"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "Phiên bản tải"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "Chi tiết kỹ thuật"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Xóa Nuvasha Launcher Cache?"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "Đã xóa bộ nhớ đệm"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "Dọn dẹp bộ đệm không thành công"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "Yêu cầu xuất siêu dữ liệu"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "Hiển thị các trường tên, tóm tắt và phiên bản trước khi xuất."
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Xóa một phần phụ thuộc sẽ xóa mod phụ thuộc vào nó"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "Hiển thị các phiên bản Minecraft không ổn định"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "Hiển thị các phiên bản Mod Loader không ổn định"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "Ngôn ngữ"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "Ngôn ngữ giao diện"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "Giới hạn dòng"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "Bộ nhớ đệm"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Phản hồi API Modrinth của bộ đệm"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1 giờ"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6 giờ"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1 ngày"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7 ngày"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "Hết hạn bộ nhớ đệm"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "Xóa bộ nhớ cache Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Trình khởi chạy Minecraft cho Linux"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "Dịch vụ & Hệ sinh thái"
+
+#: src/nuvashalauncher-main-window-actions.c:626
 msgid "Minecraft disclaimer"
 msgstr "Tuyên bố từ chối trách nhiệm Minecraft"
 
-msgid "Shader packs"
-msgstr "Gói đổ bóng"
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"KHÔNG PHẢI LÀ SẢN PHẨM MINECRAFT CHÍNH THỨC. KHÔNG ĐƯỢC PHÊ DUYỆT BỞI HOẶC "
+"LIÊN KẾT VỚI MOJANG HOẶC MICROSOFT.\n"
+"\n"
+"Minecraft là thương hiệu của Mojang AB. Trình khởi chạy được phát triển độc "
+"lập và không liên kết với Mojang Studios hoặc Microsoft."
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth & Trình tải mod"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"Modpack, mod, gói tài nguyên và shader được lưu trữ bởi Modrinth và do các "
+"tác giả tương ứng tạo ra.\n"
+"\n"
+"Trình tải mod được phát triển độc lập bởi các dự án Fabric, Quilt, Forge và "
+"NeoForge."
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "Metadata AppStream"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"Metadata AppStream (mô tả, tóm tắt và ghi chú phát hành) được phát hành theo "
+"Creative Commons CC0 1.0 Universal Public Domain Dedication."
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "Giới thiệu về Trình khởi chạy Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "Phím tắt"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "Cài đặt"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "Từ bỏ"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "Xóa mục đã chọn"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "Nhập khẩu Modpack…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "Dừng lại"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "Chơi"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "Dừng %s?"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "trò chơi"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"Trò chơi đang chạy và sẽ đóng. Tiến trình kể từ lần lưu gần nhất sẽ bị mất."
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "Tiếp tục chơi"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "Tài khoản"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "Chưa có trường hợp nào"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "Tạo một phiên bản để bắt đầu chơi."
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraft bị rơi"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Minecraft không thể bắt đầu"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft cần đăng nhập"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "Minecraft Services đã từ chối yêu cầu (HTTP %u)%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "Viết lưu trữ"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "Xuất hoàn tất"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "trình tải không thể giải quyết được: %s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "Phiêu lưu"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "Bầu không khí"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "Âm thanh"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "Khối"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "Quầng sáng"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "Hoạt hình"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "Danh mục"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "Ánh sáng màu"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "Chiến đấu"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "Shader cốt lõi"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "Kỳ quái"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "Trang trí"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "Kinh tế"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "Thực thể"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "Môi trường"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "Trang bị"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "Giả tưởng"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "Tính năng"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "Cây cỏ"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "Phông chữ"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "Thức ăn"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "Cơ chế trò chơi"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "Giao diện"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "Cao"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "Vật phẩm"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "Thư viện"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "Thấp"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "Phép thuật"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "Quản lý"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "Trung bình"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "Trò chơi nhỏ"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "Sinh vật"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "Có mod"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "Mô hình"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "Tối ưu hóa"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "Truy vết đường đi"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "Ảnh hưởng đến hiệu năng"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "Dành cho máy cấu hình rất thấp"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "Chân thực"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "Phản chiếu"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "Độ phân giải"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "Ảnh chụp màn hình"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "Bán chân thực"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "Bóng đổ"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "Đơn giản"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "Xã hội"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "Lưu trữ"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "Công nghệ"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "Theo chủ đề"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "Vận chuyển"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "Tinh chỉnh"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "Tiện ích"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "Giống bản gốc"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "Tạo thế giới"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr "Modrinth yêu cầu Nuvasha Launcher chậm lại vì có quá nhiều yêu cầu"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "Modrinth không biết tệp này"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Không tìm thấy phiên bản tương thích cho Minecraft %s và %s."
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "Đã có tài khoản ngoại tuyến với tên này."
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "Chỉnh sửa máy chủ"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "Thêm máy chủ"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "Lưu"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "Địa chỉ"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "Hỏi trước khi tải xuống"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "Luôn tải xuống"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "Không bao giờ tải xuống"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "Xóa máy chủ “%s”?"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "Xóa máy chủ"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "Di chuyển lên"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "Di chuyển xuống"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "Chỉnh sửa"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "Làm mới"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "Không có máy chủ nào"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Máy chủ thêm ở đây được lưu vào servers.dat cho phiên bản này."
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "yêu cầu Microsoft cung cấp mã…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "chờ đăng nhập trên trình duyệt…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Không thể mở trình duyệt. Hãy tự mở địa chỉ được hiển thị."
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"Microsoft trả về địa chỉ đăng nhập không an toàn. Cập nhật trình khởi chạy "
+"trước khi thử lại."
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Mở trang trong trình duyệt của bạn, sau đó nhập mã này:"
+
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Giao diện"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Hình ảnh da phải là tệp PNG 64x64 hoặc 64x32"
+
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "Da không hợp lệ"
+
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "ĐƯỢC RỒI"
+
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "Kết cấu skin PNG"
+
+#: src/nuvashalauncher-users-popover-skin.c:368
+msgid "Delete skin?"
+msgstr "Xóa da?"
+
+#: src/nuvashalauncher-users-popover-skin.c:369
+msgid "This skin will be removed from the skin library."
+msgstr "Da này sẽ bị xóa khỏi thư viện da."
+
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "Không có áo choàng"
+
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
+msgid "Remove %s?"
+msgstr "Xóa %s?"
+
+#: src/nuvashalauncher-users-popover.c:178
+msgid "this account"
+msgstr "tài khoản này"
+
+#: src/nuvashalauncher-users-popover.c:181
+msgid ""
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
+msgstr ""
+"Tài khoản sẽ bị xóa khỏi Nuvasha Launcher và thông tin đăng nhập đã lưu sẽ "
+"bị quên. Trò chơi không bị ảnh hưởng."
+
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "Di dời"
+
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Cần đăng nhập"
+
+#: src/nuvashalauncher-users-popover.c:398
+msgid "Add Microsoft account"
+msgstr "Thêm tài khoản Microsoft"
+
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Phiên bản Minecraft"
+
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "Sinh tồn"
+
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "Sáng tạo"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "Khán giả"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "Đổi tên thế giới"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "Đổi tên"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "Sao chép"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "Đã sao chép seed vào khay nhớ tạm"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Xóa thế giới “%s”? Không thể hoàn tác thao tác này."
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "Xóa thế giới"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "Sao chép seed"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "Thêm thế giới"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "Thêm thế giới…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "Không có thế giới nào"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr ""
+"Các thế giới được Minecraft lưu hoặc nhập vào đây sẽ xuất hiện trong danh "
+"sách này."
+
+#~ msgid "Colored Lighting"
+#~ msgstr "Ánh sáng màu"
+
+#~ msgid "Core Shaders"
+#~ msgstr "Shader cốt lõi"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "Cơ chế trò chơi"
+
+#~ msgid "Path Tracing"
+#~ msgstr "Truy vết đường đi"
+
+#~ msgid "Performance Impact"
+#~ msgstr "Ảnh hưởng đến hiệu năng"
+
+#~ msgid "World Generation"
+#~ msgstr "Tạo thế giới"
+
+#~ msgid "All Versions"
+#~ msgstr "Tất cả phiên bản"
+
+#~ msgid "Update All"
+#~ msgstr "Cập nhật tất cả"
+
+#~ msgid "Open Folder"
+#~ msgstr "Mở thư mục"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "Không có gì được chọn"
+
+#~ msgid "Create Instance"
+#~ msgstr "Tạo phiên bản"
+
+#~ msgid "Download Modpack"
+#~ msgstr "Tải xuống Modpack"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "Đã sao chép vào \"%s\""
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "Xóa \"%s\"?"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Thời gian chạy Java"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Thêm thời gian chạy Java"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "Minecraft cần một non-headless Java: trên Arch sử dụng gói jre-openjdk, "
+#~ "không phải jre-openjdk-headless"
+
+#~ msgid "Delete Instance"
+#~ msgstr "Xóa phiên bản"
+
+#~ msgid "Resource Packs"
+#~ msgstr "Gói tài nguyên"
+
+#~ msgid "Shader Packs"
+#~ msgstr "Gói đổ bóng"
+
+#~ msgid "Loader Version"
+#~ msgstr "Phiên bản tải"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "Hiển thị các phiên bản Mod Loader không ổn định"
+
+#~ msgid "Line Limit"
+#~ msgstr "Giới hạn dòng"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "Phím tắt"
+
+#~ msgid "Keep Playing"
+#~ msgstr "Tiếp tục chơi"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "Chưa có trường hợp nào"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "Sử dụng nút + trong tiêu đề để tạo một nút"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "Thêm tài khoản ngoại tuyến"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "tên chỉ có thể chứa các chữ cái, chữ số và dấu gạch dưới"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "tên không được để trống"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "tên phải dài từ 3 đến 16 ký tự"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "yêu cầu Microsoft cung cấp mã"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "chờ đăng nhập trên trình duyệt"
+
+#~ msgid "Sign In"
+#~ msgstr "Đăng nhập"
+
+#~ msgid "Try Again"
+#~ msgstr "Thử lại"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Thêm tài khoản Microsoft"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Phiên bản Minecraft"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s \"%s\""
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "Hiển thị phím tắt"
+
+#~ msgid "Import Modpack"
+#~ msgstr "Nhập khẩu Modpack"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Gói Modrinth (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "Xuất Modpack"
+
+#~ msgid "Clean Export"
+#~ msgstr "Xuất khẩu sạch"
+
+#~ msgid "Include All Files"
+#~ msgstr "Bao gồm tất cả các tệp"
+
+#~ msgid "Pack Name"
+#~ msgstr "Tên gói"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "Gói không xác định cài đặt của nó"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "Đang tải xuống Modpack"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "Đã cài đặt %u mục"
+#~ msgstr[1] "Đã cài đặt %u mục"
+
+#~ msgid "no compatible version"
+#~ msgstr "không có phiên bản tương thích"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "Không thể tạo \"%s\": %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "Đã xóa bộ nhớ đệm"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "Dọn dẹp bộ đệm không thành công"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "Không thể xóa bộ nhớ đệm."
+
+#~ msgid "This cannot be installed"
+#~ msgstr "Cái này không cài được"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "Duyệt qua Modpacks"
+
+#~ msgid "Choose Files"
+#~ msgstr "Chọn Tệp"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "Xóa bộ nhớ cache Nuvasha Launcher"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Xóa Nuvasha Launcher Cache?"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "Không thể hiểu câu trả lời"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "Nó mang các tệp mà Nuvasha Launcher không nhận ra."
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "Microsoft đã trả lại địa chỉ xác minh không an toàn"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr "Không có modpack nào phù hợp. Hãy thử một từ khác"
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Đã xóa dữ liệu bộ nhớ đệm của Nuvasha Launcher thành công."
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Tìm kiếm Modrinth và cài đặt modpack"
+
+#~ msgid "Unavailable"
+#~ msgstr "Không khả dụng"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "quá trình đăng nhập chưa hoàn tất"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Các phiên bản sau sẽ bị xóa:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "Chế độ chỉnh sửa"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "Vào chế độ chỉnh sửa"
+
+#~ msgid "Delete Selected"
+#~ msgstr "Xóa mục đã chọn"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "Không thể tải chi tiết dự án. Hãy thử lại."
+
+#~ msgid "Technical Details"
+#~ msgstr "Chi tiết kỹ thuật"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "Dịch vụ & Hệ sinh thái"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Tuyên bố từ chối trách nhiệm Minecraft"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth & Trình tải mod"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "Metadata AppStream"
+
+#~ msgid "Reset Icon"
+#~ msgstr "Đặt lại biểu tượng"
+
+#~ msgid "Delete World"
+#~ msgstr "Xóa thế giới"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "Xóa máy chủ \"%s\"?"
+
+#~ msgid "Remove Server"
+#~ msgstr "Xóa máy chủ"
+
+#~ msgid "Rename World"
+#~ msgstr "Đổi tên thế giới"
+
+#~ msgid "Add World"
+#~ msgstr "Thêm thế giới"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "Xóa thế giới \"%s\"? Không thể hoàn tác thao tác này."
+
+#~ msgid "Add Server"
+#~ msgstr "Thêm máy chủ"
+
+#~ msgid "Edit Server"
+#~ msgstr "Chỉnh sửa máy chủ"
+
+#~ msgid "Datapacks"
+#~ msgstr "Gói dữ liệu"
+
+#~ msgid "No Worlds"
+#~ msgstr "Không có thế giới nào"
+
+#~ msgid "Move Up"
+#~ msgstr "Di chuyển lên"
+
+#~ msgid "No Servers"
+#~ msgstr "Không có máy chủ nào"
+
+#~ msgid "Move Down"
+#~ msgstr "Di chuyển xuống"
+
+#~ msgid "Copy Seed"
+#~ msgstr "Sao chép seed"
+
+#~ msgid "Playtime"
+#~ msgstr "Thời gian chơi"
+
+#~ msgid "Runs on"
+#~ msgstr "Chạy trên"
+
+#~ msgid "Last session"
+#~ msgstr "Phiên gần nhất"
+
+#~ msgid "Server joins"
+#~ msgstr "Số lần vào máy chủ"
+
+#~ msgid "World loads"
+#~ msgstr "Số lần tải thế giới"
+
+#~ msgid "Player Profile"
+#~ msgstr "Hồ sơ người chơi"
+
+#~ msgid "Player type"
+#~ msgstr "Kiểu người chơi"
+
+#~ msgid "Pack style"
+#~ msgstr "Kiểu gói"
+
+#~ msgid "Average session"
+#~ msgstr "Phiên trung bình"
+
+#~ msgid "Stability"
+#~ msgstr "Độ ổn định"
+
+#~ msgid "Hybrid"
+#~ msgstr "Kết hợp"
+
+#~ msgid "Server Player"
+#~ msgstr "Người chơi máy chủ"
+
+#~ msgid "Singleplayer"
+#~ msgstr "Chơi đơn"
+
+#~ msgid "Unplayed"
+#~ msgstr "Chưa chơi"
+
+#~ msgid "Modpack"
+#~ msgstr "Modpack"
+
+#~ msgid "Lightweight"
+#~ msgstr "Nhẹ"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "Đầy đủ"
+
+#~ msgid "Quick"
+#~ msgstr "Nhanh"
+
+#~ msgid "Standard"
+#~ msgstr "Tiêu chuẩn"
+
+#~ msgid "Marathon"
+#~ msgstr "Dài"
+
+#~ msgid "Stable"
+#~ msgstr "Ổn định"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "%u%% tỉ lệ lỗi"

@@ -1,457 +1,363 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: tr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-msgid "Adventure"
-msgstr "Macera"
-msgid "Atmosphere"
-msgstr "Atmosfer"
-msgid "Audio"
-msgstr "Ses"
-msgid "Blocks"
-msgstr "Bloklar"
-msgid "Bloom"
-msgstr "Işık parlaması"
-msgid "Cartoon"
-msgstr "Çizgi film"
-msgid "Categories"
-msgstr "Kategoriler"
-msgid "Colored Lighting"
-msgstr "Renkli aydınlatma"
-msgid "Combat"
-msgstr "Savaş"
-msgid "Core Shaders"
-msgstr "Temel oyun gölgelendiricileri"
-msgid "Cursed"
-msgstr "Tuhaf"
-msgid "Decoration"
-msgstr "Dekorasyon"
-msgid "Economy"
-msgstr "Ekonomi"
-msgid "Entities"
-msgstr "Varlıklar"
-msgid "Environment"
-msgstr "Çevre"
-msgid "Equipment"
-msgstr "Ekipman"
-msgid "Fantasy"
-msgstr "Fantastik"
-msgid "Features"
-msgstr "Özellikler"
-msgid "Foliage"
-msgstr "Bitki örtüsü"
-msgid "Fonts"
-msgstr "Yazı tipleri"
-msgid "Food"
-msgstr "Yiyecek"
-msgid "Game Mechanics"
-msgstr "Oyun mekanikleri"
-msgid "Interface"
-msgstr "Arayüz"
-msgid "High"
-msgstr "Yüksek"
-msgid "Items"
-msgstr "Eşyalar"
-msgid "Library"
-msgstr "Kütüphane"
-msgid "Low"
-msgstr "Düşük"
-msgid "Magic"
-msgstr "Büyü"
-msgid "Management"
-msgstr "Yönetim"
-msgid "Medium"
-msgstr "Orta"
-msgid "Minigame"
-msgstr "Mini oyun"
-msgid "Mobs"
-msgstr "Canlılar"
-msgid "Modded"
-msgstr "Modlu"
-msgid "Models"
-msgstr "Modeller"
-msgid "Optimization"
-msgstr "Optimizasyon"
-msgid "Path Tracing"
-msgstr "Yol izleme"
-msgid "Performance Impact"
-msgstr "Performans etkisi"
-msgid "Potato"
-msgstr "Çok düşük donanımlı bilgisayarlar için"
-msgid "Realistic"
-msgstr "Gerçekçi"
-msgid "Reflections"
-msgstr "Yansımalar"
-msgid "Resolutions"
-msgstr "Çözünürlükler"
-msgid "Screenshot"
-msgstr "Ekran görüntüsü"
-msgid "Semi-realistic"
-msgstr "Yarı gerçekçi"
-msgid "Shadows"
-msgstr "Gölgeler"
-msgid "Simplistic"
-msgstr "Sade"
-msgid "Social"
-msgstr "Sosyal"
-msgid "Storage"
-msgstr "Depolama"
-msgid "Technology"
-msgstr "Teknoloji"
-msgid "Themed"
-msgstr "Temalı"
-msgid "Transportation"
-msgstr "Ulaşım"
-msgid "Tweaks"
-msgstr "İnce ayarlar"
-msgid "Utility"
-msgstr "Yardımcı araçlar"
-msgid "Vanilla-like"
-msgstr "Temel oyuna benzer"
-msgid "World Generation"
-msgstr "Dünya oluşturma"
 
-msgid "All Versions"
-msgstr "Tüm sürümler"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "Alaka düzeyi"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "Çevrimdışı"
 
-msgid "Newest"
-msgstr "En yeniler"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "ad boş olamaz."
 
-msgid "Recently updated"
-msgstr "Son güncellenenler"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "ad 3 ila 16 karakter uzunluğunda olmalıdır."
 
-msgid "Followers"
-msgstr "Takipçiler"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "bir ad yalnızca harf, rakam ve alt çizgi içerebilir."
 
-msgid "Filter modpacks"
-msgstr "Mod paketlerini filtrele"
-
-msgid "Cancel"
-msgstr "İptal"
-
-msgid "Confirm"
-msgstr "Onayla"
-
-msgid "Customize"
-msgstr "Özelleştir"
-
-msgid "Delete"
-msgstr "Sil"
-
-msgid "Retry"
-msgstr "Yeniden Dene"
-
-msgid "Loading…"
-msgstr "Yükleniyor…"
-
-msgid "Download"
-msgstr "İndir"
-
-msgid "Update All"
-msgstr "Tümünü Güncelle"
-
-msgid "Open Folder"
-msgstr "Klasörü Aç"
-
-msgid "Nothing installed yet"
-msgstr "Henüz hiçbir şey kurulu değil"
-
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Bu örneğin klasörüne eklenecek bir şey arayın"
-
-msgid "Installed"
-msgstr "Kurulu"
-
-msgid "Loading more…"
-msgstr "Daha fazlası yükleniyor…"
-
-msgid "Nothing is selected"
-msgstr "Hiçbir şey seçili değil"
-
-
-msgid "Filter by category"
-msgstr "Kategoriye göre filtrele"
-
-msgid "Nothing to show yet"
-msgstr "Henüz gösterilecek bir şey yok"
-
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
 msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
 msgstr ""
-"Aramak istediğinizi yazın veya Modrinth’in bu örnek için sunduğu her şeye "
-"göz atın"
+"Bu Microsoft hesabına henüz bir Xbox profili atanmamış: Bu hesapla "
+"xbox.com'da bir kez oturum açın, ardından buraya tekrar oturum açın"
 
-msgid "Browse"
-msgstr "Göz At"
-
-msgid "No mod loader"
-msgstr "Mod yükleyici yok"
-
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
 msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
 msgstr ""
-"Modlar için bir mod yükleyici gerekiyor. Önce bu örneğin ayarlarından "
-"Fabric, Quilt, Forge veya NeoForge seçin"
+"Bu bir çocuk hesabıdır: Oyun oynamaya başlayabilmesi için bir yetişkin "
+"tarafından bir Microsoft Ailesi’ne eklenmesi gerekir"
 
-msgid "Create Instance"
-msgstr "Örnek Oluştur"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr "Bu hesabın kayıtlı olduğu ülkede Xbox Live hizmeti sunulmamaktadır"
 
-msgid "Name"
-msgstr "Ad"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"Bu hesabın oyun oynamaya başlayabilmesi için bir yetişkin tarafından "
+"doğrulanması gerekiyor; Güney Koreli hesapların da yapması gereken budur"
 
-msgid "Directory"
-msgstr "Klasör"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Microsoft, oturum açmak için bir kod vermedi"
 
-msgid "Choose a folder"
-msgstr "Bir klasör seç"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1f milyon indirme"
 
-msgid "Create"
-msgstr "Oluştur"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1f bin indirme"
 
-msgid "Download Modpack"
-msgstr "Modpack indir"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s indirme"
 
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s  ·  %s tarafından"
 
-msgid "Search modpacks"
-msgstr "Modpack’lerde ara"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "%s tarafından"
 
-msgid "Close"
-msgstr "Kapat"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, fuzzy, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "%u/%u seçildi"
+msgstr[1] "%u/%u seçildi"
 
-msgid "Back"
-msgstr "Geri"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, fuzzy, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "Kaynak Paketleri"
+msgstr[1] "Kaynak Paketleri"
 
+#: src/nuvashalauncher-content-page-browser.c:98
+#, fuzzy, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "%u/%u seçildi"
+msgstr[1] "%u/%u seçildi"
+
+#: src/nuvashalauncher-content-page-browser.c:101
+#, fuzzy, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "%u/%u seçildi"
+msgstr[1] "%u/%u seçildi"
+
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr ""
+
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "Kur"
 
-msgid "Copy of %s"
-msgstr "%s kopyası"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "Sonraki sayfa yüklenemedi"
 
-msgid "Choose Java executable"
-msgstr "Java çalıştırılabilir dosyasını seç"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Modrinth'te arama yapılamadı"
 
-msgid "the chosen file does not report a Java version"
-msgstr "seçilen dosya bir Java sürümü bildirmiyor"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "Diğer"
 
-msgid "Choose an Icon"
-msgstr "Bir simge seç"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "Kategoriler yüklenemedi"
 
-msgid "Choose a Directory"
-msgstr "Bir klasör seç"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "Yeniden Dene"
 
-msgid "Duplicated to \"%s\""
-msgstr "\"%s\" konumuna çoğaltıldı"
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "Sürümler yüklenemedi. Tekrar deneyin."
 
-msgid "Delete \"%s\"?"
-msgstr "\"%s\" silinsin mi?"
-
-msgid "General"
-msgstr "Genel"
-
-msgid "Icon"
-msgstr "Simge"
-
-msgid "Change the Directory"
-msgstr "Klasörü değiştir"
-
-msgid "Minecraft"
-msgstr "Minecraft"
-
-msgid "Java"
-msgstr "Java"
-
-msgid "Java Runtime"
-msgstr "Java çalışma zamanı"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "Bu oyun Java %d veya daha yeni bir sürüm gerektiriyor, seçilen Java %d"
-
-msgid "Add Java Runtime"
-msgstr "Java çalışma zamanı ekle"
-
-msgid ""
-"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
-"not jre-openjdk-headless"
-msgstr ""
-"Minecraft’in headless olmayan bir Java’ya ihtiyacı var: Arch üzerinde jre-"
-"openjdk-headless değil, jre-openjdk paketini kullanın"
-
-msgid "JVM Arguments"
-msgstr "JVM Argümanları"
-
-msgid ""
-"The configured Java was not detected; make sure it is still a usable java "
-"executable"
-msgstr ""
-"Yapılandırılmış Java algılanmadı; hâlâ kullanılabilir bir Java "
-"çalıştırılabilir dosyası olduğundan emin olun"
-
-msgid "Actions"
-msgstr "Eylemler"
-
-msgid "Duplicate"
-msgstr "Çoğalt"
-
-msgid "Delete Instance"
-msgstr "Örneği sil"
-
-msgid "Settings"
-msgstr "Ayarlar"
-
-msgid "Resource Packs"
-msgstr "Kaynak Paketleri"
-
-msgid "Shader Packs"
-msgstr "Gölgelendirici Paketleri"
-
-msgid "Mods"
-msgstr "Modlar"
-
-msgid "Logs"
-msgstr "Günlükler"
-
-msgid "Custom: %s"
-msgstr "Özel: %s"
-
-msgid "the game was stopped by signal %d"
-msgstr "oyun %d sinyaliyle durduruldu"
-
-msgid "the game exited with code %d"
-msgstr "oyun %d koduyla sona erdi"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "Minecraft %s için uyumlu %s sürümü bulunamadı."
-
-msgid "Loader"
-msgstr "Mod yükleyici"
-
-msgid "Loader Version"
-msgstr "Mod yükleyici sürümü"
-
-msgid "Clear"
-msgstr "Temizle"
-
-msgid "Search the log"
-msgstr "Günlükte ara"
-
-msgid "Versions"
-msgstr "Sürümler"
-
-msgid "Show unstable Minecraft versions"
-msgstr "Kararsız Minecraft sürümlerini göster"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "Kararsız mod yükleyici sürümlerini göster"
-
-msgid "Language"
-msgstr "Dil"
-
-msgid "Interface language"
-msgstr "Arayüz dili"
-
-msgid "Line Limit"
-msgstr "Satır sınırı"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "Nuvasha Launcher hakkında"
-
-msgid "Keyboard Shortcuts"
-msgstr "Klavye kısayolları"
-
-msgid "Stop"
-msgstr "Durdur"
-
-msgid "Play"
-msgstr "Oyna"
-
-msgid "Keep Playing"
-msgstr "Oynamaya devam et"
-
-msgid "Downloads"
-msgstr "İndirmeler"
-
-msgid "Accounts"
-msgstr "Hesaplar"
-
-msgid "No Instances Yet"
-msgstr "Henüz örnek yok"
-
-msgid "Use the + button in the header to create one"
-msgstr "Bir tane oluşturmak için başlıktaki + düğmesini kullanın"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "mod yükleyici çözümlenemiyor: %s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "Minecraft %s ve %s için uyumlu sürüm bulunamadı."
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "Minecraft %s için uyumlu sürüm bulunamadı."
 
-msgid "Add Offline Account"
-msgstr "Çevrimdışı hesap ekle"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "Sürümler"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "bir ad yalnızca harf, rakam ve alt çizgi içerebilir"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "Klasör okunamıyor"
 
-msgid "a name cannot be empty"
-msgstr "ad boş olamaz"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "ad 3 ila 16 karakter uzunluğunda olmalıdır"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "Dosya yüklenemedi"
 
-msgid "Add"
-msgstr "Ekle"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "Microsoft’dan kod isteniyor"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "Klasör oluşturulamadı"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "tarayıcıda oturum açılması bekleniyor"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "İçerik"
 
-msgid "Sign In"
-msgstr "Oturum aç"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "Yükleme"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "Sayfayı tarayıcınızda açın, ardından bu kodu girin:"
-
-msgid "Try Again"
-msgstr "Tekrar Dene"
-
-msgid "Remove"
-msgstr "Kaldır"
-
-msgid "Add Microsoft Account"
-msgstr "Microsoft Hesabı Ekle"
-
-msgid "Minecraft Version"
-msgstr "Minecraft Sürümü"
-
-msgid "Install the selected %s?"
-msgstr "Seçili %s yüklensin mi?"
-
-msgid "%s \"%s\""
-msgstr "%s “%s”"
-
-msgid "Search"
-msgstr "Ara"
-
-msgid "Update"
-msgstr "Güncelle"
-
-msgid "Update the following %s"
-msgstr "Şunları güncelle: %s"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "Bağımlılıklar:"
 
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "Çatışmalar\n"
+
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "%s yükleniyor"
+
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "Güncelle"
+
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s “%s”"
+
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "İptal"
+
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "Bu proje bu örneğe uyan hiçbir şey yayımlamıyor."
+
+#: src/nuvashalauncher-content-page-install.c:1003
+#, fuzzy, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "%s yükleniyor"
+msgstr[1] "%s yükleniyor"
+
+#: src/nuvashalauncher-content-page-install.c:1006
+#, fuzzy, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "%s yükleniyor"
+msgstr[1] "%s yükleniyor"
+
+#: src/nuvashalauncher-content-page-install.c:1009
+#, fuzzy, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "%s yükleniyor"
+msgstr[1] "%s yükleniyor"
+
+#: src/nuvashalauncher-content-page-install.c:1012
+#, fuzzy, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "%s yükleniyor"
+msgstr[1] "%s yükleniyor"
+
+#: src/nuvashalauncher-content-page-install.c:1038
+#, fuzzy
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "Şunları güncelle: %s"
+msgstr[1] "Şunları güncelle: %s"
+
+#: src/nuvashalauncher-content-page-install.c:1041
+#, fuzzy
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "Seçili %s yüklensin mi?"
+msgstr[1] "Seçili %s yüklensin mi?"
+
+#: src/nuvashalauncher-content-page-install.c:1044
+#, fuzzy
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "Şunları güncelle: %s"
+msgstr[1] "Şunları güncelle: %s"
+
+#: src/nuvashalauncher-content-page-install.c:1047
+#, fuzzy
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "Şunları güncelle: %s"
+msgstr[1] "Şunları güncelle: %s"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "Dosya silinemiyor"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "Etkinleştir"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "Bağımlı mod silinemiyor"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "Dosyanın adı değiştirilemiyor"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "Silindi"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "“%s” silinsin mi?"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
 msgid ""
 "The following mods depend on %s:\n"
 "%s"
@@ -459,94 +365,266 @@ msgstr ""
 "Şu modlar %s moduna bağlı:\n"
 "%s"
 
-msgid "Cache"
-msgstr "Önbellek"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "Sil"
 
-msgid "Cache Modrinth API responses"
-msgstr "Modrinth API yanıtlarını önbelleğe al"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "Etkin"
 
-msgid "Cache expiration"
-msgstr "Önbellek sona erme süresi"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "Devre dışı"
 
-msgid "1 hour"
-msgstr "1 saat"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "Devre dışı bırak"
 
-msgid "6 hours"
-msgstr "6 saat"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "Ara"
 
-msgid "1 day"
-msgstr "1 gün"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "Tümünü Güncelle"
 
-msgid "7 days"
-msgstr "7 gün"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "Güncellemeler alınıyor"
 
-msgid "Show Shortcuts"
-msgstr "Kısayolları Göster"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "İlerleme"
 
-msgid "Quit"
-msgstr "Çıkış"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "Klasörü Aç"
 
-# New modpack import/export actions use English until translators provide localized text.
-msgid "Import Modpack"
-msgstr "Mod paketi içe aktar"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "Henüz hiçbir şey kurulu değil"
 
-msgid "Modpack exported"
-msgstr "Mod paketi dışa aktarıldı"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Bu örneğin klasörüne eklenecek bir şey arayın"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth mod paketleri (*.mrpack)"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "Göz At"
 
-msgid "The export location is not a local file"
-msgstr "Dışa aktarma konumu yerel bir dosya değil"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "Kurulu"
 
-msgid "Export Modpack"
-msgstr "Mod paketi dışa aktar"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "Daha fazlası yükleniyor…"
 
-msgid "Importing modpack…"
-msgstr "Mod paketi içe aktarılıyor…"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "Kategoriye göre filtrele"
 
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "Henüz gösterilecek bir şey yok"
+
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Aramak istediğinizi yazın veya Modrinth’in bu örnek için sunduğu her şeye "
+"göz atın"
+
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "Kapat"
+
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "%u öğe güncellendi"
+msgstr[1] "%u öğe güncellendi"
+
+#: src/nuvashalauncher-content-page-updates.c:246
+msgid "Everything is up to date"
+msgstr "Her şey güncel"
+
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "Şunları güncelle: %s"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "Onayla"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
+msgid "The folder could not be opened: %s"
+msgstr "The folder could not be opened: %s"
+
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
+msgid "Cannot create “%s”: %s"
+msgstr "“%s” oluşturulamıyor: %s"
+
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "Mod yükleyici yok"
+
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Modlar için bir mod yükleyici gerekiyor. Önce bu örneğin ayarlarından "
+"Fabric, Quilt, Forge veya NeoForge seçin"
+
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "Listeden bir Minecraft sürümü seçin."
+
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Yükleyicinin bir sürümünü seçin ya da başka bir yükleyici seçin."
+
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "Klasör"
+
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "Bir klasör seç"
+
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "Oluştur"
+
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, fuzzy, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "%u/%u seçildi"
+msgstr[1] "%u/%u seçildi"
+
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "Hizmet geçersiz bir yanıt döndürdü. Daha sonra tekrar deneyin."
+
+#: src/nuvashalauncher-download-modpack-browser.c:763
+msgid "All versions"
+msgstr "Tüm sürümler"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "İndirmeler"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "Alaka düzeyi"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "En yeniler"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "Son güncellenenler"
+
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "Takipçiler"
+
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "Mod paketlerini filtrele"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "Mod Paketlerine Göz At"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr "İstenen dosya, proje veya uyumlu sürüm bulunamadı."
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+#, fuzzy
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "Mod paketi yüklenemedi"
+msgstr[1] "Mod paketi yüklenemedi"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"
 msgstr "Mod paketi okunuyor"
 
-msgid "Exporting modpack"
-msgstr "Mod paketi dışa aktarılıyor"
-
-msgid "Modpack export"
-msgstr "Mod paketi dışa aktarma"
-
-msgid "Include transient files?"
-msgstr "Geçici dosyalar dahil edilsin mi?"
-
-msgid ""
-"Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr ""
-"Günlükler, çökme raporları, ekran görüntüleri, önbellekler ve indirmeler "
-"normalde hariç tutulur."
-
-msgid "Clean Export"
-msgstr "Temiz dışa aktarma"
-
-msgid "Include All Files"
-msgstr "Tüm dosyaları dahil et"
-
-msgid "Pack Name"
-msgstr "Paket adı"
-
-msgid "Summary"
-msgstr "Özet"
-
-msgid "Version ID"
-msgstr "Sürüm kimliği"
-
-msgid "Downloading files"
-msgstr "Dosyalar indiriliyor"
-
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
 msgid "Extracting files"
 msgstr "Dosyalar çıkarılıyor"
 
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "Mod paketi yüklenemedi"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "Dosyalar indiriliyor"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
 msgid "Optional files"
 msgstr "İsteğe bağlı dosyalar"
 
+#: src/nuvashalauncher-download-modpack-install.c:265
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
@@ -554,1107 +632,1899 @@ msgstr ""
 "Paket bu dosyaları listeliyor ancak gerekli olmadıklarını belirtiyor. Siz "
 "istemedikçe hiçbiri yüklenmez. Varsayılan olarak kapalı"
 
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
 msgid "Pack could not be fetched"
 msgstr "Paket alınamadı"
 
+#: src/nuvashalauncher-download-modpack-install.c:422
 msgid "Invalid pack"
 msgstr "Geçersiz paket"
 
-msgid "The pack does not define its install"
-msgstr "Paket kurulumunu tanımlamıyor"
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "Bu sürümde paket dosyası bulunmamaktadır"
 
-msgid "Downloading Modpack"
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"Bu proje, Nuvasha Launcher'nın yükleyebileceği herhangi bir paket dosyası "
+"yayınlamamaktadır."
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
 msgstr "Mod paketi indiriliyor"
 
-msgid "Writing archive"
-msgstr "Arşiv yazılıyor"
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "İndir"
 
-msgid "Export modpack metadata"
-msgstr "Dışa aktarma meta verileri"
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Bağlantı başarısız. İnternet bağlantısını kontrol edip tekrar deneyin."
 
-msgid "Ask for export metadata"
-msgstr "Dışa aktarırken meta verileri sor"
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "Hizmet isteği reddetti. Daha sonra tekrar deneyin."
 
-msgid "Pack information"
-msgstr "Paket bilgileri"
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Çok fazla istek. Biraz bekleyip tekrar deneyin."
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "Dışa aktarmadan önce ad, özet ve sürüm alanlarını göster."
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr ""
+"Dosyalar okunamadı veya yazılamadı. Konumu, izinleri ve boş disk alanını "
+"kontrol edin."
 
-msgid "Export complete"
-msgstr "Dışa aktarma tamnuvashaandı"
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr "İndirilen dosya doğrulanamadığı için kurulmadı. Yeniden indirin."
 
-msgid "Export"
-msgstr "Dışa aktar"
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr "Arşiv geçersiz veya güvensiz. Güvenilir bir kaynaktan yeniden indirin."
 
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "%u öğe yüklendi"
-msgstr[1] "%u öğe yüklendi"
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "İşlem başarısız. Daha fazla bilgi için teknik ayrıntılara bakın."
 
-msgid "Updated %u item"
-msgid_plural "Updated %u items"
-msgstr[0] "%u öğe güncellendi"
-msgstr[1] "%u öğe güncellendi"
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr ""
+"Java çalıştırılabilir dosyası kullanılamadı. Çalışan bir Java ortamı seçin."
 
-msgid "The icon must be a file on this computer"
-msgstr "Simge bu bilgisayardaki bir dosya olmalıdır"
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "Erişim reddedildi. Klasör izinlerini kontrol edin."
 
-msgid "The game is running; stop it before moving its directory"
-msgstr "Oyun çalışıyor; dizinini taşımadan önce durdurun"
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "Yeterli boş disk alanı yok."
 
-msgid "%s is being installed"
-msgstr "%s yükleniyor"
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "Dosya veya klasör bulunamadı. Konumunu kontrol edin."
 
-msgid "no compatible version"
-msgstr "uyumlu sürüm yok"
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "Hedef zaten var. Başka bir konum seçin."
 
-msgid "Enabled"
-msgstr "Etkin"
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
 
-msgid "Disabled"
-msgstr "Devre dışı"
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Kaydedilen giriş artık geçerli değil. Yeniden giriş yapın."
 
-msgid "Deleted"
-msgstr "Silindi"
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Giriş reddedildi. Giriş yapmak istiyorsanız yeniden başlayın."
 
-msgid "Everything is up to date"
-msgstr "Her şey güncel"
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Bu hesap Minecraft: Java Edition sahibi değil."
 
-msgid "Cannot create \"%s\": %s"
-msgstr "“%s” oluşturulamıyor: %s"
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr ""
+"minecraft.net üzerinde Minecraft: Java Edition profili oluşturup tekrar "
+"deneyin."
 
-msgid "This project publishes nothing that fits this instance."
-msgstr "Bu proje bu örneğe uyan hiçbir şey yayımlamıyor."
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr ""
+"Bu derlemede Microsoft girişi yapılandırılmamış. Başlatıcıyı güncelleyin."
 
-msgid "Unknown"
-msgstr "Bilinmiyor"
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
 
-msgid "%s (unstable)"
-msgstr "%s (kararsız)"
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"Bu mod yükleyicisi kurulamadı. Başka bir sürüm seçin veya teknik ayrıntılara "
+"bakın."
 
-msgid "the next page could not be loaded"
-msgstr "Sonraki sayfa yüklenemedi"
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"Oyun üst verileri geçersiz veya kullanılamıyor. Sürüm listesini yenileyip "
+"tekrar deneyin."
 
-msgid "Other"
-msgstr "Diğer"
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Bu örnek artık kullanılamıyor. Örnek listesini yenileyin."
 
-msgid "%.1fM downloads"
-msgstr "%.1f milyon indirme"
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "Başka bir örnek adı veya klasör seçin."
 
-msgid "%.1fk downloads"
-msgstr "%.1f bin indirme"
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr ""
+"Örnek ayarları geçersiz. Seçilen sürümü ve JVM bağımsız değişkenlerini "
+"kontrol edin."
 
-msgid "%s  ·  by %s"
-msgstr "%s  ·  %s tarafından"
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr ""
+"Hesap kaydedilemedi. Sistem anahtarlığını ve dosya izinlerini kontrol edin."
 
-msgid "by %s"
-msgstr "%s tarafından"
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "Temizle"
 
-msgid "%s downloads"
-msgstr "%s indirme"
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "Oturum aç"
 
-msgid "Cache Cleared"
-msgstr "Önbellek temizlendi"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "Tarayıcıda aç"
 
-msgid "Cache Cleanup Failed"
-msgstr "Önbellek temizlenemedi"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "Tekrar Dene"
 
-msgid "The cache could not be cleared."
-msgstr "Önbellek temizlenemedi."
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "Çevrimdışı hesap ekle"
 
-msgid "the versions of this loader could not be read"
-msgstr "bu mod yükleyicinin sürümleri okunamadı"
-msgid "Unavailable"
-msgstr "Kullanılamıyor"
-msgid "No compatible Java runtime was found."
-msgstr "Uyumlu Java çalışma zamanı bulunamadı."
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "Ad"
 
-msgid "Minecraft crashed"
-msgstr "Minecraft çöktü"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "Ekle"
 
-msgid "Minecraft could not start"
-msgstr "Minecraft başlatılamadı"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "Örnek Oluştur"
 
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft oturum açmanızı gerektiriyor"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "Modpack indir"
 
-msgid "The file cannot be renamed"
-msgstr "Dosyanın adı değiştirilemiyor"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "Mod paketi içe aktar"
 
-msgid "The file cannot be deleted"
-msgstr "Dosya silinemiyor"
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "Mod paketi içe aktarılıyor…"
 
-msgid "The folder cannot be read"
-msgstr "Klasör okunamıyor"
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "Modpack’lerde ara"
 
-msgid "The file could not be installed"
-msgstr "Dosya yüklenemedi"
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "Kapat"
 
-msgid "The folder cannot be created"
-msgstr "Klasör oluşturulamadı"
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "İstenen şartlara uyan mod paketi bulunamadı. Başka bir kelime deneyin."
 
-msgid "This cannot be installed"
-msgstr "Bu yüklenemiyor"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "Dosyaları Seç"
 
-msgid "Pick a Minecraft version first"
-msgstr "Önce bir Minecraft sürümü seçin"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "Yükleme yapılamadı"
 
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "Bir bağımlılığı silmek, ona bağlı olan modu da siler"
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "Geri"
 
-msgid "A dependent mod cannot be deleted"
-msgstr "Bağımlı mod silinemiyor"
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "Günlükte ara"
 
 # UI string
-msgid "Skin"
-msgstr "Skin"
-
-# UI string
-msgid "Slim model"
-msgstr "İnce model"
-
-# UI string
-msgid "OK"
-msgstr "Tamam"
-
-# UI string
-msgid "Export skin…"
-msgstr "Kaplamayı dışa aktar…"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
 msgid "Classic model"
 msgstr "Klasik model"
 
 # UI string
-msgid "PNG skin texture"
-msgstr "PNG cilt dokusu"
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "İnce model"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "Özelleştir"
 
 # UI string
-msgid "Invalid skin"
-msgstr "Geçersiz skin"
-
-# UI string
-msgid "No cape"
-msgstr "Pelerin yok"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
 msgid "Import skin…"
 msgstr "Kaplama içe aktar…"
 
 # UI string
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "Kaplamayı dışa aktar…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Minecraft Services hatası"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "Sistem varsayılanı"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "%s kopyası"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "örnek adı boş"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "Örneklerin adlarında %s şunlar bulunamaz:"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "örnek adı, dizin adı olarak kullanılamaz"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Mod paketi dışa aktarıldı"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "Dışa aktarma konumu yerel bir dosya değil"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "Mod paketi dışa aktarma"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "Mod paketi dışa aktarılıyor"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
+msgid "Export modpack"
+msgstr "Mod paketi dışa aktar"
+
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth mod paketleri (*.mrpack)"
+
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "Paket bilgileri"
+
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "Dışa aktar"
+
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "Dışa aktarma meta verileri"
+
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "Paket adı"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "Özet"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "Sürüm kimliği"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "Geçici dosyalar dahil edilsin mi?"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Günlükler, çökme raporları, ekran görüntüleri, önbellekler ve indirmeler "
+"normalde hariç tutulur."
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "Temiz dışa aktarma"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "Tüm dosyaları dahil et"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "Oyun çalışıyor; dizinini taşımadan önce durdurun"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "Bir klasör seç"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "“%s” konumuna çoğaltıldı"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Yapılandırılmış Java algılanmadı; hâlâ kullanılabilir bir Java "
+"çalıştırılabilir dosyası olduğundan emin olun"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Bu oyun Java %d veya daha yeni bir sürüm gerektiriyor, seçilen Java %d"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr "Başsız kurulum yerine masaüstü destekli bir Java çalışma ortamı seçin."
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "Simge bu bilgisayardaki bir dosya olmalıdır"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "Bir simge seç"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "Görseller"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "Genel"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "Simge"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "Klasörü değiştir"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "JVM Argümanları"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "Eylemler"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "Çoğalt"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "Örneği sil"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "Bir dakikadan az"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu dk"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu sa %llu dk"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "Bugün, %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "Henüz oynanmadı"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "Hiç"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "Hesaplanıyor…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "Etkinlik"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "Oynanan süre"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "Son oynama"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "Toplam başlatma"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "Toplam çökme"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "Örnek"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "Toplam boyut"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "Oluşturulma"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "Bilinmiyor"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "Günlükler"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "Ayarlar"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "Kaynak Paketleri"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "Gölgelendirici Paketleri"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "Modlar"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "Dünyalar"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "Sunucular"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "İstatistikler"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "seçilen dosya bir Java sürümü bildirmiyor"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Java çalıştırılabilir dosyasını seç"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "Yükleniyor…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "Özel: %s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Java çalışma zamanı ekle"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Java çalışma zamanı"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Yeni bir çökme raporu oluşturuldu. Ayrıntılar için günlükleri açın."
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "oyun %d sinyaliyle durduruldu"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "oyun %d koduyla sona erdi"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "Uyumlu Java çalışma zamanı bulunamadı."
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "bu mod yükleyicinin sürümleri okunamadı"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s (kararsız)"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "Yok"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Minecraft %s için uyumlu %s sürümü bulunamadı."
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "Önce bir Minecraft sürümü seçin"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "Mod yükleyici"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "Mod yükleyici sürümü"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "Teknik ayrıntılar"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Nuvasha Launcher önbelleğini temizlemek mi?"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "Önbellek temizlendi"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "Önbellek temizlenemedi"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "Dışa aktarırken meta verileri sor"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "Dışa aktarmadan önce ad, özet ve sürüm alanlarını göster."
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Bir bağımlılığı silmek, ona bağlı olan modu da siler"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "Kararsız Minecraft sürümlerini göster"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "Kararsız mod yükleyici sürümlerini göster"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "Dil"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "Arayüz dili"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "Satır sınırı"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "Önbellek"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Modrinth API yanıtlarını önbelleğe al"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1 saat"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6 saat"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1 gün"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7 gün"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "Önbellek sona erme süresi"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "Nuvasha Launcher Önbelleğini Temizle"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Linux için Minecraft başlatıcısı"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "Hizmetler ve Ekosistem"
+
+#: src/nuvashalauncher-main-window-actions.c:626
+msgid "Minecraft disclaimer"
+msgstr "Minecraft Sorumluluk Reddi"
+
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"RESMİ BİR MINECRAFT ÜRÜNÜ DEĞİLDİR. MOJANG VEYA MICROSOFT TARAFINDAN "
+"ONAYLANMAMIŞTIR VE ONLARLA İLİŞKİLİ DEĞİLDİR.\n"
+"\n"
+"Minecraft, Mojang AB'nin ticari markasıdır. Başlatıcı bağımsız olarak "
+"geliştirilmiştir ve Mojang Studios veya Microsoft ile bağlantılı değildir."
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth ve Mod Yükleyicileri"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"Mod paketleri, modlar, kaynak paketleri ve gölgelendiriciler Modrinth "
+"tarafından barındırılır ve ilgili yazarları tarafından oluşturulur.\n"
+"\n"
+"Mod yükleyicileri Fabric, Quilt, Forge ve NeoForge projeleri tarafından "
+"bağımsız olarak geliştirilir."
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "AppStream Meta Verileri"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"AppStream meta verileri (açıklamalar, özetler ve sürüm notları) Creative "
+"Commons CC0 1.0 Universal Public Domain Dedication kapsamında "
+"yayınlanmaktadır."
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "Nuvasha Launcher hakkında"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "Klavye kısayolları"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "Ayarlar"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "Çıkış"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "Seçilenleri Sil"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "Mod paketi içe aktar…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "Durdur"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "Oyna"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "Dur mu %s?"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "oyun"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"Oyun çalışıyor ve kapanacak. Son kaydetme işleminden bu yana kaydedilen "
+"ilerleme kaybolacak."
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "Oynamaya devam et"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "Hesaplar"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "Henüz örnek yok"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "Oynamaya başlamak için bir örnek oluşturun."
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraft çöktü"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Minecraft başlatılamadı"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft oturum açmanızı gerektiriyor"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "Minecraft Services isteği reddetti (HTTP %u)%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "Arşiv yazılıyor"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "Dışa aktarma tamnuvashaandı"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "mod yükleyici çözümlenemiyor: %s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "Macera"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "Atmosfer"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "Ses"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "Bloklar"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "Işık parlaması"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "Çizgi film"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "Kategoriler"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "Renkli aydınlatma"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "Savaş"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "Temel oyun gölgelendiricileri"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "Tuhaf"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "Dekorasyon"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "Ekonomi"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "Varlıklar"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "Çevre"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "Ekipman"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "Fantastik"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "Özellikler"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "Bitki örtüsü"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "Yazı tipleri"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "Yiyecek"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "Oyun mekanikleri"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "Arayüz"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "Yüksek"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "Eşyalar"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "Kütüphane"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "Düşük"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "Büyü"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "Yönetim"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "Orta"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "Mini oyun"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "Canlılar"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "Modlu"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "Modeller"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "Optimizasyon"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "Yol izleme"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "Performans etkisi"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "Çok düşük donanımlı bilgisayarlar için"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "Gerçekçi"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "Yansımalar"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "Çözünürlükler"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "Ekran görüntüsü"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "Yarı gerçekçi"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "Gölgeler"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "Sade"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "Sosyal"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "Depolama"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "Teknoloji"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "Temalı"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "Ulaşım"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "İnce ayarlar"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "Yardımcı araçlar"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "Temel oyuna benzer"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "Dünya oluşturma"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr ""
+"Modrinth, Nuvasha Launcher’dan biraz yavaşlamasını istiyor; çok fazla istek "
+"var"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "Modrinth bu dosyayı tanımıyor"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Minecraft %s ve %s için uyumlu sürüm bulunamadı."
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "Bu ada sahip bir çevrimdışı hesap zaten var."
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "Sunucuyu Düzenle"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "Sunucu Ekle"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "Kaydet"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "Adres"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "İndirmeden önce sor"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "Her zaman indir"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "Asla indirme"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "“%s” sunucusu kaldırılsın mı?"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "Sunucuyu Kaldır"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "Yukarı Taşı"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "Aşağı Taşı"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "Düzenle"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "Yenile"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "Sunucu Yok"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Buraya eklenen sunucular bu örneğin servers.dat dosyasına kaydedilir."
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "Microsoft’dan kod isteniyor…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "tarayıcıda oturum açılması bekleniyor…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Tarayıcı açılamadı. Gösterilen adresi elle açın."
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"Microsoft güvenli olmayan bir giriş adresi döndürdü. Yeniden denemeden önce "
+"başlatıcıyı güncelleyin."
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Sayfayı tarayıcınızda açın, ardından bu kodu girin:"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Skin"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Skin görselleri 64x64 veya 64x32 PNG dosyaları olmalıdır"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "Geçersiz skin"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "Tamam"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "PNG cilt dokusu"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:368
 msgid "Delete skin?"
 msgstr "Deri silinsin mi?"
 
 # UI string
+#: src/nuvashalauncher-users-popover-skin.c:369
 msgid "This skin will be removed from the skin library."
 msgstr "Bu deri, deri kitaplığından kaldırılacak."
 
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "Skin görselleri 64x64 veya 64x32 PNG dosyaları olmalıdır"
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "Pelerin yok"
 
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "Mod Paketlerine Göz At"
-
-msgid "Choose Files"
-msgstr "Dosyaları Seç"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "Nuvasha Launcher Önbelleğini Temizle"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Nuvasha Launcher önbelleğini temizlemek mi?"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"Çatışmalar\n"
-
-msgid "Content"
-msgstr "İçerik"
-
-msgid "Could not install"
-msgstr "Yükleme yapılamadı"
-
-msgid "Could not install the modpack"
-msgstr "Mod paketi yüklenemedi"
-
-msgid "Could not load categories"
-msgstr "Kategoriler yüklenemedi"
-
-msgid "Could not search Modrinth"
-msgstr "Modrinth'te arama yapılamadı"
-
-msgid "Could not understand the answer"
-msgstr "Cevabı anlayamadım"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "Devre dışı bırak"
-
-msgid "Dismiss"
-msgstr "Kapat"
-
-msgid "Enable"
-msgstr "Etkinleştir"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "Görseller"
-
-msgid "Installing"
-msgstr "Yükleme"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "Örneklerin adlarında %s şunlar bulunamaz:"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "Nuvasha Launcher’nın tanımadığı dosyalar içeriyor."
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "Microsoft, güvenli olmayan bir doğrulama adresi döndürdü"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "Microsoft, oturum açmak için bir kod vermedi"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · Oturum açılması gerekiyor"
-
-msgid "Modrinth does not know this file"
-msgstr "Modrinth bu dosyayı tanımıyor"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "Modrinth, Nuvasha Launcher’dan biraz yavaşlamasını istiyor; çok fazla istek var"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "İstenen şartlara uyan mod paketi bulunamadı. Başka bir kelime deneyin"
-
-msgid "None"
-msgstr "Yok"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Nuvasha Launcher önbellek verileri başarıyla silindi."
-
-msgid "Offline"
-msgstr "Çevrimdışı"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "Listeden bir Minecraft sürümü seçin."
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "Yükleyicinin bir sürümünü seçin ya da başka bir yükleyici seçin."
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
 msgid "Remove %s?"
 msgstr "Silmek mi %s?"
 
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Modrinth'te arama yap ve bir mod paketi yükle"
-
-msgid "Stop %s?"
-msgstr "Dur mu %s?"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "Sistem varsayılanı"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Hesap Nuvasha Launcher'dan kaldırılır ve kaydedilmiş oturum açma bilgileri silinir. Oyunun kendisine herhangi bir müdahale yapılmaz."
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "Oyun çalışıyor ve kapanacak. Son kaydetme işleminden bu yana kaydedilen ilerleme kaybolacak."
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "Bu proje, Nuvasha Launcher'nın yükleyebileceği herhangi bir paket dosyası yayınlamamaktadır."
-
-msgid "This version has no pack file"
-msgstr "Bu sürümde paket dosyası bulunmamaktadır"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "Bu hesabın kayıtlı olduğu ülkede Xbox Live hizmeti sunulmamaktadır"
-
-msgid "the game"
-msgstr "oyun"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "örnek adı, dizin adı olarak kullanılamaz"
-
-msgid "the instance name is empty"
-msgstr "örnek adı boş"
-
-msgid "the sign-in did not finish"
-msgstr "oturum açma işlemi tamamlanmadı"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "Bu Microsoft hesabına henüz bir Xbox profili atanmamış: Bu hesapla xbox.com'da bir kez oturum açın, ardından buraya tekrar oturum açın"
-
+#: src/nuvashalauncher-users-popover.c:178
 msgid "this account"
 msgstr "bu hesap"
 
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "Bu hesabın oyun oynamaya başlayabilmesi için bir yetişkin tarafından doğrulanması gerekiyor; Güney Koreli hesapların da yapması gereken budur"
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "Bu bir çocuk hesabıdır: Oyun oynamaya başlayabilmesi için bir yetişkin tarafından bir Microsoft Ailesi’ne eklenmesi gerekir"
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "Minecraft Services isteği reddetti (HTTP %u)%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Minecraft Services hatası"
-
-msgid "Application menu"
-msgstr "Application menu"
-
-msgid "The folder could not be opened: %s"
-msgstr "The folder could not be opened: %s"
-
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "Tarayıcıda aç"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "%u/%u seçildi"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "Aşağıdaki örnekler silinecek:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "Düzenleme modu"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "Güncellemeler alınıyor"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "İlerleme"
-
-msgid "Enter Edit Mode"
-msgstr "Düzenleme Moduna Gir"
-
-msgid "Delete Selected"
-msgstr "Seçilenleri Sil"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "Yeni bir çökme raporu oluşturuldu. Ayrıntılar için günlükleri açın."
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "Erişim reddedildi. Klasör izinlerini kontrol edin."
-
-msgid "An offline account with this name already exists."
-msgstr "Bu ada sahip bir çevrimdışı hesap zaten var."
-
-msgid "Choose another instance name or directory."
-msgstr "Başka bir örnek adı veya klasör seçin."
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "Bu mod yükleyicisi kurulamadı. Başka bir sürüm seçin veya teknik ayrıntılara bakın."
-
-msgid "Could not load project details. Try again."
-msgstr "Proje ayrıntıları yüklenemedi. Tekrar deneyin."
-
-msgid "Could not load versions. Try again."
-msgstr "Sürümler yüklenemedi. Tekrar deneyin."
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "Tarayıcı açılamadı. Gösterilen adresi elle açın."
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "Dosyalar okunamadı veya yazılamadı. Konumu, izinleri ve boş disk alanını kontrol edin."
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "Hesap kaydedilemedi. Sistem anahtarlığını ve dosya izinlerini kontrol edin."
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "Microsoft güvenli olmayan bir giriş adresi döndürdü. Yeniden denemeden önce başlatıcıyı güncelleyin."
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "Bu derlemede Microsoft girişi yapılandırılmamış. Başlatıcıyı güncelleyin."
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "Başsız kurulum yerine masaüstü destekli bir Java çalışma ortamı seçin."
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "minecraft.net üzerinde Minecraft: Java Edition profili oluşturup tekrar deneyin."
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "Giriş reddedildi. Giriş yapmak istiyorsanız yeniden başlayın."
-
-msgid "Technical Details"
-msgstr "Teknik ayrıntılar"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "Java çalıştırılabilir dosyası kullanılamadı. Çalışan bir Java ortamı seçin."
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "Arşiv geçersiz veya güvensiz. Güvenilir bir kaynaktan yeniden indirin."
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "Bağlantı başarısız. İnternet bağlantısını kontrol edip tekrar deneyin."
-
-msgid "The destination already exists. Choose another location."
-msgstr "Hedef zaten var. Başka bir konum seçin."
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "İndirilen dosya doğrulanamadığı için kurulmadı. Yeniden indirin."
-
-msgid "The file or folder was not found. Check its location."
-msgstr "Dosya veya klasör bulunamadı. Konumunu kontrol edin."
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "Oyun üst verileri geçersiz veya kullanılamıyor. Sürüm listesini yenileyip tekrar deneyin."
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "İşlem başarısız. Daha fazla bilgi için teknik ayrıntılara bakın."
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "İstenen dosya, proje veya uyumlu sürüm bulunamadı."
-
-msgid "The service rejected the request. Try again later."
-msgstr "Hizmet isteği reddetti. Daha sonra tekrar deneyin."
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "Hizmet geçersiz bir yanıt döndürdü. Daha sonra tekrar deneyin."
-
-msgid "There is not enough free disk space."
-msgstr "Yeterli boş disk alanı yok."
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "Bu hesap Minecraft: Java Edition sahibi değil."
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "Bu örnek artık kullanılamıyor. Örnek listesini yenileyin."
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "Çok fazla istek. Biraz bekleyip tekrar deneyin."
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "Örnek ayarları geçersiz. Seçilen sürümü ve JVM bağımsız değişkenlerini kontrol edin."
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "Kaydedilen giriş artık geçerli değil. Yeniden giriş yapın."
-
-msgid "Minecraft launcher for Linux"
-msgstr "Linux için Minecraft başlatıcısı"
-
-msgid "Services & Ecosystem"
-msgstr "Hizmetler ve Ekosistem"
-
-msgid "Minecraft Disclaimer"
-msgstr "Minecraft Sorumluluk Reddi"
-
+#: src/nuvashalauncher-users-popover.c:181
 msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
 msgstr ""
-"RESMİ BİR MINECRAFT ÜRÜNÜ DEĞİLDİR. MOJANG VEYA MICROSOFT TARAFINDAN ONAYLANMAMIŞTIR VE ONLARLA İLİŞKİLİ DEĞİLDİR.\n"
-"\n"
-"Minecraft, Mojang AB'nin ticari markasıdır. Başlatıcı bağımsız olarak geliştirilmiştir ve Mojang Studios veya Microsoft ile bağlantılı değildir."
+"Hesap Nuvasha Launcher'dan kaldırılır ve kaydedilmiş oturum açma bilgileri "
+"silinir. Oyunun kendisine herhangi bir müdahale yapılmaz."
 
-msgid "Modrinth & Mod Loaders"
-msgstr "Modrinth ve Mod Yükleyicileri"
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "Kaldır"
 
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"Mod paketleri, modlar, kaynak paketleri ve gölgelendiriciler Modrinth tarafından barındırılır ve ilgili yazarları tarafından oluşturulur.\n"
-"\n"
-"Mod yükleyicileri Fabric, Quilt, Forge ve NeoForge projeleri tarafından bağımsız olarak geliştirilir."
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Oturum açılması gerekiyor"
 
-msgid "AppStream Metadata"
-msgstr "AppStream Meta Verileri"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "AppStream meta verileri (açıklamalar, özetler ve sürüm notları) Creative Commons CC0 1.0 Universal Public Domain Dedication kapsamında yayınlanmaktadır."
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "Kopyala"
-
-msgid "Rename"
-msgstr "Yeniden Adlandır"
-
-msgid "Reset Icon"
-msgstr "Simgeyi Sıfırla"
-
-msgid "Delete World"
-msgstr "Dünyayı Sil"
-
-msgid "Seed copied to clipboard"
-msgstr "Tohum panoya kopyalandı"
-
-msgid "Remove server \"%s\"?"
-msgstr "\"%s\" sunucusu kaldırılsın mı?"
-
-msgid "Refresh"
-msgstr "Yenile"
-
-msgid "Remove Server"
-msgstr "Sunucuyu Kaldır"
-
-msgid "Survival"
-msgstr "Hayatta Kalma"
-
-msgid "Edit"
-msgstr "Düzenle"
-
-msgid "Ask to download"
-msgstr "İndirmeden önce sor"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Minecraft tarafından kaydedilen veya buraya aktarılan dünyalar bu listede görünecektir."
-
-msgid "Rename World"
-msgstr "Dünyayı Yeniden Adlandır"
-
-msgid "Servers"
-msgstr "Sunucular"
-
-msgid "Save"
-msgstr "Kaydet"
-
-msgid "Add World"
-msgstr "Dünya Ekle"
-
-msgid "Spectator"
-msgstr "İzleyici"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "\"%s\" dünyası silinsin mi? Bu işlem geri alınamaz."
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Buraya eklenen sunucular bu örneğin servers.dat dosyasına kaydedilir."
-
-msgid "Add Server"
-msgstr "Sunucu Ekle"
-
-msgid "Edit Server"
-msgstr "Sunucuyu Düzenle"
-
-msgid "Address"
-msgstr "Adres"
-
-msgid "Datapacks"
-msgstr "Veri Paketleri"
-
-msgid "No Worlds"
-msgstr "Dünya Yok"
-
-msgid "Creative"
-msgstr "Yaratıcı"
-
-msgid "Move Up"
-msgstr "Yukarı Taşı"
-
-msgid "No Servers"
-msgstr "Sunucu Yok"
-
-msgid "Never download"
-msgstr "Asla indirme"
-
-msgid "Worlds"
-msgstr "Dünyalar"
-
-msgid "Always download"
-msgstr "Her zaman indir"
-
-msgid "Move Down"
-msgstr "Aşağı Taşı"
-
-msgid "Copy Seed"
-msgstr "Tohumu Kopyala"
-
-msgid "Stats"
-msgstr "İstatistikler"
-
-msgid "Playtime"
-msgstr "Oynama süresi"
-
-msgid "Time played"
-msgstr "Oynanan süre"
-
-msgid "Not played yet"
-msgstr "Henüz oynanmadı"
-
-msgid "Less than a minute"
-msgstr "Bir dakikadan az"
-
-msgid "%llu min"
-msgstr "%llu dk"
-
-msgid "%llu h %llu min"
-msgstr "%llu sa %llu dk"
-
-msgid "Runs on"
-msgstr "Çalıştığı ortam"
-
-msgid "Activity"
-msgstr "Etkinlik"
-
-msgid "Last session"
-msgstr "Son oturum"
-
-msgid "Last played"
-msgstr "Son oynama"
-
-msgid "Total launches"
-msgstr "Toplam başlatma"
-
-msgid "Total crashes"
-msgstr "Toplam çökme"
-
-msgid "Server joins"
-msgstr "Sunucuya katılma"
-
-msgid "World loads"
-msgstr "Dünya yükleme"
-
-msgid "Player Profile"
-msgstr "Oyuncu Profili"
-
-msgid "Player type"
-msgstr "Oyuncu türü"
-
-msgid "Pack style"
-msgstr "Paket tarzı"
-
-msgid "Average session"
-msgstr "Ortalama oturum"
-
-msgid "Stability"
-msgstr "Kararlılık"
-
-msgid "Instance"
-msgstr "Örnek"
-
-msgid "Total size"
-msgstr "Toplam boyut"
-
-msgid "Created on"
-msgstr "Oluşturulma"
-
-msgid "Calculating…"
-msgstr "Hesaplanıyor…"
-
-msgid "Never"
-msgstr "Hiç"
-
-msgid "Today, %s"
-msgstr "Bugün, %s"
-
-msgid "Hybrid"
-msgstr "Karma"
-
-msgid "Server Player"
-msgstr "Sunucu Oyuncusu"
-
-msgid "Singleplayer"
-msgstr "Tek Oyunculu"
-
-msgid "Unplayed"
-msgstr "Oynanmadı"
-
-msgid "Modpack"
-msgstr "Mod Paketi"
-
-msgid "Lightweight"
-msgstr "Hafif"
-
-msgid "Kitchen Sink"
-msgstr "Kapsamlı"
-
-msgid "Quick"
-msgstr "Kısa"
-
-msgid "Standard"
-msgstr "Standart"
-
-msgid "Marathon"
-msgstr "Maraton"
-
-msgid "Stable"
-msgstr "Kararlı"
-
-msgid "%u%% crash rate"
-msgstr "%%%u çökme oranı"
-
-msgid "A name cannot be empty."
-msgstr "ad boş olamaz."
-
-msgid "Remove server"
-msgstr "Sunucuyu Kaldır"
-
-msgid "Download modpack"
-msgstr "Modpack indir"
-
-msgid "%s “%s”"
-msgstr "%s “%s”"
-
-msgid "Delete instance"
-msgstr "Örneği sil"
-
-msgid "No worlds"
-msgstr "Dünya Yok"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "tarayıcıda oturum açılması bekleniyor…"
-
-msgid "Choose files"
-msgstr "Dosyaları Seç"
-
-msgid "Cannot create “%s”: %s"
-msgstr "“%s” oluşturulamıyor: %s"
-
-msgid "Cache cleanup failed"
-msgstr "Önbellek temizlenemedi"
-
-msgid "Español"
-msgstr "Español"
-
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth ve Mod Yükleyicileri"
-
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "“%s” dünyası silinsin mi? Bu işlem geri alınamaz."
-
-msgid "Português"
-msgstr "Português"
-
-msgid "Create an instance to start playing."
-msgstr "Oynamaya başlamak için bir örnek oluşturun."
-
-msgid "Duplicated to “%s”"
-msgstr "“%s” konumuna çoğaltıldı"
-
-msgid "Downloading modpack"
-msgstr "Mod paketi indiriliyor"
-
-msgid "Try again"
-msgstr "Tekrar Dene"
-
-msgid "Performance impact"
-msgstr "Performans etkisi"
-
-msgid "Add world"
-msgstr "Dünya Ekle"
-
-msgid "Create instance"
-msgstr "Örnek Oluştur"
-
-msgid "Browse modpacks"
-msgstr "Mod Paketlerine Göz At"
-
-msgid "Remove server “%s”?"
-msgstr "“%s” sunucusu kaldırılsın mı?"
-
-msgid "Path tracing"
-msgstr "Yol izleme"
-
-msgid "Clean export"
-msgstr "Temiz dışa aktarma"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "Oyun mekanikleri"
-
-msgid "Minecraft version"
-msgstr "Minecraft Sürümü"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "Klasörü Aç"
-
-msgid "AppStream metadata"
-msgstr "AppStream Meta Verileri"
-
-msgid "Add Java runtime"
-msgstr "Java çalışma zamanı ekle"
-
-msgid "World generation"
-msgstr "Dünya oluşturma"
-
-msgid "Keyboard shortcuts"
-msgstr "Klavye kısayolları"
-
-msgid "Resource packs"
-msgstr "Kaynak Paketleri"
-
-msgid "Edit server"
-msgstr "Sunucuyu Düzenle"
-
-msgid "Keep playing"
-msgstr "Oynamaya devam et"
-
-msgid "Technical details"
-msgstr "Teknik ayrıntılar"
-
-msgid "Pack name"
-msgstr "Paket adı"
-
-msgid "Colored lighting"
-msgstr "Renkli aydınlatma"
-
-msgid "Rename world"
-msgstr "Dünyayı Yeniden Adlandır"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "bir ad yalnızca harf, rakam ve alt çizgi içerebilir."
-
-msgid "Preferences"
-msgstr "Ayarlar"
-
-msgid "Delete world"
-msgstr "Dünyayı Sil"
-
-msgid "Asking Microsoft for a code…"
-msgstr "Microsoft’dan kod isteniyor…"
-
-msgid "Show unstable mod loader versions"
-msgstr "Kararsız mod yükleyici sürümlerini göster"
-
-msgid "Move down"
-msgstr "Aşağı Taşı"
-
-msgid "Clear cache"
-msgstr "Nuvasha Launcher Önbelleğini Temizle"
-
-msgid "Delete “%s”?"
-msgstr "“%s” silinsin mi?"
-
-msgid "Import modpack…"
-msgstr "Mod paketi içe aktar…"
-
-msgid "Delete selected"
-msgstr "Seçilenleri Sil"
-
-msgid "Java runtime"
-msgstr "Java çalışma zamanı"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "ad 3 ila 16 karakter uzunluğunda olmalıdır."
-
-msgid "Import modpack"
-msgstr "Mod paketi içe aktar"
-
-msgid "Core shaders"
-msgstr "Temel oyun gölgelendiricileri"
-
-msgid "Sign in"
-msgstr "Oturum aç"
-
-msgid "Cache cleared"
-msgstr "Önbellek temizlendi"
-
-msgid "No instances yet"
-msgstr "Henüz örnek yok"
-
-msgid "Add offline account"
-msgstr "Çevrimdışı hesap ekle"
-
-msgid "Copy seed"
-msgstr "Tohumu Kopyala"
-
-msgid "Services & ecosystem"
-msgstr "Hizmetler ve Ekosistem"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "İstenen şartlara uyan mod paketi bulunamadı. Başka bir kelime deneyin."
-
-msgid "Line limit"
-msgstr "Satır sınırı"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Modrinth mod paketleri (*.mrpack)"
-
-msgid "Add server"
-msgstr "Sunucu Ekle"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
-msgid "All versions"
-msgstr "Tüm sürümler"
-
-msgid "No servers"
-msgstr "Sunucu Yok"
-
-msgid "Clear cache?"
-msgstr "Nuvasha Launcher önbelleğini temizlemek mi?"
-
-msgid "Loader version"
-msgstr "Mod yükleyici sürümü"
-
-msgid "translator-credits"
-msgstr "Flia"
-
-msgid "Include all files"
-msgstr "Tüm dosyaları dahil et"
-
-msgid "Export modpack"
-msgstr "Mod paketi dışa aktar"
-
-msgid "Add world…"
-msgstr "Dünya Ekle…"
-
-msgid "Update all"
-msgstr "Tümünü Güncelle"
-
+#: src/nuvashalauncher-users-popover.c:398
 msgid "Add Microsoft account"
 msgstr "Microsoft Hesabı Ekle"
 
-msgid "Move up"
-msgstr "Yukarı Taşı"
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Minecraft Sürümü"
 
-msgid "Minecraft disclaimer"
-msgstr "Minecraft Sorumluluk Reddi"
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "Hayatta Kalma"
 
-msgid "Shader packs"
-msgstr "Gölgelendirici Paketleri"
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "Yaratıcı"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "İzleyici"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "Dünyayı Yeniden Adlandır"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "Yeniden Adlandır"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "Kopyala"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "Tohum panoya kopyalandı"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "“%s” dünyası silinsin mi? Bu işlem geri alınamaz."
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "Dünyayı Sil"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "Tohumu Kopyala"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "Dünya Ekle"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "Dünya Ekle…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "Dünya Yok"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr ""
+"Minecraft tarafından kaydedilen veya buraya aktarılan dünyalar bu listede "
+"görünecektir."
+
+#~ msgid "Colored Lighting"
+#~ msgstr "Renkli aydınlatma"
+
+#~ msgid "Core Shaders"
+#~ msgstr "Temel oyun gölgelendiricileri"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "Oyun mekanikleri"
+
+#~ msgid "Path Tracing"
+#~ msgstr "Yol izleme"
+
+#~ msgid "Performance Impact"
+#~ msgstr "Performans etkisi"
+
+#~ msgid "World Generation"
+#~ msgstr "Dünya oluşturma"
+
+#~ msgid "All Versions"
+#~ msgstr "Tüm sürümler"
+
+#~ msgid "Update All"
+#~ msgstr "Tümünü Güncelle"
+
+#~ msgid "Open Folder"
+#~ msgstr "Klasörü Aç"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "Hiçbir şey seçili değil"
+
+#~ msgid "Create Instance"
+#~ msgstr "Örnek Oluştur"
+
+#~ msgid "Download Modpack"
+#~ msgstr "Modpack indir"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "\"%s\" konumuna çoğaltıldı"
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "\"%s\" silinsin mi?"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Java çalışma zamanı"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Java çalışma zamanı ekle"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "Minecraft’in headless olmayan bir Java’ya ihtiyacı var: Arch üzerinde jre-"
+#~ "openjdk-headless değil, jre-openjdk paketini kullanın"
+
+#~ msgid "Delete Instance"
+#~ msgstr "Örneği sil"
+
+#~ msgid "Resource Packs"
+#~ msgstr "Kaynak Paketleri"
+
+#~ msgid "Shader Packs"
+#~ msgstr "Gölgelendirici Paketleri"
+
+#~ msgid "Loader Version"
+#~ msgstr "Mod yükleyici sürümü"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "Kararsız mod yükleyici sürümlerini göster"
+
+#~ msgid "Line Limit"
+#~ msgstr "Satır sınırı"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "Klavye kısayolları"
+
+#~ msgid "Keep Playing"
+#~ msgstr "Oynamaya devam et"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "Henüz örnek yok"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "Bir tane oluşturmak için başlıktaki + düğmesini kullanın"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "Çevrimdışı hesap ekle"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "bir ad yalnızca harf, rakam ve alt çizgi içerebilir"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "ad boş olamaz"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "ad 3 ila 16 karakter uzunluğunda olmalıdır"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "Microsoft’dan kod isteniyor"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "tarayıcıda oturum açılması bekleniyor"
+
+#~ msgid "Sign In"
+#~ msgstr "Oturum aç"
+
+#~ msgid "Try Again"
+#~ msgstr "Tekrar Dene"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Microsoft Hesabı Ekle"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Minecraft Sürümü"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s “%s”"
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "Kısayolları Göster"
+
+# New modpack import/export actions use English until translators provide localized text.
+#~ msgid "Import Modpack"
+#~ msgstr "Mod paketi içe aktar"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Modrinth mod paketleri (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "Mod paketi dışa aktar"
+
+#~ msgid "Clean Export"
+#~ msgstr "Temiz dışa aktarma"
+
+#~ msgid "Include All Files"
+#~ msgstr "Tüm dosyaları dahil et"
+
+#~ msgid "Pack Name"
+#~ msgstr "Paket adı"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "Paket kurulumunu tanımlamıyor"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "Mod paketi indiriliyor"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "%u öğe yüklendi"
+#~ msgstr[1] "%u öğe yüklendi"
+
+#~ msgid "no compatible version"
+#~ msgstr "uyumlu sürüm yok"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "“%s” oluşturulamıyor: %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "Önbellek temizlendi"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "Önbellek temizlenemedi"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "Önbellek temizlenemedi."
+
+#~ msgid "Unavailable"
+#~ msgstr "Kullanılamıyor"
+
+#~ msgid "This cannot be installed"
+#~ msgstr "Bu yüklenemiyor"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "Mod Paketlerine Göz At"
+
+#~ msgid "Choose Files"
+#~ msgstr "Dosyaları Seç"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "Nuvasha Launcher Önbelleğini Temizle"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Nuvasha Launcher önbelleğini temizlemek mi?"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "Cevabı anlayamadım"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "Nuvasha Launcher’nın tanımadığı dosyalar içeriyor."
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "Microsoft, güvenli olmayan bir doğrulama adresi döndürdü"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr ""
+#~ "İstenen şartlara uyan mod paketi bulunamadı. Başka bir kelime deneyin"
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Nuvasha Launcher önbellek verileri başarıyla silindi."
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Modrinth'te arama yap ve bir mod paketi yükle"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "oturum açma işlemi tamamlanmadı"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Aşağıdaki örnekler silinecek:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "Düzenleme modu"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "Düzenleme Moduna Gir"
+
+#~ msgid "Delete Selected"
+#~ msgstr "Seçilenleri Sil"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "Proje ayrıntıları yüklenemedi. Tekrar deneyin."
+
+#~ msgid "Technical Details"
+#~ msgstr "Teknik ayrıntılar"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "Hizmetler ve Ekosistem"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Minecraft Sorumluluk Reddi"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth ve Mod Yükleyicileri"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "AppStream Meta Verileri"
+
+#~ msgid "Reset Icon"
+#~ msgstr "Simgeyi Sıfırla"
+
+#~ msgid "Delete World"
+#~ msgstr "Dünyayı Sil"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "\"%s\" sunucusu kaldırılsın mı?"
+
+#~ msgid "Remove Server"
+#~ msgstr "Sunucuyu Kaldır"
+
+#~ msgid "Rename World"
+#~ msgstr "Dünyayı Yeniden Adlandır"
+
+#~ msgid "Add World"
+#~ msgstr "Dünya Ekle"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "\"%s\" dünyası silinsin mi? Bu işlem geri alınamaz."
+
+#~ msgid "Add Server"
+#~ msgstr "Sunucu Ekle"
+
+#~ msgid "Edit Server"
+#~ msgstr "Sunucuyu Düzenle"
+
+#~ msgid "Datapacks"
+#~ msgstr "Veri Paketleri"
+
+#~ msgid "No Worlds"
+#~ msgstr "Dünya Yok"
+
+#~ msgid "Move Up"
+#~ msgstr "Yukarı Taşı"
+
+#~ msgid "No Servers"
+#~ msgstr "Sunucu Yok"
+
+#~ msgid "Move Down"
+#~ msgstr "Aşağı Taşı"
+
+#~ msgid "Copy Seed"
+#~ msgstr "Tohumu Kopyala"
+
+#~ msgid "Playtime"
+#~ msgstr "Oynama süresi"
+
+#~ msgid "Runs on"
+#~ msgstr "Çalıştığı ortam"
+
+#~ msgid "Last session"
+#~ msgstr "Son oturum"
+
+#~ msgid "Server joins"
+#~ msgstr "Sunucuya katılma"
+
+#~ msgid "World loads"
+#~ msgstr "Dünya yükleme"
+
+#~ msgid "Player Profile"
+#~ msgstr "Oyuncu Profili"
+
+#~ msgid "Player type"
+#~ msgstr "Oyuncu türü"
+
+#~ msgid "Pack style"
+#~ msgstr "Paket tarzı"
+
+#~ msgid "Average session"
+#~ msgstr "Ortalama oturum"
+
+#~ msgid "Stability"
+#~ msgstr "Kararlılık"
+
+#~ msgid "Hybrid"
+#~ msgstr "Karma"
+
+#~ msgid "Server Player"
+#~ msgstr "Sunucu Oyuncusu"
+
+#~ msgid "Singleplayer"
+#~ msgstr "Tek Oyunculu"
+
+#~ msgid "Unplayed"
+#~ msgstr "Oynanmadı"
+
+#~ msgid "Modpack"
+#~ msgstr "Mod Paketi"
+
+#~ msgid "Lightweight"
+#~ msgstr "Hafif"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "Kapsamlı"
+
+#~ msgid "Quick"
+#~ msgstr "Kısa"
+
+#~ msgid "Standard"
+#~ msgstr "Standart"
+
+#~ msgid "Marathon"
+#~ msgstr "Maraton"
+
+#~ msgid "Stable"
+#~ msgstr "Kararlı"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "%%%u çökme oranı"

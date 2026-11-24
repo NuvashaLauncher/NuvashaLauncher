@@ -10,6 +10,7 @@
 #include "nuvashalauncher-task.h"
 #include "nuvashalauncher-modpack.h"
 #include "nuvashalauncher-fs.h"
+#include "nuvashalauncher-icons.h"
 
 #include <errno.h>
 #include <glib/gstdio.h>
@@ -25,12 +26,40 @@ static void on_optional_install (GtkButton *, gpointer);
  * The pack fetched and the pack installed
  * ---------------------------------------------------------- */
 
+typedef struct {
+  NuvashaLauncherInstanceManager *manager;
+  NuvashaLauncherInstance *instance;
+  NuvashaLauncherTaskScope *scope;
+} ModpackInstallIconData;
+
+static void
+on_modpack_install_icon_finished (GObject *source G_GNUC_UNUSED,
+                                  GAsyncResult *result,
+                                  gpointer user_data)
+{
+  ModpackInstallIconData *data = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autofree char *path = nuvashalauncher_icon_load_finish (result, &error);
+
+  if (path != NULL && nuvashalauncher_modpack_icon_is_regular (path))
+    nuvashalauncher_modpack_install_icon (data->manager, data->instance, path, NULL);
+
+  g_clear_object (&data->manager);
+  g_clear_object (&data->instance);
+  if (data->scope != NULL)
+    nuvashalauncher_task_scope_unref (data->scope);
+  g_free (data);
+}
+
 /* References held by a background install so callbacks remain valid after
  * the dialog closes. */
 typedef struct {
   NuvashaLauncherDownloadModpackDialog *dialog;
   NuvashaLauncherDownload *download;
   NuvashaLauncherTaskScope *operation;
+  NuvashaLauncherInstanceManager *manager;
+  char *icon_path;
+  char *icon_url;
 } InstallJob;
 
 static void
@@ -38,6 +67,9 @@ install_job_free (InstallJob *job)
 {
   g_clear_object (&job->dialog);
   g_clear_object (&job->download);
+  g_clear_object (&job->manager);
+  g_clear_pointer (&job->icon_path, g_free);
+  g_clear_pointer (&job->icon_url, g_free);
   if (job->operation != NULL)
     nuvashalauncher_task_scope_unref (job->operation);
   g_free (job);
@@ -111,13 +143,28 @@ on_install_done (GObject *source G_GNUC_UNUSED,
 
   /* The instance owns its icon. Never leave its property pointing into the
      shared cache, because cache cleanup is allowed to remove that tree. */
-  if (nuvashalauncher_modpack_icon_is_regular (self->icon_path))
+  if (instance != NULL)
     {
-      if (!nuvashalauncher_modpack_install_icon (self->manager, instance, self->icon_path,
-                                     &error))
-        if (!self->closed)
-          push_failure (self, _("Could not copy the instance icon"), error,
-                      G_CALLBACK (on_error_back));
+      const char *icon_path = job->icon_path != NULL ? job->icon_path : self->icon_path;
+      const char *icon_url = job->icon_url != NULL ? job->icon_url : self->icon_url;
+      NuvashaLauncherInstanceManager *manager = job->manager != NULL ? job->manager : self->manager;
+
+      if (nuvashalauncher_modpack_icon_is_regular (icon_path))
+        {
+          if (!nuvashalauncher_modpack_install_icon (manager, instance, icon_path, &error))
+            if (!self->closed)
+              push_failure (self, _("Could not copy the instance icon"), error,
+                            G_CALLBACK (on_error_back));
+        }
+      else if (icon_url != NULL && *icon_url != '\0')
+        {
+          ModpackInstallIconData *data = g_new0 (ModpackInstallIconData, 1);
+          data->manager = g_object_ref (manager);
+          data->instance = g_object_ref (instance);
+          data->scope = nuvashalauncher_icon_load_async (icon_url,
+                                                         on_modpack_install_icon_finished,
+                                                         data);
+        }
     }
 
   install_job_free (job);
@@ -180,6 +227,10 @@ start_install (NuvashaLauncherDownloadModpackDialog *self)
 
     job->dialog = g_object_ref (self);
     job->download = g_object_ref (download);
+    if (self->manager != NULL)
+      job->manager = g_object_ref (self->manager);
+    job->icon_path = g_strdup (self->icon_path);
+    job->icon_url = g_strdup (self->icon_url);
 
     job->operation = nuvashalauncher_modpack_install_async (
       self->modpack, self->manager, name, directory, chosen,

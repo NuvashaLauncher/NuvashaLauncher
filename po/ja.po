@@ -1,456 +1,348 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: ja\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-msgid "Adventure"
-msgstr "冒険"
-msgid "Atmosphere"
-msgstr "雰囲気"
-msgid "Audio"
-msgstr "音声"
-msgid "Blocks"
-msgstr "ブロック"
-msgid "Bloom"
-msgstr "ブルーム"
-msgid "Cartoon"
-msgstr "アニメ調"
-msgid "Categories"
-msgstr "カテゴリー"
-msgid "Colored Lighting"
-msgstr "カラーライティング"
-msgid "Combat"
-msgstr "戦闘"
-msgid "Core Shaders"
-msgstr "コアシェーダー"
-msgid "Cursed"
-msgstr "奇妙"
-msgid "Decoration"
-msgstr "装飾"
-msgid "Economy"
-msgstr "経済"
-msgid "Entities"
-msgstr "エンティティ"
-msgid "Environment"
-msgstr "環境"
-msgid "Equipment"
-msgstr "装備"
-msgid "Fantasy"
-msgstr "ファンタジー"
-msgid "Features"
-msgstr "機能"
-msgid "Foliage"
-msgstr "草木"
-msgid "Fonts"
-msgstr "フォント"
-msgid "Food"
-msgstr "食べ物"
-msgid "Game Mechanics"
-msgstr "ゲームの仕組み"
-msgid "Interface"
-msgstr "インターフェース"
-msgid "High"
-msgstr "高"
-msgid "Items"
-msgstr "アイテム"
-msgid "Library"
-msgstr "ライブラリ"
-msgid "Low"
-msgstr "低"
-msgid "Magic"
-msgstr "魔法"
-msgid "Management"
-msgstr "管理"
-msgid "Medium"
-msgstr "中"
-msgid "Minigame"
-msgstr "ミニゲーム"
-msgid "Mobs"
-msgstr "モブ"
-msgid "Modded"
-msgstr "Mod対応"
-msgid "Models"
-msgstr "モデル"
-msgid "Optimization"
-msgstr "最適化"
-msgid "Path Tracing"
-msgstr "パストレーシング"
-msgid "Performance Impact"
-msgstr "パフォーマンスへの影響"
-msgid "Potato"
-msgstr "低スペックPC向け"
-msgid "Realistic"
-msgstr "リアル"
-msgid "Reflections"
-msgstr "反射"
-msgid "Resolutions"
-msgstr "解像度"
-msgid "Screenshot"
-msgstr "スクリーンショット"
-msgid "Semi-realistic"
-msgstr "セミリアル"
-msgid "Shadows"
-msgstr "影"
-msgid "Simplistic"
-msgstr "シンプル"
-msgid "Social"
-msgstr "交流"
-msgid "Storage"
-msgstr "収納"
-msgid "Technology"
-msgstr "技術"
-msgid "Themed"
-msgstr "テーマ別"
-msgid "Transportation"
-msgstr "輸送"
-msgid "Tweaks"
-msgstr "調整"
-msgid "Utility"
-msgstr "便利機能"
-msgid "Vanilla-like"
-msgstr "バニラ風"
-msgid "World Generation"
-msgstr "ワールド生成"
 
-msgid "All Versions"
-msgstr "すべてのバージョン"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "関連度"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "オフライン"
 
-msgid "Newest"
-msgstr "新着順"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "名前を空にすることはできません."
 
-msgid "Recently updated"
-msgstr "更新日時順"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "名前は3文字以上16文字以下にしてください."
 
-msgid "Followers"
-msgstr "フォロワー数"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "名前には英字、数字、アンダースコアのみ使用できます."
 
-msgid "Filter modpacks"
-msgstr "Modパックを絞り込む"
-
-msgid "Cancel"
-msgstr "キャンセル"
-
-msgid "Confirm"
-msgstr "確認"
-
-msgid "Customize"
-msgstr "カスタマイズ"
-
-msgid "Delete"
-msgstr "削除"
-
-msgid "Retry"
-msgstr "再試行"
-
-msgid "Loading…"
-msgstr "読み込み中…"
-
-msgid "Download"
-msgstr "ダウンロード"
-
-msgid "Update All"
-msgstr "すべて更新"
-
-msgid "Open Folder"
-msgstr "フォルダーを開く"
-
-msgid "Nothing installed yet"
-msgstr "なにもインストールされていません…"
-
-msgid "Browse for something to put into the folder of this instance"
-msgstr "このインスタンスのフォルダーに入れるものを参照します"
-
-msgid "Installed"
-msgstr "インストール済み"
-
-msgid "Loading more…"
-msgstr "読み込み中…"
-
-msgid "Nothing is selected"
-msgstr "何も選択されていません"
-
-
-msgid "Filter by category"
-msgstr "カテゴリーで絞り込む"
-
-msgid "Nothing to show yet"
-msgstr "表示するものはありません"
-
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
 msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
 msgstr ""
-"何を探すかを入力するか、このインスタンスのModrinthのすべてを参照してください"
+"このMicrosoftアカウントにはまだXboxプロファイルが紐付けられていません。一度"
+"xbox.comにこのアカウントでサインインしてから、こちらに再度サインインしてくだ"
+"さい。"
 
-msgid "Browse"
-msgstr "閲覧"
-
-msgid "No mod loader"
-msgstr "Mod ローダーがありません"
-
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
 msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
 msgstr ""
-"ModにはMod ローダーが必要です。先にこのインスタンスの設定でFabric、Quilt、"
-"Forge、NeoForgeを選んでください"
+"これは子供用アカウントです。ゲームをプレイするには、大人がMicrosoftファミリー"
+"にこのアカウントを追加する必要があります。"
 
-msgid "Create Instance"
-msgstr "インスタンスを作成"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr "このアカウントが登録されている国では、Xbox Liveをご利用いただけません"
 
-msgid "Name"
-msgstr "名前"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"このアカウントは、プレイを開始する前に成人による確認が必要ですが、これは韓国"
+"のアカウントでも同様の手続きが必要です。"
 
-msgid "Directory"
-msgstr "フォルダー"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "マイクロソフトは、ログイン用のコードを提供してくれませんでした"
 
-msgid "Choose a folder"
-msgstr "フォルダーを選択"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1fM ダウンロード"
 
-msgid "Create"
-msgstr "作成"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1fk ダウンロード"
 
-msgid "Download Modpack"
-msgstr "Modpack をダウンロード"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s ダウンロード"
 
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s  ·  作成者: %s"
 
-msgid "Search modpacks"
-msgstr "Modpack を検索"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "作成者: %s"
 
-msgid "Close"
-msgstr "閉じる"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "%u 個の Mod を選択中"
 
-msgid "Back"
-msgstr "戻る"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "%u 個のリソースパックを選択中"
 
+#: src/nuvashalauncher-content-page-browser.c:98
+#, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "%u 個のシェーダーを選択中"
+
+#: src/nuvashalauncher-content-page-browser.c:101
+#, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "%u 個のアイテムを選択中"
+
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr "選択"
+
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "インストール"
 
-msgid "Copy of %s"
-msgstr "%sのコピー"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "次のページを読み込めませんでした"
 
-msgid "Choose Java executable"
-msgstr "Java 実行ファイルを選択"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Modrinth の検索に失敗しました"
 
-msgid "the chosen file does not report a Java version"
-msgstr "選んだファイルは Java バージョンを報告しません"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "その他"
 
-msgid "Choose an Icon"
-msgstr "アイコンを選択"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "カテゴリを読み込めませんでした"
 
-msgid "Choose a Directory"
-msgstr "フォルダーを選択"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "再試行"
 
-msgid "Duplicated to \"%s\""
-msgstr "「%s」に複製しました"
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "バージョンを読み込めませんでした。再試行してください。"
 
-msgid "Delete \"%s\"?"
-msgstr "「%s」を削除しますか？"
-
-msgid "General"
-msgstr "一般"
-
-msgid "Icon"
-msgstr "アイコン"
-
-msgid "Change the Directory"
-msgstr "フォルダーを変更"
-
-msgid "Minecraft"
-msgstr "Minecraft"
-
-msgid "Java"
-msgstr "Java"
-
-msgid "Java Runtime"
-msgstr "Java ランタイム"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "このゲームには Java %d 以降が必要です。選択されている Java は %d です"
-
-msgid "Add Java Runtime"
-msgstr "Java ランタイムを追加"
-
-msgid ""
-"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
-"not jre-openjdk-headless"
-msgstr ""
-"Minecraft には headless でない Java が必要です。Arch では jre-openjdk-"
-"headless ではなく jre-openjdk パッケージを使ってください"
-
-msgid "JVM Arguments"
-msgstr "JVM 引数"
-
-msgid ""
-"The configured Java was not detected; make sure it is still a usable java "
-"executable"
-msgstr ""
-"設定された Java が検出されません。まだ使える Java 実行ファイルか確認してくだ"
-"さい"
-
-msgid "Actions"
-msgstr "アクション"
-
-msgid "Duplicate"
-msgstr "複製"
-
-msgid "Delete Instance"
-msgstr "インスタンスの削除。"
-
-msgid "Settings"
-msgstr "設定"
-
-msgid "Resource Packs"
-msgstr "リソースパック"
-
-msgid "Shader Packs"
-msgstr "シェーダーパック"
-
-msgid "Mods"
-msgstr "Mod"
-
-msgid "Logs"
-msgstr "ログ"
-
-msgid "Custom: %s"
-msgstr "カスタム：%s"
-
-msgid "the game was stopped by signal %d"
-msgstr "ゲームはシグナル%dによって停止されました"
-
-msgid "the game exited with code %d"
-msgstr "ゲームはコード%dで終了しました"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "Minecraft %sの互換性のある%sバージョンが見つかりません。"
-
-msgid "Loader"
-msgstr "Mod ローダー"
-
-msgid "Loader Version"
-msgstr "Mod ローダーのバージョン"
-
-msgid "Clear"
-msgstr "クリア"
-
-msgid "Search the log"
-msgstr "ログを検索"
-
-msgid "Versions"
-msgstr "バージョン"
-
-msgid "Show unstable Minecraft versions"
-msgstr "不安定な Minecraft バージョンを表示"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "不安定なMod ローダーのバージョンを表示"
-
-msgid "Language"
-msgstr "言語"
-
-msgid "Interface language"
-msgstr "インターフェース言語"
-
-msgid "Line Limit"
-msgstr "行数の上限"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "Nuvasha Launcherについて"
-
-msgid "Keyboard Shortcuts"
-msgstr "キーボードショートカット"
-
-msgid "Stop"
-msgstr "停止"
-
-msgid "Play"
-msgstr "プレイ"
-
-msgid "Keep Playing"
-msgstr "プレイを続ける"
-
-msgid "Downloads"
-msgstr "ダウンロード"
-
-msgid "Accounts"
-msgstr "アカウント"
-
-msgid "No Instances Yet"
-msgstr "インスタンスはまだありません"
-
-msgid "Use the + button in the header to create one"
-msgstr "ヘッダーの+ボタンを使用して作成します"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "Mod ローダーを特定できません：%s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "Minecraft %sと%sの互換性のあるバージョンが見つかりません。"
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "Minecraft %sの互換性のあるバージョンが見つかりません。"
 
-msgid "Add Offline Account"
-msgstr "オフラインアカウントを追加"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "バージョン"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "名前には英字、数字、アンダースコアのみ使用できます"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "フォルダーを読み取れません"
 
-msgid "a name cannot be empty"
-msgstr "名前を空にすることはできません"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "名前は3文字以上16文字以下にしてください"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "ファイルをインストールできませんでした"
 
-msgid "Add"
-msgstr "追加"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "マイクロソフトにコードを尋ねる"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "フォルダーを作成できませんでした"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "ブラウザでサインインを待っています"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "目次"
 
-msgid "Sign In"
-msgstr "サインイン"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "インストール"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "ブラウザでページを開き、次のコードを入力します。"
-
-msgid "Try Again"
-msgstr "もう一度お試しください"
-
-msgid "Remove"
-msgstr "削除"
-
-msgid "Add Microsoft Account"
-msgstr "Microsoft アカウントを追加"
-
-msgid "Minecraft Version"
-msgstr "Minecraftバージョン"
-
-msgid "Install the selected %s?"
-msgstr "選択した%sをインストールしますか？"
-
-msgid "%s \"%s\""
-msgstr "%s「%s」"
-
-msgid "Search"
-msgstr "検索"
-
-msgid "Update"
-msgstr "更新"
-
-msgid "Update the following %s"
-msgstr "次の%sを更新"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "依存関係："
 
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "対立\n"
+
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "%s をインストールしています"
+
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "更新"
+
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s「%s」"
+
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "このプロジェクトには、このインスタンスに適合する公開物がありません。"
+
+#: src/nuvashalauncher-content-page-install.c:1003
+#, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "%u 個の Mod をインストールしています"
+
+#: src/nuvashalauncher-content-page-install.c:1006
+#, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "%u 個のリソースパックをインストールしています"
+
+#: src/nuvashalauncher-content-page-install.c:1009
+#, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "%u 個のシェーダーをインストールしています"
+
+#: src/nuvashalauncher-content-page-install.c:1012
+#, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "%u 個のアイテムをインストールしています"
+
+#: src/nuvashalauncher-content-page-install.c:1038
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "次の Mod をインストールしますか？"
+
+#: src/nuvashalauncher-content-page-install.c:1041
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "次のリソースパックをインストールしますか？"
+
+#: src/nuvashalauncher-content-page-install.c:1044
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "次のシェーダーをインストールしますか？"
+
+#: src/nuvashalauncher-content-page-install.c:1047
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "次のアイテムをインストールしますか？"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "ファイルを削除できません"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "有効にする"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "依存する Mod を削除できません"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "ファイルの名前を変更できません"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "削除しました"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "「%s」を削除しますか？"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
 msgid ""
 "The following mods depend on %s:\n"
 "%s"
@@ -458,94 +350,262 @@ msgstr ""
 "次のModは%sに依存しています：\n"
 "%s"
 
-msgid "Cache"
-msgstr "キャッシュ"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "削除"
 
-msgid "Cache Modrinth API responses"
-msgstr "Modrinth API 応答をキャッシュ"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "有効"
 
-msgid "Cache expiration"
-msgstr "キャッシュの有効期限"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "無効"
 
-msgid "1 hour"
-msgstr "1時間"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "無効にする"
 
-msgid "6 hours"
-msgstr "6時間"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "検索"
 
-msgid "1 day"
-msgstr "1日"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "すべて更新"
 
-msgid "7 days"
-msgstr "7日"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "更新を取得中"
 
-msgid "Show Shortcuts"
-msgstr "ショートカットを表示"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "進捗"
 
-msgid "Quit"
-msgstr "終了"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "フォルダーを開く"
 
-# New modpack import/export actions use English until translators provide localized text.
-msgid "Import Modpack"
-msgstr "Modpack をインポート"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "なにもインストールされていません…"
 
-msgid "Modpack exported"
-msgstr "Modpack をエクスポートしました"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "このインスタンスのフォルダーに入れるものを参照します"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth Modpack (*.mrpack)"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "閲覧"
 
-msgid "The export location is not a local file"
-msgstr "エクスポート先がローカルファイルではありません"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "インストール済み"
 
-msgid "Export Modpack"
-msgstr "Modpack をエクスポート"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "読み込み中…"
 
-msgid "Importing modpack…"
-msgstr "Modpack をインポート中…"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "カテゴリーで絞り込む"
 
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "表示するものはありません"
+
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"何を探すかを入力するか、このインスタンスのModrinthのすべてを参照してください"
+
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "閉じる"
+
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "%u 個のアイテムを更新しました"
+
+#: src/nuvashalauncher-content-page-updates.c:246
+msgid "Everything is up to date"
+msgstr "すべて最新です"
+
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "次の%sを更新"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "確認"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
+msgid "The folder could not be opened: %s"
+msgstr "The folder could not be opened: %s"
+
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
+msgid "Cannot create “%s”: %s"
+msgstr "「%s」を作成できません: %s"
+
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "Mod ローダーがありません"
+
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"ModにはMod ローダーが必要です。先にこのインスタンスの設定でFabric、Quilt、"
+"Forge、NeoForgeを選んでください"
+
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "リストからMinecraftのバージョンを選んでください。"
+
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "ローダーのバージョンを選択するか、別のローダーを選択してください。"
+
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "フォルダー"
+
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "フォルダーを選択"
+
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "作成"
+
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "%u 個の Modパックを選択中"
+
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "サービスから無効な応答が返されました。後で再試行してください。"
+
+#: src/nuvashalauncher-download-modpack-browser.c:763
+msgid "All versions"
+msgstr "すべてのバージョン"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "ダウンロード"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "関連度"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "新着順"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "更新日時順"
+
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "フォロワー数"
+
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "Modパックを絞り込む"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "Modパックを閲覧する"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr ""
+"指定されたファイル、プロジェクト、または対応バージョンが見つかりません。"
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "次の Modパックをインストールしますか？"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"
 msgstr "Modpack を読み込み中"
 
-msgid "Exporting modpack"
-msgstr "Modpack をエクスポート中"
-
-msgid "Modpack export"
-msgstr "Modpack のエクスポート"
-
-msgid "Include transient files?"
-msgstr "一時ファイルを含めますか？"
-
-msgid ""
-"Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr ""
-"ログ、クラッシュレポート、スクリーンショット、キャッシュ、ダウンロードは通常"
-"除外されます。"
-
-msgid "Clean Export"
-msgstr "クリーンエクスポート"
-
-msgid "Include All Files"
-msgstr "すべてのファイルを含める"
-
-msgid "Pack Name"
-msgstr "パック名"
-
-msgid "Summary"
-msgstr "概要"
-
-msgid "Version ID"
-msgstr "バージョン ID"
-
-msgid "Downloading files"
-msgstr "ファイルをダウンロード中"
-
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
 msgid "Extracting files"
 msgstr "ファイルを展開中"
 
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "MODパックをインストールできませんでした"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "ファイルをダウンロード中"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
 msgid "Optional files"
 msgstr "オプションファイル"
 
+#: src/nuvashalauncher-download-modpack-install.c:265
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
@@ -553,1105 +613,1911 @@ msgstr ""
 "パックにはこれらのファイルが記載されていますが、必須ではありません。要求しな"
 "い限りインストールされません。デフォルトでは無効です"
 
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
 msgid "Pack could not be fetched"
 msgstr "パックを取得できませんでした"
 
+#: src/nuvashalauncher-download-modpack-install.c:422
 msgid "Invalid pack"
 msgstr "無効なパック"
 
-msgid "The pack does not define its install"
-msgstr "パックにインストール情報がありません"
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "このバージョンにはパックファイルが含まれていません"
 
-msgid "Downloading Modpack"
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"このプロジェクトでは、Nuvasha Launcherがインストールできるパックファイルは公"
+"開されていません。"
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
 msgstr "Modpack をダウンロード中"
 
-msgid "Writing archive"
-msgstr "アーカイブを書き込み中"
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "ダウンロード"
 
-msgid "Export modpack metadata"
-msgstr "エクスポートメタデータ"
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "接続に失敗しました。インターネット接続を確認して再試行してください。"
 
-msgid "Ask for export metadata"
-msgstr "エクスポート時にメタデータを確認"
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "サービスがリクエストを拒否しました。後で再試行してください。"
 
-msgid "Pack information"
-msgstr "パック情報"
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "リクエストが多すぎます。少し待ってから再試行してください。"
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "エクスポート前に名前、概要、バージョンの入力欄を表示します。"
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr ""
+"ファイルを読み書きできませんでした。場所、権限、空き容量を確認してください。"
 
-msgid "Export complete"
-msgstr "エクスポート完了"
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr ""
+"ダウンロードしたファイルの検証に失敗し、インストールしませんでした。再ダウン"
+"ロードしてください。"
 
-msgid "Export"
-msgstr "エクスポート"
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr ""
+"アーカイブが無効または安全でありません。信頼できる配布元から再ダウンロードし"
+"てください。"
 
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "%u 個のアイテムをインストールしました"
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "操作に失敗しました。技術的な詳細を確認してください。"
 
-msgid "Updated %u item"
-msgid_plural "Updated %u items"
-msgstr[0] "%u 個のアイテムを更新しました"
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr ""
+"Java実行ファイルを使用できませんでした。動作するJavaランタイムを選択してくだ"
+"さい。"
 
-msgid "The icon must be a file on this computer"
-msgstr "アイコンはこのコンピューター上のファイルである必要があります"
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "アクセスが拒否されました。フォルダーの権限を確認してください。"
 
-msgid "The game is running; stop it before moving its directory"
-msgstr "ゲームが実行中です。ディレクトリを移動する前に停止してください"
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "ディスクの空き容量が不足しています。"
 
-msgid "%s is being installed"
-msgstr "%s をインストールしています"
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "ファイルまたはフォルダーが見つかりません。場所を確認してください。"
 
-msgid "no compatible version"
-msgstr "互換性のあるバージョンがありません"
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "保存先が既に存在します。別の場所を選択してください。"
 
-msgid "Enabled"
-msgstr "有効"
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
 
-msgid "Disabled"
-msgstr "無効"
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "保存されたログイン情報は無効です。再度ログインしてください。"
 
-msgid "Deleted"
-msgstr "削除しました"
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr ""
+"ログインが拒否されました。ログインする場合は最初からやり直してください。"
 
-msgid "Everything is up to date"
-msgstr "すべて最新です"
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "このアカウントはMinecraft: Java Editionを所有していません。"
 
-msgid "Cannot create \"%s\": %s"
-msgstr "「%s」を作成できません: %s"
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr ""
+"minecraft.netでMinecraft: Java Editionのプロフィールを設定してから再試行して"
+"ください。"
 
-msgid "This project publishes nothing that fits this instance."
-msgstr "このプロジェクトには、このインスタンスに適合する公開物がありません。"
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr ""
+"このビルドではMicrosoftログインが設定されていません。ランチャーを更新してくだ"
+"さい。"
 
-msgid "Unknown"
-msgstr "不明"
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
 
-msgid "%s (unstable)"
-msgstr "%s（不安定）"
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"このModローダーをインストールできませんでした。別のバージョンを選ぶか、技術的"
+"な詳細を確認してください。"
 
-msgid "the next page could not be loaded"
-msgstr "次のページを読み込めませんでした"
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"ゲームのメタデータが無効または利用できません。バージョン一覧を更新して再試行"
+"してください。"
 
-msgid "Other"
-msgstr "その他"
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr ""
+"このインスタンスは利用できなくなりました。インスタンス一覧を更新してくださ"
+"い。"
 
-msgid "%.1fM downloads"
-msgstr "%.1fM ダウンロード"
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "別のインスタンス名またはフォルダーを選択してください。"
 
-msgid "%.1fk downloads"
-msgstr "%.1fk ダウンロード"
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr ""
+"インスタンスの設定が無効です。選択したバージョンとJVM引数を確認してください。"
 
-msgid "%s  ·  by %s"
-msgstr "%s  ·  作成者: %s"
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr ""
+"アカウントを保存できませんでした。システムのキーリングとファイルの権限を確認"
+"してください。"
 
-msgid "by %s"
-msgstr "作成者: %s"
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "クリア"
 
-msgid "%s downloads"
-msgstr "%s ダウンロード"
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "サインイン"
 
-msgid "Cache Cleared"
-msgstr "キャッシュを消去しました"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "ブラウザーで開く"
 
-msgid "Cache Cleanup Failed"
-msgstr "キャッシュの消去に失敗しました"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "もう一度お試しください"
 
-msgid "The cache could not be cleared."
-msgstr "キャッシュを消去できませんでした。"
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "オフラインアカウントを追加"
 
-msgid "the versions of this loader could not be read"
-msgstr "この Mod ローダーのバージョンを読み取れませんでした"
-msgid "Unavailable"
-msgstr "利用できません"
-msgid "No compatible Java runtime was found."
-msgstr "互換性のあるJavaランタイムが見つかりません。"
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "名前"
 
-msgid "Minecraft crashed"
-msgstr "Minecraftがクラッシュしました"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "追加"
 
-msgid "Minecraft could not start"
-msgstr "Minecraftを起動できませんでした"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "インスタンスを作成"
 
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraftにはサインインが必要です"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "Modpack をダウンロード"
 
-msgid "The file cannot be renamed"
-msgstr "ファイルの名前を変更できません"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "Modpack をインポート"
 
-msgid "The file cannot be deleted"
-msgstr "ファイルを削除できません"
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "Modpack をインポート中…"
 
-msgid "The folder cannot be read"
-msgstr "フォルダーを読み取れません"
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "Modpack を検索"
 
-msgid "The file could not be installed"
-msgstr "ファイルをインストールできませんでした"
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "閉じる"
 
-msgid "The folder cannot be created"
-msgstr "フォルダーを作成できませんでした"
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr ""
+"ご指定の内容に一致するモッドパックはありません。別のキーワードをお試しくださ"
+"い。."
 
-msgid "This cannot be installed"
-msgstr "これはインストールできません"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "ファイルを選択"
 
-msgid "Pick a Minecraft version first"
-msgstr "先にMinecraftのバージョンを選択してください"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "インストールできませんでした"
 
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "依存関係を削除すると、その依存関係に依存していた Mod も削除します"
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "戻る"
 
-msgid "A dependent mod cannot be deleted"
-msgstr "依存する Mod を削除できません"
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "ログを検索"
 
 # UI string
-msgid "Skin"
-msgstr "Skin"
-
-# UI string
-msgid "Slim model"
-msgstr "スリムモデル"
-
-# UI string
-msgid "OK"
-msgstr "わかった"
-
-# UI string
-msgid "Export skin…"
-msgstr "スキンをエクスポート…"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
 msgid "Classic model"
 msgstr "クラシックモデル"
 
 # UI string
-msgid "PNG skin texture"
-msgstr "PNGのスキンテクスチャ"
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "スリムモデル"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "カスタマイズ"
 
 # UI string
-msgid "Invalid skin"
-msgstr "無効なスキン"
-
-# UI string
-msgid "No cape"
-msgstr "マントなし"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
 msgid "Import skin…"
 msgstr "スキンをインポート…"
 
 # UI string
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "スキンをエクスポート…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Minecraft Services のエラー"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "システムのデフォルト設定"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "%sのコピー"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "インスタンス名が空です"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "インスタンスの名前%sには、以下を含めることはできません"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "インスタンス名はディレクトリ名として使用できません"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Modpack をエクスポートしました"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "エクスポート先がローカルファイルではありません"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "Modpack のエクスポート"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "Modpack をエクスポート中"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
+msgid "Export modpack"
+msgstr "Modpack をエクスポート"
+
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth Modpack (*.mrpack)"
+
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "パック情報"
+
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "エクスポート"
+
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "エクスポートメタデータ"
+
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "パック名"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "概要"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "バージョン ID"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "一時ファイルを含めますか？"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"ログ、クラッシュレポート、スクリーンショット、キャッシュ、ダウンロードは通常"
+"除外されます。"
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "クリーンエクスポート"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "すべてのファイルを含める"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "ゲームが実行中です。ディレクトリを移動する前に停止してください"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "フォルダーを選択"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "「%s」に複製しました"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"設定された Java が検出されません。まだ使える Java 実行ファイルか確認してくだ"
+"さい"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "このゲームには Java %d 以降が必要です。選択されている Java は %d です"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr ""
+"ヘッドレス版ではなく、デスクトップ対応のJavaランタイムを選択してください。"
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "アイコンはこのコンピューター上のファイルである必要があります"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "アイコンを選択"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "画像"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "一般"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "アイコン"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "フォルダーを変更"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "JVM 引数"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "アクション"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "複製"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "インスタンスの削除。"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "1分未満"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu 分"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu 時間 %llu 分"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "今日 %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "まだプレイしていません"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "なし"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "計算中…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "アクティビティ"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "合計プレイ時間"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "最終プレイ"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "合計起動回数"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "合計クラッシュ数"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "インスタンス"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "合計サイズ"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "作成日"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "不明"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "ログ"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "設定"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "リソースパック"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "シェーダーパック"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "Mod"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "ワールド"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "サーバー"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "統計"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "選んだファイルは Java バージョンを報告しません"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Java 実行ファイルを選択"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "読み込み中…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "カスタム：%s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Java ランタイムを追加"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Java ランタイム"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr ""
+"新しいクラッシュレポートが作成されました。詳細はログを開いて確認してくださ"
+"い。"
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "ゲームはシグナル%dによって停止されました"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "ゲームはコード%dで終了しました"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "互換性のあるJavaランタイムが見つかりません。"
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "この Mod ローダーのバージョンを読み取れませんでした"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s（不安定）"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "なし"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Minecraft %sの互換性のある%sバージョンが見つかりません。"
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "先にMinecraftのバージョンを選択してください"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "Mod ローダー"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "Mod ローダーのバージョン"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "技術的な詳細"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Nuvasha Launcherのキャッシュを消去しますか？"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "キャッシュを消去しました"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "キャッシュの消去に失敗しました"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "エクスポート時にメタデータを確認"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "エクスポート前に名前、概要、バージョンの入力欄を表示します。"
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "依存関係を削除すると、その依存関係に依存していた Mod も削除します"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "不安定な Minecraft バージョンを表示"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "不安定なMod ローダーのバージョンを表示"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "言語"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "インターフェース言語"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "行数の上限"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "キャッシュ"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Modrinth API 応答をキャッシュ"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1時間"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6時間"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1日"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7日"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "キャッシュの有効期限"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "Nuvasha Launcherのキャッシュをクリアする"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Linux用Minecraftランチャー"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "サービスとエコシステム"
+
+#: src/nuvashalauncher-main-window-actions.c:626
+msgid "Minecraft disclaimer"
+msgstr "Minecraft免責事項"
+
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"公式のMINECRAFT製品ではありません。MOJANGまたはMICROSOFTによって承認されてお"
+"らず、関連もありません。\n"
+"\n"
+"MinecraftはMojang ABの商標です。このランチャーは独自に開発されたものであり、"
+"Mojang StudiosまたはMicrosoftとは提携していません。"
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "ModrinthとModローダー"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"Modパック、Mod、リソースパック、およびシェーダーはModrinthによってホストさ"
+"れ、それぞれの作者によって作成されています。\n"
+"\n"
+"ModローダーはFabric、Quilt、Forge、およびNeoForgeプロジェクトによって独自に開"
+"発されています。"
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "AppStreamメタデータ"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"AppStreamメタデータ（説明、概要、リリースノート）は、Creative Commons CC0 "
+"1.0 Universal Public Domain Dedicationの下で公開されています。"
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "Nuvasha Launcherについて"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "キーボードショートカット"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "設定"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "終了"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "選択した項目を削除"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "Modpack をインポート…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "停止"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "プレイ"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "ストップ%s？"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "そのゲーム"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"ゲームが実行中ですが、まもなく終了します。前回のセーブ以降に進めた内容は失わ"
+"れます。"
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "プレイを続ける"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "アカウント"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "インスタンスはまだありません"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "プレイを開始するにはインスタンスを作成してください。"
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraftがクラッシュしました"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Minecraftを起動できませんでした"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraftにはサインインが必要です"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "Minecraft Services がリクエストを拒否しました（HTTP %u）%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "アーカイブを書き込み中"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "エクスポート完了"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "Mod ローダーを特定できません：%s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "冒険"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "雰囲気"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "音声"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "ブロック"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "ブルーム"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "アニメ調"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "カテゴリー"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "カラーライティング"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "戦闘"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "コアシェーダー"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "奇妙"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "装飾"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "経済"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "エンティティ"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "環境"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "装備"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "ファンタジー"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "機能"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "草木"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "フォント"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "食べ物"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "ゲームの仕組み"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "インターフェース"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "高"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "アイテム"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "ライブラリ"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "低"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "魔法"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "管理"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "中"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "ミニゲーム"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "モブ"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "Mod対応"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "モデル"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "最適化"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "パストレーシング"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "パフォーマンスへの影響"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "低スペックPC向け"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "リアル"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "反射"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "解像度"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "スクリーンショット"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "セミリアル"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "影"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "シンプル"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "交流"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "収納"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "技術"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "テーマ別"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "輸送"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "調整"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "便利機能"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "バニラ風"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "ワールド生成"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr ""
+"モドリンスはヌヴァシャにペースを落とすよう頼んでいる。依頼が多すぎるからだ。"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "Modrinthはこのファイルを知りません"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Minecraft %sと%sの互換性のあるバージョンが見つかりません。"
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "この名前のオフラインアカウントは既に存在します。"
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "サーバーを編集"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "サーバーを追加"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "保存"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "アドレス"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "ダウンロード時に確認する"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "常にダウンロード"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "ダウンロードしない"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "サーバー「%s」を削除しますか？"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "サーバーを削除"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "上へ移動"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "下へ移動"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "編集"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "更新"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "サーバーがありません"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr ""
+"ここに追加されたサーバーはこのインスタンスの servers.dat に保存されます。"
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "マイクロソフトにコードを尋ねる…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "ブラウザでサインインを待っています…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr ""
+"ブラウザーを開けませんでした。表示されたアドレスを手動で開いてください。"
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"Microsoftから安全でないログイン先が返されました。再試行する前にランチャーを更"
+"新してください。"
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "ブラウザでページを開き、次のコードを入力します。"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Skin"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "スキン画像は64x64または64x32のPNGファイルである必要があります"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "無効なスキン"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "わかった"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "PNGのスキンテクスチャ"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:368
 msgid "Delete skin?"
 msgstr "スキンを削除しますか？"
 
 # UI string
+#: src/nuvashalauncher-users-popover-skin.c:369
 msgid "This skin will be removed from the skin library."
 msgstr "このスキンはスキンライブラリから削除されます。"
 
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "スキン画像は64x64または64x32のPNGファイルである必要があります"
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "マントなし"
 
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "Modパックを閲覧する"
-
-msgid "Choose Files"
-msgstr "ファイルを選択"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "Nuvasha Launcherのキャッシュをクリアする"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Nuvasha Launcherのキャッシュを消去しますか？"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"対立\n"
-
-msgid "Content"
-msgstr "目次"
-
-msgid "Could not install"
-msgstr "インストールできませんでした"
-
-msgid "Could not install the modpack"
-msgstr "MODパックをインストールできませんでした"
-
-msgid "Could not load categories"
-msgstr "カテゴリを読み込めませんでした"
-
-msgid "Could not search Modrinth"
-msgstr "Modrinth の検索に失敗しました"
-
-msgid "Could not understand the answer"
-msgstr "その答えが理解できなかった"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "無効にする"
-
-msgid "Dismiss"
-msgstr "閉じる"
-
-msgid "Enable"
-msgstr "有効にする"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "画像"
-
-msgid "Installing"
-msgstr "インストール"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "インスタンスの名前%sには、以下を含めることはできません"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "Nuvasha Launcherが認識できないファイルが含まれています。"
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "マイクロソフトは、安全でない検証アドレスを返しました"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "マイクロソフトは、ログイン用のコードを提供してくれませんでした"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · サインインが必要です"
-
-msgid "Modrinth does not know this file"
-msgstr "Modrinthはこのファイルを知りません"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "モドリンスはヌヴァシャにペースを落とすよう頼んでいる。依頼が多すぎるからだ。"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "ご指定の内容に一致するモッドパックはありません。別のキーワードをお試しください。"
-
-msgid "None"
-msgstr "なし"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Nuvasha Launcherのキャッシュデータは正常に消去されました。"
-
-msgid "Offline"
-msgstr "オフライン"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "リストからMinecraftのバージョンを選んでください。"
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "ローダーのバージョンを選択するか、別のローダーを選択してください。"
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
 msgid "Remove %s?"
 msgstr "削除する%s？"
 
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Modrinthを検索して、Modpackをインストールする"
-
-msgid "Stop %s?"
-msgstr "ストップ%s？"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "システムのデフォルト設定"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "そのアカウントはNuvasha Launcherから削除され、保存されていたログイン情報は消去されます。ゲーム本体には一切影響はありません。"
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "ゲームが実行中ですが、まもなく終了します。前回のセーブ以降に進めた内容は失われます。"
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "このプロジェクトでは、Nuvasha Launcherがインストールできるパックファイルは公開されていません。"
-
-msgid "This version has no pack file"
-msgstr "このバージョンにはパックファイルが含まれていません"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "このアカウントが登録されている国では、Xbox Liveをご利用いただけません"
-
-msgid "the game"
-msgstr "そのゲーム"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "インスタンス名はディレクトリ名として使用できません"
-
-msgid "the instance name is empty"
-msgstr "インスタンス名が空です"
-
-msgid "the sign-in did not finish"
-msgstr "サインインが完了しませんでした"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "このMicrosoftアカウントにはまだXboxプロファイルが紐付けられていません。一度xbox.comにこのアカウントでサインインしてから、こちらに再度サインインしてください。"
-
+#: src/nuvashalauncher-users-popover.c:178
 msgid "this account"
 msgstr "このアカウント"
 
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "このアカウントは、プレイを開始する前に成人による確認が必要ですが、これは韓国のアカウントでも同様の手続きが必要です。"
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "これは子供用アカウントです。ゲームをプレイするには、大人がMicrosoftファミリーにこのアカウントを追加する必要があります。"
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "Minecraft Services がリクエストを拒否しました（HTTP %u）%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Minecraft Services のエラー"
-
-msgid "Application menu"
-msgstr "Application menu"
-
-msgid "The folder could not be opened: %s"
-msgstr "The folder could not be opened: %s"
-
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "ブラウザーで開く"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "%u/%u 個選択中"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "次のインスタンスが削除されます:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "編集モード"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "更新を取得中"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "進捗"
-
-msgid "Enter Edit Mode"
-msgstr "編集モードに入る"
-
-msgid "Delete Selected"
-msgstr "選択した項目を削除"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "新しいクラッシュレポートが作成されました。詳細はログを開いて確認してください。"
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "アクセスが拒否されました。フォルダーの権限を確認してください。"
-
-msgid "An offline account with this name already exists."
-msgstr "この名前のオフラインアカウントは既に存在します。"
-
-msgid "Choose another instance name or directory."
-msgstr "別のインスタンス名またはフォルダーを選択してください。"
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "このModローダーをインストールできませんでした。別のバージョンを選ぶか、技術的な詳細を確認してください。"
-
-msgid "Could not load project details. Try again."
-msgstr "プロジェクトの詳細を読み込めませんでした。再試行してください。"
-
-msgid "Could not load versions. Try again."
-msgstr "バージョンを読み込めませんでした。再試行してください。"
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "ブラウザーを開けませんでした。表示されたアドレスを手動で開いてください。"
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "ファイルを読み書きできませんでした。場所、権限、空き容量を確認してください。"
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "アカウントを保存できませんでした。システムのキーリングとファイルの権限を確認してください。"
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "Microsoftから安全でないログイン先が返されました。再試行する前にランチャーを更新してください。"
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "このビルドではMicrosoftログインが設定されていません。ランチャーを更新してください。"
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "ヘッドレス版ではなく、デスクトップ対応のJavaランタイムを選択してください。"
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "minecraft.netでMinecraft: Java Editionのプロフィールを設定してから再試行してください。"
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "ログインが拒否されました。ログインする場合は最初からやり直してください。"
-
-msgid "Technical Details"
-msgstr "技術的な詳細"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "Java実行ファイルを使用できませんでした。動作するJavaランタイムを選択してください。"
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "アーカイブが無効または安全でありません。信頼できる配布元から再ダウンロードしてください。"
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "接続に失敗しました。インターネット接続を確認して再試行してください。"
-
-msgid "The destination already exists. Choose another location."
-msgstr "保存先が既に存在します。別の場所を選択してください。"
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "ダウンロードしたファイルの検証に失敗し、インストールしませんでした。再ダウンロードしてください。"
-
-msgid "The file or folder was not found. Check its location."
-msgstr "ファイルまたはフォルダーが見つかりません。場所を確認してください。"
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "ゲームのメタデータが無効または利用できません。バージョン一覧を更新して再試行してください。"
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "操作に失敗しました。技術的な詳細を確認してください。"
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "指定されたファイル、プロジェクト、または対応バージョンが見つかりません。"
-
-msgid "The service rejected the request. Try again later."
-msgstr "サービスがリクエストを拒否しました。後で再試行してください。"
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "サービスから無効な応答が返されました。後で再試行してください。"
-
-msgid "There is not enough free disk space."
-msgstr "ディスクの空き容量が不足しています。"
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "このアカウントはMinecraft: Java Editionを所有していません。"
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "このインスタンスは利用できなくなりました。インスタンス一覧を更新してください。"
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "リクエストが多すぎます。少し待ってから再試行してください。"
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "インスタンスの設定が無効です。選択したバージョンとJVM引数を確認してください。"
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "保存されたログイン情報は無効です。再度ログインしてください。"
-
-msgid "Minecraft launcher for Linux"
-msgstr "Linux用Minecraftランチャー"
-
-msgid "Services & Ecosystem"
-msgstr "サービスとエコシステム"
-
-msgid "Minecraft Disclaimer"
-msgstr "Minecraft免責事項"
-
+#: src/nuvashalauncher-users-popover.c:181
 msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
 msgstr ""
-"公式のMINECRAFT製品ではありません。MOJANGまたはMICROSOFTによって承認されておらず、関連もありません。\n"
-"\n"
-"MinecraftはMojang ABの商標です。このランチャーは独自に開発されたものであり、Mojang StudiosまたはMicrosoftとは提携していません。"
+"そのアカウントはNuvasha Launcherから削除され、保存されていたログイン情報は消"
+"去されます。ゲーム本体には一切影響はありません。"
 
-msgid "Modrinth & Mod Loaders"
-msgstr "ModrinthとModローダー"
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "削除"
 
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"Modパック、Mod、リソースパック、およびシェーダーはModrinthによってホストされ、それぞれの作者によって作成されています。\n"
-"\n"
-"ModローダーはFabric、Quilt、Forge、およびNeoForgeプロジェクトによって独自に開発されています。"
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · サインインが必要です"
 
-msgid "AppStream Metadata"
-msgstr "AppStreamメタデータ"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "AppStreamメタデータ（説明、概要、リリースノート）は、Creative Commons CC0 1.0 Universal Public Domain Dedicationの下で公開されています。"
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "コピー"
-
-msgid "Rename"
-msgstr "名前を変更"
-
-msgid "Reset Icon"
-msgstr "アイコンをリセット"
-
-msgid "Delete World"
-msgstr "ワールドを削除"
-
-msgid "Seed copied to clipboard"
-msgstr "シード値をクリップボードにコピーしました"
-
-msgid "Remove server \"%s\"?"
-msgstr "サーバー「%s」を削除しますか？"
-
-msgid "Refresh"
-msgstr "更新"
-
-msgid "Remove Server"
-msgstr "サーバーを削除"
-
-msgid "Survival"
-msgstr "サバイバル"
-
-msgid "Edit"
-msgstr "編集"
-
-msgid "Ask to download"
-msgstr "ダウンロード時に確認する"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Minecraft で保存されたワールドやインポートしたワールドがここに表示されます。"
-
-msgid "Rename World"
-msgstr "ワールド名を変更"
-
-msgid "Servers"
-msgstr "サーバー"
-
-msgid "Save"
-msgstr "保存"
-
-msgid "Add World"
-msgstr "ワールドを追加"
-
-msgid "Spectator"
-msgstr "スペクテイター"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "ワールド「%s」を削除しますか？この操作は取り消せません。"
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "ここに追加されたサーバーはこのインスタンスの servers.dat に保存されます。"
-
-msgid "Add Server"
-msgstr "サーバーを追加"
-
-msgid "Edit Server"
-msgstr "サーバーを編集"
-
-msgid "Address"
-msgstr "アドレス"
-
-msgid "Datapacks"
-msgstr "データパック"
-
-msgid "No Worlds"
-msgstr "ワールドがありません"
-
-msgid "Creative"
-msgstr "クリエイティブ"
-
-msgid "Move Up"
-msgstr "上へ移動"
-
-msgid "No Servers"
-msgstr "サーバーがありません"
-
-msgid "Never download"
-msgstr "ダウンロードしない"
-
-msgid "Worlds"
-msgstr "ワールド"
-
-msgid "Always download"
-msgstr "常にダウンロード"
-
-msgid "Move Down"
-msgstr "下へ移動"
-
-msgid "Copy Seed"
-msgstr "シード値をコピー"
-
-msgid "Stats"
-msgstr "統計"
-
-msgid "Playtime"
-msgstr "プレイ時間"
-
-msgid "Time played"
-msgstr "合計プレイ時間"
-
-msgid "Not played yet"
-msgstr "まだプレイしていません"
-
-msgid "Less than a minute"
-msgstr "1分未満"
-
-msgid "%llu min"
-msgstr "%llu 分"
-
-msgid "%llu h %llu min"
-msgstr "%llu 時間 %llu 分"
-
-msgid "Runs on"
-msgstr "動作環境"
-
-msgid "Activity"
-msgstr "アクティビティ"
-
-msgid "Last session"
-msgstr "前回のセッション"
-
-msgid "Last played"
-msgstr "最終プレイ"
-
-msgid "Total launches"
-msgstr "合計起動回数"
-
-msgid "Total crashes"
-msgstr "合計クラッシュ数"
-
-msgid "Server joins"
-msgstr "サーバー参加回数"
-
-msgid "World loads"
-msgstr "ワールド読込回数"
-
-msgid "Player Profile"
-msgstr "プレイヤープロファイル"
-
-msgid "Player type"
-msgstr "プレイスタイル"
-
-msgid "Pack style"
-msgstr "構成スタイル"
-
-msgid "Average session"
-msgstr "平均セッション"
-
-msgid "Stability"
-msgstr "安定性"
-
-msgid "Instance"
-msgstr "インスタンス"
-
-msgid "Total size"
-msgstr "合計サイズ"
-
-msgid "Created on"
-msgstr "作成日"
-
-msgid "Calculating…"
-msgstr "計算中…"
-
-msgid "Never"
-msgstr "なし"
-
-msgid "Today, %s"
-msgstr "今日 %s"
-
-msgid "Hybrid"
-msgstr "ハイブリッド"
-
-msgid "Server Player"
-msgstr "サーバープレイヤー"
-
-msgid "Singleplayer"
-msgstr "シングルプレイヤー"
-
-msgid "Unplayed"
-msgstr "未プレイ"
-
-msgid "Modpack"
-msgstr "Modpack"
-
-msgid "Lightweight"
-msgstr "軽量"
-
-msgid "Kitchen Sink"
-msgstr "大型パック"
-
-msgid "Quick"
-msgstr "短時間"
-
-msgid "Standard"
-msgstr "標準"
-
-msgid "Marathon"
-msgstr "長時間"
-
-msgid "Stable"
-msgstr "安定"
-
-msgid "%u%% crash rate"
-msgstr "クラッシュ率 %u%%"
-
-msgid "A name cannot be empty."
-msgstr "名前を空にすることはできません."
-
-msgid "Remove server"
-msgstr "サーバーを削除"
-
-msgid "Download modpack"
-msgstr "Modpack をダウンロード"
-
-msgid "%s “%s”"
-msgstr "%s「%s」"
-
-msgid "Delete instance"
-msgstr "インスタンスの削除。"
-
-msgid "No worlds"
-msgstr "ワールドがありません"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "ブラウザでサインインを待っています…"
-
-msgid "Choose files"
-msgstr "ファイルを選択"
-
-msgid "Cannot create “%s”: %s"
-msgstr "「%s」を作成できません: %s"
-
-msgid "Cache cleanup failed"
-msgstr "キャッシュの消去に失敗しました"
-
-msgid "Español"
-msgstr "Español"
-
-msgid "Modrinth & mod loaders"
-msgstr "ModrinthとModローダー"
-
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "ワールド「%s」を削除しますか？この操作は取り消せません。"
-
-msgid "Português"
-msgstr "Português"
-
-msgid "Create an instance to start playing."
-msgstr "プレイを開始するにはインスタンスを作成してください。"
-
-msgid "Duplicated to “%s”"
-msgstr "「%s」に複製しました"
-
-msgid "Downloading modpack"
-msgstr "Modpack をダウンロード中"
-
-msgid "Try again"
-msgstr "もう一度お試しください"
-
-msgid "Performance impact"
-msgstr "パフォーマンスへの影響"
-
-msgid "Add world"
-msgstr "ワールドを追加"
-
-msgid "Create instance"
-msgstr "インスタンスを作成"
-
-msgid "Browse modpacks"
-msgstr "Modパックを閲覧する"
-
-msgid "Remove server “%s”?"
-msgstr "サーバー「%s」を削除しますか？"
-
-msgid "Path tracing"
-msgstr "パストレーシング"
-
-msgid "Clean export"
-msgstr "クリーンエクスポート"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "ゲームの仕組み"
-
-msgid "Minecraft version"
-msgstr "Minecraftバージョン"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "フォルダーを開く"
-
-msgid "AppStream metadata"
-msgstr "AppStreamメタデータ"
-
-msgid "Add Java runtime"
-msgstr "Java ランタイムを追加"
-
-msgid "World generation"
-msgstr "ワールド生成"
-
-msgid "Keyboard shortcuts"
-msgstr "キーボードショートカット"
-
-msgid "Resource packs"
-msgstr "リソースパック"
-
-msgid "Edit server"
-msgstr "サーバーを編集"
-
-msgid "Keep playing"
-msgstr "プレイを続ける"
-
-msgid "Technical details"
-msgstr "技術的な詳細"
-
-msgid "Pack name"
-msgstr "パック名"
-
-msgid "Colored lighting"
-msgstr "カラーライティング"
-
-msgid "Rename world"
-msgstr "ワールド名を変更"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "名前には英字、数字、アンダースコアのみ使用できます."
-
-msgid "Preferences"
-msgstr "設定"
-
-msgid "Delete world"
-msgstr "ワールドを削除"
-
-msgid "Asking Microsoft for a code…"
-msgstr "マイクロソフトにコードを尋ねる…"
-
-msgid "Show unstable mod loader versions"
-msgstr "不安定なMod ローダーのバージョンを表示"
-
-msgid "Move down"
-msgstr "下へ移動"
-
-msgid "Clear cache"
-msgstr "Nuvasha Launcherのキャッシュをクリアする"
-
-msgid "Delete “%s”?"
-msgstr "「%s」を削除しますか？"
-
-msgid "Import modpack…"
-msgstr "Modpack をインポート…"
-
-msgid "Delete selected"
-msgstr "選択した項目を削除"
-
-msgid "Java runtime"
-msgstr "Java ランタイム"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "名前は3文字以上16文字以下にしてください."
-
-msgid "Import modpack"
-msgstr "Modpack をインポート"
-
-msgid "Core shaders"
-msgstr "コアシェーダー"
-
-msgid "Sign in"
-msgstr "サインイン"
-
-msgid "Cache cleared"
-msgstr "キャッシュを消去しました"
-
-msgid "No instances yet"
-msgstr "インスタンスはまだありません"
-
-msgid "Add offline account"
-msgstr "オフラインアカウントを追加"
-
-msgid "Copy seed"
-msgstr "シード値をコピー"
-
-msgid "Services & ecosystem"
-msgstr "サービスとエコシステム"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "ご指定の内容に一致するモッドパックはありません。別のキーワードをお試しください。."
-
-msgid "Line limit"
-msgstr "行数の上限"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Modrinth Modpack (*.mrpack)"
-
-msgid "Add server"
-msgstr "サーバーを追加"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
-msgid "All versions"
-msgstr "すべてのバージョン"
-
-msgid "No servers"
-msgstr "サーバーがありません"
-
-msgid "Clear cache?"
-msgstr "Nuvasha Launcherのキャッシュを消去しますか？"
-
-msgid "Loader version"
-msgstr "Mod ローダーのバージョン"
-
-msgid "translator-credits"
-msgstr "Flia"
-
-msgid "Include all files"
-msgstr "すべてのファイルを含める"
-
-msgid "Export modpack"
-msgstr "Modpack をエクスポート"
-
-msgid "Add world…"
-msgstr "ワールドを追加…"
-
-msgid "Update all"
-msgstr "すべて更新"
-
+#: src/nuvashalauncher-users-popover.c:398
 msgid "Add Microsoft account"
 msgstr "Microsoft アカウントを追加"
 
-msgid "Move up"
-msgstr "上へ移動"
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Minecraftバージョン"
 
-msgid "Minecraft disclaimer"
-msgstr "Minecraft免責事項"
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "サバイバル"
 
-msgid "Shader packs"
-msgstr "シェーダーパック"
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "クリエイティブ"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "スペクテイター"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "ワールド名を変更"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "名前を変更"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "コピー"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "シード値をクリップボードにコピーしました"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "ワールド「%s」を削除しますか？この操作は取り消せません。"
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "ワールドを削除"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "シード値をコピー"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "ワールドを追加"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "ワールドを追加…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "ワールドがありません"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr ""
+"Minecraft で保存されたワールドやインポートしたワールドがここに表示されます。"
+
+#~ msgid "Colored Lighting"
+#~ msgstr "カラーライティング"
+
+#~ msgid "Core Shaders"
+#~ msgstr "コアシェーダー"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "ゲームの仕組み"
+
+#~ msgid "Path Tracing"
+#~ msgstr "パストレーシング"
+
+#~ msgid "Performance Impact"
+#~ msgstr "パフォーマンスへの影響"
+
+#~ msgid "World Generation"
+#~ msgstr "ワールド生成"
+
+#~ msgid "All Versions"
+#~ msgstr "すべてのバージョン"
+
+#~ msgid "Update All"
+#~ msgstr "すべて更新"
+
+#~ msgid "Open Folder"
+#~ msgstr "フォルダーを開く"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "何も選択されていません"
+
+#~ msgid "Create Instance"
+#~ msgstr "インスタンスを作成"
+
+#~ msgid "Download Modpack"
+#~ msgstr "Modpack をダウンロード"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "「%s」に複製しました"
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "「%s」を削除しますか？"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Java ランタイム"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Java ランタイムを追加"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "Minecraft には headless でない Java が必要です。Arch では jre-openjdk-"
+#~ "headless ではなく jre-openjdk パッケージを使ってください"
+
+#~ msgid "Delete Instance"
+#~ msgstr "インスタンスの削除。"
+
+#~ msgid "Resource Packs"
+#~ msgstr "リソースパック"
+
+#~ msgid "Shader Packs"
+#~ msgstr "シェーダーパック"
+
+#~ msgid "Loader Version"
+#~ msgstr "Mod ローダーのバージョン"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "不安定なMod ローダーのバージョンを表示"
+
+#~ msgid "Line Limit"
+#~ msgstr "行数の上限"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "キーボードショートカット"
+
+#~ msgid "Keep Playing"
+#~ msgstr "プレイを続ける"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "インスタンスはまだありません"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "ヘッダーの+ボタンを使用して作成します"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "オフラインアカウントを追加"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "名前には英字、数字、アンダースコアのみ使用できます"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "名前を空にすることはできません"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "名前は3文字以上16文字以下にしてください"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "マイクロソフトにコードを尋ねる"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "ブラウザでサインインを待っています"
+
+#~ msgid "Sign In"
+#~ msgstr "サインイン"
+
+#~ msgid "Try Again"
+#~ msgstr "もう一度お試しください"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Microsoft アカウントを追加"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Minecraftバージョン"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s「%s」"
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "ショートカットを表示"
+
+# New modpack import/export actions use English until translators provide localized text.
+#~ msgid "Import Modpack"
+#~ msgstr "Modpack をインポート"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Modrinth Modpack (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "Modpack をエクスポート"
+
+#~ msgid "Clean Export"
+#~ msgstr "クリーンエクスポート"
+
+#~ msgid "Include All Files"
+#~ msgstr "すべてのファイルを含める"
+
+#~ msgid "Pack Name"
+#~ msgstr "パック名"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "パックにインストール情報がありません"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "Modpack をダウンロード中"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "%u 個のアイテムをインストールしました"
+
+#~ msgid "no compatible version"
+#~ msgstr "互換性のあるバージョンがありません"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "「%s」を作成できません: %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "キャッシュを消去しました"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "キャッシュの消去に失敗しました"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "キャッシュを消去できませんでした。"
+
+#~ msgid "Unavailable"
+#~ msgstr "利用できません"
+
+#~ msgid "This cannot be installed"
+#~ msgstr "これはインストールできません"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "Modパックを閲覧する"
+
+#~ msgid "Choose Files"
+#~ msgstr "ファイルを選択"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "Nuvasha Launcherのキャッシュをクリアする"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Nuvasha Launcherのキャッシュを消去しますか？"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "その答えが理解できなかった"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "Nuvasha Launcherが認識できないファイルが含まれています。"
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "マイクロソフトは、安全でない検証アドレスを返しました"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr ""
+#~ "ご指定の内容に一致するモッドパックはありません。別のキーワードをお試しくだ"
+#~ "さい。"
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Nuvasha Launcherのキャッシュデータは正常に消去されました。"
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Modrinthを検索して、Modpackをインストールする"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "サインインが完了しませんでした"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "次のインスタンスが削除されます:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "編集モード"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "編集モードに入る"
+
+#~ msgid "Delete Selected"
+#~ msgstr "選択した項目を削除"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "プロジェクトの詳細を読み込めませんでした。再試行してください。"
+
+#~ msgid "Technical Details"
+#~ msgstr "技術的な詳細"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "サービスとエコシステム"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Minecraft免責事項"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "ModrinthとModローダー"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "AppStreamメタデータ"
+
+#~ msgid "Reset Icon"
+#~ msgstr "アイコンをリセット"
+
+#~ msgid "Delete World"
+#~ msgstr "ワールドを削除"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "サーバー「%s」を削除しますか？"
+
+#~ msgid "Remove Server"
+#~ msgstr "サーバーを削除"
+
+#~ msgid "Rename World"
+#~ msgstr "ワールド名を変更"
+
+#~ msgid "Add World"
+#~ msgstr "ワールドを追加"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "ワールド「%s」を削除しますか？この操作は取り消せません。"
+
+#~ msgid "Add Server"
+#~ msgstr "サーバーを追加"
+
+#~ msgid "Edit Server"
+#~ msgstr "サーバーを編集"
+
+#~ msgid "Datapacks"
+#~ msgstr "データパック"
+
+#~ msgid "No Worlds"
+#~ msgstr "ワールドがありません"
+
+#~ msgid "Move Up"
+#~ msgstr "上へ移動"
+
+#~ msgid "No Servers"
+#~ msgstr "サーバーがありません"
+
+#~ msgid "Move Down"
+#~ msgstr "下へ移動"
+
+#~ msgid "Copy Seed"
+#~ msgstr "シード値をコピー"
+
+#~ msgid "Playtime"
+#~ msgstr "プレイ時間"
+
+#~ msgid "Runs on"
+#~ msgstr "動作環境"
+
+#~ msgid "Last session"
+#~ msgstr "前回のセッション"
+
+#~ msgid "Server joins"
+#~ msgstr "サーバー参加回数"
+
+#~ msgid "World loads"
+#~ msgstr "ワールド読込回数"
+
+#~ msgid "Player Profile"
+#~ msgstr "プレイヤープロファイル"
+
+#~ msgid "Player type"
+#~ msgstr "プレイスタイル"
+
+#~ msgid "Pack style"
+#~ msgstr "構成スタイル"
+
+#~ msgid "Average session"
+#~ msgstr "平均セッション"
+
+#~ msgid "Stability"
+#~ msgstr "安定性"
+
+#~ msgid "Hybrid"
+#~ msgstr "ハイブリッド"
+
+#~ msgid "Server Player"
+#~ msgstr "サーバープレイヤー"
+
+#~ msgid "Singleplayer"
+#~ msgstr "シングルプレイヤー"
+
+#~ msgid "Unplayed"
+#~ msgstr "未プレイ"
+
+#~ msgid "Modpack"
+#~ msgstr "Modpack"
+
+#~ msgid "Lightweight"
+#~ msgstr "軽量"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "大型パック"
+
+#~ msgid "Quick"
+#~ msgstr "短時間"
+
+#~ msgid "Standard"
+#~ msgstr "標準"
+
+#~ msgid "Marathon"
+#~ msgstr "長時間"
+
+#~ msgid "Stable"
+#~ msgstr "安定"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "クラッシュ率 %u%%"

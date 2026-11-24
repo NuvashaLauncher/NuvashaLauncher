@@ -112,6 +112,10 @@ struct _NuvashaLauncherContentPage
 
     GList *result_rows;
     NuvashaLauncherContentBrowserModel *model;
+    GtkBox *selection_bar;
+    GtkLabel *selection_label;
+    GtkButton *selection_button;
+    GHashTable *selected_projects;
   } browse;
 };
 
@@ -124,6 +128,10 @@ void nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self
 void nuvashalauncher_content_page_build_bar (NuvashaLauncherContentPage *self);
 void nuvashalauncher_content_page_move_actions_into_bar (NuvashaLauncherContentPage *self,
                                              gboolean browsing);
+void nuvashalauncher_content_page_on_batch_install_clicked (GtkButton *button,
+                                                            gpointer user_data);
+void nuvashalauncher_content_page_start_batch_plan (NuvashaLauncherContentPage *self,
+                                                    GPtrArray *projects);
 
 void nuvashalauncher_content_page_on_installed_search_changed (GtkEditable *editable,
                                                    gpointer user_data);

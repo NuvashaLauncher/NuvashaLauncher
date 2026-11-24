@@ -1,456 +1,365 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: uk\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-msgid "Adventure"
-msgstr "Пригоди"
-msgid "Atmosphere"
-msgstr "Атмосфера"
-msgid "Audio"
-msgstr "Звук"
-msgid "Blocks"
-msgstr "Блоки"
-msgid "Bloom"
-msgstr "Світіння"
-msgid "Cartoon"
-msgstr "Мультяшний стиль"
-msgid "Categories"
-msgstr "Категорії"
-msgid "Colored Lighting"
-msgstr "Кольорове освітлення"
-msgid "Combat"
-msgstr "Битви"
-msgid "Core Shaders"
-msgstr "Шейдери базової гри"
-msgid "Cursed"
-msgstr "Химерне"
-msgid "Decoration"
-msgstr "Декор"
-msgid "Economy"
-msgstr "Економіка"
-msgid "Entities"
-msgstr "Сутності"
-msgid "Environment"
-msgstr "Оточення"
-msgid "Equipment"
-msgstr "Спорядження"
-msgid "Fantasy"
-msgstr "Фентезі"
-msgid "Features"
-msgstr "Можливості"
-msgid "Foliage"
-msgstr "Рослинність"
-msgid "Fonts"
-msgstr "Шрифти"
-msgid "Food"
-msgstr "Їжа"
-msgid "Game Mechanics"
-msgstr "Ігрові механіки"
-msgid "Interface"
-msgstr "Інтерфейс"
-msgid "High"
-msgstr "Високий"
-msgid "Items"
-msgstr "Предмети"
-msgid "Library"
-msgstr "Бібліотека"
-msgid "Low"
-msgstr "Низький"
-msgid "Magic"
-msgstr "Магія"
-msgid "Management"
-msgstr "Керування"
-msgid "Medium"
-msgstr "Середній"
-msgid "Minigame"
-msgstr "Мінігра"
-msgid "Mobs"
-msgstr "Моби"
-msgid "Modded"
-msgstr "Для модів"
-msgid "Models"
-msgstr "Моделі"
-msgid "Optimization"
-msgstr "Оптимізація"
-msgid "Path Tracing"
-msgstr "Трасування шляхів"
-msgid "Performance Impact"
-msgstr "Вплив на продуктивність"
-msgid "Potato"
-msgstr "Для дуже слабких ПК"
-msgid "Realistic"
-msgstr "Реалістичний стиль"
-msgid "Reflections"
-msgstr "Відбиття"
-msgid "Resolutions"
-msgstr "Роздільності"
-msgid "Screenshot"
-msgstr "Знімок екрана"
-msgid "Semi-realistic"
-msgstr "Напівреалістичний стиль"
-msgid "Shadows"
-msgstr "Тіні"
-msgid "Simplistic"
-msgstr "Простий стиль"
-msgid "Social"
-msgstr "Спілкування"
-msgid "Storage"
-msgstr "Зберігання"
-msgid "Technology"
-msgstr "Технології"
-msgid "Themed"
-msgstr "Тематичне"
-msgid "Transportation"
-msgstr "Транспорт"
-msgid "Tweaks"
-msgstr "Покращення"
-msgid "Utility"
-msgstr "Утиліти"
-msgid "Vanilla-like"
-msgstr "У стилі оригінальної гри"
-msgid "World Generation"
-msgstr "Генерація світу"
 
-msgid "All Versions"
-msgstr "Усі версії"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "Релевантність"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "Офлайн"
 
-msgid "Newest"
-msgstr "Найновіші"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "ім’я не може бути порожнім."
 
-msgid "Recently updated"
-msgstr "Нещодавно оновлені"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "ім’я має містити від 3 до 16 символів."
 
-msgid "Followers"
-msgstr "Підписники"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "ім’я може містити лише літери, цифри та символи підкреслення."
 
-msgid "Filter modpacks"
-msgstr "Фільтрувати збірки"
-
-msgid "Cancel"
-msgstr "Скасувати"
-
-msgid "Confirm"
-msgstr "Підтвердити"
-
-msgid "Customize"
-msgstr "Налаштувати"
-
-msgid "Delete"
-msgstr "Видалити"
-
-msgid "Retry"
-msgstr "Повторити"
-
-msgid "Loading…"
-msgstr "Завантаження…"
-
-msgid "Download"
-msgstr "Завантажити"
-
-msgid "Update All"
-msgstr "Оновити все"
-
-msgid "Open Folder"
-msgstr "Відкрити теку"
-
-msgid "Nothing installed yet"
-msgstr "Ще нічого не встановлено"
-
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Знайдіть те, що додати до теки цього екземпляра"
-
-msgid "Installed"
-msgstr "Встановлено"
-
-msgid "Loading more…"
-msgstr "Завантаження ще…"
-
-msgid "Nothing is selected"
-msgstr "Нічого не вибрано"
-
-
-msgid "Filter by category"
-msgstr "Фільтр за категорією"
-
-msgid "Nothing to show yet"
-msgstr "Поки що нічого показати"
-
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
 msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
 msgstr ""
-"Введіть запит або перегляньте усе, що Modrinth має для цього екземпляра"
+"Цей обліковий запис Microsoft ще не пов’язаний з профілем Xbox: увійдіть ним "
+"один раз на сайті xbox.com, а потім увійдіть тут знову"
 
-msgid "Browse"
-msgstr "Переглянути"
-
-msgid "No mod loader"
-msgstr "Немає завантажувача модів"
-
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
 msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
 msgstr ""
-"Моди потребують завантажувача модів. Спершу виберіть Fabric, Quilt, Forge "
-"або NeoForge в налаштуваннях цього екземпляра"
+"це дитячий обліковий запис: щоб дитина могла грати, дорослий повинен додати "
+"його до сімейної групи Microsoft"
 
-msgid "Create Instance"
-msgstr "Створити екземпляр"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr ""
+"Xbox Live недоступний у країні, в якій зареєстровано цей обліковий запис"
 
-msgid "Name"
-msgstr "Назва"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"Цей обліковий запис потребує підтвердження дорослою особою, перш ніж ним "
+"можна буде користуватися — саме так відбувається з обліковими записами в "
+"Південній Кореї"
 
-msgid "Directory"
-msgstr "Тека"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "Компанія Microsoft не надала код для входу в систему"
 
-msgid "Choose a folder"
-msgstr "Виберіть теку"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1f млн завантажень"
 
-msgid "Create"
-msgstr "Створити"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1f тис. завантажень"
 
-msgid "Download Modpack"
-msgstr "Завантажити модпак"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s завантажень"
 
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s  ·  автор: %s"
 
-msgid "Search modpacks"
-msgstr "Пошук модпаків"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "автор: %s"
 
-msgid "Close"
-msgstr "Закрити"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, fuzzy, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "Вибрано: %u/%u"
+msgstr[1] "Вибрано: %u/%u"
 
-msgid "Back"
-msgstr "Назад"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, fuzzy, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "Пакети ресурсів"
+msgstr[1] "Пакети ресурсів"
 
+#: src/nuvashalauncher-content-page-browser.c:98
+#, fuzzy, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "Вибрано: %u/%u"
+msgstr[1] "Вибрано: %u/%u"
+
+#: src/nuvashalauncher-content-page-browser.c:101
+#, fuzzy, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "Вибрано: %u/%u"
+msgstr[1] "Вибрано: %u/%u"
+
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr ""
+
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "Встановити"
 
-msgid "Copy of %s"
-msgstr "Копія %s"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "Не вдалося завантажити наступну сторінку"
 
-msgid "Choose Java executable"
-msgstr "Виберіть виконуваний файл Java"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Не вдалося знайти Modrinth"
 
-msgid "the chosen file does not report a Java version"
-msgstr "вибраний файл не повідомляє версію Java"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "Інше"
 
-msgid "Choose an Icon"
-msgstr "Виберіть піктограму"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "Не вдалося завантажити категорії"
 
-msgid "Choose a Directory"
-msgstr "Виберіть теку"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "Повторити"
 
-msgid "Duplicated to \"%s\""
-msgstr "Скопійовано до \"%s\""
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "Не вдалося завантажити версії. Спробуйте знову."
 
-msgid "Delete \"%s\"?"
-msgstr "Видалити \"%s\"?"
-
-msgid "General"
-msgstr "Загальні"
-
-msgid "Icon"
-msgstr "Піктограма"
-
-msgid "Change the Directory"
-msgstr "Змінити теку"
-
-msgid "Minecraft"
-msgstr "Minecraft"
-
-msgid "Java"
-msgstr "Java"
-
-msgid "Java Runtime"
-msgstr "Середовище виконання Java"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "Для цієї гри потрібна Java %d або новіша, вибрано Java %d"
-
-msgid "Add Java Runtime"
-msgstr "Додати середовище виконання Java"
-
-msgid ""
-"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
-"not jre-openjdk-headless"
-msgstr ""
-"Minecraft потребує Java без headless-режиму: в Arch використовуйте пакунок "
-"jre-openjdk, а не jre-openjdk-headless"
-
-msgid "JVM Arguments"
-msgstr "Аргументи JVM"
-
-msgid ""
-"The configured Java was not detected; make sure it is still a usable java "
-"executable"
-msgstr ""
-"Налаштовану Java не виявлено; переконайтеся, що це й досі придатний "
-"виконуваний файл Java"
-
-msgid "Actions"
-msgstr "Дії"
-
-msgid "Duplicate"
-msgstr "Дублювати"
-
-msgid "Delete Instance"
-msgstr "Видалити екземпляр"
-
-msgid "Settings"
-msgstr "Налаштування"
-
-msgid "Resource Packs"
-msgstr "Пакети ресурсів"
-
-msgid "Shader Packs"
-msgstr "Пакети шейдерів"
-
-msgid "Mods"
-msgstr "Моди"
-
-msgid "Logs"
-msgstr "Журнали"
-
-msgid "Custom: %s"
-msgstr "Власне: %s"
-
-msgid "the game was stopped by signal %d"
-msgstr "гру зупинено сигналом %d"
-
-msgid "the game exited with code %d"
-msgstr "гру завершено з кодом %d"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "Не знайдено сумісної версії %s для Minecraft %s."
-
-msgid "Loader"
-msgstr "Завантажувач модів"
-
-msgid "Loader Version"
-msgstr "Версія завантажувача модів"
-
-msgid "Clear"
-msgstr "Очистити"
-
-msgid "Search the log"
-msgstr "Пошук у журналі"
-
-msgid "Versions"
-msgstr "Версії"
-
-msgid "Show unstable Minecraft versions"
-msgstr "Показувати нестабільні версії Minecraft"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "Показувати нестабільні версії завантажувачів модів"
-
-msgid "Language"
-msgstr "Мова"
-
-msgid "Interface language"
-msgstr "Мова інтерфейсу"
-
-msgid "Line Limit"
-msgstr "Обмеження рядків"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "Про Nuvasha Launcher"
-
-msgid "Keyboard Shortcuts"
-msgstr "Комбінації клавіш"
-
-msgid "Stop"
-msgstr "Зупинити"
-
-msgid "Play"
-msgstr "Грати"
-
-msgid "Keep Playing"
-msgstr "Продовжити гру"
-
-msgid "Downloads"
-msgstr "Завантаження"
-
-msgid "Accounts"
-msgstr "Облікові записи"
-
-msgid "No Instances Yet"
-msgstr "Екземплярів ще немає"
-
-msgid "Use the + button in the header to create one"
-msgstr "Скористайтеся кнопкою + у верхній панелі, щоб створити"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "не вдалося визначити завантажувач модів: %s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "Не знайдено сумісної версії для Minecraft %s та %s."
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "Не знайдено сумісної версії для Minecraft %s."
 
-msgid "Add Offline Account"
-msgstr "Додати офлайн-обліковий запис"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "Версії"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "ім’я може містити лише літери, цифри та символи підкреслення"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "Не вдалося прочитати папку"
 
-msgid "a name cannot be empty"
-msgstr "ім’я не може бути порожнім"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "ім’я має містити від 3 до 16 символів"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "Не вдалося встановити файл"
 
-msgid "Add"
-msgstr "Додати"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "запит коду в Microsoft"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "Не вдалося створити папку"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "очікування входу в браузері"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "Зміст"
 
-msgid "Sign In"
-msgstr "Увійти"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "Встановлення"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "Відкрийте сторінку у браузері, потім введіть цей код:"
-
-msgid "Try Again"
-msgstr "Спробувати ще раз"
-
-msgid "Remove"
-msgstr "Вилучити"
-
-msgid "Add Microsoft Account"
-msgstr "Додати обліковий запис Microsoft"
-
-msgid "Minecraft Version"
-msgstr "Версія Minecraft"
-
-msgid "Install the selected %s?"
-msgstr "Установити вибрані %s?"
-
-msgid "%s \"%s\""
-msgstr "%s «%s»"
-
-msgid "Search"
-msgstr "Пошук"
-
-msgid "Update"
-msgstr "Оновити"
-
-msgid "Update the following %s"
-msgstr "Оновити такі %s"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "Залежності:"
 
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "Конфлікти\n"
+
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "Встановлення %s"
+
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "Оновити"
+
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s «%s»"
+
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "Скасувати"
+
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "Цей проєкт не публікує нічого сумісного з цим екземпляром."
+
+#: src/nuvashalauncher-content-page-install.c:1003
+#, fuzzy, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "Встановлення %s"
+msgstr[1] "Встановлення %s"
+
+#: src/nuvashalauncher-content-page-install.c:1006
+#, fuzzy, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "Встановлення %s"
+msgstr[1] "Встановлення %s"
+
+#: src/nuvashalauncher-content-page-install.c:1009
+#, fuzzy, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "Встановлення %s"
+msgstr[1] "Встановлення %s"
+
+#: src/nuvashalauncher-content-page-install.c:1012
+#, fuzzy, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "Встановлення %s"
+msgstr[1] "Встановлення %s"
+
+#: src/nuvashalauncher-content-page-install.c:1038
+#, fuzzy
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "Оновити такі %s"
+msgstr[1] "Оновити такі %s"
+
+#: src/nuvashalauncher-content-page-install.c:1041
+#, fuzzy
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "Установити вибрані %s?"
+msgstr[1] "Установити вибрані %s?"
+
+#: src/nuvashalauncher-content-page-install.c:1044
+#, fuzzy
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "Оновити такі %s"
+msgstr[1] "Оновити такі %s"
+
+#: src/nuvashalauncher-content-page-install.c:1047
+#, fuzzy
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "Оновити такі %s"
+msgstr[1] "Оновити такі %s"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "Не вдалося видалити файл"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "Увімкнути"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "Не вдалося видалити залежний мод"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "Не вдалося перейменувати файл"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "Видалено"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "Видалити “%s”?"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
 msgid ""
 "The following mods depend on %s:\n"
 "%s"
@@ -458,94 +367,265 @@ msgstr ""
 "Такі моди залежать від %s:\n"
 "%s"
 
-msgid "Cache"
-msgstr "Кеш"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "Видалити"
 
-msgid "Cache Modrinth API responses"
-msgstr "Кешувати відповіді API Modrinth"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "Увімкнено"
 
-msgid "Cache expiration"
-msgstr "Термін дії кешу"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "Вимкнено"
 
-msgid "1 hour"
-msgstr "1 година"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "Вимкнути"
 
-msgid "6 hours"
-msgstr "6 годин"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "Пошук"
 
-msgid "1 day"
-msgstr "1 день"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "Оновити все"
 
-msgid "7 days"
-msgstr "7 днів"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "Отримання оновлень"
 
-msgid "Show Shortcuts"
-msgstr "Показати комбінації клавіш"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "Прогрес"
 
-msgid "Quit"
-msgstr "Вийти"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "Відкрити теку"
 
-# New modpack import/export actions use English until translators provide localized text.
-msgid "Import Modpack"
-msgstr "Імпортувати модпак"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "Ще нічого не встановлено"
 
-msgid "Modpack exported"
-msgstr "Модпак експортовано"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "Знайдіть те, що додати до теки цього екземпляра"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Модпаки Modrinth (*.mrpack)"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "Переглянути"
 
-msgid "The export location is not a local file"
-msgstr "Місце експорту не є локальним файлом"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "Встановлено"
 
-msgid "Export Modpack"
-msgstr "Експортувати модпак"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "Завантаження ще…"
 
-msgid "Importing modpack…"
-msgstr "Імпорт модпака…"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "Фільтр за категорією"
 
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "Поки що нічого показати"
+
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"Введіть запит або перегляньте усе, що Modrinth має для цього екземпляра"
+
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "Відхилити"
+
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "Оновлено %u елемент"
+msgstr[1] "Оновлено елементів: %u"
+
+#: src/nuvashalauncher-content-page-updates.c:246
+msgid "Everything is up to date"
+msgstr "Усе оновлено"
+
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "Оновити такі %s"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "Підтвердити"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
+msgid "The folder could not be opened: %s"
+msgstr "The folder could not be opened: %s"
+
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
+msgid "Cannot create “%s”: %s"
+msgstr "Не вдалося створити «%s»: %s"
+
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "Немає завантажувача модів"
+
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"Моди потребують завантажувача модів. Спершу виберіть Fabric, Quilt, Forge "
+"або NeoForge в налаштуваннях цього екземпляра"
+
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "Виберіть версію Minecraft зі списку."
+
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "Оберіть версію завантажувача або інший завантажувач."
+
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "Тека"
+
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "Виберіть теку"
+
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "Створити"
+
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, fuzzy, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "Вибрано: %u/%u"
+msgstr[1] "Вибрано: %u/%u"
+
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "Сервіс повернув некоректну відповідь. Спробуйте пізніше."
+
+#: src/nuvashalauncher-download-modpack-browser.c:763
+msgid "All versions"
+msgstr "Усі версії"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "Завантаження"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "Релевантність"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "Найновіші"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "Нещодавно оновлені"
+
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "Підписники"
+
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "Фільтрувати збірки"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "Переглянути модпаки"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr "Запитаний файл, проєкт або сумісну версію не знайдено."
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+#, fuzzy
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "Не вдалося встановити модпак"
+msgstr[1] "Не вдалося встановити модпак"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"
 msgstr "Читання модпака"
 
-msgid "Exporting modpack"
-msgstr "Експорт модпака"
-
-msgid "Modpack export"
-msgstr "Експорт модпака"
-
-msgid "Include transient files?"
-msgstr "Включити тимчасові файли?"
-
-msgid ""
-"Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr ""
-"Журнали, звіти про помилки, знімки екрана, кеш і завантаження зазвичай "
-"виключаються."
-
-msgid "Clean Export"
-msgstr "Чистий експорт"
-
-msgid "Include All Files"
-msgstr "Включити всі файли"
-
-msgid "Pack Name"
-msgstr "Назва пакета"
-
-msgid "Summary"
-msgstr "Підсумок"
-
-msgid "Version ID"
-msgstr "Ідентифікатор версії"
-
-msgid "Downloading files"
-msgstr "Завантаження файлів"
-
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
 msgid "Extracting files"
 msgstr "Розпакування файлів"
 
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "Не вдалося встановити модпак"
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "Завантаження файлів"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
 msgid "Optional files"
 msgstr "Необов’язкові файли"
 
+#: src/nuvashalauncher-download-modpack-install.c:265
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
@@ -553,1107 +633,1903 @@ msgstr ""
 "Пакет містить ці файли, але вони не є необхідними. Вони не встановлюються "
 "без вашого запиту. Типово вимкнено"
 
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
 msgid "Pack could not be fetched"
 msgstr "Не вдалося отримати пакет"
 
+#: src/nuvashalauncher-download-modpack-install.c:422
 msgid "Invalid pack"
 msgstr "Недійсний пакет"
 
-msgid "The pack does not define its install"
-msgstr "Пакет не визначає встановлення"
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "У цій версії немає файлу пакету"
 
-msgid "Downloading Modpack"
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"Цей проєкт не публікує жодних файлів пакетів, які Nuvasha Launcher могла б "
+"встановити."
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
 msgstr "Завантаження модпака"
 
-msgid "Writing archive"
-msgstr "Запис архіву"
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "Завантажити"
 
-msgid "Export modpack metadata"
-msgstr "Метадані експорту"
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "Помилка з’єднання. Перевірте інтернет і спробуйте знову."
 
-msgid "Ask for export metadata"
-msgstr "Запитувати метадані під час експорту"
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "Сервіс відхилив запит. Спробуйте пізніше."
 
-msgid "Pack information"
-msgstr "Інформація про пакет"
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "Забагато запитів. Зачекайте та спробуйте знову."
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "Показувати поля назви, підсумку та версії перед експортом."
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr ""
+"Не вдалося прочитати або записати файли. Перевірте шлях, права та вільне "
+"місце."
 
-msgid "Export complete"
-msgstr "Експорт завершено"
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr ""
+"Завантажений файл не пройшов перевірку та не був установлений. Завантажте "
+"його знову."
 
-msgid "Export"
-msgstr "Експортувати"
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr ""
+"Архів некоректний або небезпечний. Завантажте його знову з надійного джерела."
 
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "Встановлено %u елемент"
-msgstr[1] "Встановлено елементів: %u"
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "Операцію не виконано. Подробиці в технічних відомостях."
 
-msgid "Updated %u item"
-msgid_plural "Updated %u items"
-msgstr[0] "Оновлено %u елемент"
-msgstr[1] "Оновлено елементів: %u"
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr ""
+"Не вдалося використати виконуваний файл Java. Виберіть робоче середовище "
+"Java."
 
-msgid "The icon must be a file on this computer"
-msgstr "Значок має бути файлом на цьому комп’ютері"
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "Доступ заборонено. Перевірте права на папку."
 
-msgid "The game is running; stop it before moving its directory"
-msgstr "Гра запущена; зупиніть її перед переміщенням каталогу"
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "Недостатньо вільного місця на диску."
 
-msgid "%s is being installed"
-msgstr "Встановлення %s"
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "Файл або папку не знайдено. Перевірте розташування."
 
-msgid "no compatible version"
-msgstr "немає сумісної версії"
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "Місце призначення вже існує. Виберіть інше розташування."
 
-msgid "Enabled"
-msgstr "Увімкнено"
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
 
-msgid "Disabled"
-msgstr "Вимкнено"
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "Збережений вхід більше недійсний. Увійдіть знову."
 
-msgid "Deleted"
-msgstr "Видалено"
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "Вхід відхилено. Почніть знову, якщо хочете ввійти."
 
-msgid "Everything is up to date"
-msgstr "Усе оновлено"
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "Цей обліковий запис не володіє Minecraft: Java Edition."
 
-msgid "Cannot create \"%s\": %s"
-msgstr "Не вдалося створити «%s»: %s"
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr ""
+"Створіть профіль Minecraft: Java Edition на minecraft.net і спробуйте знову."
 
-msgid "This project publishes nothing that fits this instance."
-msgstr "Цей проєкт не публікує нічого сумісного з цим екземпляром."
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr "У цій збірці не налаштовано вхід через Microsoft. Оновіть лаунчер."
 
-msgid "Unknown"
-msgstr "Невідомо"
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
 
-msgid "%s (unstable)"
-msgstr "%s (нестабільна)"
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"Не вдалося встановити завантажувач модів. Виберіть іншу версію або відкрийте "
+"технічні відомості."
 
-msgid "the next page could not be loaded"
-msgstr "Не вдалося завантажити наступну сторінку"
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"Метадані гри некоректні або недоступні. Оновіть список версій і спробуйте "
+"знову."
 
-msgid "Other"
-msgstr "Інше"
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr "Цей екземпляр більше недоступний. Оновіть список екземплярів."
 
-msgid "%.1fM downloads"
-msgstr "%.1f млн завантажень"
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "Виберіть інше ім’я або папку екземпляра."
 
-msgid "%.1fk downloads"
-msgstr "%.1f тис. завантажень"
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr ""
+"Некоректні налаштування екземпляра. Перевірте вибрану версію та аргументи "
+"JVM."
 
-msgid "%s  ·  by %s"
-msgstr "%s  ·  автор: %s"
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr ""
+"Не вдалося зберегти обліковий запис. Перевірте системну в’язку ключів і "
+"права на файли."
 
-msgid "by %s"
-msgstr "автор: %s"
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "Очистити"
 
-msgid "%s downloads"
-msgstr "%s завантажень"
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "Увійти"
 
-msgid "Cache Cleared"
-msgstr "Кеш очищено"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "Відкрити в браузері"
 
-msgid "Cache Cleanup Failed"
-msgstr "Не вдалося очистити кеш"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "Спробувати ще раз"
 
-msgid "The cache could not be cleared."
-msgstr "Не вдалося очистити кеш."
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "Додати офлайн-обліковий запис"
 
-msgid "the versions of this loader could not be read"
-msgstr "не вдалося прочитати версії цього завантажувача модів"
-msgid "Unavailable"
-msgstr "Недоступно"
-msgid "No compatible Java runtime was found."
-msgstr "Сумісне середовище виконання Java не знайдено."
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "Назва"
 
-msgid "Minecraft crashed"
-msgstr "Minecraft аварійно завершив роботу"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "Додати"
 
-msgid "Minecraft could not start"
-msgstr "Не вдалося запустити Minecraft"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "Створити екземпляр"
 
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft потребує входу"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "Завантажити модпак"
 
-msgid "The file cannot be renamed"
-msgstr "Не вдалося перейменувати файл"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "Імпортувати модпак"
 
-msgid "The file cannot be deleted"
-msgstr "Не вдалося видалити файл"
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "Імпорт модпака…"
 
-msgid "The folder cannot be read"
-msgstr "Не вдалося прочитати папку"
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "Пошук модпаків"
 
-msgid "The file could not be installed"
-msgstr "Не вдалося встановити файл"
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "Закрити"
 
-msgid "The folder cannot be created"
-msgstr "Не вдалося створити папку"
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr ""
+"Жоден модпак не відповідає введеному запиту. Спробуйте ввести інше слово."
 
-msgid "This cannot be installed"
-msgstr "Це неможливо встановити"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "Вибрати файли"
 
-msgid "Pick a Minecraft version first"
-msgstr "Спочатку виберіть версію Minecraft"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "Не вдалося встановити"
 
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "Видалення залежності видаляє мод, який від неї залежав"
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "Назад"
 
-msgid "A dependent mod cannot be deleted"
-msgstr "Не вдалося видалити залежний мод"
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "Пошук у журналі"
 
 # UI string
-msgid "Skin"
-msgstr "Skin"
-
-# UI string
-msgid "Slim model"
-msgstr "Тонка модель"
-
-# UI string
-msgid "OK"
-msgstr "Гаразд"
-
-# UI string
-msgid "Export skin…"
-msgstr "Експортувати скін…"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
 msgid "Classic model"
 msgstr "Класична модель"
 
 # UI string
-msgid "PNG skin texture"
-msgstr "Текстура шкіри PNG"
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "Тонка модель"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "Налаштувати"
 
 # UI string
-msgid "Invalid skin"
-msgstr "Недійсний скін"
-
-# UI string
-msgid "No cape"
-msgstr "Без плаща"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
 msgid "Import skin…"
 msgstr "Імпортувати скін…"
 
 # UI string
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "Експортувати скін…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Помилка Minecraft Services"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "Системні налаштування за замовчуванням"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "Копія %s"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "ім'я екземпляра не вказано"
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "Інстанції не можуть містити %s у своїй назві"
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "ім'я екземпляра не можна використовувати як ім'я каталогу"
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "Модпак експортовано"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "Місце експорту не є локальним файлом"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "Експорт модпака"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "Експорт модпака"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
+msgid "Export modpack"
+msgstr "Експортувати модпак"
+
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Модпаки Modrinth (*.mrpack)"
+
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "Інформація про пакет"
+
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "Експортувати"
+
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "Метадані експорту"
+
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "Назва пакета"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "Підсумок"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "Ідентифікатор версії"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "Включити тимчасові файли?"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr ""
+"Журнали, звіти про помилки, знімки екрана, кеш і завантаження зазвичай "
+"виключаються."
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "Чистий експорт"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "Включити всі файли"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "Гра запущена; зупиніть її перед переміщенням каталогу"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "Виберіть теку"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "Скопійовано до “%s”"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"Налаштовану Java не виявлено; переконайтеся, що це й досі придатний "
+"виконуваний файл Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "Для цієї гри потрібна Java %d або новіша, вибрано Java %d"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr ""
+"Виберіть середовище Java з підтримкою графічного інтерфейсу, а не headless-"
+"версію."
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "Значок має бути файлом на цьому комп’ютері"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "Виберіть піктограму"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "Зображення"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "Загальні"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "Піктограма"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "Змінити теку"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "Аргументи JVM"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "Дії"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "Дублювати"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "Видалити екземпляр"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "Менше хвилини"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu хв"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu год %llu хв"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "Сьогодні, %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "Ще не грали"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "Ніколи"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "Обчислення…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "Активність"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "Зіграно часу"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "Востаннє грали"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "Усього запусків"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "Усього збоїв"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "Збірка"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "Загальний розмір"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "Створено"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "Невідомо"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "Журнали"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "Налаштування"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "Пакети ресурсів"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "Пакети шейдерів"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "Моди"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "Світи"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "Сервери"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "Статистика"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "вибраний файл не повідомляє версію Java"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Виберіть виконуваний файл Java"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "Завантаження…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "Власне: %s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Додати середовище виконання Java"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Середовище виконання Java"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr "Створено новий звіт про збій. Відкрийте журнали для подробиць."
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "гру зупинено сигналом %d"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "гру завершено з кодом %d"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "Сумісне середовище виконання Java не знайдено."
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "не вдалося прочитати версії цього завантажувача модів"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s (нестабільна)"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "Немає"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "Не знайдено сумісної версії %s для Minecraft %s."
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "Спочатку виберіть версію Minecraft"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "Завантажувач модів"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "Версія завантажувача модів"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "Технічні відомості"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Очистити кеш Nuvasha Launcher?"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "Кеш очищено"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "Не вдалося очистити кеш"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "Запитувати метадані під час експорту"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "Показувати поля назви, підсумку та версії перед експортом."
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "Видалення залежності видаляє мод, який від неї залежав"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "Показувати нестабільні версії Minecraft"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "Показувати нестабільні версії завантажувачів модів"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "Мова"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "Мова інтерфейсу"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "Обмеження рядків"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "Кеш"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Кешувати відповіді API Modrinth"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1 година"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6 годин"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1 день"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7 днів"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "Термін дії кешу"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "Очистити кеш Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Лаунчер Minecraft для Linux"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "Сервіси та екосистема"
+
+#: src/nuvashalauncher-main-window-actions.c:626
+msgid "Minecraft disclaimer"
+msgstr "Відмова від відповідальності щодо Minecraft"
+
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"НЕ Є ОФІЦІЙНИМ ПРОДУКТОМ MINECRAFT. НЕ СХВАЛЕНО І НЕ ПОВ'ЯЗАНО З MOJANG АБО "
+"MICROSOFT.\n"
+"\n"
+"Minecraft є торговою маркою Mojang AB. Лаунчер розробляється незалежно та не "
+"пов'язаний з Mojang Studios або Microsoft."
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth та завантажувачі модів"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"Модпаки, моди, пакети ресурсів і шейдери розміщені на Modrinth та створені "
+"відповідними авторами.\n"
+"\n"
+"Завантажувачі модів розробляються незалежно проєктами Fabric, Quilt, Forge "
+"та NeoForge."
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "Метадані AppStream"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"Метадані AppStream (описи, резюме та примітки до випуску) опубліковані в "
+"межах Creative Commons CC0 1.0 Universal Public Domain Dedication."
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "Про Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "Комбінації клавіш"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "Налаштування"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "Вийти"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "Видалити вибране"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "Імпортувати модпак…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "Зупинити"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "Грати"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "Стоп %s?"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "гра"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"Гра працює і незабаром закриється. Прогрес, досягнутий з моменту останнього "
+"збереження, буде втрачено."
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "Продовжити гру"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "Облікові записи"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "Екземплярів ще немає"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "Створіть екземпляр, щоб почати гру."
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraft аварійно завершив роботу"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Не вдалося запустити Minecraft"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft потребує входу"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "Minecraft Services відхилив запит (HTTP %u)%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "Запис архіву"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "Експорт завершено"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "не вдалося визначити завантажувач модів: %s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "Пригоди"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "Атмосфера"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "Звук"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "Блоки"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "Світіння"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "Мультяшний стиль"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "Категорії"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "Кольорове освітлення"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "Битви"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "Шейдери базової гри"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "Химерне"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "Декор"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "Економіка"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "Сутності"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "Оточення"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "Спорядження"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "Фентезі"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "Можливості"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "Рослинність"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "Шрифти"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "Їжа"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "Ігрові механіки"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "Інтерфейс"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "Високий"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "Предмети"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "Бібліотека"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "Низький"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "Магія"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "Керування"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "Середній"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "Мінігра"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "Моби"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "Для модів"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "Моделі"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "Оптимізація"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "Трасування шляхів"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "Вплив на продуктивність"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "Для дуже слабких ПК"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "Реалістичний стиль"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "Відбиття"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "Роздільності"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "Знімок екрана"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "Напівреалістичний стиль"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "Тіні"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "Простий стиль"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "Спілкування"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "Зберігання"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "Технології"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "Тематичне"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "Транспорт"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "Покращення"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "Утиліти"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "У стилі оригінальної гри"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "Генерація світу"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr ""
+"Modrinth просить Nuvasha Launcher зменшити темп роботи, оскільки надходить "
+"занадто багато запитів"
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "Modrinth не знає цього файлу"
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "Не знайдено сумісної версії для Minecraft %s та %s."
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "Автономний обліковий запис із таким ім’ям уже існує."
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "Редагувати сервер"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "Додати сервер"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "Зберегти"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "Адреса"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "Запитувати перед завантаженням"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "Завжди завантажувати"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "Ніколи не завантажувати"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "Вилучити сервер «%s»?"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "Вилучити сервер"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "Перемістити вгору"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "Перемістити вниз"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "Редагувати"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "Оновити"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "Немає серверів"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "Додані тут сервери зберігаються у servers.dat цього екземпляра."
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "запит коду в Microsoft…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "очікування входу в браузері…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "Не вдалося відкрити браузер. Відкрийте показану адресу вручну."
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"Microsoft повернула небезпечну адресу входу. Оновіть лаунчер перед повторною "
+"спробою."
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "Відкрийте сторінку у браузері, потім введіть цей код:"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Skin"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "Зображення скіну мають бути PNG-файлами розміром 64x64 або 64x32"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "Недійсний скін"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "Гаразд"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "Текстура шкіри PNG"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:368
 msgid "Delete skin?"
 msgstr "Видалити скін?"
 
 # UI string
+#: src/nuvashalauncher-users-popover-skin.c:369
 msgid "This skin will be removed from the skin library."
 msgstr "Цей скін буде видалено з бібліотеки."
 
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "Зображення скіну мають бути PNG-файлами розміром 64x64 або 64x32"
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "Без плаща"
 
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "Переглянути модпаки"
-
-msgid "Choose Files"
-msgstr "Вибрати файли"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "Очистити кеш Nuvasha Launcher"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Очистити кеш Nuvasha Launcher?"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"Конфлікти\n"
-
-msgid "Content"
-msgstr "Зміст"
-
-msgid "Could not install"
-msgstr "Не вдалося встановити"
-
-msgid "Could not install the modpack"
-msgstr "Не вдалося встановити модпак"
-
-msgid "Could not load categories"
-msgstr "Не вдалося завантажити категорії"
-
-msgid "Could not search Modrinth"
-msgstr "Не вдалося знайти Modrinth"
-
-msgid "Could not understand the answer"
-msgstr "Не зміг зрозуміти відповідь"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "Вимкнути"
-
-msgid "Dismiss"
-msgstr "Відхилити"
-
-msgid "Enable"
-msgstr "Увімкнути"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "Зображення"
-
-msgid "Installing"
-msgstr "Встановлення"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "Інстанції не можуть містити %s у своїй назві"
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "У ньому містяться файли, які Nuvasha Launcher не розпізнає."
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "Компанія Microsoft повернула небезпечну адресу для підтвердження"
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "Компанія Microsoft не надала код для входу в систему"
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · Необхідно увійти"
-
-msgid "Modrinth does not know this file"
-msgstr "Modrinth не знає цього файлу"
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "Modrinth просить Nuvasha Launcher зменшити темп роботи, оскільки надходить занадто багато запитів"
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "Жоден модпак не відповідає введеному запиту. Спробуйте ввести інше слово"
-
-msgid "None"
-msgstr "Немає"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Дані кешу Nuvasha Launcher було успішно очищено."
-
-msgid "Offline"
-msgstr "Офлайн"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "Виберіть версію Minecraft зі списку."
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "Оберіть версію завантажувача або інший завантажувач."
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
 msgid "Remove %s?"
 msgstr "Видалити %s?"
 
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Знайдіть Modrinth та встановіть модпак"
-
-msgid "Stop %s?"
-msgstr "Стоп %s?"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "Системні налаштування за замовчуванням"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "Акаунт видалено з Nuvasha Launcher, а збережені дані для входу — видалено. Сама гра залишилася без змін."
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "Гра працює і незабаром закриється. Прогрес, досягнутий з моменту останнього збереження, буде втрачено."
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "Цей проєкт не публікує жодних файлів пакетів, які Nuvasha Launcher могла б встановити."
-
-msgid "This version has no pack file"
-msgstr "У цій версії немає файлу пакету"
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "Xbox Live недоступний у країні, в якій зареєстровано цей обліковий запис"
-
-msgid "the game"
-msgstr "гра"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "ім'я екземпляра не можна використовувати як ім'я каталогу"
-
-msgid "the instance name is empty"
-msgstr "ім'я екземпляра не вказано"
-
-msgid "the sign-in did not finish"
-msgstr "вхід не завершився"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "Цей обліковий запис Microsoft ще не пов’язаний з профілем Xbox: увійдіть ним один раз на сайті xbox.com, а потім увійдіть тут знову"
-
+#: src/nuvashalauncher-users-popover.c:178
 msgid "this account"
 msgstr "цей обліковий запис"
 
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "Цей обліковий запис потребує підтвердження дорослою особою, перш ніж ним можна буде користуватися — саме так відбувається з обліковими записами в Південній Кореї"
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "це дитячий обліковий запис: щоб дитина могла грати, дорослий повинен додати його до сімейної групи Microsoft"
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "Minecraft Services відхилив запит (HTTP %u)%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Помилка Minecraft Services"
-
-msgid "Application menu"
-msgstr "Application menu"
-
-msgid "The folder could not be opened: %s"
-msgstr "The folder could not be opened: %s"
-
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "Відкрити в браузері"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "Вибрано: %u/%u"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "Буде видалено такі екземпляри:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "Режим редагування"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "Отримання оновлень"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "Прогрес"
-
-msgid "Enter Edit Mode"
-msgstr "Увійти в режим редагування"
-
-msgid "Delete Selected"
-msgstr "Видалити вибране"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "Створено новий звіт про збій. Відкрийте журнали для подробиць."
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "Доступ заборонено. Перевірте права на папку."
-
-msgid "An offline account with this name already exists."
-msgstr "Автономний обліковий запис із таким ім’ям уже існує."
-
-msgid "Choose another instance name or directory."
-msgstr "Виберіть інше ім’я або папку екземпляра."
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "Не вдалося встановити завантажувач модів. Виберіть іншу версію або відкрийте технічні відомості."
-
-msgid "Could not load project details. Try again."
-msgstr "Не вдалося завантажити відомості про проєкт. Спробуйте знову."
-
-msgid "Could not load versions. Try again."
-msgstr "Не вдалося завантажити версії. Спробуйте знову."
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "Не вдалося відкрити браузер. Відкрийте показану адресу вручну."
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "Не вдалося прочитати або записати файли. Перевірте шлях, права та вільне місце."
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "Не вдалося зберегти обліковий запис. Перевірте системну в’язку ключів і права на файли."
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "Microsoft повернула небезпечну адресу входу. Оновіть лаунчер перед повторною спробою."
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "У цій збірці не налаштовано вхід через Microsoft. Оновіть лаунчер."
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "Виберіть середовище Java з підтримкою графічного інтерфейсу, а не headless-версію."
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "Створіть профіль Minecraft: Java Edition на minecraft.net і спробуйте знову."
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "Вхід відхилено. Почніть знову, якщо хочете ввійти."
-
-msgid "Technical Details"
-msgstr "Технічні відомості"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "Не вдалося використати виконуваний файл Java. Виберіть робоче середовище Java."
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "Архів некоректний або небезпечний. Завантажте його знову з надійного джерела."
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "Помилка з’єднання. Перевірте інтернет і спробуйте знову."
-
-msgid "The destination already exists. Choose another location."
-msgstr "Місце призначення вже існує. Виберіть інше розташування."
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "Завантажений файл не пройшов перевірку та не був установлений. Завантажте його знову."
-
-msgid "The file or folder was not found. Check its location."
-msgstr "Файл або папку не знайдено. Перевірте розташування."
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "Метадані гри некоректні або недоступні. Оновіть список версій і спробуйте знову."
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "Операцію не виконано. Подробиці в технічних відомостях."
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "Запитаний файл, проєкт або сумісну версію не знайдено."
-
-msgid "The service rejected the request. Try again later."
-msgstr "Сервіс відхилив запит. Спробуйте пізніше."
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "Сервіс повернув некоректну відповідь. Спробуйте пізніше."
-
-msgid "There is not enough free disk space."
-msgstr "Недостатньо вільного місця на диску."
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "Цей обліковий запис не володіє Minecraft: Java Edition."
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "Цей екземпляр більше недоступний. Оновіть список екземплярів."
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "Забагато запитів. Зачекайте та спробуйте знову."
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "Некоректні налаштування екземпляра. Перевірте вибрану версію та аргументи JVM."
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "Збережений вхід більше недійсний. Увійдіть знову."
-
-msgid "Minecraft launcher for Linux"
-msgstr "Лаунчер Minecraft для Linux"
-
-msgid "Services & Ecosystem"
-msgstr "Сервіси та екосистема"
-
-msgid "Minecraft Disclaimer"
-msgstr "Відмова від відповідальності щодо Minecraft"
-
+#: src/nuvashalauncher-users-popover.c:181
 msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
 msgstr ""
-"НЕ Є ОФІЦІЙНИМ ПРОДУКТОМ MINECRAFT. НЕ СХВАЛЕНО І НЕ ПОВ'ЯЗАНО З MOJANG АБО MICROSOFT.\n"
-"\n"
-"Minecraft є торговою маркою Mojang AB. Лаунчер розробляється незалежно та не пов'язаний з Mojang Studios або Microsoft."
+"Акаунт видалено з Nuvasha Launcher, а збережені дані для входу — видалено. "
+"Сама гра залишилася без змін."
 
-msgid "Modrinth & Mod Loaders"
-msgstr "Modrinth та завантажувачі модів"
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "Вилучити"
 
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"Модпаки, моди, пакети ресурсів і шейдери розміщені на Modrinth та створені відповідними авторами.\n"
-"\n"
-"Завантажувачі модів розробляються незалежно проєктами Fabric, Quilt, Forge та NeoForge."
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · Необхідно увійти"
 
-msgid "AppStream Metadata"
-msgstr "Метадані AppStream"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "Метадані AppStream (описи, резюме та примітки до випуску) опубліковані в межах Creative Commons CC0 1.0 Universal Public Domain Dedication."
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "Копіювати"
-
-msgid "Rename"
-msgstr "Перейменувати"
-
-msgid "Reset Icon"
-msgstr "Скинути піктограму"
-
-msgid "Delete World"
-msgstr "Видалити світ"
-
-msgid "Seed copied to clipboard"
-msgstr "Зерно скопійовано в буфер обміну"
-
-msgid "Remove server \"%s\"?"
-msgstr "Вилучити сервер «%s»?"
-
-msgid "Refresh"
-msgstr "Оновити"
-
-msgid "Remove Server"
-msgstr "Вилучити сервер"
-
-msgid "Survival"
-msgstr "Виживання"
-
-msgid "Edit"
-msgstr "Редагувати"
-
-msgid "Ask to download"
-msgstr "Запитувати перед завантаженням"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Світи, збережені Minecraft або імпортовані сюди, з'являться в цьому списку."
-
-msgid "Rename World"
-msgstr "Перейменувати світ"
-
-msgid "Servers"
-msgstr "Сервери"
-
-msgid "Save"
-msgstr "Зберегти"
-
-msgid "Add World"
-msgstr "Додати світ"
-
-msgid "Spectator"
-msgstr "Спостерігач"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "Видалити світ «%s»? Цю дію не можна скасувати."
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Додані тут сервери зберігаються у servers.dat цього екземпляра."
-
-msgid "Add Server"
-msgstr "Додати сервер"
-
-msgid "Edit Server"
-msgstr "Редагувати сервер"
-
-msgid "Address"
-msgstr "Адреса"
-
-msgid "Datapacks"
-msgstr "Пакети даних"
-
-msgid "No Worlds"
-msgstr "Немає світів"
-
-msgid "Creative"
-msgstr "Творчий"
-
-msgid "Move Up"
-msgstr "Перемістити вгору"
-
-msgid "No Servers"
-msgstr "Немає серверів"
-
-msgid "Never download"
-msgstr "Ніколи не завантажувати"
-
-msgid "Worlds"
-msgstr "Світи"
-
-msgid "Always download"
-msgstr "Завжди завантажувати"
-
-msgid "Move Down"
-msgstr "Перемістити вниз"
-
-msgid "Copy Seed"
-msgstr "Копіювати зерно"
-
-msgid "Stats"
-msgstr "Статистика"
-
-msgid "Playtime"
-msgstr "Час гри"
-
-msgid "Time played"
-msgstr "Зіграно часу"
-
-msgid "Not played yet"
-msgstr "Ще не грали"
-
-msgid "Less than a minute"
-msgstr "Менше хвилини"
-
-msgid "%llu min"
-msgstr "%llu хв"
-
-msgid "%llu h %llu min"
-msgstr "%llu год %llu хв"
-
-msgid "Runs on"
-msgstr "Платформа"
-
-msgid "Activity"
-msgstr "Активність"
-
-msgid "Last session"
-msgstr "Останній сеанс"
-
-msgid "Last played"
-msgstr "Востаннє грали"
-
-msgid "Total launches"
-msgstr "Усього запусків"
-
-msgid "Total crashes"
-msgstr "Усього збоїв"
-
-msgid "Server joins"
-msgstr "Входів на сервери"
-
-msgid "World loads"
-msgstr "Завантажень світів"
-
-msgid "Player Profile"
-msgstr "Профіль гравця"
-
-msgid "Player type"
-msgstr "Тип гравця"
-
-msgid "Pack style"
-msgstr "Стиль збірки"
-
-msgid "Average session"
-msgstr "Середній сеанс"
-
-msgid "Stability"
-msgstr "Стабільність"
-
-msgid "Instance"
-msgstr "Збірка"
-
-msgid "Total size"
-msgstr "Загальний розмір"
-
-msgid "Created on"
-msgstr "Створено"
-
-msgid "Calculating…"
-msgstr "Обчислення…"
-
-msgid "Never"
-msgstr "Ніколи"
-
-msgid "Today, %s"
-msgstr "Сьогодні, %s"
-
-msgid "Hybrid"
-msgstr "Змішаний"
-
-msgid "Server Player"
-msgstr "Мережевий гравець"
-
-msgid "Singleplayer"
-msgstr "Одиночна гра"
-
-msgid "Unplayed"
-msgstr "Ще не грали"
-
-msgid "Modpack"
-msgstr "Модпак"
-
-msgid "Lightweight"
-msgstr "Легка"
-
-msgid "Kitchen Sink"
-msgstr "Велика"
-
-msgid "Quick"
-msgstr "Короткий"
-
-msgid "Standard"
-msgstr "Звичайний"
-
-msgid "Marathon"
-msgstr "Марафон"
-
-msgid "Stable"
-msgstr "Стабільна"
-
-msgid "%u%% crash rate"
-msgstr "%u%% збоїв"
-
-msgid "A name cannot be empty."
-msgstr "ім’я не може бути порожнім."
-
-msgid "Remove server"
-msgstr "Вилучити сервер"
-
-msgid "Download modpack"
-msgstr "Завантажити модпак"
-
-msgid "%s “%s”"
-msgstr "%s «%s»"
-
-msgid "Delete instance"
-msgstr "Видалити екземпляр"
-
-msgid "No worlds"
-msgstr "Немає світів"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "очікування входу в браузері…"
-
-msgid "Choose files"
-msgstr "Вибрати файли"
-
-msgid "Cannot create “%s”: %s"
-msgstr "Не вдалося створити «%s»: %s"
-
-msgid "Cache cleanup failed"
-msgstr "Не вдалося очистити кеш"
-
-msgid "Español"
-msgstr "Español"
-
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth та завантажувачі модів"
-
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "Видалити світ «%s»? Цю дію не можна скасувати."
-
-msgid "Português"
-msgstr "Português"
-
-msgid "Create an instance to start playing."
-msgstr "Створіть екземпляр, щоб почати гру."
-
-msgid "Duplicated to “%s”"
-msgstr "Скопійовано до “%s”"
-
-msgid "Downloading modpack"
-msgstr "Завантаження модпака"
-
-msgid "Try again"
-msgstr "Спробувати ще раз"
-
-msgid "Performance impact"
-msgstr "Вплив на продуктивність"
-
-msgid "Add world"
-msgstr "Додати світ"
-
-msgid "Create instance"
-msgstr "Створити екземпляр"
-
-msgid "Browse modpacks"
-msgstr "Переглянути модпаки"
-
-msgid "Remove server “%s”?"
-msgstr "Вилучити сервер «%s»?"
-
-msgid "Path tracing"
-msgstr "Трасування шляхів"
-
-msgid "Clean export"
-msgstr "Чистий експорт"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "Ігрові механіки"
-
-msgid "Minecraft version"
-msgstr "Версія Minecraft"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "Відкрити теку"
-
-msgid "AppStream metadata"
-msgstr "Метадані AppStream"
-
-msgid "Add Java runtime"
-msgstr "Додати середовище виконання Java"
-
-msgid "World generation"
-msgstr "Генерація світу"
-
-msgid "Keyboard shortcuts"
-msgstr "Комбінації клавіш"
-
-msgid "Resource packs"
-msgstr "Пакети ресурсів"
-
-msgid "Edit server"
-msgstr "Редагувати сервер"
-
-msgid "Keep playing"
-msgstr "Продовжити гру"
-
-msgid "Technical details"
-msgstr "Технічні відомості"
-
-msgid "Pack name"
-msgstr "Назва пакета"
-
-msgid "Colored lighting"
-msgstr "Кольорове освітлення"
-
-msgid "Rename world"
-msgstr "Перейменувати світ"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "ім’я може містити лише літери, цифри та символи підкреслення."
-
-msgid "Preferences"
-msgstr "Налаштування"
-
-msgid "Delete world"
-msgstr "Видалити світ"
-
-msgid "Asking Microsoft for a code…"
-msgstr "запит коду в Microsoft…"
-
-msgid "Show unstable mod loader versions"
-msgstr "Показувати нестабільні версії завантажувачів модів"
-
-msgid "Move down"
-msgstr "Перемістити вниз"
-
-msgid "Clear cache"
-msgstr "Очистити кеш Nuvasha Launcher"
-
-msgid "Delete “%s”?"
-msgstr "Видалити “%s”?"
-
-msgid "Import modpack…"
-msgstr "Імпортувати модпак…"
-
-msgid "Delete selected"
-msgstr "Видалити вибране"
-
-msgid "Java runtime"
-msgstr "Середовище виконання Java"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "ім’я має містити від 3 до 16 символів."
-
-msgid "Import modpack"
-msgstr "Імпортувати модпак"
-
-msgid "Core shaders"
-msgstr "Шейдери базової гри"
-
-msgid "Sign in"
-msgstr "Увійти"
-
-msgid "Cache cleared"
-msgstr "Кеш очищено"
-
-msgid "No instances yet"
-msgstr "Екземплярів ще немає"
-
-msgid "Add offline account"
-msgstr "Додати офлайн-обліковий запис"
-
-msgid "Copy seed"
-msgstr "Копіювати зерно"
-
-msgid "Services & ecosystem"
-msgstr "Сервіси та екосистема"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "Жоден модпак не відповідає введеному запиту. Спробуйте ввести інше слово."
-
-msgid "Line limit"
-msgstr "Обмеження рядків"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Модпаки Modrinth (*.mrpack)"
-
-msgid "Add server"
-msgstr "Додати сервер"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
-msgid "All versions"
-msgstr "Усі версії"
-
-msgid "No servers"
-msgstr "Немає серверів"
-
-msgid "Clear cache?"
-msgstr "Очистити кеш Nuvasha Launcher?"
-
-msgid "Loader version"
-msgstr "Версія завантажувача модів"
-
-msgid "translator-credits"
-msgstr "Flia"
-
-msgid "Include all files"
-msgstr "Включити всі файли"
-
-msgid "Export modpack"
-msgstr "Експортувати модпак"
-
-msgid "Add world…"
-msgstr "Додати світ…"
-
-msgid "Update all"
-msgstr "Оновити все"
-
+#: src/nuvashalauncher-users-popover.c:398
 msgid "Add Microsoft account"
 msgstr "Додати обліковий запис Microsoft"
 
-msgid "Move up"
-msgstr "Перемістити вгору"
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "Версія Minecraft"
 
-msgid "Minecraft disclaimer"
-msgstr "Відмова від відповідальності щодо Minecraft"
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "Виживання"
 
-msgid "Shader packs"
-msgstr "Пакети шейдерів"
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "Творчий"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "Спостерігач"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "Перейменувати світ"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "Перейменувати"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "Копіювати"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "Зерно скопійовано в буфер обміну"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "Видалити світ «%s»? Цю дію не можна скасувати."
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "Видалити світ"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "Копіювати зерно"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "Додати світ"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "Додати світ…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "Немає світів"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr ""
+"Світи, збережені Minecraft або імпортовані сюди, з'являться в цьому списку."
+
+#~ msgid "Colored Lighting"
+#~ msgstr "Кольорове освітлення"
+
+#~ msgid "Core Shaders"
+#~ msgstr "Шейдери базової гри"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "Ігрові механіки"
+
+#~ msgid "Path Tracing"
+#~ msgstr "Трасування шляхів"
+
+#~ msgid "Performance Impact"
+#~ msgstr "Вплив на продуктивність"
+
+#~ msgid "World Generation"
+#~ msgstr "Генерація світу"
+
+#~ msgid "All Versions"
+#~ msgstr "Усі версії"
+
+#~ msgid "Update All"
+#~ msgstr "Оновити все"
+
+#~ msgid "Open Folder"
+#~ msgstr "Відкрити теку"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "Нічого не вибрано"
+
+#~ msgid "Create Instance"
+#~ msgstr "Створити екземпляр"
+
+#~ msgid "Download Modpack"
+#~ msgstr "Завантажити модпак"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "Скопійовано до \"%s\""
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "Видалити \"%s\"?"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Середовище виконання Java"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Додати середовище виконання Java"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "Minecraft потребує Java без headless-режиму: в Arch використовуйте "
+#~ "пакунок jre-openjdk, а не jre-openjdk-headless"
+
+#~ msgid "Delete Instance"
+#~ msgstr "Видалити екземпляр"
+
+#~ msgid "Resource Packs"
+#~ msgstr "Пакети ресурсів"
+
+#~ msgid "Shader Packs"
+#~ msgstr "Пакети шейдерів"
+
+#~ msgid "Loader Version"
+#~ msgstr "Версія завантажувача модів"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "Показувати нестабільні версії завантажувачів модів"
+
+#~ msgid "Line Limit"
+#~ msgstr "Обмеження рядків"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "Комбінації клавіш"
+
+#~ msgid "Keep Playing"
+#~ msgstr "Продовжити гру"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "Екземплярів ще немає"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "Скористайтеся кнопкою + у верхній панелі, щоб створити"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "Додати офлайн-обліковий запис"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "ім’я може містити лише літери, цифри та символи підкреслення"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "ім’я не може бути порожнім"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "ім’я має містити від 3 до 16 символів"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "запит коду в Microsoft"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "очікування входу в браузері"
+
+#~ msgid "Sign In"
+#~ msgstr "Увійти"
+
+#~ msgid "Try Again"
+#~ msgstr "Спробувати ще раз"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Додати обліковий запис Microsoft"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "Версія Minecraft"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s «%s»"
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "Показати комбінації клавіш"
+
+# New modpack import/export actions use English until translators provide localized text.
+#~ msgid "Import Modpack"
+#~ msgstr "Імпортувати модпак"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Модпаки Modrinth (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "Експортувати модпак"
+
+#~ msgid "Clean Export"
+#~ msgstr "Чистий експорт"
+
+#~ msgid "Include All Files"
+#~ msgstr "Включити всі файли"
+
+#~ msgid "Pack Name"
+#~ msgstr "Назва пакета"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "Пакет не визначає встановлення"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "Завантаження модпака"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "Встановлено %u елемент"
+#~ msgstr[1] "Встановлено елементів: %u"
+
+#~ msgid "no compatible version"
+#~ msgstr "немає сумісної версії"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "Не вдалося створити «%s»: %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "Кеш очищено"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "Не вдалося очистити кеш"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "Не вдалося очистити кеш."
+
+#~ msgid "Unavailable"
+#~ msgstr "Недоступно"
+
+#~ msgid "This cannot be installed"
+#~ msgstr "Це неможливо встановити"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "Переглянути модпаки"
+
+#~ msgid "Choose Files"
+#~ msgstr "Вибрати файли"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "Очистити кеш Nuvasha Launcher"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Очистити кеш Nuvasha Launcher?"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "Не зміг зрозуміти відповідь"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "У ньому містяться файли, які Nuvasha Launcher не розпізнає."
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "Компанія Microsoft повернула небезпечну адресу для підтвердження"
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr ""
+#~ "Жоден модпак не відповідає введеному запиту. Спробуйте ввести інше слово"
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Дані кешу Nuvasha Launcher було успішно очищено."
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Знайдіть Modrinth та встановіть модпак"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "вхід не завершився"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Буде видалено такі екземпляри:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "Режим редагування"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "Увійти в режим редагування"
+
+#~ msgid "Delete Selected"
+#~ msgstr "Видалити вибране"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "Не вдалося завантажити відомості про проєкт. Спробуйте знову."
+
+#~ msgid "Technical Details"
+#~ msgstr "Технічні відомості"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "Сервіси та екосистема"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Відмова від відповідальності щодо Minecraft"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth та завантажувачі модів"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "Метадані AppStream"
+
+#~ msgid "Reset Icon"
+#~ msgstr "Скинути піктограму"
+
+#~ msgid "Delete World"
+#~ msgstr "Видалити світ"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "Вилучити сервер «%s»?"
+
+#~ msgid "Remove Server"
+#~ msgstr "Вилучити сервер"
+
+#~ msgid "Rename World"
+#~ msgstr "Перейменувати світ"
+
+#~ msgid "Add World"
+#~ msgstr "Додати світ"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "Видалити світ «%s»? Цю дію не можна скасувати."
+
+#~ msgid "Add Server"
+#~ msgstr "Додати сервер"
+
+#~ msgid "Edit Server"
+#~ msgstr "Редагувати сервер"
+
+#~ msgid "Datapacks"
+#~ msgstr "Пакети даних"
+
+#~ msgid "No Worlds"
+#~ msgstr "Немає світів"
+
+#~ msgid "Move Up"
+#~ msgstr "Перемістити вгору"
+
+#~ msgid "No Servers"
+#~ msgstr "Немає серверів"
+
+#~ msgid "Move Down"
+#~ msgstr "Перемістити вниз"
+
+#~ msgid "Copy Seed"
+#~ msgstr "Копіювати зерно"
+
+#~ msgid "Playtime"
+#~ msgstr "Час гри"
+
+#~ msgid "Runs on"
+#~ msgstr "Платформа"
+
+#~ msgid "Last session"
+#~ msgstr "Останній сеанс"
+
+#~ msgid "Server joins"
+#~ msgstr "Входів на сервери"
+
+#~ msgid "World loads"
+#~ msgstr "Завантажень світів"
+
+#~ msgid "Player Profile"
+#~ msgstr "Профіль гравця"
+
+#~ msgid "Player type"
+#~ msgstr "Тип гравця"
+
+#~ msgid "Pack style"
+#~ msgstr "Стиль збірки"
+
+#~ msgid "Average session"
+#~ msgstr "Середній сеанс"
+
+#~ msgid "Stability"
+#~ msgstr "Стабільність"
+
+#~ msgid "Hybrid"
+#~ msgstr "Змішаний"
+
+#~ msgid "Server Player"
+#~ msgstr "Мережевий гравець"
+
+#~ msgid "Singleplayer"
+#~ msgstr "Одиночна гра"
+
+#~ msgid "Unplayed"
+#~ msgstr "Ще не грали"
+
+#~ msgid "Modpack"
+#~ msgstr "Модпак"
+
+#~ msgid "Lightweight"
+#~ msgstr "Легка"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "Велика"
+
+#~ msgid "Quick"
+#~ msgstr "Короткий"
+
+#~ msgid "Standard"
+#~ msgstr "Звичайний"
+
+#~ msgid "Marathon"
+#~ msgstr "Марафон"
+
+#~ msgid "Stable"
+#~ msgstr "Стабільна"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "%u%% збоїв"

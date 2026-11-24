@@ -1,457 +1,347 @@
 msgid ""
 msgstr ""
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 16:30-0300\n"
 "Language: ko\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-msgid "Adventure"
-msgstr "모험"
-msgid "Atmosphere"
-msgstr "분위기"
-msgid "Audio"
-msgstr "오디오"
-msgid "Blocks"
-msgstr "블록"
-msgid "Bloom"
-msgstr "빛 번짐"
-msgid "Cartoon"
-msgstr "만화풍"
-msgid "Categories"
-msgstr "카테고리"
-msgid "Colored Lighting"
-msgstr "색상 조명"
-msgid "Combat"
-msgstr "전투"
-msgid "Core Shaders"
-msgstr "코어 셰이더"
-msgid "Cursed"
-msgstr "기괴함"
-msgid "Decoration"
-msgstr "장식"
-msgid "Economy"
-msgstr "경제"
-msgid "Entities"
-msgstr "엔티티"
-msgid "Environment"
-msgstr "환경"
-msgid "Equipment"
-msgstr "장비"
-msgid "Fantasy"
-msgstr "판타지"
-msgid "Features"
-msgstr "기능"
-msgid "Foliage"
-msgstr "초목"
-msgid "Fonts"
-msgstr "글꼴"
-msgid "Food"
-msgstr "음식"
-msgid "Game Mechanics"
-msgstr "게임 시스템"
-msgid "Interface"
-msgstr "인터페이스"
-msgid "High"
-msgstr "높음"
-msgid "Items"
-msgstr "아이템"
-msgid "Library"
-msgstr "라이브러리"
-msgid "Low"
-msgstr "낮음"
-msgid "Magic"
-msgstr "마법"
-msgid "Management"
-msgstr "관리"
-msgid "Medium"
-msgstr "보통"
-msgid "Minigame"
-msgstr "미니게임"
-msgid "Mobs"
-msgstr "몹"
-msgid "Modded"
-msgstr "모드 지원"
-msgid "Models"
-msgstr "모델"
-msgid "Optimization"
-msgstr "최적화"
-msgid "Path Tracing"
-msgstr "패스 트레이싱"
-msgid "Performance Impact"
-msgstr "성능 영향"
-msgid "Potato"
-msgstr "초저사양용"
-msgid "Realistic"
-msgstr "사실적"
-msgid "Reflections"
-msgstr "반사"
-msgid "Resolutions"
-msgstr "해상도"
-msgid "Screenshot"
-msgstr "스크린샷"
-msgid "Semi-realistic"
-msgstr "반사실적"
-msgid "Shadows"
-msgstr "그림자"
-msgid "Simplistic"
-msgstr "단순함"
-msgid "Social"
-msgstr "소셜"
-msgid "Storage"
-msgstr "보관"
-msgid "Technology"
-msgstr "기술"
-msgid "Themed"
-msgstr "테마형"
-msgid "Transportation"
-msgstr "운송"
-msgid "Tweaks"
-msgstr "개선"
-msgid "Utility"
-msgstr "편의 기능"
-msgid "Vanilla-like"
-msgstr "바닐라풍"
-msgid "World Generation"
-msgstr "세계 생성"
 
-msgid "All Versions"
-msgstr "모든 버전"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Microsoft"
+msgstr "Microsoft"
 
-msgid "Relevance"
-msgstr "관련도"
+#: src/nuvashalauncher-accounts.c:76
+msgid "Offline"
+msgstr "오프라인"
 
-msgid "Newest"
-msgstr "최신순"
+#: src/nuvashalauncher-accounts.c:112
+msgid "A name cannot be empty."
+msgstr "이름을 비워 둘 수 없습니다."
 
-msgid "Recently updated"
-msgstr "최근 업데이트순"
+#: src/nuvashalauncher-accounts.c:120
+msgid "A name has to be 3 to 16 characters long."
+msgstr "이름은 3~16자여야 합니다."
 
-msgid "Followers"
-msgstr "팔로워 수"
+#: src/nuvashalauncher-accounts.c:129
+msgid "A name can only hold letters, digits and underscores."
+msgstr "이름에는 문자, 숫자, 밑줄만 사용할 수 있습니다."
 
-msgid "Filter modpacks"
-msgstr "모드팩 필터링"
-
-msgid "Cancel"
-msgstr "취소"
-
-msgid "Confirm"
-msgstr "확인"
-
-msgid "Customize"
-msgstr "사용자 지정"
-
-msgid "Delete"
-msgstr "삭제"
-
-msgid "Retry"
-msgstr "다시 시도"
-
-msgid "Loading…"
-msgstr "로드 중…"
-
-msgid "Download"
-msgstr "다운로드"
-
-msgid "Update All"
-msgstr "모두 업데이트"
-
-msgid "Open Folder"
-msgstr "폴더 열기"
-
-msgid "Nothing installed yet"
-msgstr "아직 아무것도 설치되지 않음"
-
-msgid "Browse for something to put into the folder of this instance"
-msgstr "이 인스턴스의 폴더에 넣을 항목을 찾습니다"
-
-msgid "Installed"
-msgstr "설치됨"
-
-msgid "Loading more…"
-msgstr "정보 가져오는 중"
-
-msgid "Nothing is selected"
-msgstr "선택된 항목이 없습니다"
-
-
-msgid "Filter by category"
-msgstr "카테고리별 필터링"
-
-msgid "Nothing to show yet"
-msgstr "보여줄 항목 없음"
-
+#: src/nuvashalauncher-auth-microsoft-json.c:297
+#: src/nuvashalauncher-errors.c:101
 msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
+"this Microsoft account has no Xbox profile behind it yet: sign in to "
+"xbox.com once with it, then sign in here again"
 msgstr ""
-"검색할 항목을 입력하거나 Modrinth가 이 회차에 대해 가지고 있는 모든 것을 찾아"
-"보세요."
+"이 Microsoft 계정에는 아직 연결된 Xbox 프로필이 없습니다. 해당 계정으로 "
+"xbox.com에 한 번 로그인한 다음, 이곳에서 다시 로그인해 주세요."
 
-msgid "Browse"
-msgstr "찾아보기"
-
-msgid "No mod loader"
-msgstr "모드 로더 없음"
-
+#: src/nuvashalauncher-auth-microsoft-json.c:302
+#: src/nuvashalauncher-errors.c:103
 msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
+"this is a child account: it has to be added to a Microsoft family by an "
+"adult before it can play"
 msgstr ""
-"모드는 모드 로더가 필요합니다. 먼저 이 인스턴스 설정에서 Fabric, Quilt, "
-"Forge 또는 NeoForge를 선택하세요"
+"이 계정은 자녀 계정입니다. 게임을 하려면 먼저 성인이 이 계정을 Microsoft 가"
+"족 그룹에 추가해야 합니다."
 
-msgid "Create Instance"
-msgstr "인스턴스 생성"
+#: src/nuvashalauncher-auth-microsoft-json.c:307
+#: src/nuvashalauncher-errors.c:105
+msgid ""
+"Xbox Live is not available for the country this account is registered in"
+msgstr "이 계정이 등록된 국가에서는 Xbox Live를 이용할 수 없습니다."
 
-msgid "Name"
-msgstr "이름"
+#: src/nuvashalauncher-auth-microsoft-json.c:312
+#: src/nuvashalauncher-errors.c:107
+msgid ""
+"this account needs an adult to verify it before it can play, which is what "
+"South Korean accounts have to do"
+msgstr ""
+"이 계정은 게임을 시작하기 전에 성인의 인증을 받아야 하는데, 이는 한국 계정의 "
+"경우 반드시 거쳐야 하는 절차입니다."
 
-msgid "Directory"
-msgstr "폴더"
+#: src/nuvashalauncher-auth-microsoft.c:498
+msgid "Microsoft would not give a code to sign in with"
+msgstr "마이크로소프트는 로그인할 수 있는 코드를 제공하지 않았습니다."
 
-msgid "Choose a folder"
-msgstr "폴더 선택"
+#: src/nuvashalauncher-content-format.c:14
+#, c-format
+msgid "%.1fM downloads"
+msgstr "%.1fM 다운로드"
 
-msgid "Create"
-msgstr "생성"
+#: src/nuvashalauncher-content-format.c:17
+#, c-format
+msgid "%.1fk downloads"
+msgstr "%.1fk 다운로드"
 
-msgid "Download Modpack"
-msgstr "모드팩 다운로드"
+#: src/nuvashalauncher-content-format.c:20
+#, c-format
+msgid "%s downloads"
+msgstr "%s 다운로드"
 
+#: src/nuvashalauncher-content-format.c:29
+#, c-format
+msgid "%s  ·  by %s"
+msgstr "%s  ·  제작자: %s"
 
-msgid "Search modpacks"
-msgstr "모드팩 검색"
+#: src/nuvashalauncher-content-format.c:31
+#, c-format
+msgid "by %s"
+msgstr "제작자: %s"
 
-msgid "Close"
-msgstr "닫기"
+#: src/nuvashalauncher-content-page-browser.c:92
+#, c-format
+msgid "%u mod selected"
+msgid_plural "%u mods selected"
+msgstr[0] "%u개의 모드 선택됨"
 
-msgid "Back"
-msgstr "뒤로"
+#: src/nuvashalauncher-content-page-browser.c:95
+#, c-format
+msgid "%u resource pack selected"
+msgid_plural "%u resource packs selected"
+msgstr[0] "%u개의 리소스 팩 선택됨"
 
+#: src/nuvashalauncher-content-page-browser.c:98
+#, c-format
+msgid "%u shader selected"
+msgid_plural "%u shaders selected"
+msgstr[0] "%u개의 셰이더 선택됨"
+
+#: src/nuvashalauncher-content-page-browser.c:101
+#, c-format
+msgid "%u item selected"
+msgid_plural "%u items selected"
+msgstr[0] "%u개의 항목 선택됨"
+
+#: src/nuvashalauncher-content-page-browser.c:274
+#: src/nuvashalauncher-download-modpack-browser.c:471
+msgid "Select"
+msgstr "선택"
+
+#: src/nuvashalauncher-content-page-browser.c:286
+#: src/nuvashalauncher-content-page-install.c:609
+#: src/nuvashalauncher-content-page-install.c:615
+#: src/nuvashalauncher-content-page-install.c:624
+#: src/nuvashalauncher-content-page-install.c:1079
+#: src/nuvashalauncher-content-page-ui.c:419
+#: src/nuvashalauncher-download-modpack-browser.c:483
+#: src/nuvashalauncher-download-modpack-browser.c:864
+#: src/nuvashalauncher-download-modpack-details.c:215
+#: src/nuvashalauncher-download-modpack-details.c:223
+#: src/nuvashalauncher-download-modpack-details.c:711
+#: data/ui/nuvashalauncher-modpack-optional.ui:17
 msgid "Install"
 msgstr "설치"
 
-msgid "Copy of %s"
-msgstr "%s 의 복사"
+#: src/nuvashalauncher-content-page-browser.c:391
+msgid "the next page could not be loaded"
+msgstr "다음 페이지를 불러오지 못했습니다"
 
-msgid "Choose Java executable"
-msgstr "Java 실행 파일 선택"
+#: src/nuvashalauncher-content-page-browser.c:411
+#: src/nuvashalauncher-download-modpack-browser.c:666
+msgid "Could not search Modrinth"
+msgstr "Modrinth를 검색할 수 없습니다."
 
-msgid "the chosen file does not report a Java version"
-msgstr "선택한 파일이 Java 버전을 알려주지 않습니다"
+#: src/nuvashalauncher-content-page-browser.c:647
+msgid "Other"
+msgstr "기타"
 
-msgid "Choose an Icon"
-msgstr "아이콘 선택"
+#: src/nuvashalauncher-content-page-browser.c:722
+msgid "Could not load categories"
+msgstr "카테고리를 불러올 수 없습니다"
 
-msgid "Choose a Directory"
-msgstr "폴더 선택"
+#: src/nuvashalauncher-content-page-browser.c:725
+#: src/nuvashalauncher-content-page-ui.c:324 src/nuvashalauncher-i18n.c:22
+#: src/nuvashalauncher-java-row.c:541 src/nuvashalauncher-java-row.c:542
+#: src/nuvashalauncher-loader-row.c:503 src/nuvashalauncher-loader-row.c:504
+#: src/nuvashalauncher-version-row.c:367 src/nuvashalauncher-version-row.c:368
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:41
+#: data/ui/nuvashalauncher-modpack-error.ui:26
+msgid "Retry"
+msgstr "다시 시도"
 
-msgid "Duplicated to \"%s\""
-msgstr "\"%s\"(으)로 복제됨"
+#: src/nuvashalauncher-content-page-details.c:81
+#: src/nuvashalauncher-content-page-details.c:250
+#: src/nuvashalauncher-content-page-install.c:704
+#: src/nuvashalauncher-download-modpack-details.c:279
+#: src/nuvashalauncher-download-modpack-details.c:288
+#: src/nuvashalauncher-download-modpack-details.c:295
+#: src/nuvashalauncher-download-modpack-details.c:472
+#: src/nuvashalauncher-download-modpack-details.c:482
+msgid "Could not load versions. Try again."
+msgstr "버전을 불러오지 못했습니다. 다시 시도하세요."
 
-msgid "Delete \"%s\"?"
-msgstr "%s 삭제하기"
-
-msgid "General"
-msgstr "일반"
-
-msgid "Icon"
-msgstr "아이콘"
-
-msgid "Change the Directory"
-msgstr "폴더 변경"
-
-msgid "Minecraft"
-msgstr "마인크래프트"
-
-msgid "Java"
-msgstr "Java"
-
-msgid "Java Runtime"
-msgstr "Java 런타임"
-
-
-msgid "This game needs Java %d or newer, selected Java is %d"
-msgstr "이 게임에는 Java %d 이상이 필요하지만 선택된 Java는 %d입니다"
-
-msgid "Add Java Runtime"
-msgstr "Java 런타임 추가"
-
-msgid ""
-"Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
-"not jre-openjdk-headless"
-msgstr ""
-"Minecraft에는 headless가 아닌 Java가 필요합니다. Arch에서는 jre-openjdk-"
-"headless가 아니라 jre-openjdk 패키지를 사용하세요"
-
-msgid "JVM Arguments"
-msgstr "JVM 인수"
-
-msgid ""
-"The configured Java was not detected; make sure it is still a usable java "
-"executable"
-msgstr ""
-"설정된 Java를 찾을 수 없습니다. 아직 사용할 수 있는 Java 실행 파일인지 확인하"
-"세요"
-
-msgid "Actions"
-msgstr "작업"
-
-msgid "Duplicate"
-msgstr "복제"
-
-msgid "Delete Instance"
-msgstr "인스턴스 삭제"
-
-msgid "Settings"
-msgstr "설정"
-
-msgid "Resource Packs"
-msgstr "자원 팩"
-
-msgid "Shader Packs"
-msgstr "셰이더 팩"
-
-msgid "Mods"
-msgstr "모드"
-
-msgid "Logs"
-msgstr "로그"
-
-msgid "Custom: %s"
-msgstr "사용자 지정: %s"
-
-msgid "the game was stopped by signal %d"
-msgstr "%d 신호에 의해 게임이 중지되었습니다"
-
-msgid "the game exited with code %d"
-msgstr "%d 코드로 게임을 종료했습니다"
-
-msgid "No compatible %s version found for Minecraft %s."
-msgstr "마인크래프트 %s 와 (과) 호환되는 %s 버전을 찾을 수 없습니다."
-
-msgid "Loader"
-msgstr "모드 로더"
-
-msgid "Loader Version"
-msgstr "모드 로더 버전"
-
-msgid "Clear"
-msgstr "지우기"
-
-msgid "Search the log"
-msgstr "로그 검색"
-
-msgid "Versions"
-msgstr "버전"
-
-msgid "Show unstable Minecraft versions"
-msgstr "불안정한 Minecraft 버전 표시"
-
-msgid "Show unstable Mod Loader versions"
-msgstr "불안정한 모드 로더 버전 표시"
-
-msgid "Language"
-msgstr "언어"
-
-msgid "Interface language"
-msgstr "인터페이스 언어"
-
-msgid "Line Limit"
-msgstr "줄 수 제한"
-
-
-msgid "About Nuvasha Launcher"
-msgstr "Nuvasha Launcher 소개"
-
-msgid "Keyboard Shortcuts"
-msgstr "키보드 단축키"
-
-msgid "Stop"
-msgstr "중지"
-
-msgid "Play"
-msgstr "플레이"
-
-msgid "Keep Playing"
-msgstr "계속 플레이"
-
-msgid "Downloads"
-msgstr "다운로드"
-
-msgid "Accounts"
-msgstr "계정"
-
-msgid "No Instances Yet"
-msgstr "아직 인스턴스가 없습니다"
-
-msgid "Use the + button in the header to create one"
-msgstr "헤더의 + 버튼을 사용하여 생성"
-
-msgid "the loader cannot be resolved: %s"
-msgstr "모드 로더를 확인할 수 없습니다: %s"
-
-msgid "No compatible version found for Minecraft %s and %s."
-msgstr "마인크래프트 %s 및 %s 와 (과) 호환되는 버전을 찾을 수 없습니다."
-
+#: src/nuvashalauncher-content-page-details.c:89
+#: src/nuvashalauncher-content-page-details.c:258
+#: src/nuvashalauncher-modrinth.c:677
+#, c-format
 msgid "No compatible version found for Minecraft %s."
 msgstr "마인크래프트 %s 와 (과) 호환되는 버전을 찾을 수 없습니다."
 
-msgid "Add Offline Account"
-msgstr "오프라인 계정 추가"
+#: src/nuvashalauncher-content-page-details.c:318
+#: src/nuvashalauncher-download-modpack-details.c:550
+#: src/nuvashalauncher-main-window-actions.c:404
+msgid "Versions"
+msgstr "버전"
 
-msgid "a name can only hold letters, digits and underscores"
-msgstr "이름에는 문자, 숫자, 밑줄만 사용할 수 있습니다"
+#: src/nuvashalauncher-content-page-identify.c:720
+msgid "The folder cannot be read"
+msgstr "폴더를 읽을 수 없습니다"
 
-msgid "a name cannot be empty"
-msgstr "이름을 비워 둘 수 없습니다"
+#: src/nuvashalauncher-content-page-install.c:154 src/nuvashalauncher-i18n.c:30
+#, c-format
+msgid "The duplicate file “%s” could not be removed: %s"
+msgstr "The duplicate file “%s” could not be removed: %s"
 
-msgid "a name has to be 3 to 16 characters long"
-msgstr "이름은 3~16자여야 합니다"
+#: src/nuvashalauncher-content-page-install.c:233
+#: src/nuvashalauncher-content-page-install.c:652
+msgid "The file could not be installed"
+msgstr "파일을 설치할 수 없습니다"
 
-msgid "Add"
-msgstr "추가"
+#: src/nuvashalauncher-content-page-install.c:251 src/nuvashalauncher-i18n.c:31
+#, c-format
+msgid "The replaced file “%s” could not be removed"
+msgstr "The replaced file “%s” could not be removed"
 
-msgid "asking Microsoft for a code"
-msgstr "microsoft에 코드 요청"
+#: src/nuvashalauncher-content-page-install.c:329
+msgid "The folder cannot be created"
+msgstr "폴더를 만들 수 없습니다"
 
-msgid "waiting for the sign-in in the browser"
-msgstr "브라우저에서 로그인을 기다리는 중"
+#: src/nuvashalauncher-content-page-install.c:382
+msgid "Content"
+msgstr "내용"
 
-msgid "Sign In"
-msgstr "로그인"
+#: src/nuvashalauncher-content-page-install.c:389
+msgid "Installing"
+msgstr "설치"
 
-msgid "Open the page in your browser, then enter this code:"
-msgstr "브라우저에서 페이지를 연 다음 다음 코드를 입력하세요."
-
-msgid "Try Again"
-msgstr "다시 시도"
-
-msgid "Remove"
-msgstr "제거"
-
-msgid "Add Microsoft Account"
-msgstr "Microsoft 계정 추가"
-
-msgid "Minecraft Version"
-msgstr "마인크래프트 버전"
-
-msgid "Install the selected %s?"
-msgstr "선택한 %s을(를) 설치할까요?"
-
-msgid "%s \"%s\""
-msgstr "%s “%s”"
-
-msgid "Search"
-msgstr "검색"
-
-msgid "Update"
-msgstr "업데이트"
-
-msgid "Update the following %s"
-msgstr "다음 %s 업데이트"
-
+#: src/nuvashalauncher-content-page-install.c:508
+#: src/nuvashalauncher-content-page-install.c:1062
 msgid "Dependencies:"
 msgstr "종속 항목:"
 
+#: src/nuvashalauncher-content-page-install.c:547
+msgid "Conflicts\n"
+msgstr "갈등\n"
+
+#: src/nuvashalauncher-content-page-install.c:584
+#, c-format
+msgid "%s is being installed"
+msgstr "%s 설치 중"
+
+#: src/nuvashalauncher-content-page-install.c:609
+msgid "Update"
+msgstr "업데이트"
+
+#: src/nuvashalauncher-content-page-install.c:614
+#: src/nuvashalauncher-download-modpack-details.c:215
+#, c-format
+msgid "%s “%s”"
+msgstr "%s “%s”"
+
+#: src/nuvashalauncher-content-page-install.c:622
+#: src/nuvashalauncher-content-page-install.c:1078
+#: src/nuvashalauncher-content-page-installed-delete.c:304
+#: src/nuvashalauncher-content-page-ui.c:167
+#: src/nuvashalauncher-content-page-updates.c:275
+#: src/nuvashalauncher-create-instance-dialog.c:247
+#: src/nuvashalauncher-download-modpack-details.c:222
+#: src/nuvashalauncher-download-modpack-details.c:710
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-operations.c:257
+#: src/nuvashalauncher-instance-page-operations.c:369
+#: src/nuvashalauncher-instance-page-operations.c:625
+#: src/nuvashalauncher-main-window-actions.c:303
+#: src/nuvashalauncher-main-window-downloads.c:135
+#: src/nuvashalauncher-offline-account-dialog.c:139
+#: src/nuvashalauncher-servers-page.c:255
+#: src/nuvashalauncher-servers-page.c:373
+#: src/nuvashalauncher-users-popover-skin.c:372
+#: src/nuvashalauncher-users-popover.c:185
+#: src/nuvashalauncher-worlds-page.c:319 src/nuvashalauncher-worlds-page.c:577
+#: data/ui/nuvashalauncher-download-row.ui:21
+#: data/ui/nuvashalauncher-modpack-optional.ui:12
+msgid "Cancel"
+msgstr "취소"
+
+#: src/nuvashalauncher-content-page-install.c:705
+msgid "This project publishes nothing that fits this instance."
+msgstr "이 프로젝트에는 이 인스턴스에 맞는 항목이 없습니다."
+
+#: src/nuvashalauncher-content-page-install.c:1003
+#, c-format
+msgid "%u mod is being installed"
+msgid_plural "%u mods are being installed"
+msgstr[0] "%u개의 모드를 설치하는 중"
+
+#: src/nuvashalauncher-content-page-install.c:1006
+#, c-format
+msgid "%u resource pack is being installed"
+msgid_plural "%u resource packs are being installed"
+msgstr[0] "%u개의 리소스 팩을 설치하는 중"
+
+#: src/nuvashalauncher-content-page-install.c:1009
+#, c-format
+msgid "%u shader is being installed"
+msgid_plural "%u shaders are being installed"
+msgstr[0] "%u개의 셰이더를 설치하는 중"
+
+#: src/nuvashalauncher-content-page-install.c:1012
+#, c-format
+msgid "%u item is being installed"
+msgid_plural "%u items are being installed"
+msgstr[0] "%u개의 항목을 설치하는 중"
+
+#: src/nuvashalauncher-content-page-install.c:1038
+msgid "Install the following mod?"
+msgid_plural "Install the following mods?"
+msgstr[0] "다음 모드를 설치할까요?"
+
+#: src/nuvashalauncher-content-page-install.c:1041
+msgid "Install the following resource pack?"
+msgid_plural "Install the following resource packs?"
+msgstr[0] "다음 리소스 팩을 설치할까요?"
+
+#: src/nuvashalauncher-content-page-install.c:1044
+msgid "Install the following shader?"
+msgid_plural "Install the following shaders?"
+msgstr[0] "다음 셰이더를 설치할까요?"
+
+#: src/nuvashalauncher-content-page-install.c:1047
+msgid "Install the following item?"
+msgid_plural "Install the following items?"
+msgstr[0] "다음 항목을 설치할까요?"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:79
+msgid "The file cannot be deleted"
+msgstr "파일을 삭제할 수 없습니다"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:176
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Enable"
+msgstr "활성화"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:186
+msgid "A dependent mod cannot be deleted"
+msgstr "종속 모드를 삭제할 수 없습니다"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:187
+#: src/nuvashalauncher-content-page-installed.c:69
+msgid "The file cannot be renamed"
+msgstr "파일 이름을 변경할 수 없습니다"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:193
+msgid "Deleted"
+msgstr "삭제됨"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:292
+#: src/nuvashalauncher-instance-page-operations.c:618
+#, c-format
+msgid "Delete “%s”?"
+msgstr "%s 삭제하기"
+
+#: src/nuvashalauncher-content-page-installed-delete.c:295
+#, c-format
 msgid ""
 "The following mods depend on %s:\n"
 "%s"
@@ -459,92 +349,262 @@ msgstr ""
 "다음 모드가 %s에 의존합니다:\n"
 "%s"
 
-msgid "Cache"
-msgstr "캐시"
+#: src/nuvashalauncher-content-page-installed-delete.c:305
+#: src/nuvashalauncher-content-page-installed.c:345
+#: src/nuvashalauncher-i18n.c:24
+#: src/nuvashalauncher-instance-page-operations.c:626
+#: src/nuvashalauncher-servers-page.c:374
+#: src/nuvashalauncher-servers-page.c:469
+#: src/nuvashalauncher-users-popover-skin.c:373
+#: src/nuvashalauncher-users-popover-skin.c:991
+#: src/nuvashalauncher-users-popover-skin.c:1002
+#: src/nuvashalauncher-users-popover.c:277
+#: src/nuvashalauncher-worlds-page.c:578 src/nuvashalauncher-worlds-page.c:655
+#: data/ui/nuvashalauncher-skin-content.ui:44
+msgid "Delete"
+msgstr "삭제"
 
-msgid "Cache Modrinth API responses"
-msgstr "Modrinth API 응답 캐시"
+#: src/nuvashalauncher-content-page-installed.c:109
+#: src/nuvashalauncher-content-page-installed.c:330
+msgid "Enabled"
+msgstr "활성화됨"
 
-msgid "Cache expiration"
-msgstr "캐시 만료"
+#: src/nuvashalauncher-content-page-installed.c:109
+msgid "Disabled"
+msgstr "비활성화됨"
 
-msgid "1 hour"
-msgstr "1시간"
+#: src/nuvashalauncher-content-page-installed.c:285
+#: src/nuvashalauncher-content-page-installed.c:327
+msgid "Disable"
+msgstr "비활성화"
 
-msgid "6 hours"
-msgstr "6시간"
+#: src/nuvashalauncher-content-page-ui.c:142
+#: src/nuvashalauncher-content-page-ui.c:146
+#: src/nuvashalauncher-content-page-ui.c:335
+#: src/nuvashalauncher-instance-page-settings.c:748
+#: src/nuvashalauncher-instance-page.c:661 src/nuvashalauncher-logs-page.c:688
+#: src/nuvashalauncher-main-window-actions.c:674
+#: src/nuvashalauncher-servers-page.c:721
+#: src/nuvashalauncher-worlds-page.c:1256
+msgid "Search"
+msgstr "검색"
 
-msgid "1 day"
-msgstr "1일"
+#: src/nuvashalauncher-content-page-ui.c:157
+msgid "Update all"
+msgstr "모두 업데이트"
 
-msgid "7 days"
-msgstr "7일"
+#: src/nuvashalauncher-content-page-ui.c:165
+msgid "Fetching updates"
+msgstr "업데이트 가져오는 중"
 
-msgid "Show Shortcuts"
-msgstr "바로 가기 표시"
+#: src/nuvashalauncher-content-page-ui.c:166
+#: src/nuvashalauncher-content-page-updates.c:147
+msgid "Progress"
+msgstr "진행률"
 
-msgid "Quit"
-msgstr "종료"
+#: src/nuvashalauncher-content-page-ui.c:192
+#: src/nuvashalauncher-instance-page-settings.c:985
+#: src/nuvashalauncher-logs-page.c:669
+#: src/nuvashalauncher-users-popover-skin.c:990
+#: src/nuvashalauncher-users-popover-skin.c:999
+#: src/nuvashalauncher-worlds-page.c:1200
+#: data/ui/nuvashalauncher-skin-content.ui:43
+msgid "Open folder"
+msgstr "폴더 열기"
 
-# New modpack import/export actions use English until translators provide localized text.
-msgid "Import Modpack"
-msgstr "모드팩 가져오기"
+#: src/nuvashalauncher-content-page-ui.c:217
+msgid "Nothing installed yet"
+msgstr "아직 아무것도 설치되지 않음"
 
-msgid "Modpack exported"
-msgstr "모드팩을 내보냈습니다"
+#: src/nuvashalauncher-content-page-ui.c:220
+msgid "Browse for something to put into the folder of this instance"
+msgstr "이 인스턴스의 폴더에 넣을 항목을 찾습니다"
 
-msgid "Modrinth Modpacks (*.mrpack)"
-msgstr "Modrinth 모드팩 (*.mrpack)"
+#: src/nuvashalauncher-content-page-ui.c:222
+#: src/nuvashalauncher-content-page-ui.c:493
+#: src/nuvashalauncher-content-page-ui.c:566
+msgid "Browse"
+msgstr "찾아보기"
 
-msgid "The export location is not a local file"
-msgstr "내보내기 위치가 로컬 파일이 아닙니다"
+#: src/nuvashalauncher-content-page-ui.c:261
+#: src/nuvashalauncher-content-page-ui.c:564
+msgid "Installed"
+msgstr "설치됨"
 
-msgid "Export Modpack"
-msgstr "모드팩 내보내기"
+#: src/nuvashalauncher-content-page-ui.c:321 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:31
+msgid "Loading more…"
+msgstr "정보 가져오는 중"
 
-msgid "Importing modpack…"
-msgstr "모드팩 가져오는 중…"
+#: src/nuvashalauncher-content-page-ui.c:349
+msgid "Filter by category"
+msgstr "카테고리별 필터링"
 
+#: src/nuvashalauncher-content-page-ui.c:385 src/nuvashalauncher-i18n.c:19
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:18
+msgid "Nothing to show yet"
+msgstr "보여줄 항목 없음"
+
+#: src/nuvashalauncher-content-page-ui.c:388
+msgid ""
+"Type what to look for, or browse everything Modrinth has for this instance"
+msgstr ""
+"검색할 항목을 입력하거나 Modrinth가 이 회차에 대해 가지고 있는 모든 것을 찾아"
+"보세요."
+
+#: src/nuvashalauncher-content-page-ui.c:591
+#: src/nuvashalauncher-main-window-ui.c:165
+msgid "Dismiss"
+msgstr "닫기"
+
+#: src/nuvashalauncher-content-page-updates.c:177
+#, c-format
+msgid "Updated %u item"
+msgid_plural "Updated %u items"
+msgstr[0] "아이템 %u개 업데이트됨"
+
+#: src/nuvashalauncher-content-page-updates.c:246
+msgid "Everything is up to date"
+msgstr "모두 최신 상태입니다"
+
+#: src/nuvashalauncher-content-page-updates.c:258
+#, c-format
+msgid "Update the following %s"
+msgstr "다음 %s 업데이트"
+
+#: src/nuvashalauncher-content-page-updates.c:276
+msgid "Confirm"
+msgstr "확인"
+
+#: src/nuvashalauncher-content-page.c:69 src/nuvashalauncher-i18n.c:27
+#, c-format
+msgid "The folder could not be opened: %s"
+msgstr "The folder could not be opened: %s"
+
+#: src/nuvashalauncher-content-page.c:91
+#, c-format
+msgid "Cannot create “%s”: %s"
+msgstr "“%s”을(를) 만들 수 없습니다: %s"
+
+#: src/nuvashalauncher-content-page.c:178
+msgid "No mod loader"
+msgstr "모드 로더 없음"
+
+#: src/nuvashalauncher-content-page.c:181
+msgid ""
+"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
+"settings of this instance first"
+msgstr ""
+"모드는 모드 로더가 필요합니다. 먼저 이 인스턴스 설정에서 Fabric, Quilt, "
+"Forge 또는 NeoForge를 선택하세요"
+
+#: src/nuvashalauncher-create-instance-dialog.c:139
+msgid "Pick a Minecraft version from the list."
+msgstr "목록에서 마인크래프트 버전을 하나 선택하세요."
+
+#: src/nuvashalauncher-create-instance-dialog.c:146
+msgid "Pick a version of the loader, or pick another loader."
+msgstr "로더 버전을 선택하거나 다른 로더를 선택하세요."
+
+#: src/nuvashalauncher-create-instance-dialog.c:234
+#: src/nuvashalauncher-i18n.c:14
+#: src/nuvashalauncher-instance-page-settings.c:856
+msgid "Directory"
+msgstr "폴더"
+
+#: src/nuvashalauncher-create-instance-dialog.c:237
+#: src/nuvashalauncher-i18n.c:15
+msgid "Choose a folder"
+msgstr "폴더 선택"
+
+#: src/nuvashalauncher-create-instance-dialog.c:248
+#: src/nuvashalauncher-i18n.c:15
+msgid "Create"
+msgstr "생성"
+
+#: src/nuvashalauncher-download-modpack-browser.c:249
+#, c-format
+msgid "%u modpack selected"
+msgid_plural "%u modpacks selected"
+msgstr[0] "%u개의 모드팩 선택됨"
+
+#: src/nuvashalauncher-download-modpack-browser.c:698
+#: src/nuvashalauncher-errors.c:33
+msgid "The service returned an invalid response. Try again later."
+msgstr "서비스가 잘못된 응답을 반환했습니다. 나중에 다시 시도하세요."
+
+#: src/nuvashalauncher-download-modpack-browser.c:763
+msgid "All versions"
+msgstr "모든 버전"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+#: src/nuvashalauncher-main-window-ui.c:97
+msgid "Downloads"
+msgstr "다운로드"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Relevance"
+msgstr "관련도"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Newest"
+msgstr "최신순"
+
+#: src/nuvashalauncher-download-modpack-browser.c:767
+msgid "Recently updated"
+msgstr "최근 업데이트순"
+
+#: src/nuvashalauncher-download-modpack-browser.c:768
+msgid "Followers"
+msgstr "팔로워 수"
+
+#: src/nuvashalauncher-download-modpack-browser.c:784
+msgid "Filter modpacks"
+msgstr "모드팩 필터링"
+
+#: src/nuvashalauncher-download-modpack-browser.c:894
+msgid "Browse modpacks"
+msgstr "모드팩 둘러보기"
+
+#: src/nuvashalauncher-download-modpack-details.c:296
+#: src/nuvashalauncher-download-modpack-details.c:493
+#: src/nuvashalauncher-errors.c:131
+msgid "The requested file, project, or compatible version was not found."
+msgstr "요청한 파일, 프로젝트 또는 호환 버전을 찾지 못했습니다."
+
+#: src/nuvashalauncher-download-modpack-details.c:693
+msgid "Install the following modpack?"
+msgid_plural "Install the following modpacks?"
+msgstr[0] "다음 모드팩을 설치할까요?"
+
+#: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"
 msgstr "모드팩 읽는 중"
 
-msgid "Exporting modpack"
-msgstr "모드팩 내보내는 중"
-
-msgid "Modpack export"
-msgstr "모드팩 내보내기"
-
-msgid "Include transient files?"
-msgstr "임시 파일을 포함할까요?"
-
-msgid ""
-"Logs, crash reports, screenshots, caches and downloads are normally excluded."
-msgstr "로그, 충돌 보고서, 스크린샷, 캐시 및 다운로드는 일반적으로 제외됩니다."
-
-msgid "Clean Export"
-msgstr "깔끔하게 내보내기"
-
-msgid "Include All Files"
-msgstr "모든 파일 포함"
-
-msgid "Pack Name"
-msgstr "팩 이름"
-
-msgid "Summary"
-msgstr "요약"
-
-msgid "Version ID"
-msgstr "버전 ID"
-
-msgid "Downloading files"
-msgstr "파일 다운로드 중"
-
+#: src/nuvashalauncher-download-modpack-install.c:89
+#: src/nuvashalauncher-download-modpack-install.c:226
 msgid "Extracting files"
 msgstr "파일 압축 해제 중"
 
+#: src/nuvashalauncher-download-modpack-install.c:132
+#: src/nuvashalauncher-download-modpack-install.c:441
+msgid "Could not install the modpack"
+msgstr "모드팩을 설치할 수 없습니다."
+
+#: src/nuvashalauncher-download-modpack-install.c:156
+#: src/nuvashalauncher-i18n.c:32
+msgid "Could not copy the instance icon"
+msgstr "Could not copy the instance icon"
+
+#: src/nuvashalauncher-download-modpack-install.c:225
+msgid "Downloading files"
+msgstr "파일 다운로드 중"
+
+#: src/nuvashalauncher-download-modpack-install.c:262
 msgid "Optional files"
 msgstr "선택 파일"
 
+#: src/nuvashalauncher-download-modpack-install.c:265
 msgid ""
 "The pack lists these files but says they are not needed. Nothing of them is "
 "installed unless you ask. Default is off"
@@ -552,1105 +612,1889 @@ msgstr ""
 "팩에 나열되어 있지만 필수 항목은 아닙니다. 요청하지 않으면 설치되지 않습니"
 "다. 기본값은 끔입니다"
 
+#: src/nuvashalauncher-download-modpack-install.c:385
+#: src/nuvashalauncher-download-modpack-install.c:564
+#: src/nuvashalauncher-errors.c:151
 msgid "Pack could not be fetched"
 msgstr "팩을 가져오지 못했습니다"
 
+#: src/nuvashalauncher-download-modpack-install.c:422
 msgid "Invalid pack"
 msgstr "잘못된 팩"
 
-msgid "The pack does not define its install"
-msgstr "팩에 설치 정보가 없습니다"
+#: src/nuvashalauncher-download-modpack-install.c:512
+msgid "This version has no pack file"
+msgstr "이 버전에는 팩 파일이 포함되어 있지 않습니다."
 
-msgid "Downloading Modpack"
+#: src/nuvashalauncher-download-modpack-install.c:513
+msgid "This project publishes no pack file Nuvasha Launcher can install."
+msgstr ""
+"이 프로젝트는 Nuvasha Launcher가 설치할 수 있는 팩 파일을 제공하지 않습니다."
+
+#: src/nuvashalauncher-download-modpack-install.c:540
+msgid "Downloading modpack"
 msgstr "모드팩 다운로드 중"
 
-msgid "Writing archive"
-msgstr "압축 파일 작성 중"
+#: src/nuvashalauncher-downloads.c:237
+msgid "Download"
+msgstr "다운로드"
 
-msgid "Export modpack metadata"
-msgstr "내보내기 메타데이터"
+#: src/nuvashalauncher-errors.c:32
+msgid "The connection failed. Check your internet connection and try again."
+msgstr "연결에 실패했습니다. 인터넷 연결을 확인하고 다시 시도하세요."
 
-msgid "Ask for export metadata"
-msgstr "내보낼 때 메타데이터 묻기"
+#: src/nuvashalauncher-errors.c:34
+msgid "The service rejected the request. Try again later."
+msgstr "서비스가 요청을 거부했습니다. 나중에 다시 시도하세요."
 
-msgid "Pack information"
-msgstr "팩 정보"
+#: src/nuvashalauncher-errors.c:35
+msgid "Too many requests. Wait a moment and try again."
+msgstr "요청이 너무 많습니다. 잠시 기다렸다가 다시 시도하세요."
 
-msgid "Show name, summary and version fields before exporting."
-msgstr "내보내기 전에 이름, 요약, 버전 입력란을 표시합니다."
+#: src/nuvashalauncher-errors.c:36
+msgid ""
+"Could not read or write files. Check the location, permissions, and free "
+"disk space."
+msgstr "파일을 읽거나 쓰지 못했습니다. 위치, 권한, 여유 공간을 확인하세요."
 
-msgid "Export complete"
-msgstr "내보내기 완료"
+#: src/nuvashalauncher-errors.c:37
+msgid ""
+"The downloaded file failed verification. It was not installed. Try "
+"downloading it again."
+msgstr ""
+"다운로드한 파일의 검증에 실패하여 설치하지 않았습니다. 다시 다운로드하세요."
 
-msgid "Export"
-msgstr "내보내기"
+#: src/nuvashalauncher-errors.c:38
+msgid ""
+"The archive is invalid or unsafe. Download it again from a trusted source."
+msgstr ""
+"압축 파일이 잘못되었거나 안전하지 않습니다. 신뢰할 수 있는 출처에서 다시 다운"
+"로드하세요."
 
-msgid "Installed %u item"
-msgid_plural "Installed %u items"
-msgstr[0] "아이템 %u개 설치됨"
+#: src/nuvashalauncher-errors.c:41 src/nuvashalauncher-errors.c:70
+#: src/nuvashalauncher-errors.c:155 src/nuvashalauncher-errors.c:195
+msgid "The operation failed. See Technical Details for more information."
+msgstr "작업에 실패했습니다. 기술 세부 정보를 확인하세요."
 
-msgid "Updated %u item"
-msgid_plural "Updated %u items"
-msgstr[0] "아이템 %u개 업데이트됨"
+#: src/nuvashalauncher-errors.c:47 src/nuvashalauncher-errors.c:162
+#: src/nuvashalauncher-java-row-discovery.c:130
+msgid "The Java executable could not be used. Select a working Java runtime."
+msgstr ""
+"Java 실행 파일을 사용하지 못했습니다. 정상 작동하는 Java 런타임을 선택하세요."
 
-msgid "The icon must be a file on this computer"
-msgstr "아이콘은 이 컴퓨터에 있는 파일이어야 합니다"
+#: src/nuvashalauncher-errors.c:61 src/nuvashalauncher-errors.c:77
+msgid "Access was denied. Check the folder permissions."
+msgstr "접근이 거부되었습니다. 폴더 권한을 확인하세요."
 
-msgid "The game is running; stop it before moving its directory"
-msgstr "게임이 실행 중입니다. 디렉터리를 이동하기 전에 게임을 중지하세요"
+#: src/nuvashalauncher-errors.c:63 src/nuvashalauncher-errors.c:79
+msgid "There is not enough free disk space."
+msgstr "디스크 여유 공간이 부족합니다."
 
-msgid "%s is being installed"
-msgstr "%s 설치 중"
+#: src/nuvashalauncher-errors.c:65
+msgid "The file or folder was not found. Check its location."
+msgstr "파일이나 폴더를 찾지 못했습니다. 위치를 확인하세요."
 
-msgid "no compatible version"
-msgstr "호환되는 버전이 없습니다"
+#: src/nuvashalauncher-errors.c:67 src/nuvashalauncher-errors.c:177
+msgid "The destination already exists. Choose another location."
+msgstr "대상이 이미 있습니다. 다른 위치를 선택하세요."
 
-msgid "Enabled"
-msgstr "활성화됨"
+#: src/nuvashalauncher-errors.c:89
+msgid "The sign-in request expired. Start again to get a new code."
+msgstr "The sign-in request expired. Start again to get a new code."
 
-msgid "Disabled"
-msgstr "비활성화됨"
+#: src/nuvashalauncher-errors.c:91 src/nuvashalauncher-launcher-control.c:64
+msgid "Your saved sign-in is no longer valid. Sign in again."
+msgstr "저장된 로그인 정보가 더 이상 유효하지 않습니다. 다시 로그인하세요."
 
-msgid "Deleted"
-msgstr "삭제됨"
+#: src/nuvashalauncher-errors.c:93
+msgid "Sign-in was declined. Start again if you want to sign in."
+msgstr "로그인이 거부되었습니다. 로그인하려면 처음부터 다시 시작하세요."
 
-msgid "Everything is up to date"
-msgstr "모두 최신 상태입니다"
+#: src/nuvashalauncher-errors.c:95
+msgid "This account does not own Minecraft: Java Edition."
+msgstr "이 계정은 Minecraft: Java Edition을 소유하지 않습니다."
 
-msgid "Cannot create \"%s\": %s"
-msgstr "“%s”을(를) 만들 수 없습니다: %s"
+#: src/nuvashalauncher-errors.c:97
+msgid ""
+"Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
+msgstr ""
+"minecraft.net에서 Minecraft: Java Edition 프로필을 만든 뒤 다시 시도하세요."
 
-msgid "This project publishes nothing that fits this instance."
-msgstr "이 프로젝트에는 이 인스턴스에 맞는 항목이 없습니다."
+#: src/nuvashalauncher-errors.c:99
+msgid "Microsoft sign-in is not configured in this build. Update the launcher."
+msgstr ""
+"이 빌드에는 Microsoft 로그인이 구성되지 않았습니다. 런처를 업데이트하세요."
 
-msgid "Unknown"
-msgstr "알 수 없음"
+#: src/nuvashalauncher-errors.c:108
+msgid "Microsoft sign-in failed. Try again."
+msgstr "Microsoft sign-in failed. Try again."
 
-msgid "%s (unstable)"
-msgstr "%s (불안정)"
+#: src/nuvashalauncher-errors.c:153 src/nuvashalauncher-errors.c:160
+#: src/nuvashalauncher-launcher-loader.c:354
+msgid ""
+"Could not install this mod loader. Choose another version or inspect "
+"Technical Details."
+msgstr ""
+"이 모드 로더를 설치하지 못했습니다. 다른 버전을 선택하거나 기술 세부 정보를 "
+"확인하세요."
 
-msgid "the next page could not be loaded"
-msgstr "다음 페이지를 불러오지 못했습니다"
+#: src/nuvashalauncher-errors.c:164 src/nuvashalauncher-errors.c:171
+msgid ""
+"The game metadata is invalid or unavailable. Refresh the version list and "
+"try again."
+msgstr ""
+"게임 메타데이터가 잘못되었거나 사용할 수 없습니다. 버전 목록을 새로고침하고 "
+"다시 시도하세요."
 
-msgid "Other"
-msgstr "기타"
+#: src/nuvashalauncher-errors.c:181
+msgid "This instance is no longer available. Refresh the instance list."
+msgstr ""
+"이 인스턴스를 더 이상 사용할 수 없습니다. 인스턴스 목록을 새로고침하세요."
 
-msgid "%.1fM downloads"
-msgstr "%.1fM 다운로드"
+#: src/nuvashalauncher-errors.c:182 src/nuvashalauncher-errors.c:187
+msgid "Choose another instance name or directory."
+msgstr "다른 인스턴스 이름이나 폴더를 선택하세요."
 
-msgid "%.1fk downloads"
-msgstr "%.1fk 다운로드"
+#: src/nuvashalauncher-errors.c:185 src/nuvashalauncher-launcher-loader.c:356
+msgid ""
+"Your instance settings are invalid. Check the selected version and JVM "
+"arguments."
+msgstr "인스턴스 설정이 잘못되었습니다. 선택한 버전과 JVM 인수를 확인하세요."
 
-msgid "%s  ·  by %s"
-msgstr "%s  ·  제작자: %s"
+#: src/nuvashalauncher-errors.c:191
+msgid ""
+"Could not save the account. Check your system keyring and file permissions."
+msgstr "계정을 저장하지 못했습니다. 시스템 키링과 파일 권한을 확인하세요."
 
-msgid "by %s"
-msgstr "제작자: %s"
+#: src/nuvashalauncher-filter-entry.c:109 src/nuvashalauncher-logs-page.c:666
+#: src/nuvashalauncher-main-window-actions.c:304
+msgid "Clear"
+msgstr "지우기"
 
-msgid "%s downloads"
-msgstr "%s 다운로드"
+#: src/nuvashalauncher-i18n.c:12 data/ui/nuvashalauncher-sign-in.ui:4
+msgid "Sign in"
+msgstr "로그인"
 
-msgid "Cache Cleared"
-msgstr "캐시 삭제됨"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:343
+msgid "Open in browser"
+msgstr "브라우저에서 열기"
 
-msgid "Cache Cleanup Failed"
-msgstr "캐시 정리 실패"
+#: src/nuvashalauncher-i18n.c:12 src/nuvashalauncher-sign-in-dialog.c:349
+#: src/nuvashalauncher-sign-in-dialog.c:350
+msgid "Try again"
+msgstr "다시 시도"
 
-msgid "The cache could not be cleared."
-msgstr "캐시를 삭제할 수 없습니다."
+#: src/nuvashalauncher-i18n.c:13 src/nuvashalauncher-users-popover.c:399
+#: data/ui/nuvashalauncher-offline-account.ui:4
+msgid "Add offline account"
+msgstr "오프라인 계정 추가"
 
-msgid "the versions of this loader could not be read"
-msgstr "이 모드 로더의 버전을 읽을 수 없습니다"
-msgid "Unavailable"
-msgstr "사용할 수 없음"
-msgid "No compatible Java runtime was found."
-msgstr "호환되는 Java 런타임을 찾을 수 없습니다."
+#: src/nuvashalauncher-i18n.c:13
+#: src/nuvashalauncher-instance-page-settings.c:824
+#: src/nuvashalauncher-offline-account-dialog.c:131
+#: src/nuvashalauncher-servers-page.c:268
+msgid "Name"
+msgstr "이름"
 
-msgid "Minecraft crashed"
-msgstr "Minecraft가 충돌했습니다"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-ui.c:65
+#: src/nuvashalauncher-offline-account-dialog.c:140
+msgid "Add"
+msgstr "추가"
 
-msgid "Minecraft could not start"
-msgstr "Minecraft를 시작할 수 없습니다"
+#: src/nuvashalauncher-i18n.c:14 src/nuvashalauncher-main-window-actions.c:666
+#: src/nuvashalauncher-main-window-actions.c:694
+#: data/ui/nuvashalauncher-create-instance.ui:4
+msgid "Create instance"
+msgstr "인스턴스 생성"
 
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft에 로그인이 필요합니다"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:695
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:11
+#: data/ui/nuvashalauncher-modpack-dialog.ui:4
+msgid "Download modpack"
+msgstr "모드팩 다운로드"
 
-msgid "The file cannot be renamed"
-msgstr "파일 이름을 변경할 수 없습니다"
+#: src/nuvashalauncher-i18n.c:16 src/nuvashalauncher-main-window-actions.c:87
+#: data/ui/nuvashalauncher-modpack-import.ui:4
+msgid "Import modpack"
+msgstr "모드팩 가져오기"
 
-msgid "The file cannot be deleted"
-msgstr "파일을 삭제할 수 없습니다"
+#: src/nuvashalauncher-i18n.c:17 data/ui/nuvashalauncher-modpack-import.ui:14
+msgid "Importing modpack…"
+msgstr "모드팩 가져오는 중…"
 
-msgid "The folder cannot be read"
-msgstr "폴더를 읽을 수 없습니다"
+#: src/nuvashalauncher-i18n.c:17
+#: data/ui/nuvashalauncher-modpack-browser-toolbar.ui:28
+msgid "Search modpacks"
+msgstr "모드팩 검색"
 
-msgid "The file could not be installed"
-msgstr "파일을 설치할 수 없습니다"
+#: src/nuvashalauncher-i18n.c:18 src/nuvashalauncher-ui-feedback.c:88
+msgid "Close"
+msgstr "닫기"
 
-msgid "The folder cannot be created"
-msgstr "폴더를 만들 수 없습니다"
+#: src/nuvashalauncher-i18n.c:20
+#: data/ui/nuvashalauncher-modpack-browser-states.ui:19
+msgid "No modpack matches what was asked for. Try another word."
+msgstr "요청하신 내용과 일치하는 모드팩이 없습니다. 다른 단어를 입력해 보세요."
 
-msgid "This cannot be installed"
-msgstr "이 항목은 설치할 수 없습니다"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-optional.ui:4
+msgid "Choose files"
+msgstr "파일 선택"
 
-msgid "Pick a Minecraft version first"
-msgstr "먼저 Minecraft 버전을 선택하세요"
+#: src/nuvashalauncher-i18n.c:21 data/ui/nuvashalauncher-modpack-error.ui:4
+msgid "Could not install"
+msgstr "설치를 완료할 수 없습니다."
 
-msgid "Deleting a dependency deletes the mod that depended on it"
-msgstr "종속성을 삭제하면 해당 종속 모드도 삭제됩니다"
+#: src/nuvashalauncher-i18n.c:22 data/ui/nuvashalauncher-modpack-error.ui:32
+msgid "Back"
+msgstr "뒤로"
 
-msgid "A dependent mod cannot be deleted"
-msgstr "종속 모드를 삭제할 수 없습니다"
+#: src/nuvashalauncher-i18n.c:22 src/nuvashalauncher-logs-page.c:684
+msgid "Search the log"
+msgstr "로그 검색"
 
 # UI string
-msgid "Skin"
-msgstr "Skin"
-
-# UI string
-msgid "Slim model"
-msgstr "슬림 모델"
-
-# UI string
-msgid "OK"
-msgstr "알겠습니다"
-
-# UI string
-msgid "Export skin…"
-msgstr "스킨 내보내기…"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:18
 msgid "Classic model"
 msgstr "클래식 모델"
 
 # UI string
-msgid "PNG skin texture"
-msgstr "PNG 스킨 텍스처"
+#: src/nuvashalauncher-i18n.c:23 data/ui/nuvashalauncher-skin-content.ui:19
+msgid "Slim model"
+msgstr "슬림 모델"
+
+#: src/nuvashalauncher-i18n.c:24 src/nuvashalauncher-users-popover.c:265
+msgid "Customize"
+msgstr "사용자 지정"
 
 # UI string
-msgid "Invalid skin"
-msgstr "잘못된 스킨"
-
-# UI string
-msgid "No cape"
-msgstr "망토 없음"
-
-# UI string
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:40
 msgid "Import skin…"
 msgstr "스킨 가져오기…"
 
 # UI string
+#: src/nuvashalauncher-i18n.c:25 data/ui/nuvashalauncher-skin-content.ui:41
+msgid "Export skin…"
+msgstr "스킨 내보내기…"
+
+#: src/nuvashalauncher-i18n.c:26 src/nuvashalauncher-users-popover-skin.c:103
+msgid "Minecraft Services error"
+msgstr "Minecraft Services 오류"
+
+#: src/nuvashalauncher-i18n.c:28 src/nuvashalauncher-main-window-actions.c:65
+msgid "The selected modpack file is not local."
+msgstr "The selected modpack file is not local."
+
+#: src/nuvashalauncher-i18n.c:29
+#, c-format
+msgid "The log folder could not be opened: %s"
+msgstr "The log folder could not be opened: %s"
+
+#: src/nuvashalauncher-i18n.c:44
+msgid "System default"
+msgstr "시스템 기본값"
+
+#: src/nuvashalauncher-i18n.c:45
+msgid "English"
+msgstr "English"
+
+#: src/nuvashalauncher-i18n.c:46
+msgid "Español"
+msgstr "Español"
+
+#: src/nuvashalauncher-i18n.c:47
+msgid "Español (Argentina)"
+msgstr "Español (Argentina)"
+
+#: src/nuvashalauncher-i18n.c:48
+msgid "Español (España)"
+msgstr "Español (España)"
+
+#: src/nuvashalauncher-i18n.c:49
+msgid "Português"
+msgstr "Português"
+
+#: src/nuvashalauncher-i18n.c:50
+msgid "Português (Brasil)"
+msgstr "Português (Brasil)"
+
+#: src/nuvashalauncher-i18n.c:51
+msgid "Português (Portugal)"
+msgstr "Português (Portugal)"
+
+#: src/nuvashalauncher-i18n.c:52
+msgid "Français"
+msgstr "Français"
+
+#: src/nuvashalauncher-i18n.c:53
+msgid "Deutsch"
+msgstr "Deutsch"
+
+#: src/nuvashalauncher-i18n.c:54
+msgid "Italiano"
+msgstr "Italiano"
+
+#: src/nuvashalauncher-i18n.c:55
+msgid "日本語"
+msgstr "日本語"
+
+#: src/nuvashalauncher-i18n.c:56
+msgid "한국어"
+msgstr "한국어"
+
+#: src/nuvashalauncher-i18n.c:57
+msgid "简体中文"
+msgstr "简体中文"
+
+#: src/nuvashalauncher-i18n.c:58
+msgid "繁體中文"
+msgstr "繁體中文"
+
+#: src/nuvashalauncher-i18n.c:59
+msgid "Русский"
+msgstr "Русский"
+
+#: src/nuvashalauncher-i18n.c:60
+msgid "Polski"
+msgstr "Polski"
+
+#: src/nuvashalauncher-i18n.c:61
+msgid "Čeština"
+msgstr "Čeština"
+
+#: src/nuvashalauncher-i18n.c:62
+msgid "Magyar"
+msgstr "Magyar"
+
+#: src/nuvashalauncher-i18n.c:63
+msgid "Українська"
+msgstr "Українська"
+
+#: src/nuvashalauncher-i18n.c:64
+msgid "Türkçe"
+msgstr "Türkçe"
+
+#: src/nuvashalauncher-i18n.c:65
+msgid "Nederlands"
+msgstr "Nederlands"
+
+#: src/nuvashalauncher-i18n.c:66
+msgid "Svenska"
+msgstr "Svenska"
+
+#: src/nuvashalauncher-i18n.c:67
+msgid "Dansk"
+msgstr "Dansk"
+
+#: src/nuvashalauncher-i18n.c:68
+msgid "Suomi"
+msgstr "Suomi"
+
+#: src/nuvashalauncher-i18n.c:69
+msgid "Norsk (bokmål)"
+msgstr "Norsk (bokmål)"
+
+#: src/nuvashalauncher-i18n.c:70
+msgid "Română"
+msgstr "Română"
+
+#: src/nuvashalauncher-i18n.c:71
+msgid "Tiếng Việt"
+msgstr "Tiếng Việt"
+
+#: src/nuvashalauncher-i18n.c:72
+msgid "Bahasa Indonesia"
+msgstr "Bahasa Indonesia"
+
+#: src/nuvashalauncher-i18n.c:73
+msgid "العربية"
+msgstr "العربية"
+
+#: src/nuvashalauncher-instance-manager-operations.c:133
+#, c-format
+msgid "Copy of %s"
+msgstr "%s 의 복사"
+
+#: src/nuvashalauncher-instance-manager.c:522
+#: src/nuvashalauncher-instance-manager.c:618
+msgid "the instance name is empty"
+msgstr "인스턴스 이름이 비어 있습니다."
+
+#: src/nuvashalauncher-instance-manager.c:524
+#: src/nuvashalauncher-instance-manager.c:620
+#, c-format
+msgid "Instances cannot contain %s in their name"
+msgstr "인스턴스의 이름에는%s 다음을 포함할 수 없습니다."
+
+#: src/nuvashalauncher-instance-manager.c:525
+#: src/nuvashalauncher-instance-manager.c:621
+msgid "the instance name cannot be used as a directory name"
+msgstr "인스턴스 이름을 디렉터리 이름으로 사용할 수 없습니다."
+
+#: src/nuvashalauncher-instance-page-operations.c:80
+msgid "Modpack exported"
+msgstr "모드팩을 내보냈습니다"
+
+#: src/nuvashalauncher-instance-page-operations.c:123
+msgid "The export location is not a local file"
+msgstr "내보내기 위치가 로컬 파일이 아닙니다"
+
+#: src/nuvashalauncher-instance-page-operations.c:130
+msgid "Modpack export"
+msgstr "모드팩 내보내기"
+
+#: src/nuvashalauncher-instance-page-operations.c:132
+#: src/nuvashalauncher-instance-page-operations.c:344
+msgid "Exporting modpack"
+msgstr "모드팩 내보내는 중"
+
+#: src/nuvashalauncher-instance-page-operations.c:162
+#: src/nuvashalauncher-instance-page-settings.c:989
+msgid "Export modpack"
+msgstr "모드팩 내보내기"
+
+#: src/nuvashalauncher-instance-page-operations.c:164
+#: src/nuvashalauncher-main-window-actions.c:90
+msgid "Modrinth modpacks (*.mrpack)"
+msgstr "Modrinth 모드팩 (*.mrpack)"
+
+#: src/nuvashalauncher-instance-page-operations.c:255
+msgid "Pack information"
+msgstr "팩 정보"
+
+#: src/nuvashalauncher-instance-page-operations.c:258
+msgid "Export"
+msgstr "내보내기"
+
+#: src/nuvashalauncher-instance-page-operations.c:273
+msgid "Export modpack metadata"
+msgstr "내보내기 메타데이터"
+
+#: src/nuvashalauncher-instance-page-operations.c:279
+msgid "Pack name"
+msgstr "팩 이름"
+
+#: src/nuvashalauncher-instance-page-operations.c:281
+msgid "Summary"
+msgstr "요약"
+
+#: src/nuvashalauncher-instance-page-operations.c:283
+msgid "Version ID"
+msgstr "버전 ID"
+
+#: src/nuvashalauncher-instance-page-operations.c:363
+msgid "Include transient files?"
+msgstr "임시 파일을 포함할까요?"
+
+#: src/nuvashalauncher-instance-page-operations.c:364
+msgid ""
+"Logs, crash reports, screenshots, caches and downloads are normally excluded."
+msgstr "로그, 충돌 보고서, 스크린샷, 캐시 및 다운로드는 일반적으로 제외됩니다."
+
+#: src/nuvashalauncher-instance-page-operations.c:370
+msgid "Clean export"
+msgstr "깔끔하게 내보내기"
+
+#: src/nuvashalauncher-instance-page-operations.c:371
+msgid "Include all files"
+msgstr "모든 파일 포함"
+
+#: src/nuvashalauncher-instance-page-operations.c:516
+msgid "The game is running; stop it before moving its directory"
+msgstr "게임이 실행 중입니다. 디렉터리를 이동하기 전에 게임을 중지하세요"
+
+#: src/nuvashalauncher-instance-page-operations.c:521
+msgid "Choose a Directory"
+msgstr "폴더 선택"
+
+#: src/nuvashalauncher-instance-page-operations.c:547
+#, c-format
+msgid "Duplicated to “%s”"
+msgstr "“%s”(으)로 복제됨"
+
+#: src/nuvashalauncher-instance-page-settings.c:268
+msgid ""
+"The configured Java was not detected; make sure it is still a usable java "
+"executable"
+msgstr ""
+"설정된 Java를 찾을 수 없습니다. 아직 사용할 수 있는 Java 실행 파일인지 확인하"
+"세요"
+
+#: src/nuvashalauncher-instance-page-settings.c:274
+#, c-format
+msgid "This game needs Java %d or newer, selected Java is %d"
+msgstr "이 게임에는 Java %d 이상이 필요하지만 선택된 Java는 %d입니다"
+
+#: src/nuvashalauncher-instance-page-settings.c:290
+#: src/nuvashalauncher-launcher-prepare.c:78
+msgid ""
+"Select a Java runtime with desktop support, not a headless installation."
+msgstr "헤드리스 설치 대신 데스크톱을 지원하는 Java 런타임을 선택하세요."
+
+#: src/nuvashalauncher-instance-page-settings.c:476
+msgid "The icon must be a file on this computer"
+msgstr "아이콘은 이 컴퓨터에 있는 파일이어야 합니다"
+
+#: src/nuvashalauncher-instance-page-settings.c:505
+#: src/nuvashalauncher-instance-page-settings.c:840
+msgid "Choose an Icon"
+msgstr "아이콘 선택"
+
+#: src/nuvashalauncher-instance-page-settings.c:506
+msgid "Images"
+msgstr "이미지"
+
+#: src/nuvashalauncher-instance-page-settings.c:822
+#: src/nuvashalauncher-main-window-actions.c:406
+#: src/nuvashalauncher-main-window-actions.c:661
+msgid "General"
+msgstr "일반"
+
+#: src/nuvashalauncher-instance-page-settings.c:834
+msgid "Icon"
+msgstr "아이콘"
+
+#: src/nuvashalauncher-instance-page-settings.c:862
+msgid "Change the Directory"
+msgstr "폴더 변경"
+
+#: src/nuvashalauncher-instance-page-settings.c:885
+msgid "Minecraft"
+msgstr "마인크래프트"
+
+#: src/nuvashalauncher-instance-page-settings.c:928
+msgid "Java"
+msgstr "Java"
+
+#: src/nuvashalauncher-instance-page-settings.c:964
+msgid "JVM Arguments"
+msgstr "JVM 인수"
+
+#: src/nuvashalauncher-instance-page-settings.c:980
+msgid "Actions"
+msgstr "작업"
+
+#: src/nuvashalauncher-instance-page-settings.c:982
+#: src/nuvashalauncher-worlds-page.c:650
+msgid "Duplicate"
+msgstr "복제"
+
+#: src/nuvashalauncher-instance-page-settings.c:993
+msgid "Delete instance"
+msgstr "인스턴스 삭제"
+
+#: src/nuvashalauncher-instance-page-stats.c:35
+msgid "Less than a minute"
+msgstr "1분 미만"
+
+#: src/nuvashalauncher-instance-page-stats.c:37
+#, c-format
+msgid "%llu min"
+msgstr "%llu분"
+
+#: src/nuvashalauncher-instance-page-stats.c:39
+#, c-format
+msgid "%llu h %llu min"
+msgstr "%llu시간 %llu분"
+
+#: src/nuvashalauncher-instance-page-stats.c:62
+#, c-format
+msgid "Today, %s"
+msgstr "오늘, %s"
+
+#: src/nuvashalauncher-instance-page-stats.c:120
+msgid "Not played yet"
+msgstr "아직 플레이하지 않음"
+
+#: src/nuvashalauncher-instance-page-stats.c:123
+msgid "Never"
+msgstr "없음"
+
+#: src/nuvashalauncher-instance-page-stats.c:212
+msgid "Calculating…"
+msgstr "계산 중…"
+
+#: src/nuvashalauncher-instance-page-stats.c:305
+msgid "Activity"
+msgstr "활동"
+
+#: src/nuvashalauncher-instance-page-stats.c:306
+msgid "Time played"
+msgstr "플레이한 시간"
+
+#: src/nuvashalauncher-instance-page-stats.c:307
+msgid "Last played"
+msgstr "마지막 플레이"
+
+#: src/nuvashalauncher-instance-page-stats.c:308
+msgid "Total launches"
+msgstr "총 실행 횟수"
+
+#: src/nuvashalauncher-instance-page-stats.c:309
+msgid "Total crashes"
+msgstr "총 충돌 횟수"
+
+#: src/nuvashalauncher-instance-page-stats.c:311
+msgid "Instance"
+msgstr "인스턴스"
+
+#: src/nuvashalauncher-instance-page-stats.c:312
+msgid "Total size"
+msgstr "전체 크기"
+
+#: src/nuvashalauncher-instance-page-stats.c:313
+msgid "Created on"
+msgstr "생성일"
+
+#: src/nuvashalauncher-instance-page.c:57 src/nuvashalauncher-worlds-page.c:88
+msgid "Unknown"
+msgstr "알 수 없음"
+
+#: src/nuvashalauncher-instance-page.c:377
+#: src/nuvashalauncher-instance-page.c:616 src/nuvashalauncher-logs-page.c:754
+#: src/nuvashalauncher-main-window-actions.c:456
+msgid "Logs"
+msgstr "로그"
+
+#: src/nuvashalauncher-instance-page.c:578
+#: src/nuvashalauncher-instance-page.c:588
+#: src/nuvashalauncher-main-window-actions.c:399
+msgid "Settings"
+msgstr "설정"
+
+#: src/nuvashalauncher-instance-page.c:593
+#: src/nuvashalauncher-servers-page.c:285
+msgid "Resource packs"
+msgstr "자원 팩"
+
+#: src/nuvashalauncher-instance-page.c:597
+msgid "Shader packs"
+msgstr "셰이더 팩"
+
+#: src/nuvashalauncher-instance-page.c:601
+msgid "Mods"
+msgstr "모드"
+
+#: src/nuvashalauncher-instance-page.c:605
+msgid "Worlds"
+msgstr "월드"
+
+#: src/nuvashalauncher-instance-page.c:609
+msgid "Servers"
+msgstr "서버"
+
+#: src/nuvashalauncher-instance-page.c:620
+msgid "Stats"
+msgstr "통계"
+
+#: src/nuvashalauncher-java-row-discovery.c:206
+msgid "the chosen file does not report a Java version"
+msgstr "선택한 파일이 Java 버전을 알려주지 않습니다"
+
+#: src/nuvashalauncher-java-row-discovery.c:222
+msgid "Choose Java executable"
+msgstr "Java 실행 파일 선택"
+
+#: src/nuvashalauncher-java-row.c:92 src/nuvashalauncher-loader-row.c:202
+#: src/nuvashalauncher-version-row.c:76
+msgid "Loading…"
+msgstr "로드 중…"
+
+#: src/nuvashalauncher-java-row.c:118
+#, c-format
+msgid "Custom: %s"
+msgstr "사용자 지정: %s"
+
+#: src/nuvashalauncher-java-row.c:200 src/nuvashalauncher-java-row.c:555
+msgid "Add Java runtime"
+msgstr "Java 런타임 추가"
+
+#: src/nuvashalauncher-java-row.c:508
+msgid "Java runtime"
+msgstr "Java 런타임"
+
+#: src/nuvashalauncher-launcher-finish.c:74
+msgid "A new crash report was created. Open the logs for details."
+msgstr "새 충돌 보고서가 생성되었습니다. 자세한 내용은 로그를 확인하세요."
+
+#: src/nuvashalauncher-launcher-finish.c:87
+#, c-format
+msgid "the game was stopped by signal %d"
+msgstr "%d 신호에 의해 게임이 중지되었습니다"
+
+#: src/nuvashalauncher-launcher-finish.c:90
+#, c-format
+msgid "the game exited with code %d"
+msgstr "%d 코드로 게임을 종료했습니다"
+
+#: src/nuvashalauncher-launcher-prepare.c:68
+msgid "No compatible Java runtime was found."
+msgstr "호환되는 Java 런타임을 찾을 수 없습니다."
+
+#: src/nuvashalauncher-loader-row.c:13
+msgid "the versions of this loader could not be read"
+msgstr "이 모드 로더의 버전을 읽을 수 없습니다"
+
+#: src/nuvashalauncher-loader-row.c:174
+#, c-format
+msgid "%s (unstable)"
+msgstr "%s (불안정)"
+
+#: src/nuvashalauncher-loader-row.c:230 src/nuvashalauncher-loader-row.c:259
+msgid "None"
+msgstr "없음"
+
+#: src/nuvashalauncher-loader-row.c:272 src/nuvashalauncher-loader-row.c:307
+#, c-format
+msgid "No compatible %s version found for Minecraft %s."
+msgstr "마인크래프트 %s 와 (과) 호환되는 %s 버전을 찾을 수 없습니다."
+
+#: src/nuvashalauncher-loader-row.c:451
+msgid "Pick a Minecraft version first"
+msgstr "먼저 Minecraft 버전을 선택하세요"
+
+#: src/nuvashalauncher-loader-row.c:488
+msgid "Loader"
+msgstr "모드 로더"
+
+#: src/nuvashalauncher-loader-row.c:501
+msgid "Loader version"
+msgstr "모드 로더 버전"
+
+#: src/nuvashalauncher-loader-versions.c:63
+#: src/nuvashalauncher-loader-versions.c:78
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: src/nuvashalauncher-loader-versions.c:66
+msgid "Fabric"
+msgstr "Fabric"
+
+#: src/nuvashalauncher-loader-versions.c:69
+msgid "Quilt"
+msgstr "Quilt"
+
+#: src/nuvashalauncher-loader-versions.c:72
+msgid "Forge"
+msgstr "Forge"
+
+#: src/nuvashalauncher-loader-versions.c:75
+msgid "NeoForge"
+msgstr "NeoForge"
+
+#: src/nuvashalauncher-logs-page.c:497
+#: src/nuvashalauncher-main-window-actions.c:147
+#: src/nuvashalauncher-main-window-actions.c:170
+#: src/nuvashalauncher-main-window-actions.c:191
+#: src/nuvashalauncher-main-window-actions.c:212
+#: src/nuvashalauncher-main-window-actions.c:232
+#: src/nuvashalauncher-main-window-actions.c:253
+#: src/nuvashalauncher-main-window-actions.c:287
+#: src/nuvashalauncher-ui-feedback.c:56 src/nuvashalauncher-ui-feedback.c:123
+#: src/nuvashalauncher-ui-feedback.c:151 src/nuvashalauncher-ui-feedback.c:164
+#: src/nuvashalauncher-ui-feedback.c:173
+#: src/nuvashalauncher-users-popover-skin.c:428
+#: src/nuvashalauncher-users-popover-skin.c:450
+#: src/nuvashalauncher-users-popover.c:61
+msgid "Technical details"
+msgstr "기술 세부 정보"
+
+#: src/nuvashalauncher-main-window-actions.c:301
+msgid "Clear cache?"
+msgstr "Nuvasha Launcher 캐시를 지울까요?"
+
+#: src/nuvashalauncher-main-window-actions.c:334
+msgid "Cache cleared"
+msgstr "캐시 삭제됨"
+
+#: src/nuvashalauncher-main-window-actions.c:337
+msgid "Cache cleanup failed"
+msgstr "캐시 정리 실패"
+
+#: src/nuvashalauncher-main-window-actions.c:408
+msgid "Ask for export metadata"
+msgstr "내보낼 때 메타데이터 묻기"
+
+#: src/nuvashalauncher-main-window-actions.c:410
+msgid "Show name, summary and version fields before exporting."
+msgstr "내보내기 전에 이름, 요약, 버전 입력란을 표시합니다."
+
+#: src/nuvashalauncher-main-window-actions.c:420
+msgid "Deleting a dependency deletes the mod that depended on it"
+msgstr "종속성을 삭제하면 해당 종속 모드도 삭제됩니다"
+
+#: src/nuvashalauncher-main-window-actions.c:431
+msgid "Show unstable Minecraft versions"
+msgstr "불안정한 Minecraft 버전 표시"
+
+#: src/nuvashalauncher-main-window-actions.c:445
+msgid "Show unstable mod loader versions"
+msgstr "불안정한 모드 로더 버전 표시"
+
+#: src/nuvashalauncher-main-window-actions.c:473
+#: src/nuvashalauncher-modrinth-categories.c:61
+msgid "Language"
+msgstr "언어"
+
+#: src/nuvashalauncher-main-window-actions.c:475
+msgid "Interface language"
+msgstr "인터페이스 언어"
+
+#: src/nuvashalauncher-main-window-actions.c:494
+msgid "Line limit"
+msgstr "줄 수 제한"
+
+#: src/nuvashalauncher-main-window-actions.c:500
+msgid "Cache"
+msgstr "캐시"
+
+#: src/nuvashalauncher-main-window-actions.c:502
+msgid "Cache Modrinth API responses"
+msgstr "Modrinth API 응답 캐시"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 hour"
+msgstr "1시간"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "6 hours"
+msgstr "6시간"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "1 day"
+msgstr "1일"
+
+#: src/nuvashalauncher-main-window-actions.c:512
+msgid "7 days"
+msgstr "7일"
+
+#: src/nuvashalauncher-main-window-actions.c:530
+msgid "Cache expiration"
+msgstr "캐시 만료"
+
+#: src/nuvashalauncher-main-window-actions.c:542
+#: src/nuvashalauncher-main-window-actions.c:546
+msgid "Clear cache"
+msgstr "Nuvasha Launcher 캐시 지우기"
+
+#: src/nuvashalauncher-main-window-actions.c:599
+msgid "Nuvasha Launcher"
+msgstr "Nuvasha Launcher"
+
+#: src/nuvashalauncher-main-window-actions.c:607
+msgid "translator-credits"
+msgstr "Flia"
+
+#: src/nuvashalauncher-main-window-actions.c:609
+msgid "Minecraft launcher for Linux"
+msgstr "Linux용 Minecraft 런처"
+
+#: src/nuvashalauncher-main-window-actions.c:622
+msgid "Services & ecosystem"
+msgstr "서비스 및 생태계"
+
+#: src/nuvashalauncher-main-window-actions.c:626
+msgid "Minecraft disclaimer"
+msgstr "Minecraft 면책 조항"
+
+#: src/nuvashalauncher-main-window-actions.c:629
+msgid ""
+"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG "
+"OR MICROSOFT.\n"
+"\n"
+"Minecraft is a trademark of Mojang AB. The launcher is developed "
+"independently and is not affiliated with Mojang Studios or Microsoft."
+msgstr ""
+"공식 MINECRAFT 제품이 아닙니다. MOJANG 또는 MICROSOFT의 승인을 받지 않았으며 "
+"이들과 관련이 없습니다.\n"
+"\n"
+"Minecraft는 Mojang AB의 상표입니다. 이 런처는 독립적으로 개발되었으며 Mojang "
+"Studios 또는 Microsoft와 제휴하지 않았습니다."
+
+#: src/nuvashalauncher-main-window-actions.c:634
+msgid "Modrinth & mod loaders"
+msgstr "Modrinth 및 모드 로더"
+
+#: src/nuvashalauncher-main-window-actions.c:637
+msgid ""
+"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and "
+"created by their respective authors.\n"
+"\n"
+"Mod loaders are developed independently by the Fabric, Quilt, Forge, and "
+"NeoForge projects."
+msgstr ""
+"모드팩, 모드, 리소스 팩 및 셰이더는 Modrinth에서 호스팅되며 각 작성자가 제작"
+"했습니다.\n"
+"\n"
+"모드 로더는 Fabric, Quilt, Forge 및 NeoForge 프로젝트에서 독립적으로 개발되었"
+"습니다."
+
+#: src/nuvashalauncher-main-window-actions.c:642
+msgid "AppStream metadata"
+msgstr "AppStream 메타데이터"
+
+#: src/nuvashalauncher-main-window-actions.c:645
+msgid ""
+"The AppStream metadata (descriptions, summaries, and release notes) is "
+"released under the Creative Commons CC0 1.0 Universal Public Domain "
+"Dedication."
+msgstr ""
+"AppStream 메타데이터(설명, 요약 및 릴리스 정보)는 Creative Commons CC0 1.0 "
+"Universal Public Domain Dedication에 따라 배포됩니다."
+
+#: src/nuvashalauncher-main-window-actions.c:647
+#: src/nuvashalauncher-main-window-actions.c:712
+msgid "About Nuvasha Launcher"
+msgstr "Nuvasha Launcher 소개"
+
+#: src/nuvashalauncher-main-window-actions.c:664
+#: src/nuvashalauncher-main-window-actions.c:711
+msgid "Keyboard shortcuts"
+msgstr "키보드 단축키"
+
+#: src/nuvashalauncher-main-window-actions.c:668
+#: src/nuvashalauncher-main-window-actions.c:708
+msgid "Preferences"
+msgstr "설정"
+
+#: src/nuvashalauncher-main-window-actions.c:670
+msgid "Quit"
+msgstr "종료"
+
+#: src/nuvashalauncher-main-window-actions.c:672
+msgid "Delete selected"
+msgstr "선택 항목 삭제"
+
+#: src/nuvashalauncher-main-window-actions.c:696
+msgid "Import modpack…"
+msgstr "모드팩 가져오기…"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:113
+msgid "Stop"
+msgstr "중지"
+
+#: src/nuvashalauncher-main-window-instance-row.c:30
+#: src/nuvashalauncher-main-window-instance-row.c:35
+#: src/nuvashalauncher-main-window-instance-row.c:362
+#: src/nuvashalauncher-main-window-instance-row.c:393
+#: src/nuvashalauncher-servers-page.c:453 src/nuvashalauncher-worlds-page.c:635
+msgid "Play"
+msgstr "플레이"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+#, c-format
+msgid "Stop %s?"
+msgstr "멈출까요%s?"
+
+#: src/nuvashalauncher-main-window-instance-row.c:105
+msgid "the game"
+msgstr "게임"
+
+#: src/nuvashalauncher-main-window-instance-row.c:108
+msgid ""
+"The game is running and will close. Progress since the last save is lost."
+msgstr ""
+"게임이 실행 중이며 곧 종료됩니다. 마지막 저장 이후의 진행 상황은 사라집니다."
+
+#: src/nuvashalauncher-main-window-instance-row.c:112
+msgid "Keep playing"
+msgstr "계속 플레이"
+
+#: src/nuvashalauncher-main-window-ui.c:134
+msgid "Accounts"
+msgstr "계정"
+
+#: src/nuvashalauncher-main-window-ui.c:139
+msgid "Main menu"
+msgstr "Application menu"
+
+#: src/nuvashalauncher-main-window-ui.c:147
+msgid "No instances yet"
+msgstr "아직 인스턴스가 없습니다"
+
+#: src/nuvashalauncher-main-window-ui.c:149
+msgid "Create an instance to start playing."
+msgstr "플레이를 시작하려면 인스턴스를 생성하세요."
+
+#: src/nuvashalauncher-main-window.c:147
+msgid "Minecraft crashed"
+msgstr "Minecraft가 충돌했습니다"
+
+#: src/nuvashalauncher-main-window.c:151
+msgid "Minecraft could not start"
+msgstr "Minecraft를 시작할 수 없습니다"
+
+#: src/nuvashalauncher-main-window.c:155
+msgid "Minecraft needs a sign-in"
+msgstr "Minecraft에 로그인이 필요합니다"
+
+# Minecraft Services API errors
+#: src/nuvashalauncher-minecraft-services.c:104
+#, c-format
+msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
+msgstr "Minecraft Services가 요청을 거부했습니다 (HTTP %u)%s%s"
+
+#: src/nuvashalauncher-modpack-export.c:184
+#: src/nuvashalauncher-modpack-export.c:523
+#: src/nuvashalauncher-modpack-export.c:593
+msgid "Writing archive"
+msgstr "압축 파일 작성 중"
+
+#: src/nuvashalauncher-modpack-export.c:631
+msgid "Export complete"
+msgstr "내보내기 완료"
+
+#: src/nuvashalauncher-modpack-install.c:483
+#, c-format
+msgid "the loader cannot be resolved: %s"
+msgstr "모드 로더를 확인할 수 없습니다: %s"
+
+#: src/nuvashalauncher-modrinth-categories.c:35
+#: src/nuvashalauncher-worlds-page.c:84
+msgid "Adventure"
+msgstr "모험"
+
+#: src/nuvashalauncher-modrinth-categories.c:36
+msgid "Atmosphere"
+msgstr "분위기"
+
+#: src/nuvashalauncher-modrinth-categories.c:37
+msgid "Audio"
+msgstr "오디오"
+
+#: src/nuvashalauncher-modrinth-categories.c:38
+msgid "Blocks"
+msgstr "블록"
+
+#: src/nuvashalauncher-modrinth-categories.c:39
+msgid "Bloom"
+msgstr "빛 번짐"
+
+#: src/nuvashalauncher-modrinth-categories.c:40
+msgid "Cartoon"
+msgstr "만화풍"
+
+#: src/nuvashalauncher-modrinth-categories.c:41
+msgid "Categories"
+msgstr "카테고리"
+
+#: src/nuvashalauncher-modrinth-categories.c:42
+msgid "Colored lighting"
+msgstr "색상 조명"
+
+#: src/nuvashalauncher-modrinth-categories.c:43
+msgid "Combat"
+msgstr "전투"
+
+#: src/nuvashalauncher-modrinth-categories.c:44
+msgid "Core shaders"
+msgstr "코어 셰이더"
+
+#: src/nuvashalauncher-modrinth-categories.c:45
+msgid "Cursed"
+msgstr "기괴함"
+
+#: src/nuvashalauncher-modrinth-categories.c:46
+msgid "Decoration"
+msgstr "장식"
+
+#: src/nuvashalauncher-modrinth-categories.c:47
+msgid "Economy"
+msgstr "경제"
+
+#: src/nuvashalauncher-modrinth-categories.c:48
+msgid "Entities"
+msgstr "엔티티"
+
+#: src/nuvashalauncher-modrinth-categories.c:49
+msgid "Environment"
+msgstr "환경"
+
+#: src/nuvashalauncher-modrinth-categories.c:50
+msgid "Equipment"
+msgstr "장비"
+
+#: src/nuvashalauncher-modrinth-categories.c:51
+msgid "Fantasy"
+msgstr "판타지"
+
+#: src/nuvashalauncher-modrinth-categories.c:52
+msgid "Features"
+msgstr "기능"
+
+#: src/nuvashalauncher-modrinth-categories.c:53
+msgid "Foliage"
+msgstr "초목"
+
+#: src/nuvashalauncher-modrinth-categories.c:54
+msgid "Fonts"
+msgstr "글꼴"
+
+#: src/nuvashalauncher-modrinth-categories.c:55
+msgid "Food"
+msgstr "음식"
+
+#: src/nuvashalauncher-modrinth-categories.c:56
+msgid "Game mechanics"
+msgstr "게임 시스템"
+
+#: src/nuvashalauncher-modrinth-categories.c:57
+msgid "Interface"
+msgstr "인터페이스"
+
+#: src/nuvashalauncher-modrinth-categories.c:58
+msgid "High"
+msgstr "높음"
+
+#: src/nuvashalauncher-modrinth-categories.c:59
+msgid "Items"
+msgstr "아이템"
+
+#: src/nuvashalauncher-modrinth-categories.c:60
+msgid "Library"
+msgstr "라이브러리"
+
+#: src/nuvashalauncher-modrinth-categories.c:62
+msgid "Low"
+msgstr "낮음"
+
+#: src/nuvashalauncher-modrinth-categories.c:63
+msgid "Magic"
+msgstr "마법"
+
+#: src/nuvashalauncher-modrinth-categories.c:64
+msgid "Management"
+msgstr "관리"
+
+#: src/nuvashalauncher-modrinth-categories.c:65
+msgid "Medium"
+msgstr "보통"
+
+#: src/nuvashalauncher-modrinth-categories.c:66
+msgid "Minigame"
+msgstr "미니게임"
+
+#: src/nuvashalauncher-modrinth-categories.c:67
+msgid "Mobs"
+msgstr "몹"
+
+#: src/nuvashalauncher-modrinth-categories.c:68
+msgid "Modded"
+msgstr "모드 지원"
+
+#: src/nuvashalauncher-modrinth-categories.c:69
+msgid "Models"
+msgstr "모델"
+
+#: src/nuvashalauncher-modrinth-categories.c:70
+msgid "Optimization"
+msgstr "최적화"
+
+#: src/nuvashalauncher-modrinth-categories.c:71
+msgid "Path tracing"
+msgstr "패스 트레이싱"
+
+#: src/nuvashalauncher-modrinth-categories.c:72
+msgid "Performance impact"
+msgstr "성능 영향"
+
+#: src/nuvashalauncher-modrinth-categories.c:73
+msgid "Potato"
+msgstr "초저사양용"
+
+#: src/nuvashalauncher-modrinth-categories.c:74
+msgid "Realistic"
+msgstr "사실적"
+
+#: src/nuvashalauncher-modrinth-categories.c:75
+msgid "Reflections"
+msgstr "반사"
+
+#: src/nuvashalauncher-modrinth-categories.c:76
+msgid "Resolutions"
+msgstr "해상도"
+
+#: src/nuvashalauncher-modrinth-categories.c:77
+msgid "Screenshot"
+msgstr "스크린샷"
+
+#: src/nuvashalauncher-modrinth-categories.c:78
+msgid "Semi-realistic"
+msgstr "반사실적"
+
+#: src/nuvashalauncher-modrinth-categories.c:79
+msgid "Shadows"
+msgstr "그림자"
+
+#: src/nuvashalauncher-modrinth-categories.c:80
+msgid "Simplistic"
+msgstr "단순함"
+
+#: src/nuvashalauncher-modrinth-categories.c:81
+msgid "Social"
+msgstr "소셜"
+
+#: src/nuvashalauncher-modrinth-categories.c:82
+msgid "Storage"
+msgstr "보관"
+
+#: src/nuvashalauncher-modrinth-categories.c:83
+msgid "Technology"
+msgstr "기술"
+
+#: src/nuvashalauncher-modrinth-categories.c:84
+msgid "Themed"
+msgstr "테마형"
+
+#: src/nuvashalauncher-modrinth-categories.c:85
+msgid "Transportation"
+msgstr "운송"
+
+#: src/nuvashalauncher-modrinth-categories.c:86
+msgid "Tweaks"
+msgstr "개선"
+
+#: src/nuvashalauncher-modrinth-categories.c:87
+msgid "Utility"
+msgstr "편의 기능"
+
+#: src/nuvashalauncher-modrinth-categories.c:88
+msgid "Vanilla-like"
+msgstr "바닐라풍"
+
+#: src/nuvashalauncher-modrinth-categories.c:89
+msgid "World generation"
+msgstr "세계 생성"
+
+#: src/nuvashalauncher-modrinth-requests.c:111
+msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
+msgstr ""
+"모드린스는 누바샤에게 속도를 늦춰 달라고 요청하고 있다. 요청이 너무 많기 때문"
+"이다."
+
+#: src/nuvashalauncher-modrinth-requests.c:178
+#: src/nuvashalauncher-modrinth-requests.c:237
+msgid "Modrinth does not know this file"
+msgstr "Modrinth는 이 파일을 인식하지 못합니다."
+
+#: src/nuvashalauncher-modrinth.c:674
+#, c-format
+msgid "No compatible version found for Minecraft %s and %s."
+msgstr "마인크래프트 %s 및 %s 와 (과) 호환되는 버전을 찾을 수 없습니다."
+
+#: src/nuvashalauncher-offline-account-dialog.c:81
+#: src/nuvashalauncher-offline-account-dialog.c:111
+msgid "An offline account with this name already exists."
+msgstr "이 이름의 오프라인 계정이 이미 있습니다."
+
+#: src/nuvashalauncher-servers-page.c:248
+msgid "Edit server"
+msgstr "서버 편집"
+
+#: src/nuvashalauncher-servers-page.c:248
+#: src/nuvashalauncher-servers-page.c:663
+#: src/nuvashalauncher-servers-page.c:705
+msgid "Add server"
+msgstr "서버 추가"
+
+#: src/nuvashalauncher-servers-page.c:259
+msgid "Save"
+msgstr "저장"
+
+#: src/nuvashalauncher-servers-page.c:273
+msgid "Address"
+msgstr "주소"
+
+#: src/nuvashalauncher-servers-page.c:278
+msgid "Ask to download"
+msgstr "다운로드할지 묻기"
+
+#: src/nuvashalauncher-servers-page.c:279
+msgid "Always download"
+msgstr "항상 다운로드"
+
+#: src/nuvashalauncher-servers-page.c:280
+msgid "Never download"
+msgstr "다운로드 안 함"
+
+#: src/nuvashalauncher-servers-page.c:367
+#, c-format
+msgid "Remove server “%s”?"
+msgstr "“%s” 서버를 제거할까요?"
+
+#: src/nuvashalauncher-servers-page.c:369
+msgid "Remove server"
+msgstr "서버 제거"
+
+#: src/nuvashalauncher-servers-page.c:455
+msgid "Move up"
+msgstr "위로 이동"
+
+#: src/nuvashalauncher-servers-page.c:460
+msgid "Move down"
+msgstr "아래로 이동"
+
+#: src/nuvashalauncher-servers-page.c:466
+msgid "Edit"
+msgstr "편집"
+
+#: src/nuvashalauncher-servers-page.c:671
+#: src/nuvashalauncher-worlds-page.c:1204
+msgid "Refresh"
+msgstr "새로 고침"
+
+#: src/nuvashalauncher-servers-page.c:702
+msgid "No servers"
+msgstr "서버 없음"
+
+#: src/nuvashalauncher-servers-page.c:703
+msgid "Servers added here are saved to servers.dat for this instance."
+msgstr "여기에 추가한 서버는 이 인스턴스의 servers.dat에 저장됩니다."
+
+#: src/nuvashalauncher-sign-in-dialog.c:14
+msgid "Asking Microsoft for a code…"
+msgstr "microsoft에 코드 요청…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:15
+msgid "Waiting for sign-in in browser…"
+msgstr "브라우저에서 로그인을 기다리는 중…"
+
+#: src/nuvashalauncher-sign-in-dialog.c:138
+msgid "Could not open the browser. Open the displayed address manually."
+msgstr "브라우저를 열지 못했습니다. 표시된 주소를 직접 여세요."
+
+#: src/nuvashalauncher-sign-in-dialog.c:154
+msgid ""
+"Microsoft returned an unsafe sign-in address. Update the launcher before "
+"trying again."
+msgstr ""
+"Microsoft가 안전하지 않은 로그인 주소를 반환했습니다. 런처를 업데이트한 뒤 다"
+"시 시도하세요."
+
+#: src/nuvashalauncher-sign-in-dialog.c:301
+msgid "Open the page in your browser, then enter this code:"
+msgstr "브라우저에서 페이지를 연 다음 다음 코드를 입력하세요."
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin-library.c:35
+#: src/nuvashalauncher-users-popover-skin.c:548
+#: src/nuvashalauncher-users-popover-skin.c:1009
+msgid "Skin"
+msgstr "Skin"
+
+#: src/nuvashalauncher-users-popover-skin.c:194
+#: src/nuvashalauncher-users-popover-skin.c:206
+#: src/nuvashalauncher-users-popover-skin.c:256
+msgid "Skin images must be 64x64 or 64x32 PNG files"
+msgstr "스킨 이미지는 64x64 또는 64x32 PNG 파일이어야 합니다"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:254
+msgid "Invalid skin"
+msgstr "잘못된 스킨"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:261
+msgid "OK"
+msgstr "알겠습니다"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:281
+msgid "PNG skin texture"
+msgstr "PNG 스킨 텍스처"
+
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:368
 msgid "Delete skin?"
 msgstr "스킨을 삭제하시겠습니까?"
 
 # UI string
+#: src/nuvashalauncher-users-popover-skin.c:369
 msgid "This skin will be removed from the skin library."
 msgstr "이 스킨은 스킨 라이브러리에서 삭제됩니다."
 
-msgid "Skin images must be 64x64 or 64x32 PNG files"
-msgstr "스킨 이미지는 64x64 또는 64x32 PNG 파일이어야 합니다"
+# UI string
+#: src/nuvashalauncher-users-popover-skin.c:904
+msgid "No cape"
+msgstr "망토 없음"
 
-msgid "Bahasa Indonesia"
-msgstr "Bahasa Indonesia"
-
-msgid "Browse Modpacks"
-msgstr "모드팩 둘러보기"
-
-msgid "Choose Files"
-msgstr "파일 선택"
-
-msgid "Clear Nuvasha Launcher Cache"
-msgstr "Nuvasha Launcher 캐시 지우기"
-
-msgid "Clear Nuvasha Launcher Cache?"
-msgstr "Nuvasha Launcher 캐시를 지울까요?"
-
-msgid ""
-"Conflicts\n"
-msgstr ""
-"갈등\n"
-
-msgid "Content"
-msgstr "내용"
-
-msgid "Could not install"
-msgstr "설치를 완료할 수 없습니다."
-
-msgid "Could not install the modpack"
-msgstr "모드팩을 설치할 수 없습니다."
-
-msgid "Could not load categories"
-msgstr "카테고리를 불러올 수 없습니다"
-
-msgid "Could not search Modrinth"
-msgstr "Modrinth를 검색할 수 없습니다."
-
-msgid "Could not understand the answer"
-msgstr "답변을 이해할 수 없었습니다"
-
-msgid "Dansk"
-msgstr "Dansk"
-
-msgid "Deutsch"
-msgstr "Deutsch"
-
-msgid "Disable"
-msgstr "비활성화"
-
-msgid "Dismiss"
-msgstr "닫기"
-
-msgid "Enable"
-msgstr "활성화"
-
-msgid "English"
-msgstr "English"
-
-msgid "Español (Argentina)"
-msgstr "Español (Argentina)"
-
-msgid "Español (España)"
-msgstr "Español (España)"
-
-msgid "Fabric"
-msgstr "Fabric"
-
-msgid "Forge"
-msgstr "Forge"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "Images"
-msgstr "이미지"
-
-msgid "Installing"
-msgstr "설치"
-
-msgid "Instances cannot contain %s in their name"
-msgstr "인스턴스의 이름에는%s 다음을 포함할 수 없습니다."
-
-msgid "It carries files that Nuvasha Launcher does not recognize."
-msgstr "이 파일은 Nuvasha Launcher가 인식하지 못하는 파일입니다."
-
-msgid "Italiano"
-msgstr "Italiano"
-
-msgid "Magyar"
-msgstr "Magyar"
-
-msgid "Microsoft"
-msgstr "Microsoft"
-
-msgid "Microsoft returned an unsafe verification address"
-msgstr "마이크로소프트가 안전하지 않은 확인 주소를 반환했습니다."
-
-msgid "Microsoft would not give a code to sign in with"
-msgstr "마이크로소프트는 로그인할 수 있는 코드를 제공하지 않았습니다."
-
-msgid "Microsoft · Needs sign-in"
-msgstr "Microsoft · 로그인이 필요합니다"
-
-msgid "Modrinth does not know this file"
-msgstr "Modrinth는 이 파일을 인식하지 못합니다."
-
-msgid "Modrinth is asking Nuvasha Launcher to slow down, too many requests"
-msgstr "모드린스는 누바샤에게 속도를 늦춰 달라고 요청하고 있다. 요청이 너무 많기 때문이다."
-
-msgid "Nederlands"
-msgstr "Nederlands"
-
-msgid "NeoForge"
-msgstr "NeoForge"
-
-msgid "No modpack matches what was asked for. Try another word"
-msgstr "요청하신 내용과 일치하는 모드팩이 없습니다. 다른 단어를 입력해 보세요."
-
-msgid "None"
-msgstr "없음"
-
-msgid "Norsk (bokmål)"
-msgstr "Norsk (bokmål)"
-
-
-msgid "Nuvasha Launcher cache data was cleared successfully."
-msgstr "Nuvasha Launcher 캐시 데이터가 성공적으로 삭제되었습니다."
-
-msgid "Offline"
-msgstr "오프라인"
-
-msgid "Pick a Minecraft version from the list."
-msgstr "목록에서 마인크래프트 버전을 하나 선택하세요."
-
-msgid "Pick a version of the loader, or pick another loader."
-msgstr "로더 버전을 선택하거나 다른 로더를 선택하세요."
-
-msgid "Polski"
-msgstr "Polski"
-
-msgid "Português (Brasil)"
-msgstr "Português (Brasil)"
-
-msgid "Português (Portugal)"
-msgstr "Português (Portugal)"
-
-msgid "Quilt"
-msgstr "Quilt"
-
+#: src/nuvashalauncher-users-popover.c:178
+#, c-format
 msgid "Remove %s?"
 msgstr "제거할까요%s?"
 
-msgid "Română"
-msgstr "Română"
-
-msgid "Search Modrinth and install a modpack"
-msgstr "Modrinth에서 검색하여 모드팩을 설치하세요"
-
-msgid "Stop %s?"
-msgstr "멈출까요%s?"
-
-msgid "Suomi"
-msgstr "Suomi"
-
-msgid "Svenska"
-msgstr "Svenska"
-
-msgid "System default"
-msgstr "시스템 기본값"
-
-msgid "The account is removed from Nuvasha Launcher and its saved sign-in is forgotten. The game itself is not touched."
-msgstr "해당 계정은 Nuvasha Launcher에서 삭제되며, 저장된 로그인 정보도 삭제됩니다. 게임 자체에는 아무런 영향이 없습니다."
-
-msgid "The game is running and will close. Progress since the last save is lost."
-msgstr "게임이 실행 중이며 곧 종료됩니다. 마지막 저장 이후의 진행 상황은 사라집니다."
-
-msgid "This project publishes no pack file Nuvasha Launcher can install."
-msgstr "이 프로젝트는 Nuvasha Launcher가 설치할 수 있는 팩 파일을 제공하지 않습니다."
-
-msgid "This version has no pack file"
-msgstr "이 버전에는 팩 파일이 포함되어 있지 않습니다."
-
-msgid "Tiếng Việt"
-msgstr "Tiếng Việt"
-
-msgid "Türkçe"
-msgstr "Türkçe"
-
-msgid "Vanilla"
-msgstr "Vanilla"
-
-msgid "Xbox Live is not available for the country this account is registered in"
-msgstr "이 계정이 등록된 국가에서는 Xbox Live를 이용할 수 없습니다."
-
-msgid "the game"
-msgstr "게임"
-
-msgid "the instance name cannot be used as a directory name"
-msgstr "인스턴스 이름을 디렉터리 이름으로 사용할 수 없습니다."
-
-msgid "the instance name is empty"
-msgstr "인스턴스 이름이 비어 있습니다."
-
-msgid "the sign-in did not finish"
-msgstr "로그인이 완료되지 않았습니다"
-
-msgid "this Microsoft account has no Xbox profile behind it yet: sign in to xbox.com once with it, then sign in here again"
-msgstr "이 Microsoft 계정에는 아직 연결된 Xbox 프로필이 없습니다. 해당 계정으로 xbox.com에 한 번 로그인한 다음, 이곳에서 다시 로그인해 주세요."
-
+#: src/nuvashalauncher-users-popover.c:178
 msgid "this account"
 msgstr "이 계정"
 
-msgid "this account needs an adult to verify it before it can play, which is what South Korean accounts have to do"
-msgstr "이 계정은 게임을 시작하기 전에 성인의 인증을 받아야 하는데, 이는 한국 계정의 경우 반드시 거쳐야 하는 절차입니다."
-
-msgid "this is a child account: it has to be added to a Microsoft family by an adult before it can play"
-msgstr "이 계정은 자녀 계정입니다. 게임을 하려면 먼저 성인이 이 계정을 Microsoft 가족 그룹에 추가해야 합니다."
-
-msgid "Čeština"
-msgstr "Čeština"
-
-msgid "Русский"
-msgstr "Русский"
-
-msgid "Українська"
-msgstr "Українська"
-
-msgid "العربية"
-msgstr "العربية"
-
-msgid "日本語"
-msgstr "日本語"
-
-msgid "简体中文"
-msgstr "简体中文"
-
-msgid "繁體中文"
-msgstr "繁體中文"
-
-msgid "한국어"
-msgstr "한국어"
-
-# Minecraft Services API errors
-msgid "Minecraft Services rejected the request (HTTP %u)%s%s"
-msgstr "Minecraft Services가 요청을 거부했습니다 (HTTP %u)%s%s"
-
-msgid "Minecraft Services error"
-msgstr "Minecraft Services 오류"
-
-msgid "Application menu"
-msgstr "Application menu"
-
-msgid "The folder could not be opened: %s"
-msgstr "The folder could not be opened: %s"
-
-msgid "The selected modpack file is not local."
-msgstr "The selected modpack file is not local."
-
-msgid "The log folder could not be opened: %s"
-msgstr "The log folder could not be opened: %s"
-
-msgid "The duplicate file \"%s\" could not be removed: %s"
-msgstr "The duplicate file \"%s\" could not be removed: %s"
-
-msgid "The replaced file \"%s\" could not be removed"
-msgstr "The replaced file \"%s\" could not be removed"
-
-msgid "Could not copy the instance icon"
-msgstr "Could not copy the instance icon"
-
-msgid "Unknown error"
-msgstr "Unknown error"
-msgid "The sign-in request expired. Start again to get a new code."
-msgstr "The sign-in request expired. Start again to get a new code."
-
-msgid "Microsoft could not be reached. Check your connection and try again."
-msgstr "Microsoft could not be reached. Check your connection and try again."
-
-msgid "Microsoft sign-in failed. Try again."
-msgstr "Microsoft sign-in failed. Try again."
-
-msgid "Open in browser"
-msgstr "브라우저에서 열기"
-
-#: src/nuvashalauncher-main-window.c
-msgid "%u/%u selected"
-msgstr "%u/%u개 선택됨"
-
-#: src/nuvashalauncher-main-window.c
-msgid "The following instances will be deleted:\n%s"
-msgstr "다음 인스턴스가 삭제됩니다:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Delete selected %s?"
-msgstr "Delete selected %s?"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s"
-msgstr "Selected %s:\n%s"
-
-#: src/nuvashalauncher-content-page.c
-msgid "Selected %s:\n%s\n\nDependencies:\n%s"
-msgstr "Selected %s:\n%s\n\nDependencies:\n%s"
-
-#: src/nuvashalauncher-main-window-ui.c
-msgid "Edit mode"
-msgstr "편집 모드"
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Fetching updates"
-msgstr "업데이트 가져오는 중"
-
-
-#: src/nuvashalauncher-content-page-ui.c
-msgid "Progress"
-msgstr "진행률"
-
-msgid "Enter Edit Mode"
-msgstr "편집 모드 들어가기"
-
-msgid "Delete Selected"
-msgstr "선택 항목 삭제"
-
-msgid "A new crash report was created. Open the logs for details."
-msgstr "새 충돌 보고서가 생성되었습니다. 자세한 내용은 로그를 확인하세요."
-
-msgid "Access was denied. Check the folder permissions."
-msgstr "접근이 거부되었습니다. 폴더 권한을 확인하세요."
-
-msgid "An offline account with this name already exists."
-msgstr "이 이름의 오프라인 계정이 이미 있습니다."
-
-msgid "Choose another instance name or directory."
-msgstr "다른 인스턴스 이름이나 폴더를 선택하세요."
-
-msgid "Could not install this mod loader. Choose another version or inspect Technical Details."
-msgstr "이 모드 로더를 설치하지 못했습니다. 다른 버전을 선택하거나 기술 세부 정보를 확인하세요."
-
-msgid "Could not load project details. Try again."
-msgstr "프로젝트 세부 정보를 불러오지 못했습니다. 다시 시도하세요."
-
-msgid "Could not load versions. Try again."
-msgstr "버전을 불러오지 못했습니다. 다시 시도하세요."
-
-msgid "Could not open the browser. Open the displayed address manually."
-msgstr "브라우저를 열지 못했습니다. 표시된 주소를 직접 여세요."
-
-msgid "Could not read or write files. Check the location, permissions, and free disk space."
-msgstr "파일을 읽거나 쓰지 못했습니다. 위치, 권한, 여유 공간을 확인하세요."
-
-msgid "Could not save the account. Check your system keyring and file permissions."
-msgstr "계정을 저장하지 못했습니다. 시스템 키링과 파일 권한을 확인하세요."
-
-msgid "Microsoft returned an unsafe sign-in address. Update the launcher before trying again."
-msgstr "Microsoft가 안전하지 않은 로그인 주소를 반환했습니다. 런처를 업데이트한 뒤 다시 시도하세요."
-
-msgid "Microsoft sign-in is not configured in this build. Update the launcher."
-msgstr "이 빌드에는 Microsoft 로그인이 구성되지 않았습니다. 런처를 업데이트하세요."
-
-msgid "Select a Java runtime with desktop support, not a headless installation."
-msgstr "헤드리스 설치 대신 데스크톱을 지원하는 Java 런타임을 선택하세요."
-
-msgid "Set up a Minecraft: Java Edition profile on minecraft.net, then try again."
-msgstr "minecraft.net에서 Minecraft: Java Edition 프로필을 만든 뒤 다시 시도하세요."
-
-msgid "Sign-in was declined. Start again if you want to sign in."
-msgstr "로그인이 거부되었습니다. 로그인하려면 처음부터 다시 시작하세요."
-
-msgid "Technical Details"
-msgstr "기술 세부 정보"
-
-msgid "The Java executable could not be used. Select a working Java runtime."
-msgstr "Java 실행 파일을 사용하지 못했습니다. 정상 작동하는 Java 런타임을 선택하세요."
-
-msgid "The archive is invalid or unsafe. Download it again from a trusted source."
-msgstr "압축 파일이 잘못되었거나 안전하지 않습니다. 신뢰할 수 있는 출처에서 다시 다운로드하세요."
-
-msgid "The connection failed. Check your internet connection and try again."
-msgstr "연결에 실패했습니다. 인터넷 연결을 확인하고 다시 시도하세요."
-
-msgid "The destination already exists. Choose another location."
-msgstr "대상이 이미 있습니다. 다른 위치를 선택하세요."
-
-msgid "The downloaded file failed verification. It was not installed. Try downloading it again."
-msgstr "다운로드한 파일의 검증에 실패하여 설치하지 않았습니다. 다시 다운로드하세요."
-
-msgid "The file or folder was not found. Check its location."
-msgstr "파일이나 폴더를 찾지 못했습니다. 위치를 확인하세요."
-
-msgid "The game metadata is invalid or unavailable. Refresh the version list and try again."
-msgstr "게임 메타데이터가 잘못되었거나 사용할 수 없습니다. 버전 목록을 새로고침하고 다시 시도하세요."
-
-msgid "The operation failed. See Technical Details for more information."
-msgstr "작업에 실패했습니다. 기술 세부 정보를 확인하세요."
-
-msgid "The requested file, project, or compatible version was not found."
-msgstr "요청한 파일, 프로젝트 또는 호환 버전을 찾지 못했습니다."
-
-msgid "The service rejected the request. Try again later."
-msgstr "서비스가 요청을 거부했습니다. 나중에 다시 시도하세요."
-
-msgid "The service returned an invalid response. Try again later."
-msgstr "서비스가 잘못된 응답을 반환했습니다. 나중에 다시 시도하세요."
-
-msgid "There is not enough free disk space."
-msgstr "디스크 여유 공간이 부족합니다."
-
-msgid "This account does not own Minecraft: Java Edition."
-msgstr "이 계정은 Minecraft: Java Edition을 소유하지 않습니다."
-
-msgid "This instance is no longer available. Refresh the instance list."
-msgstr "이 인스턴스를 더 이상 사용할 수 없습니다. 인스턴스 목록을 새로고침하세요."
-
-msgid "Too many requests. Wait a moment and try again."
-msgstr "요청이 너무 많습니다. 잠시 기다렸다가 다시 시도하세요."
-
-msgid "Your instance settings are invalid. Check the selected version and JVM arguments."
-msgstr "인스턴스 설정이 잘못되었습니다. 선택한 버전과 JVM 인수를 확인하세요."
-
-msgid "Your saved sign-in is no longer valid. Sign in again."
-msgstr "저장된 로그인 정보가 더 이상 유효하지 않습니다. 다시 로그인하세요."
-
-msgid "Minecraft launcher for Linux"
-msgstr "Linux용 Minecraft 런처"
-
-msgid "Services & Ecosystem"
-msgstr "서비스 및 생태계"
-
-msgid "Minecraft Disclaimer"
-msgstr "Minecraft 면책 조항"
-
+#: src/nuvashalauncher-users-popover.c:181
 msgid ""
-"NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.\n"
-"\n"
-"Minecraft is a trademark of Mojang AB. The launcher is developed independently and is not affiliated with Mojang Studios or Microsoft."
+"The account is removed from Nuvasha Launcher and its saved sign-in is "
+"forgotten. The game itself is not touched."
 msgstr ""
-"공식 MINECRAFT 제품이 아닙니다. MOJANG 또는 MICROSOFT의 승인을 받지 않았으며 이들과 관련이 없습니다.\n"
-"\n"
-"Minecraft는 Mojang AB의 상표입니다. 이 런처는 독립적으로 개발되었으며 Mojang Studios 또는 Microsoft와 제휴하지 않았습니다."
+"해당 계정은 Nuvasha Launcher에서 삭제되며, 저장된 로그인 정보도 삭제됩니다. "
+"게임 자체에는 아무런 영향이 없습니다."
 
-msgid "Modrinth & Mod Loaders"
-msgstr "Modrinth 및 모드 로더"
+#: src/nuvashalauncher-users-popover.c:186
+msgid "Remove"
+msgstr "제거"
 
-msgid ""
-"Modpacks, mods, resource packs, and shaders are hosted by Modrinth and created by their respective authors.\n"
-"\n"
-"Mod loaders are developed independently by the Fabric, Quilt, Forge, and NeoForge projects."
-msgstr ""
-"모드팩, 모드, 리소스 팩 및 셰이더는 Modrinth에서 호스팅되며 각 작성자가 제작했습니다.\n"
-"\n"
-"모드 로더는 Fabric, Quilt, Forge 및 NeoForge 프로젝트에서 독립적으로 개발되었습니다."
+#: src/nuvashalauncher-users-popover.c:227
+msgid "Microsoft · Needs sign-in"
+msgstr "Microsoft · 로그인이 필요합니다"
 
-msgid "AppStream Metadata"
-msgstr "AppStream 메타데이터"
-
-msgid "The AppStream metadata (descriptions, summaries, and release notes) is released under the Creative Commons CC0 1.0 Universal Public Domain Dedication."
-msgstr "AppStream 메타데이터(설명, 요약 및 릴리스 정보)는 Creative Commons CC0 1.0 Universal Public Domain Dedication에 따라 배포됩니다."
-
-msgid "Nuvasha Launcher"
-msgstr "Nuvasha Launcher"
-
-msgid "Copy"
-msgstr "복사"
-
-msgid "Rename"
-msgstr "이름 바꾸기"
-
-msgid "Reset Icon"
-msgstr "아이콘 초기화"
-
-msgid "Delete World"
-msgstr "월드 삭제"
-
-msgid "Seed copied to clipboard"
-msgstr "시드가 클립보드에 복사되었습니다"
-
-msgid "Remove server \"%s\"?"
-msgstr "\"%s\" 서버를 제거할까요?"
-
-msgid "Refresh"
-msgstr "새로 고침"
-
-msgid "Remove Server"
-msgstr "서버 제거"
-
-msgid "Survival"
-msgstr "서바이벌"
-
-msgid "Edit"
-msgstr "편집"
-
-msgid "Ask to download"
-msgstr "다운로드할지 묻기"
-
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Minecraft에서 저장하거나 여기로 가져온 월드가 이 목록에 표시됩니다."
-
-msgid "Rename World"
-msgstr "월드 이름 바꾸기"
-
-msgid "Servers"
-msgstr "서버"
-
-msgid "Save"
-msgstr "저장"
-
-msgid "Add World"
-msgstr "월드 추가"
-
-msgid "Spectator"
-msgstr "관전자"
-
-msgid "Delete world \"%s\"? This cannot be undone."
-msgstr "\"%s\" 월드를 삭제할까요? 되돌릴 수 없습니다."
-
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "여기에 추가한 서버는 이 인스턴스의 servers.dat에 저장됩니다."
-
-msgid "Add Server"
-msgstr "서버 추가"
-
-msgid "Edit Server"
-msgstr "서버 편집"
-
-msgid "Address"
-msgstr "주소"
-
-msgid "Datapacks"
-msgstr "데이터 팩"
-
-msgid "No Worlds"
-msgstr "월드 없음"
-
-msgid "Creative"
-msgstr "크리에이티브"
-
-msgid "Move Up"
-msgstr "위로 이동"
-
-msgid "No Servers"
-msgstr "서버 없음"
-
-msgid "Never download"
-msgstr "다운로드 안 함"
-
-msgid "Worlds"
-msgstr "월드"
-
-msgid "Always download"
-msgstr "항상 다운로드"
-
-msgid "Move Down"
-msgstr "아래로 이동"
-
-msgid "Copy Seed"
-msgstr "시드 복사"
-
-msgid "Stats"
-msgstr "통계"
-
-msgid "Playtime"
-msgstr "플레이 시간"
-
-msgid "Time played"
-msgstr "플레이한 시간"
-
-msgid "Not played yet"
-msgstr "아직 플레이하지 않음"
-
-msgid "Less than a minute"
-msgstr "1분 미만"
-
-msgid "%llu min"
-msgstr "%llu분"
-
-msgid "%llu h %llu min"
-msgstr "%llu시간 %llu분"
-
-msgid "Runs on"
-msgstr "실행 환경"
-
-msgid "Activity"
-msgstr "활동"
-
-msgid "Last session"
-msgstr "마지막 세션"
-
-msgid "Last played"
-msgstr "마지막 플레이"
-
-msgid "Total launches"
-msgstr "총 실행 횟수"
-
-msgid "Total crashes"
-msgstr "총 충돌 횟수"
-
-msgid "Server joins"
-msgstr "서버 접속 횟수"
-
-msgid "World loads"
-msgstr "월드 불러오기 횟수"
-
-msgid "Player Profile"
-msgstr "플레이어 프로필"
-
-msgid "Player type"
-msgstr "플레이어 유형"
-
-msgid "Pack style"
-msgstr "팩 스타일"
-
-msgid "Average session"
-msgstr "평균 세션"
-
-msgid "Stability"
-msgstr "안정성"
-
-msgid "Instance"
-msgstr "인스턴스"
-
-msgid "Total size"
-msgstr "전체 크기"
-
-msgid "Created on"
-msgstr "생성일"
-
-msgid "Calculating…"
-msgstr "계산 중…"
-
-msgid "Never"
-msgstr "없음"
-
-msgid "Today, %s"
-msgstr "오늘, %s"
-
-msgid "Hybrid"
-msgstr "혼합"
-
-msgid "Server Player"
-msgstr "서버 플레이어"
-
-msgid "Singleplayer"
-msgstr "싱글플레이어"
-
-msgid "Unplayed"
-msgstr "플레이 안 함"
-
-msgid "Modpack"
-msgstr "모드팩"
-
-msgid "Lightweight"
-msgstr "경량"
-
-msgid "Kitchen Sink"
-msgstr "대형"
-
-msgid "Quick"
-msgstr "짧음"
-
-msgid "Standard"
-msgstr "보통"
-
-msgid "Marathon"
-msgstr "장시간"
-
-msgid "Stable"
-msgstr "안정적"
-
-msgid "%u%% crash rate"
-msgstr "충돌률 %u%%"
-
-msgid "A name cannot be empty."
-msgstr "이름을 비워 둘 수 없습니다."
-
-msgid "Remove server"
-msgstr "서버 제거"
-
-msgid "Download modpack"
-msgstr "모드팩 다운로드"
-
-msgid "%s “%s”"
-msgstr "%s “%s”"
-
-msgid "Delete instance"
-msgstr "인스턴스 삭제"
-
-msgid "No worlds"
-msgstr "월드 없음"
-
-msgid "Waiting for sign-in in browser…"
-msgstr "브라우저에서 로그인을 기다리는 중…"
-
-msgid "Choose files"
-msgstr "파일 선택"
-
-msgid "Cannot create “%s”: %s"
-msgstr "“%s”을(를) 만들 수 없습니다: %s"
-
-msgid "Cache cleanup failed"
-msgstr "캐시 정리 실패"
-
-msgid "Español"
-msgstr "Español"
-
-msgid "Modrinth & mod loaders"
-msgstr "Modrinth 및 모드 로더"
-
-msgid "Delete world “%s”? This cannot be undone."
-msgstr "“%s” 월드를 삭제할까요? 되돌릴 수 없습니다."
-
-msgid "Português"
-msgstr "Português"
-
-msgid "Create an instance to start playing."
-msgstr "플레이를 시작하려면 인스턴스를 생성하세요."
-
-msgid "Duplicated to “%s”"
-msgstr "“%s”(으)로 복제됨"
-
-msgid "Downloading modpack"
-msgstr "모드팩 다운로드 중"
-
-msgid "Try again"
-msgstr "다시 시도"
-
-msgid "Performance impact"
-msgstr "성능 영향"
-
-msgid "Add world"
-msgstr "월드 추가"
-
-msgid "Create instance"
-msgstr "인스턴스 생성"
-
-msgid "Browse modpacks"
-msgstr "모드팩 둘러보기"
-
-msgid "Remove server “%s”?"
-msgstr "“%s” 서버를 제거할까요?"
-
-msgid "Path tracing"
-msgstr "패스 트레이싱"
-
-msgid "Clean export"
-msgstr "깔끔하게 내보내기"
-
-msgid "Main menu"
-msgstr "Application menu"
-
-msgid "Game mechanics"
-msgstr "게임 시스템"
-
-msgid "Minecraft version"
-msgstr "마인크래프트 버전"
-
-msgid "The duplicate file “%s” could not be removed: %s"
-msgstr "The duplicate file “%s” could not be removed: %s"
-
-msgid "Open folder"
-msgstr "폴더 열기"
-
-msgid "AppStream metadata"
-msgstr "AppStream 메타데이터"
-
-msgid "Add Java runtime"
-msgstr "Java 런타임 추가"
-
-msgid "World generation"
-msgstr "세계 생성"
-
-msgid "Keyboard shortcuts"
-msgstr "키보드 단축키"
-
-msgid "Resource packs"
-msgstr "자원 팩"
-
-msgid "Edit server"
-msgstr "서버 편집"
-
-msgid "Keep playing"
-msgstr "계속 플레이"
-
-msgid "Technical details"
-msgstr "기술 세부 정보"
-
-msgid "Pack name"
-msgstr "팩 이름"
-
-msgid "Colored lighting"
-msgstr "색상 조명"
-
-msgid "Rename world"
-msgstr "월드 이름 바꾸기"
-
-msgid "A name can only hold letters, digits and underscores."
-msgstr "이름에는 문자, 숫자, 밑줄만 사용할 수 있습니다."
-
-msgid "Preferences"
-msgstr "설정"
-
-msgid "Delete world"
-msgstr "월드 삭제"
-
-msgid "Asking Microsoft for a code…"
-msgstr "microsoft에 코드 요청…"
-
-msgid "Show unstable mod loader versions"
-msgstr "불안정한 모드 로더 버전 표시"
-
-msgid "Move down"
-msgstr "아래로 이동"
-
-msgid "Clear cache"
-msgstr "Nuvasha Launcher 캐시 지우기"
-
-msgid "Delete “%s”?"
-msgstr "%s 삭제하기"
-
-msgid "Import modpack…"
-msgstr "모드팩 가져오기…"
-
-msgid "Delete selected"
-msgstr "선택 항목 삭제"
-
-msgid "Java runtime"
-msgstr "Java 런타임"
-
-msgid "A name has to be 3 to 16 characters long."
-msgstr "이름은 3~16자여야 합니다."
-
-msgid "Import modpack"
-msgstr "모드팩 가져오기"
-
-msgid "Core shaders"
-msgstr "코어 셰이더"
-
-msgid "Sign in"
-msgstr "로그인"
-
-msgid "Cache cleared"
-msgstr "캐시 삭제됨"
-
-msgid "No instances yet"
-msgstr "아직 인스턴스가 없습니다"
-
-msgid "Add offline account"
-msgstr "오프라인 계정 추가"
-
-msgid "Copy seed"
-msgstr "시드 복사"
-
-msgid "Services & ecosystem"
-msgstr "서비스 및 생태계"
-
-msgid "No modpack matches what was asked for. Try another word."
-msgstr "요청하신 내용과 일치하는 모드팩이 없습니다. 다른 단어를 입력해 보세요."
-
-msgid "Line limit"
-msgstr "줄 수 제한"
-
-msgid "Modrinth modpacks (*.mrpack)"
-msgstr "Modrinth 모드팩 (*.mrpack)"
-
-msgid "Add server"
-msgstr "서버 추가"
-
-msgid "The replaced file “%s” could not be removed"
-msgstr "The replaced file “%s” could not be removed"
-
-msgid "All versions"
-msgstr "모든 버전"
-
-msgid "No servers"
-msgstr "서버 없음"
-
-msgid "Clear cache?"
-msgstr "Nuvasha Launcher 캐시를 지울까요?"
-
-msgid "Loader version"
-msgstr "모드 로더 버전"
-
-msgid "translator-credits"
-msgstr "Flia"
-
-msgid "Include all files"
-msgstr "모든 파일 포함"
-
-msgid "Export modpack"
-msgstr "모드팩 내보내기"
-
-msgid "Add world…"
-msgstr "월드 추가…"
-
-msgid "Update all"
-msgstr "모두 업데이트"
-
+#: src/nuvashalauncher-users-popover.c:398
 msgid "Add Microsoft account"
 msgstr "Microsoft 계정 추가"
 
-msgid "Move up"
-msgstr "위로 이동"
+#: src/nuvashalauncher-version-row.c:360
+msgid "Minecraft version"
+msgstr "마인크래프트 버전"
 
-msgid "Minecraft disclaimer"
-msgstr "Minecraft 면책 조항"
+#: src/nuvashalauncher-worlds-page.c:80
+msgid "Survival"
+msgstr "서바이벌"
 
-msgid "Shader packs"
-msgstr "셰이더 팩"
+#: src/nuvashalauncher-worlds-page.c:82
+msgid "Creative"
+msgstr "크리에이티브"
+
+#: src/nuvashalauncher-worlds-page.c:86
+msgid "Spectator"
+msgstr "관전자"
+
+#: src/nuvashalauncher-worlds-page.c:312
+msgid "Rename world"
+msgstr "월드 이름 바꾸기"
+
+#: src/nuvashalauncher-worlds-page.c:320 src/nuvashalauncher-worlds-page.c:648
+msgid "Rename"
+msgstr "이름 바꾸기"
+
+#: src/nuvashalauncher-worlds-page.c:477
+msgid "Copy"
+msgstr "복사"
+
+#: src/nuvashalauncher-worlds-page.c:499
+msgid "Seed copied to clipboard"
+msgstr "시드가 클립보드에 복사되었습니다"
+
+#: src/nuvashalauncher-worlds-page.c:571
+#, c-format
+msgid "Delete world “%s”? This cannot be undone."
+msgstr "“%s” 월드를 삭제할까요? 되돌릴 수 없습니다."
+
+#: src/nuvashalauncher-worlds-page.c:573
+msgid "Delete world"
+msgstr "월드 삭제"
+
+#: src/nuvashalauncher-worlds-page.c:653
+msgid "Copy seed"
+msgstr "시드 복사"
+
+#: src/nuvashalauncher-worlds-page.c:1071
+msgid "Add world"
+msgstr "월드 추가"
+
+#: src/nuvashalauncher-worlds-page.c:1190
+#: src/nuvashalauncher-worlds-page.c:1240
+msgid "Add world…"
+msgstr "월드 추가…"
+
+#: src/nuvashalauncher-worlds-page.c:1237
+msgid "No worlds"
+msgstr "월드 없음"
+
+#: src/nuvashalauncher-worlds-page.c:1238
+msgid "Worlds saved by Minecraft or imported here will appear in this list."
+msgstr "Minecraft에서 저장하거나 여기로 가져온 월드가 이 목록에 표시됩니다."
+
+#~ msgid "Colored Lighting"
+#~ msgstr "색상 조명"
+
+#~ msgid "Core Shaders"
+#~ msgstr "코어 셰이더"
+
+#~ msgid "Game Mechanics"
+#~ msgstr "게임 시스템"
+
+#~ msgid "Path Tracing"
+#~ msgstr "패스 트레이싱"
+
+#~ msgid "Performance Impact"
+#~ msgstr "성능 영향"
+
+#~ msgid "World Generation"
+#~ msgstr "세계 생성"
+
+#~ msgid "All Versions"
+#~ msgstr "모든 버전"
+
+#~ msgid "Update All"
+#~ msgstr "모두 업데이트"
+
+#~ msgid "Open Folder"
+#~ msgstr "폴더 열기"
+
+#~ msgid "Nothing is selected"
+#~ msgstr "선택된 항목이 없습니다"
+
+#~ msgid "Create Instance"
+#~ msgstr "인스턴스 생성"
+
+#~ msgid "Download Modpack"
+#~ msgstr "모드팩 다운로드"
+
+#~ msgid "Duplicated to \"%s\""
+#~ msgstr "\"%s\"(으)로 복제됨"
+
+#~ msgid "Delete \"%s\"?"
+#~ msgstr "%s 삭제하기"
+
+#~ msgid "Java Runtime"
+#~ msgstr "Java 런타임"
+
+#~ msgid "Add Java Runtime"
+#~ msgstr "Java 런타임 추가"
+
+#~ msgid ""
+#~ "Minecraft needs a non-headless Java: on Arch use the jre-openjdk package, "
+#~ "not jre-openjdk-headless"
+#~ msgstr ""
+#~ "Minecraft에는 headless가 아닌 Java가 필요합니다. Arch에서는 jre-openjdk-"
+#~ "headless가 아니라 jre-openjdk 패키지를 사용하세요"
+
+#~ msgid "Delete Instance"
+#~ msgstr "인스턴스 삭제"
+
+#~ msgid "Resource Packs"
+#~ msgstr "자원 팩"
+
+#~ msgid "Shader Packs"
+#~ msgstr "셰이더 팩"
+
+#~ msgid "Loader Version"
+#~ msgstr "모드 로더 버전"
+
+#~ msgid "Show unstable Mod Loader versions"
+#~ msgstr "불안정한 모드 로더 버전 표시"
+
+#~ msgid "Line Limit"
+#~ msgstr "줄 수 제한"
+
+#~ msgid "Keyboard Shortcuts"
+#~ msgstr "키보드 단축키"
+
+#~ msgid "Keep Playing"
+#~ msgstr "계속 플레이"
+
+#~ msgid "No Instances Yet"
+#~ msgstr "아직 인스턴스가 없습니다"
+
+#~ msgid "Use the + button in the header to create one"
+#~ msgstr "헤더의 + 버튼을 사용하여 생성"
+
+#~ msgid "Add Offline Account"
+#~ msgstr "오프라인 계정 추가"
+
+#~ msgid "a name can only hold letters, digits and underscores"
+#~ msgstr "이름에는 문자, 숫자, 밑줄만 사용할 수 있습니다"
+
+#~ msgid "a name cannot be empty"
+#~ msgstr "이름을 비워 둘 수 없습니다"
+
+#~ msgid "a name has to be 3 to 16 characters long"
+#~ msgstr "이름은 3~16자여야 합니다"
+
+#~ msgid "asking Microsoft for a code"
+#~ msgstr "microsoft에 코드 요청"
+
+#~ msgid "waiting for the sign-in in the browser"
+#~ msgstr "브라우저에서 로그인을 기다리는 중"
+
+#~ msgid "Sign In"
+#~ msgstr "로그인"
+
+#~ msgid "Try Again"
+#~ msgstr "다시 시도"
+
+#~ msgid "Add Microsoft Account"
+#~ msgstr "Microsoft 계정 추가"
+
+#~ msgid "Minecraft Version"
+#~ msgstr "마인크래프트 버전"
+
+#~ msgid "%s \"%s\""
+#~ msgstr "%s “%s”"
+
+#~ msgid "Show Shortcuts"
+#~ msgstr "바로 가기 표시"
+
+# New modpack import/export actions use English until translators provide localized text.
+#~ msgid "Import Modpack"
+#~ msgstr "모드팩 가져오기"
+
+#~ msgid "Modrinth Modpacks (*.mrpack)"
+#~ msgstr "Modrinth 모드팩 (*.mrpack)"
+
+#~ msgid "Export Modpack"
+#~ msgstr "모드팩 내보내기"
+
+#~ msgid "Clean Export"
+#~ msgstr "깔끔하게 내보내기"
+
+#~ msgid "Include All Files"
+#~ msgstr "모든 파일 포함"
+
+#~ msgid "Pack Name"
+#~ msgstr "팩 이름"
+
+#~ msgid "The pack does not define its install"
+#~ msgstr "팩에 설치 정보가 없습니다"
+
+#~ msgid "Downloading Modpack"
+#~ msgstr "모드팩 다운로드 중"
+
+#~ msgid "Installed %u item"
+#~ msgid_plural "Installed %u items"
+#~ msgstr[0] "아이템 %u개 설치됨"
+
+#~ msgid "no compatible version"
+#~ msgstr "호환되는 버전이 없습니다"
+
+#~ msgid "Cannot create \"%s\": %s"
+#~ msgstr "“%s”을(를) 만들 수 없습니다: %s"
+
+#~ msgid "Cache Cleared"
+#~ msgstr "캐시 삭제됨"
+
+#~ msgid "Cache Cleanup Failed"
+#~ msgstr "캐시 정리 실패"
+
+#~ msgid "The cache could not be cleared."
+#~ msgstr "캐시를 삭제할 수 없습니다."
+
+#~ msgid "Unavailable"
+#~ msgstr "사용할 수 없음"
+
+#~ msgid "This cannot be installed"
+#~ msgstr "이 항목은 설치할 수 없습니다"
+
+#~ msgid "Browse Modpacks"
+#~ msgstr "모드팩 둘러보기"
+
+#~ msgid "Choose Files"
+#~ msgstr "파일 선택"
+
+#~ msgid "Clear Nuvasha Launcher Cache"
+#~ msgstr "Nuvasha Launcher 캐시 지우기"
+
+#~ msgid "Clear Nuvasha Launcher Cache?"
+#~ msgstr "Nuvasha Launcher 캐시를 지울까요?"
+
+#~ msgid "Could not understand the answer"
+#~ msgstr "답변을 이해할 수 없었습니다"
+
+#~ msgid "It carries files that Nuvasha Launcher does not recognize."
+#~ msgstr "이 파일은 Nuvasha Launcher가 인식하지 못하는 파일입니다."
+
+#~ msgid "Microsoft returned an unsafe verification address"
+#~ msgstr "마이크로소프트가 안전하지 않은 확인 주소를 반환했습니다."
+
+#~ msgid "No modpack matches what was asked for. Try another word"
+#~ msgstr ""
+#~ "요청하신 내용과 일치하는 모드팩이 없습니다. 다른 단어를 입력해 보세요."
+
+#~ msgid "Nuvasha Launcher cache data was cleared successfully."
+#~ msgstr "Nuvasha Launcher 캐시 데이터가 성공적으로 삭제되었습니다."
+
+#~ msgid "Search Modrinth and install a modpack"
+#~ msgstr "Modrinth에서 검색하여 모드팩을 설치하세요"
+
+#~ msgid "the sign-in did not finish"
+#~ msgstr "로그인이 완료되지 않았습니다"
+
+#~ msgid "Application menu"
+#~ msgstr "Application menu"
+
+#~ msgid "The duplicate file \"%s\" could not be removed: %s"
+#~ msgstr "The duplicate file \"%s\" could not be removed: %s"
+
+#~ msgid "The replaced file \"%s\" could not be removed"
+#~ msgstr "The replaced file \"%s\" could not be removed"
+
+#~ msgid "Unknown error"
+#~ msgstr "Unknown error"
+
+#~ msgid "Microsoft could not be reached. Check your connection and try again."
+#~ msgstr ""
+#~ "Microsoft could not be reached. Check your connection and try again."
+
+#~ msgid ""
+#~ "The following instances will be deleted:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "다음 인스턴스가 삭제됩니다:\n"
+#~ "%s"
+
+#~ msgid "Delete selected %s?"
+#~ msgstr "Delete selected %s?"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s"
+
+#~ msgid ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Selected %s:\n"
+#~ "%s\n"
+#~ "\n"
+#~ "Dependencies:\n"
+#~ "%s"
+
+#~ msgid "Edit mode"
+#~ msgstr "편집 모드"
+
+#~ msgid "Enter Edit Mode"
+#~ msgstr "편집 모드 들어가기"
+
+#~ msgid "Delete Selected"
+#~ msgstr "선택 항목 삭제"
+
+#~ msgid "Could not load project details. Try again."
+#~ msgstr "프로젝트 세부 정보를 불러오지 못했습니다. 다시 시도하세요."
+
+#~ msgid "Technical Details"
+#~ msgstr "기술 세부 정보"
+
+#~ msgid "Services & Ecosystem"
+#~ msgstr "서비스 및 생태계"
+
+#~ msgid "Minecraft Disclaimer"
+#~ msgstr "Minecraft 면책 조항"
+
+#~ msgid "Modrinth & Mod Loaders"
+#~ msgstr "Modrinth 및 모드 로더"
+
+#~ msgid "AppStream Metadata"
+#~ msgstr "AppStream 메타데이터"
+
+#~ msgid "Reset Icon"
+#~ msgstr "아이콘 초기화"
+
+#~ msgid "Delete World"
+#~ msgstr "월드 삭제"
+
+#~ msgid "Remove server \"%s\"?"
+#~ msgstr "\"%s\" 서버를 제거할까요?"
+
+#~ msgid "Remove Server"
+#~ msgstr "서버 제거"
+
+#~ msgid "Rename World"
+#~ msgstr "월드 이름 바꾸기"
+
+#~ msgid "Add World"
+#~ msgstr "월드 추가"
+
+#~ msgid "Delete world \"%s\"? This cannot be undone."
+#~ msgstr "\"%s\" 월드를 삭제할까요? 되돌릴 수 없습니다."
+
+#~ msgid "Add Server"
+#~ msgstr "서버 추가"
+
+#~ msgid "Edit Server"
+#~ msgstr "서버 편집"
+
+#~ msgid "Datapacks"
+#~ msgstr "데이터 팩"
+
+#~ msgid "No Worlds"
+#~ msgstr "월드 없음"
+
+#~ msgid "Move Up"
+#~ msgstr "위로 이동"
+
+#~ msgid "No Servers"
+#~ msgstr "서버 없음"
+
+#~ msgid "Move Down"
+#~ msgstr "아래로 이동"
+
+#~ msgid "Copy Seed"
+#~ msgstr "시드 복사"
+
+#~ msgid "Playtime"
+#~ msgstr "플레이 시간"
+
+#~ msgid "Runs on"
+#~ msgstr "실행 환경"
+
+#~ msgid "Last session"
+#~ msgstr "마지막 세션"
+
+#~ msgid "Server joins"
+#~ msgstr "서버 접속 횟수"
+
+#~ msgid "World loads"
+#~ msgstr "월드 불러오기 횟수"
+
+#~ msgid "Player Profile"
+#~ msgstr "플레이어 프로필"
+
+#~ msgid "Player type"
+#~ msgstr "플레이어 유형"
+
+#~ msgid "Pack style"
+#~ msgstr "팩 스타일"
+
+#~ msgid "Average session"
+#~ msgstr "평균 세션"
+
+#~ msgid "Stability"
+#~ msgstr "안정성"
+
+#~ msgid "Hybrid"
+#~ msgstr "혼합"
+
+#~ msgid "Server Player"
+#~ msgstr "서버 플레이어"
+
+#~ msgid "Singleplayer"
+#~ msgstr "싱글플레이어"
+
+#~ msgid "Unplayed"
+#~ msgstr "플레이 안 함"
+
+#~ msgid "Modpack"
+#~ msgstr "모드팩"
+
+#~ msgid "Lightweight"
+#~ msgstr "경량"
+
+#~ msgid "Kitchen Sink"
+#~ msgstr "대형"
+
+#~ msgid "Quick"
+#~ msgstr "짧음"
+
+#~ msgid "Standard"
+#~ msgstr "보통"
+
+#~ msgid "Marathon"
+#~ msgstr "장시간"
+
+#~ msgid "Stable"
+#~ msgstr "안정적"
+
+#~ msgid "%u%% crash rate"
+#~ msgstr "충돌률 %u%%"
