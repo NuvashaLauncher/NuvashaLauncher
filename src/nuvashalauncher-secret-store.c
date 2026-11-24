@@ -238,7 +238,6 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
   const char *store_file = test_secret_store_file ();
   g_autoptr (GError) local_error = NULL;
   g_autofree char *active = NULL;
-  g_autoptr (SecretService) service = NULL;
   g_autoptr (GHashTable) attributes = NULL;
   const SecretSchema *accounts_schema = account_schema_for_store ();
   const SecretSchema *active_account_schema = active_schema_for_store ();
@@ -252,16 +251,12 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
   if (store_file != NULL)
     return file_store_read (store_file, accounts, active_id, error);
 
-  service = secret_service_get_sync (SECRET_SERVICE_NONE, NULL, &local_error);
-  if (service == NULL)
-    return secret_error (error, g_steal_pointer (&local_error));
-
   loaded = g_ptr_array_new_with_free_func (
     (GDestroyNotify) nuvashalauncher_account_free);
   attributes = g_hash_table_new (g_str_hash, g_str_equal);
-  items = secret_service_search_sync (service, accounts_schema, attributes,
-                                      SECRET_SEARCH_ALL | SECRET_SEARCH_UNLOCK | SECRET_SEARCH_LOAD_SECRETS,
-                                      NULL, &local_error);
+  items = secret_password_search_sync (accounts_schema, attributes,
+                                       SECRET_SEARCH_ALL | SECRET_SEARCH_UNLOCK | SECRET_SEARCH_LOAD_SECRETS,
+                                       NULL, &local_error);
   if (local_error != NULL)
     {
       g_ptr_array_unref (loaded);
@@ -270,15 +265,21 @@ nuvashalauncher_secret_store_load (GPtrArray **accounts,
 
   for (GList *item = items; item != NULL; item = item->next)
     {
-      SecretValue *value = secret_item_get_secret (SECRET_ITEM (item->data));
-      g_autoptr (NuvashaLauncherAccount) account =
-        value != NULL ? account_from_payload (secret_value_get_text (value)) : NULL;
+      SecretRetrievable *retrievable = SECRET_RETRIEVABLE (item->data);
+      GHashTable *item_attrs = secret_retrievable_get_attributes (retrievable);
 
-      if (value != NULL)
-        secret_value_unref (value);
+      if (item_attrs != NULL && g_hash_table_contains (item_attrs, "account-id"))
+        {
+          SecretValue *value = secret_retrievable_retrieve_secret_sync (retrievable, NULL, NULL);
+          g_autoptr (NuvashaLauncherAccount) account =
+            value != NULL ? account_from_payload (secret_value_get_text (value)) : NULL;
 
-      if (account != NULL)
-        g_ptr_array_add (loaded, g_steal_pointer (&account));
+          if (value != NULL)
+            secret_value_unref (value);
+
+          if (account != NULL)
+            g_ptr_array_add (loaded, g_steal_pointer (&account));
+        }
     }
   g_list_free_full (items, g_object_unref);
 

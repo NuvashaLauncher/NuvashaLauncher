@@ -324,23 +324,42 @@ test_persistence (void)
       return;
     }
   g_assert_no_error (error);
+
+  g_autoptr (NuvashaLauncherAccount) offline =
+    nuvashalauncher_account_new_offline ("OfflineHero", &error);
+  g_assert_no_error (error);
+  nuvashalauncher_secret_store_remove_account (offline->id, NULL);
+  g_assert_true (nuvashalauncher_accounts_add (store, offline, &error));
+  g_assert_no_error (error);
   g_assert_false (g_file_test (path, G_FILE_TEST_EXISTS));
 
   reopened = nuvashalauncher_accounts_new_for_path (path);
-  g_assert_cmpuint (nuvashalauncher_accounts_count (reopened), ==, 1);
+  g_assert_cmpuint (nuvashalauncher_accounts_count (reopened), ==, 2);
   found = nuvashalauncher_accounts_get_active (reopened);
   g_assert_nonnull (found);
-  g_assert_cmpint (found->type, ==, NUVASHALAUNCHER_ACCOUNT_MICROSOFT);
-  g_assert_cmpstr (found->name, ==, "Notch");
-  g_assert_cmpstr (found->access_token, ==, "the-access-token");
-  g_assert_cmpstr (found->refresh_token, ==, "the-refresh-token");
-  g_assert_cmpint (found->expires_at, ==, 1800000000);
-  g_assert_cmpstr (found->avatar_url, ==, "https://example.invalid/skin.png");
-  g_assert_cmpstr (found->skin_model, ==, "SLIM");
-  g_assert_cmpstr (found->cape_id, ==, "cape");
+  g_assert_cmpstr (found->id, ==, "OfflineHero");
+
+  NuvashaLauncherAccount *found_ms = nuvashalauncher_accounts_find (reopened, account->id);
+  g_assert_nonnull (found_ms);
+  g_assert_cmpint (found_ms->type, ==, NUVASHALAUNCHER_ACCOUNT_MICROSOFT);
+  g_assert_cmpstr (found_ms->name, ==, "Notch");
+  g_assert_cmpstr (found_ms->access_token, ==, "the-access-token");
+  g_assert_cmpstr (found_ms->refresh_token, ==, "the-refresh-token");
+  g_assert_cmpint (found_ms->expires_at, ==, 1800000000);
+  g_assert_cmpstr (found_ms->avatar_url, ==, "https://example.invalid/skin.png");
+  g_assert_cmpstr (found_ms->skin_model, ==, "SLIM");
+  g_assert_cmpstr (found_ms->cape_id, ==, "cape");
+
+  NuvashaLauncherAccount *found_off = nuvashalauncher_accounts_find (reopened, "OfflineHero");
+  g_assert_nonnull (found_off);
+  g_assert_cmpint (found_off->type, ==, NUVASHALAUNCHER_ACCOUNT_OFFLINE);
+  g_assert_cmpstr (found_off->name, ==, "OfflineHero");
 
   g_assert_true (nuvashalauncher_accounts_remove (
     store, account->id, &error));
+  g_assert_no_error (error);
+  g_assert_true (nuvashalauncher_accounts_remove (
+    store, offline->id, &error));
   g_assert_no_error (error);
   g_assert_cmpuint (nuvashalauncher_accounts_count (store), ==, 0);
   g_assert_null (nuvashalauncher_accounts_get_active (store));
