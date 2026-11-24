@@ -94,7 +94,7 @@ update_selection_ui (NuvashaLauncherContentPage *self)
     case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
       format = ngettext ("%u resource pack selected", "%u resource packs selected", count);
       break;
-    case NUVASHALAUNCHER_CONTENT_SHADER:
+    case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       format = ngettext ("%u shader selected", "%u shaders selected", count);
       break;
     default:
@@ -111,7 +111,7 @@ static void
 on_row_check_toggled (GtkCheckButton *check, gpointer user_data)
 {
   NuvashaLauncherContentPage *self = NUVASHALAUNCHER_CONTENT_PAGE (user_data);
-  const NuvashaLauncherModrinthProject *project =
+  NuvashaLauncherModrinthProject *project =
     g_object_get_data (G_OBJECT (check), "nuvashalauncher-project");
 
   if (project == NULL || project->project_id == NULL)

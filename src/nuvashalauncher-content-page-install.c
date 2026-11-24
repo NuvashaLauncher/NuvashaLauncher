@@ -1005,7 +1005,7 @@ on_batch_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
       msg_format = ngettext ("%u resource pack is being installed", "%u resource packs are being installed", count);
       break;
-    case NUVASHALAUNCHER_CONTENT_SHADER:
+    case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       msg_format = ngettext ("%u shader is being installed", "%u shaders are being installed", count);
       break;
     default:
@@ -1040,7 +1040,7 @@ show_batch_plan (NuvashaLauncherContentPage *self, BatchPlanRun *batch)
     case NUVASHALAUNCHER_CONTENT_RESOURCE_PACK:
       heading_format = ngettext ("Install the following resource pack?", "Install the following resource packs?", count);
       break;
-    case NUVASHALAUNCHER_CONTENT_SHADER:
+    case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       heading_format = ngettext ("Install the following shader?", "Install the following shaders?", count);
       break;
     default:
