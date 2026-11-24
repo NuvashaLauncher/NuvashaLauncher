@@ -90,41 +90,41 @@ msgid "by %s"
 msgstr "od %s"
 
 #: src/nuvashalauncher-content-page-browser.c:92
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod selected"
 msgid_plural "%u mods selected"
-msgstr[0] "%u/%u vybráno"
-msgstr[1] "%u/%u vybráno"
-msgstr[2] "%u/%u vybráno"
+msgstr[0] "Vybrán %u mod"
+msgstr[1] "Vybrány %u mody"
+msgstr[2] "Vybráno %u modů"
 
 #: src/nuvashalauncher-content-page-browser.c:95
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack selected"
 msgid_plural "%u resource packs selected"
-msgstr[0] "Balíčky zdrojů"
-msgstr[1] "Balíčky zdrojů"
-msgstr[2] "Balíčky zdrojů"
+msgstr[0] "Vybrán %u balíček zdrojů"
+msgstr[1] "Vybrány %u balíčky zdrojů"
+msgstr[2] "Vybráno %u balíčků zdrojů"
 
 #: src/nuvashalauncher-content-page-browser.c:98
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader selected"
 msgid_plural "%u shaders selected"
-msgstr[0] "%u/%u vybráno"
-msgstr[1] "%u/%u vybráno"
-msgstr[2] "%u/%u vybráno"
+msgstr[0] "Vybrán %u shader"
+msgstr[1] "Vybrány %u shadery"
+msgstr[2] "Vybráno %u shaderů"
 
 #: src/nuvashalauncher-content-page-browser.c:101
-#, fuzzy, c-format
+#, c-format
 msgid "%u item selected"
 msgid_plural "%u items selected"
-msgstr[0] "%u/%u vybráno"
-msgstr[1] "%u/%u vybráno"
-msgstr[2] "%u/%u vybráno"
+msgstr[0] "Vybrána %u položka"
+msgstr[1] "Vybrány %u položky"
+msgstr[2] "Vybráno %u položek"
 
 #: src/nuvashalauncher-content-page-browser.c:274
 #: src/nuvashalauncher-download-modpack-browser.c:471
 msgid "Select"
-msgstr ""
+msgstr "Vybrat"
 
 #: src/nuvashalauncher-content-page-browser.c:286
 #: src/nuvashalauncher-content-page-install.c:609
@@ -277,68 +277,64 @@ msgid "This project publishes nothing that fits this instance."
 msgstr "Tento projekt nepublikuje nic, co by odpovídalo této instanci."
 
 #: src/nuvashalauncher-content-page-install.c:1003
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod is being installed"
 msgid_plural "%u mods are being installed"
-msgstr[0] "%s se instaluje"
-msgstr[1] "%s se instaluje"
-msgstr[2] "%s se instaluje"
+msgstr[0] "Instaluje se %u mod"
+msgstr[1] "Instalují se %u mody"
+msgstr[2] "Instaluje se %u modů"
 
 #: src/nuvashalauncher-content-page-install.c:1006
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack is being installed"
 msgid_plural "%u resource packs are being installed"
-msgstr[0] "%s se instaluje"
-msgstr[1] "%s se instaluje"
-msgstr[2] "%s se instaluje"
+msgstr[0] "Instaluje se %u balíček zdrojů"
+msgstr[1] "Instalují se %u balíčky zdrojů"
+msgstr[2] "Instaluje se %u balíčků zdrojů"
 
 #: src/nuvashalauncher-content-page-install.c:1009
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader is being installed"
 msgid_plural "%u shaders are being installed"
-msgstr[0] "%s se instaluje"
-msgstr[1] "%s se instaluje"
-msgstr[2] "%s se instaluje"
+msgstr[0] "Instaluje se %u shader"
+msgstr[1] "Instalují se %u shadery"
+msgstr[2] "Instaluje se %u shaderů"
 
 #: src/nuvashalauncher-content-page-install.c:1012
-#, fuzzy, c-format
+#, c-format
 msgid "%u item is being installed"
 msgid_plural "%u items are being installed"
-msgstr[0] "%s se instaluje"
-msgstr[1] "%s se instaluje"
-msgstr[2] "%s se instaluje"
+msgstr[0] "Instaluje se %u položka"
+msgstr[1] "Instalují se %u položky"
+msgstr[2] "Instaluje se %u položek"
 
 #: src/nuvashalauncher-content-page-install.c:1038
-#, fuzzy
 msgid "Install the following mod?"
 msgid_plural "Install the following mods?"
-msgstr[0] "Aktualizujte následující %s"
-msgstr[1] "Aktualizujte následující %s"
-msgstr[2] "Aktualizujte následující %s"
+msgstr[0] "Nainstalovat následující mod?"
+msgstr[1] "Nainstalovat následující mody?"
+msgstr[2] "Nainstalovat následující mody?"
 
 #: src/nuvashalauncher-content-page-install.c:1041
-#, fuzzy
 msgid "Install the following resource pack?"
 msgid_plural "Install the following resource packs?"
-msgstr[0] "Instalovat vybrané %s?"
-msgstr[1] "Instalovat vybrané %s?"
-msgstr[2] "Instalovat vybrané %s?"
+msgstr[0] "Nainstalovat následující balíček zdrojů?"
+msgstr[1] "Nainstalovat následující balíčky zdrojů?"
+msgstr[2] "Nainstalovat následující balíčky zdrojů?"
 
 #: src/nuvashalauncher-content-page-install.c:1044
-#, fuzzy
 msgid "Install the following shader?"
 msgid_plural "Install the following shaders?"
-msgstr[0] "Aktualizujte následující %s"
-msgstr[1] "Aktualizujte následující %s"
-msgstr[2] "Aktualizujte následující %s"
+msgstr[0] "Nainstalovat následující shader?"
+msgstr[1] "Nainstalovat následující shadery?"
+msgstr[2] "Nainstalovat následující shadery?"
 
 #: src/nuvashalauncher-content-page-install.c:1047
-#, fuzzy
 msgid "Install the following item?"
 msgid_plural "Install the following items?"
-msgstr[0] "Aktualizujte následující %s"
-msgstr[1] "Aktualizujte následující %s"
-msgstr[2] "Aktualizujte následující %s"
+msgstr[0] "Nainstalovat následující položku?"
+msgstr[1] "Nainstalovat následující položky?"
+msgstr[2] "Nainstalovat následující položky?"
 
 #: src/nuvashalauncher-content-page-installed-delete.c:79
 msgid "The file cannot be deleted"
@@ -553,12 +549,12 @@ msgid "Create"
 msgstr "Vytvořit"
 
 #: src/nuvashalauncher-download-modpack-browser.c:249
-#, fuzzy, c-format
+#, c-format
 msgid "%u modpack selected"
 msgid_plural "%u modpacks selected"
-msgstr[0] "%u/%u vybráno"
-msgstr[1] "%u/%u vybráno"
-msgstr[2] "%u/%u vybráno"
+msgstr[0] "Vybrán %u modpack"
+msgstr[1] "Vybrány %u modpacky"
+msgstr[2] "Vybráno %u modpacků"
 
 #: src/nuvashalauncher-download-modpack-browser.c:698
 #: src/nuvashalauncher-errors.c:33
@@ -605,12 +601,11 @@ msgid "The requested file, project, or compatible version was not found."
 msgstr "Požadovaný soubor, projekt nebo kompatibilní verze nenalezena."
 
 #: src/nuvashalauncher-download-modpack-details.c:693
-#, fuzzy
 msgid "Install the following modpack?"
 msgid_plural "Install the following modpacks?"
-msgstr[0] "Modpack se nepodařilo nainstalovat"
-msgstr[1] "Modpack se nepodařilo nainstalovat"
-msgstr[2] "Modpack se nepodařilo nainstalovat"
+msgstr[0] "Nainstalovat následující modpack?"
+msgstr[1] "Nainstalovat následující modpacky?"
+msgstr[2] "Nainstalovat následující modpacky?"
 
 #: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"

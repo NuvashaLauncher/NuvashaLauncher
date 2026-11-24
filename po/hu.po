@@ -91,37 +91,37 @@ msgid "by %s"
 msgstr "készítette: %s"
 
 #: src/nuvashalauncher-content-page-browser.c:92
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod selected"
 msgid_plural "%u mods selected"
-msgstr[0] "%u/%u kiválasztva"
-msgstr[1] "%u/%u kiválasztva"
+msgstr[0] "%u mod kijelölve"
+msgstr[1] "%u mod kijelölve"
 
 #: src/nuvashalauncher-content-page-browser.c:95
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack selected"
 msgid_plural "%u resource packs selected"
-msgstr[0] "Erőforrás csomagok"
-msgstr[1] "Erőforrás csomagok"
+msgstr[0] "%u erőforráscsomag kijelölve"
+msgstr[1] "%u erőforráscsomag kijelölve"
 
 #: src/nuvashalauncher-content-page-browser.c:98
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader selected"
 msgid_plural "%u shaders selected"
-msgstr[0] "%u/%u kiválasztva"
-msgstr[1] "%u/%u kiválasztva"
+msgstr[0] "%u shader kijelölve"
+msgstr[1] "%u shader kijelölve"
 
 #: src/nuvashalauncher-content-page-browser.c:101
-#, fuzzy, c-format
+#, c-format
 msgid "%u item selected"
 msgid_plural "%u items selected"
-msgstr[0] "%u/%u kiválasztva"
-msgstr[1] "%u/%u kiválasztva"
+msgstr[0] "%u elem kijelölve"
+msgstr[1] "%u elem kijelölve"
 
 #: src/nuvashalauncher-content-page-browser.c:274
 #: src/nuvashalauncher-download-modpack-browser.c:471
 msgid "Select"
-msgstr ""
+msgstr "Kijelölés"
 
 #: src/nuvashalauncher-content-page-browser.c:286
 #: src/nuvashalauncher-content-page-install.c:609
@@ -274,60 +274,56 @@ msgid "This project publishes nothing that fits this instance."
 msgstr "Ez a projekt nem tesz közzé semmit, ami ehhez a példányhoz illik."
 
 #: src/nuvashalauncher-content-page-install.c:1003
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod is being installed"
 msgid_plural "%u mods are being installed"
-msgstr[0] "%s telepítése folyamatban van"
-msgstr[1] "%s telepítése folyamatban van"
+msgstr[0] "%u mod telepítése folyamatban"
+msgstr[1] "%u mod telepítése folyamatban"
 
 #: src/nuvashalauncher-content-page-install.c:1006
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack is being installed"
 msgid_plural "%u resource packs are being installed"
-msgstr[0] "%s telepítése folyamatban van"
-msgstr[1] "%s telepítése folyamatban van"
+msgstr[0] "%u erőforráscsomag telepítése folyamatban"
+msgstr[1] "%u erőforráscsomag telepítése folyamatban"
 
 #: src/nuvashalauncher-content-page-install.c:1009
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader is being installed"
 msgid_plural "%u shaders are being installed"
-msgstr[0] "%s telepítése folyamatban van"
-msgstr[1] "%s telepítése folyamatban van"
+msgstr[0] "%u shader telepítése folyamatban"
+msgstr[1] "%u shader telepítése folyamatban"
 
 #: src/nuvashalauncher-content-page-install.c:1012
-#, fuzzy, c-format
+#, c-format
 msgid "%u item is being installed"
 msgid_plural "%u items are being installed"
-msgstr[0] "%s telepítése folyamatban van"
-msgstr[1] "%s telepítése folyamatban van"
+msgstr[0] "%u elem telepítése folyamatban"
+msgstr[1] "%u elem telepítése folyamatban"
 
 #: src/nuvashalauncher-content-page-install.c:1038
-#, fuzzy
 msgid "Install the following mod?"
 msgid_plural "Install the following mods?"
-msgstr[0] "Frissítse a következőt: %s"
-msgstr[1] "Frissítse a következőt: %s"
+msgstr[0] "Telepíti a következő modot?"
+msgstr[1] "Telepíti a következő modokat?"
 
 #: src/nuvashalauncher-content-page-install.c:1041
-#, fuzzy
 msgid "Install the following resource pack?"
 msgid_plural "Install the following resource packs?"
-msgstr[0] "Telepíti a kiválasztott %s-t?"
-msgstr[1] "Telepíti a kiválasztott %s-t?"
+msgstr[0] "Telepíti a következő erőforráscsomagot?"
+msgstr[1] "Telepíti a következő erőforráscsomagokat?"
 
 #: src/nuvashalauncher-content-page-install.c:1044
-#, fuzzy
 msgid "Install the following shader?"
 msgid_plural "Install the following shaders?"
-msgstr[0] "Frissítse a következőt: %s"
-msgstr[1] "Frissítse a következőt: %s"
+msgstr[0] "Telepíti a következő shadert?"
+msgstr[1] "Telepíti a következő shadereket?"
 
 #: src/nuvashalauncher-content-page-install.c:1047
-#, fuzzy
 msgid "Install the following item?"
 msgid_plural "Install the following items?"
-msgstr[0] "Frissítse a következőt: %s"
-msgstr[1] "Frissítse a következőt: %s"
+msgstr[0] "Telepíti a következő elemet?"
+msgstr[1] "Telepíti a következő elemeket?"
 
 #: src/nuvashalauncher-content-page-installed-delete.c:79
 msgid "The file cannot be deleted"
@@ -542,11 +538,11 @@ msgid "Create"
 msgstr "Teremt"
 
 #: src/nuvashalauncher-download-modpack-browser.c:249
-#, fuzzy, c-format
+#, c-format
 msgid "%u modpack selected"
 msgid_plural "%u modpacks selected"
-msgstr[0] "%u/%u kiválasztva"
-msgstr[1] "%u/%u kiválasztva"
+msgstr[0] "%u modcsomag kijelölve"
+msgstr[1] "%u modcsomag kijelölve"
 
 #: src/nuvashalauncher-download-modpack-browser.c:698
 #: src/nuvashalauncher-errors.c:33
@@ -593,11 +589,10 @@ msgid "The requested file, project, or compatible version was not found."
 msgstr "A kért fájl, projekt vagy kompatibilis verzió nem található."
 
 #: src/nuvashalauncher-download-modpack-details.c:693
-#, fuzzy
 msgid "Install the following modpack?"
 msgid_plural "Install the following modpacks?"
-msgstr[0] "A modcsomag telepítése nem sikerült"
-msgstr[1] "A modcsomag telepítése nem sikerült"
+msgstr[0] "Telepíti a következő modcsomagot?"
+msgstr[1] "Telepíti a következő modcsomagokat?"
 
 #: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"

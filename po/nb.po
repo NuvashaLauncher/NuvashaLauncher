@@ -90,37 +90,37 @@ msgid "by %s"
 msgstr "av %s"
 
 #: src/nuvashalauncher-content-page-browser.c:92
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod selected"
 msgid_plural "%u mods selected"
-msgstr[0] "%u/%u valgt"
-msgstr[1] "%u/%u valgt"
+msgstr[0] "%u mod valgt"
+msgstr[1] "%u mods valgt"
 
 #: src/nuvashalauncher-content-page-browser.c:95
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack selected"
 msgid_plural "%u resource packs selected"
-msgstr[0] "Ressurspakker"
-msgstr[1] "Ressurspakker"
+msgstr[0] "%u ressurspakke valgt"
+msgstr[1] "%u ressurspakker valgt"
 
 #: src/nuvashalauncher-content-page-browser.c:98
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader selected"
 msgid_plural "%u shaders selected"
-msgstr[0] "%u/%u valgt"
-msgstr[1] "%u/%u valgt"
+msgstr[0] "%u shader valgt"
+msgstr[1] "%u shadere valgt"
 
 #: src/nuvashalauncher-content-page-browser.c:101
-#, fuzzy, c-format
+#, c-format
 msgid "%u item selected"
 msgid_plural "%u items selected"
-msgstr[0] "%u/%u valgt"
-msgstr[1] "%u/%u valgt"
+msgstr[0] "%u element valgt"
+msgstr[1] "%u elementer valgt"
 
 #: src/nuvashalauncher-content-page-browser.c:274
 #: src/nuvashalauncher-download-modpack-browser.c:471
 msgid "Select"
-msgstr ""
+msgstr "Velg"
 
 #: src/nuvashalauncher-content-page-browser.c:286
 #: src/nuvashalauncher-content-page-install.c:609
@@ -274,60 +274,56 @@ msgstr ""
 "Dette prosjektet publiserer ingenting som passer til denne forekomsten."
 
 #: src/nuvashalauncher-content-page-install.c:1003
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod is being installed"
 msgid_plural "%u mods are being installed"
-msgstr[0] "%s blir installert"
-msgstr[1] "%s blir installert"
+msgstr[0] "%u mod installeres"
+msgstr[1] "%u mods installeres"
 
 #: src/nuvashalauncher-content-page-install.c:1006
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack is being installed"
 msgid_plural "%u resource packs are being installed"
-msgstr[0] "%s blir installert"
-msgstr[1] "%s blir installert"
+msgstr[0] "%u ressurspakke installeres"
+msgstr[1] "%u ressurspakker installeres"
 
 #: src/nuvashalauncher-content-page-install.c:1009
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader is being installed"
 msgid_plural "%u shaders are being installed"
-msgstr[0] "%s blir installert"
-msgstr[1] "%s blir installert"
+msgstr[0] "%u shader installeres"
+msgstr[1] "%u shadere installeres"
 
 #: src/nuvashalauncher-content-page-install.c:1012
-#, fuzzy, c-format
+#, c-format
 msgid "%u item is being installed"
 msgid_plural "%u items are being installed"
-msgstr[0] "%s blir installert"
-msgstr[1] "%s blir installert"
+msgstr[0] "%u element installeres"
+msgstr[1] "%u elementer installeres"
 
 #: src/nuvashalauncher-content-page-install.c:1038
-#, fuzzy
 msgid "Install the following mod?"
 msgid_plural "Install the following mods?"
-msgstr[0] "Oppdater følgende %s"
-msgstr[1] "Oppdater følgende %s"
+msgstr[0] "Installere følgende mod?"
+msgstr[1] "Installere følgende mods?"
 
 #: src/nuvashalauncher-content-page-install.c:1041
-#, fuzzy
 msgid "Install the following resource pack?"
 msgid_plural "Install the following resource packs?"
-msgstr[0] "Vil du installere den valgte %s?"
-msgstr[1] "Vil du installere den valgte %s?"
+msgstr[0] "Installere følgende ressurspakke?"
+msgstr[1] "Installere følgende ressurspakker?"
 
 #: src/nuvashalauncher-content-page-install.c:1044
-#, fuzzy
 msgid "Install the following shader?"
 msgid_plural "Install the following shaders?"
-msgstr[0] "Oppdater følgende %s"
-msgstr[1] "Oppdater følgende %s"
+msgstr[0] "Installere følgende shader?"
+msgstr[1] "Installere følgende shadere?"
 
 #: src/nuvashalauncher-content-page-install.c:1047
-#, fuzzy
 msgid "Install the following item?"
 msgid_plural "Install the following items?"
-msgstr[0] "Oppdater følgende %s"
-msgstr[1] "Oppdater følgende %s"
+msgstr[0] "Installere følgende element?"
+msgstr[1] "Installere følgende elementer?"
 
 #: src/nuvashalauncher-content-page-installed-delete.c:79
 msgid "The file cannot be deleted"
@@ -542,11 +538,11 @@ msgid "Create"
 msgstr "Skape"
 
 #: src/nuvashalauncher-download-modpack-browser.c:249
-#, fuzzy, c-format
+#, c-format
 msgid "%u modpack selected"
 msgid_plural "%u modpacks selected"
-msgstr[0] "%u/%u valgt"
-msgstr[1] "%u/%u valgt"
+msgstr[0] "%u modpakke valgt"
+msgstr[1] "%u modpakker valgt"
 
 #: src/nuvashalauncher-download-modpack-browser.c:698
 #: src/nuvashalauncher-errors.c:33
@@ -594,11 +590,10 @@ msgstr ""
 "Den forespurte filen, prosjektet eller en kompatibel versjon ble ikke funnet."
 
 #: src/nuvashalauncher-download-modpack-details.c:693
-#, fuzzy
 msgid "Install the following modpack?"
 msgid_plural "Install the following modpacks?"
-msgstr[0] "Det gikk ikke an å installere modpakken"
-msgstr[1] "Det gikk ikke an å installere modpakken"
+msgstr[0] "Installere følgende modpakke?"
+msgstr[1] "Installere følgende modpakker?"
 
 #: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"

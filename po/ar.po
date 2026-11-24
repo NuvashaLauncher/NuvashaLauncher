@@ -91,53 +91,53 @@ msgid "by %s"
 msgstr "بواسطة %s"
 
 #: src/nuvashalauncher-content-page-browser.c:92
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod selected"
 msgid_plural "%u mods selected"
-msgstr[0] "%u/%u محددة"
-msgstr[1] "%u/%u محددة"
-msgstr[2] "%u/%u محددة"
-msgstr[3] "%u/%u محددة"
-msgstr[4] "%u/%u محددة"
-msgstr[5] "%u/%u محددة"
+msgstr[0] "تم تحديد %u مود"
+msgstr[1] "تم تحديد %u مود"
+msgstr[2] "تم تحديد %u مود"
+msgstr[3] "تم تحديد %u مود"
+msgstr[4] "تم تحديد %u مود"
+msgstr[5] "تم تحديد %u مود"
 
 #: src/nuvashalauncher-content-page-browser.c:95
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack selected"
 msgid_plural "%u resource packs selected"
-msgstr[0] "حزم الموارد"
-msgstr[1] "حزم الموارد"
-msgstr[2] "حزم الموارد"
-msgstr[3] "حزم الموارد"
-msgstr[4] "حزم الموارد"
-msgstr[5] "حزم الموارد"
+msgstr[0] "تم تحديد %u حزمة موارد"
+msgstr[1] "تم تحديد %u حزمة موارد"
+msgstr[2] "تم تحديد %u حزمة موارد"
+msgstr[3] "تم تحديد %u حزمة موارد"
+msgstr[4] "تم تحديد %u حزمة موارد"
+msgstr[5] "تم تحديد %u حزمة موارد"
 
 #: src/nuvashalauncher-content-page-browser.c:98
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader selected"
 msgid_plural "%u shaders selected"
-msgstr[0] "%u/%u محددة"
-msgstr[1] "%u/%u محددة"
-msgstr[2] "%u/%u محددة"
-msgstr[3] "%u/%u محددة"
-msgstr[4] "%u/%u محددة"
-msgstr[5] "%u/%u محددة"
+msgstr[0] "تم تحديد %u شادر"
+msgstr[1] "تم تحديد %u شادر"
+msgstr[2] "تم تحديد %u شادر"
+msgstr[3] "تم تحديد %u شادر"
+msgstr[4] "تم تحديد %u شادر"
+msgstr[5] "تم تحديد %u شادر"
 
 #: src/nuvashalauncher-content-page-browser.c:101
-#, fuzzy, c-format
+#, c-format
 msgid "%u item selected"
 msgid_plural "%u items selected"
-msgstr[0] "%u/%u محددة"
-msgstr[1] "%u/%u محددة"
-msgstr[2] "%u/%u محددة"
-msgstr[3] "%u/%u محددة"
-msgstr[4] "%u/%u محددة"
-msgstr[5] "%u/%u محددة"
+msgstr[0] "تم تحديد %u عنصر"
+msgstr[1] "تم تحديد %u عنصر"
+msgstr[2] "تم تحديد %u عنصر"
+msgstr[3] "تم تحديد %u عنصر"
+msgstr[4] "تم تحديد %u عنصر"
+msgstr[5] "تم تحديد %u عنصر"
 
 #: src/nuvashalauncher-content-page-browser.c:274
 #: src/nuvashalauncher-download-modpack-browser.c:471
 msgid "Select"
-msgstr ""
+msgstr "تحديد"
 
 #: src/nuvashalauncher-content-page-browser.c:286
 #: src/nuvashalauncher-content-page-install.c:609
@@ -290,92 +290,88 @@ msgid "This project publishes nothing that fits this instance."
 msgstr "لا ينشر هذا المشروع أي شيء يناسب هذه الحالة."
 
 #: src/nuvashalauncher-content-page-install.c:1003
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod is being installed"
 msgid_plural "%u mods are being installed"
-msgstr[0] "يتم الآن تثبيت %s"
-msgstr[1] "يتم الآن تثبيت %s"
-msgstr[2] "يتم الآن تثبيت %s"
-msgstr[3] "يتم الآن تثبيت %s"
-msgstr[4] "يتم الآن تثبيت %s"
-msgstr[5] "يتم الآن تثبيت %s"
+msgstr[0] "جاري تثبيت %u مود"
+msgstr[1] "جاري تثبيت %u مود"
+msgstr[2] "جاري تثبيت %u مود"
+msgstr[3] "جاري تثبيت %u مود"
+msgstr[4] "جاري تثبيت %u مود"
+msgstr[5] "جاري تثبيت %u مود"
 
 #: src/nuvashalauncher-content-page-install.c:1006
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack is being installed"
 msgid_plural "%u resource packs are being installed"
-msgstr[0] "يتم الآن تثبيت %s"
-msgstr[1] "يتم الآن تثبيت %s"
-msgstr[2] "يتم الآن تثبيت %s"
-msgstr[3] "يتم الآن تثبيت %s"
-msgstr[4] "يتم الآن تثبيت %s"
-msgstr[5] "يتم الآن تثبيت %s"
+msgstr[0] "جاري تثبيت %u حزمة موارد"
+msgstr[1] "جاري تثبيت %u حزمة موارد"
+msgstr[2] "جاري تثبيت %u حزمة موارد"
+msgstr[3] "جاري تثبيت %u حزمة موارد"
+msgstr[4] "جاري تثبيت %u حزمة موارد"
+msgstr[5] "جاري تثبيت %u حزمة موارد"
 
 #: src/nuvashalauncher-content-page-install.c:1009
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader is being installed"
 msgid_plural "%u shaders are being installed"
-msgstr[0] "يتم الآن تثبيت %s"
-msgstr[1] "يتم الآن تثبيت %s"
-msgstr[2] "يتم الآن تثبيت %s"
-msgstr[3] "يتم الآن تثبيت %s"
-msgstr[4] "يتم الآن تثبيت %s"
-msgstr[5] "يتم الآن تثبيت %s"
+msgstr[0] "جاري تثبيت %u شادر"
+msgstr[1] "جاري تثبيت %u شادر"
+msgstr[2] "جاري تثبيت %u شادر"
+msgstr[3] "جاري تثبيت %u شادر"
+msgstr[4] "جاري تثبيت %u شادر"
+msgstr[5] "جاري تثبيت %u شادر"
 
 #: src/nuvashalauncher-content-page-install.c:1012
-#, fuzzy, c-format
+#, c-format
 msgid "%u item is being installed"
 msgid_plural "%u items are being installed"
-msgstr[0] "يتم الآن تثبيت %s"
-msgstr[1] "يتم الآن تثبيت %s"
-msgstr[2] "يتم الآن تثبيت %s"
-msgstr[3] "يتم الآن تثبيت %s"
-msgstr[4] "يتم الآن تثبيت %s"
-msgstr[5] "يتم الآن تثبيت %s"
+msgstr[0] "جاري تثبيت %u عنصر"
+msgstr[1] "جاري تثبيت %u عنصر"
+msgstr[2] "جاري تثبيت %u عنصر"
+msgstr[3] "جاري تثبيت %u عنصر"
+msgstr[4] "جاري تثبيت %u عنصر"
+msgstr[5] "جاري تثبيت %u عنصر"
 
 #: src/nuvashalauncher-content-page-install.c:1038
-#, fuzzy
 msgid "Install the following mod?"
 msgid_plural "Install the following mods?"
-msgstr[0] "قم بتحديث %s التالي"
-msgstr[1] "قم بتحديث %s التالي"
-msgstr[2] "قم بتحديث %s التالي"
-msgstr[3] "قم بتحديث %s التالي"
-msgstr[4] "قم بتحديث %s التالي"
-msgstr[5] "قم بتحديث %s التالي"
+msgstr[0] "تثبيت المود التالي؟"
+msgstr[1] "تثبيت المودات التالية؟"
+msgstr[2] "تثبيت المودات التالية؟"
+msgstr[3] "تثبيت المودات التالية؟"
+msgstr[4] "تثبيت المودات التالية؟"
+msgstr[5] "تثبيت المودات التالية؟"
 
 #: src/nuvashalauncher-content-page-install.c:1041
-#, fuzzy
 msgid "Install the following resource pack?"
 msgid_plural "Install the following resource packs?"
-msgstr[0] "هل تريد تثبيت %s المحدد؟"
-msgstr[1] "هل تريد تثبيت %s المحدد؟"
-msgstr[2] "هل تريد تثبيت %s المحدد؟"
-msgstr[3] "هل تريد تثبيت %s المحدد؟"
-msgstr[4] "هل تريد تثبيت %s المحدد؟"
-msgstr[5] "هل تريد تثبيت %s المحدد؟"
+msgstr[0] "تثبيت حزمة الموارد التالية؟"
+msgstr[1] "تثبيت حزم الموارد التالية؟"
+msgstr[2] "تثبيت حزم الموارد التالية؟"
+msgstr[3] "تثبيت حزم الموارد التالية؟"
+msgstr[4] "تثبيت حزم الموارد التالية؟"
+msgstr[5] "تثبيت حزم الموارد التالية؟"
 
 #: src/nuvashalauncher-content-page-install.c:1044
-#, fuzzy
 msgid "Install the following shader?"
 msgid_plural "Install the following shaders?"
-msgstr[0] "قم بتحديث %s التالي"
-msgstr[1] "قم بتحديث %s التالي"
-msgstr[2] "قم بتحديث %s التالي"
-msgstr[3] "قم بتحديث %s التالي"
-msgstr[4] "قم بتحديث %s التالي"
-msgstr[5] "قم بتحديث %s التالي"
+msgstr[0] "تثبيت الشادر التالي؟"
+msgstr[1] "تثبيت الشادرات التالية؟"
+msgstr[2] "تثبيت الشادرات التالية؟"
+msgstr[3] "تثبيت الشادرات التالية؟"
+msgstr[4] "تثبيت الشادرات التالية؟"
+msgstr[5] "تثبيت الشادرات التالية؟"
 
 #: src/nuvashalauncher-content-page-install.c:1047
-#, fuzzy
 msgid "Install the following item?"
 msgid_plural "Install the following items?"
-msgstr[0] "قم بتحديث %s التالي"
-msgstr[1] "قم بتحديث %s التالي"
-msgstr[2] "قم بتحديث %s التالي"
-msgstr[3] "قم بتحديث %s التالي"
-msgstr[4] "قم بتحديث %s التالي"
-msgstr[5] "قم بتحديث %s التالي"
+msgstr[0] "تثبيت العنصر التالي؟"
+msgstr[1] "تثبيت العناصر التالية؟"
+msgstr[2] "تثبيت العناصر التالية؟"
+msgstr[3] "تثبيت العناصر التالية؟"
+msgstr[4] "تثبيت العناصر التالية؟"
+msgstr[5] "تثبيت العناصر التالية؟"
 
 #: src/nuvashalauncher-content-page-installed-delete.c:79
 msgid "The file cannot be deleted"
@@ -592,15 +588,15 @@ msgid "Create"
 msgstr "يخلق"
 
 #: src/nuvashalauncher-download-modpack-browser.c:249
-#, fuzzy, c-format
+#, c-format
 msgid "%u modpack selected"
 msgid_plural "%u modpacks selected"
-msgstr[0] "%u/%u محددة"
-msgstr[1] "%u/%u محددة"
-msgstr[2] "%u/%u محددة"
-msgstr[3] "%u/%u محددة"
-msgstr[4] "%u/%u محددة"
-msgstr[5] "%u/%u محددة"
+msgstr[0] "تم تحديد %u حزمة مودات"
+msgstr[1] "تم تحديد %u حزمة مودات"
+msgstr[2] "تم تحديد %u حزمة مودات"
+msgstr[3] "تم تحديد %u حزمة مودات"
+msgstr[4] "تم تحديد %u حزمة مودات"
+msgstr[5] "تم تحديد %u حزمة مودات"
 
 #: src/nuvashalauncher-download-modpack-browser.c:698
 #: src/nuvashalauncher-errors.c:33
@@ -647,15 +643,14 @@ msgid "The requested file, project, or compatible version was not found."
 msgstr "لم يُعثر على الملف أو المشروع أو الإصدار المتوافق المطلوب."
 
 #: src/nuvashalauncher-download-modpack-details.c:693
-#, fuzzy
 msgid "Install the following modpack?"
 msgid_plural "Install the following modpacks?"
-msgstr[0] "تعذر تثبيت حزمة التعديلات"
-msgstr[1] "تعذر تثبيت حزمة التعديلات"
-msgstr[2] "تعذر تثبيت حزمة التعديلات"
-msgstr[3] "تعذر تثبيت حزمة التعديلات"
-msgstr[4] "تعذر تثبيت حزمة التعديلات"
-msgstr[5] "تعذر تثبيت حزمة التعديلات"
+msgstr[0] "تثبيت حزمة المودات التالية؟"
+msgstr[1] "تثبيت حزم المودات التالية؟"
+msgstr[2] "تثبيت حزم المودات التالية؟"
+msgstr[3] "تثبيت حزم المودات التالية؟"
+msgstr[4] "تثبيت حزم المودات التالية؟"
+msgstr[5] "تثبيت حزم المودات التالية؟"
 
 #: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"

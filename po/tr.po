@@ -89,37 +89,37 @@ msgid "by %s"
 msgstr "%s tarafından"
 
 #: src/nuvashalauncher-content-page-browser.c:92
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod selected"
 msgid_plural "%u mods selected"
-msgstr[0] "%u/%u seçildi"
-msgstr[1] "%u/%u seçildi"
+msgstr[0] "%u mod seçildi"
+msgstr[1] "%u mod seçildi"
 
 #: src/nuvashalauncher-content-page-browser.c:95
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack selected"
 msgid_plural "%u resource packs selected"
-msgstr[0] "Kaynak Paketleri"
-msgstr[1] "Kaynak Paketleri"
+msgstr[0] "%u kaynak paketi seçildi"
+msgstr[1] "%u kaynak paketi seçildi"
 
 #: src/nuvashalauncher-content-page-browser.c:98
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader selected"
 msgid_plural "%u shaders selected"
-msgstr[0] "%u/%u seçildi"
-msgstr[1] "%u/%u seçildi"
+msgstr[0] "%u gölgelendirici seçildi"
+msgstr[1] "%u gölgelendirici seçildi"
 
 #: src/nuvashalauncher-content-page-browser.c:101
-#, fuzzy, c-format
+#, c-format
 msgid "%u item selected"
 msgid_plural "%u items selected"
-msgstr[0] "%u/%u seçildi"
-msgstr[1] "%u/%u seçildi"
+msgstr[0] "%u öğe seçildi"
+msgstr[1] "%u öğe seçildi"
 
 #: src/nuvashalauncher-content-page-browser.c:274
 #: src/nuvashalauncher-download-modpack-browser.c:471
 msgid "Select"
-msgstr ""
+msgstr "Seç"
 
 #: src/nuvashalauncher-content-page-browser.c:286
 #: src/nuvashalauncher-content-page-install.c:609
@@ -272,60 +272,56 @@ msgid "This project publishes nothing that fits this instance."
 msgstr "Bu proje bu örneğe uyan hiçbir şey yayımlamıyor."
 
 #: src/nuvashalauncher-content-page-install.c:1003
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod is being installed"
 msgid_plural "%u mods are being installed"
-msgstr[0] "%s yükleniyor"
-msgstr[1] "%s yükleniyor"
+msgstr[0] "%u mod yükleniyor"
+msgstr[1] "%u mod yükleniyor"
 
 #: src/nuvashalauncher-content-page-install.c:1006
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack is being installed"
 msgid_plural "%u resource packs are being installed"
-msgstr[0] "%s yükleniyor"
-msgstr[1] "%s yükleniyor"
+msgstr[0] "%u kaynak paketi yükleniyor"
+msgstr[1] "%u kaynak paketi yükleniyor"
 
 #: src/nuvashalauncher-content-page-install.c:1009
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader is being installed"
 msgid_plural "%u shaders are being installed"
-msgstr[0] "%s yükleniyor"
-msgstr[1] "%s yükleniyor"
+msgstr[0] "%u gölgelendirici yükleniyor"
+msgstr[1] "%u gölgelendirici yükleniyor"
 
 #: src/nuvashalauncher-content-page-install.c:1012
-#, fuzzy, c-format
+#, c-format
 msgid "%u item is being installed"
 msgid_plural "%u items are being installed"
-msgstr[0] "%s yükleniyor"
-msgstr[1] "%s yükleniyor"
+msgstr[0] "%u öğe yükleniyor"
+msgstr[1] "%u öğe yükleniyor"
 
 #: src/nuvashalauncher-content-page-install.c:1038
-#, fuzzy
 msgid "Install the following mod?"
 msgid_plural "Install the following mods?"
-msgstr[0] "Şunları güncelle: %s"
-msgstr[1] "Şunları güncelle: %s"
+msgstr[0] "Aşağıdaki mod yüklensin mi?"
+msgstr[1] "Aşağıdaki modlar yüklensin mi?"
 
 #: src/nuvashalauncher-content-page-install.c:1041
-#, fuzzy
 msgid "Install the following resource pack?"
 msgid_plural "Install the following resource packs?"
-msgstr[0] "Seçili %s yüklensin mi?"
-msgstr[1] "Seçili %s yüklensin mi?"
+msgstr[0] "Aşağıdaki kaynak paketi yüklensin mi?"
+msgstr[1] "Aşağıdaki kaynak paketleri yüklensin mi?"
 
 #: src/nuvashalauncher-content-page-install.c:1044
-#, fuzzy
 msgid "Install the following shader?"
 msgid_plural "Install the following shaders?"
-msgstr[0] "Şunları güncelle: %s"
-msgstr[1] "Şunları güncelle: %s"
+msgstr[0] "Aşağıdaki gölgelendirici yüklensin mi?"
+msgstr[1] "Aşağıdaki gölgelendiriciler yüklensin mi?"
 
 #: src/nuvashalauncher-content-page-install.c:1047
-#, fuzzy
 msgid "Install the following item?"
 msgid_plural "Install the following items?"
-msgstr[0] "Şunları güncelle: %s"
-msgstr[1] "Şunları güncelle: %s"
+msgstr[0] "Aşağıdaki öğe yüklensin mi?"
+msgstr[1] "Aşağıdaki öğeler yüklensin mi?"
 
 #: src/nuvashalauncher-content-page-installed-delete.c:79
 msgid "The file cannot be deleted"
@@ -540,11 +536,11 @@ msgid "Create"
 msgstr "Oluştur"
 
 #: src/nuvashalauncher-download-modpack-browser.c:249
-#, fuzzy, c-format
+#, c-format
 msgid "%u modpack selected"
 msgid_plural "%u modpacks selected"
-msgstr[0] "%u/%u seçildi"
-msgstr[1] "%u/%u seçildi"
+msgstr[0] "%u mod paketi seçildi"
+msgstr[1] "%u mod paketi seçildi"
 
 #: src/nuvashalauncher-download-modpack-browser.c:698
 #: src/nuvashalauncher-errors.c:33
@@ -591,11 +587,10 @@ msgid "The requested file, project, or compatible version was not found."
 msgstr "İstenen dosya, proje veya uyumlu sürüm bulunamadı."
 
 #: src/nuvashalauncher-download-modpack-details.c:693
-#, fuzzy
 msgid "Install the following modpack?"
 msgid_plural "Install the following modpacks?"
-msgstr[0] "Mod paketi yüklenemedi"
-msgstr[1] "Mod paketi yüklenemedi"
+msgstr[0] "Aşağıdaki mod paketi yüklensin mi?"
+msgstr[1] "Aşağıdaki mod paketleri yüklensin mi?"
 
 #: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"

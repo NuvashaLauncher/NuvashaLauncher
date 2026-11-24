@@ -89,37 +89,37 @@ msgid "by %s"
 msgstr "bởi %s"
 
 #: src/nuvashalauncher-content-page-browser.c:92
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod selected"
 msgid_plural "%u mods selected"
-msgstr[0] "Đã chọn %u/%u"
-msgstr[1] "Đã chọn %u/%u"
+msgstr[0] "Đã chọn %u mod"
+msgstr[1] "Đã chọn %u mod"
 
 #: src/nuvashalauncher-content-page-browser.c:95
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack selected"
 msgid_plural "%u resource packs selected"
-msgstr[0] "Gói tài nguyên"
-msgstr[1] "Gói tài nguyên"
+msgstr[0] "Đã chọn %u gói tài nguyên"
+msgstr[1] "Đã chọn %u gói tài nguyên"
 
 #: src/nuvashalauncher-content-page-browser.c:98
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader selected"
 msgid_plural "%u shaders selected"
-msgstr[0] "Đã chọn %u/%u"
-msgstr[1] "Đã chọn %u/%u"
+msgstr[0] "Đã chọn %u shader"
+msgstr[1] "Đã chọn %u shader"
 
 #: src/nuvashalauncher-content-page-browser.c:101
-#, fuzzy, c-format
+#, c-format
 msgid "%u item selected"
 msgid_plural "%u items selected"
-msgstr[0] "Đã chọn %u/%u"
-msgstr[1] "Đã chọn %u/%u"
+msgstr[0] "Đã chọn %u mục"
+msgstr[1] "Đã chọn %u mục"
 
 #: src/nuvashalauncher-content-page-browser.c:274
 #: src/nuvashalauncher-download-modpack-browser.c:471
 msgid "Select"
-msgstr ""
+msgstr "Chọn"
 
 #: src/nuvashalauncher-content-page-browser.c:286
 #: src/nuvashalauncher-content-page-install.c:609
@@ -272,60 +272,56 @@ msgid "This project publishes nothing that fits this instance."
 msgstr "Dự án này không xuất bản gì phù hợp với trường hợp này."
 
 #: src/nuvashalauncher-content-page-install.c:1003
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod is being installed"
 msgid_plural "%u mods are being installed"
-msgstr[0] "%s đang được cài đặt"
-msgstr[1] "%s đang được cài đặt"
+msgstr[0] "Đang cài đặt %u mod"
+msgstr[1] "Đang cài đặt %u mod"
 
 #: src/nuvashalauncher-content-page-install.c:1006
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack is being installed"
 msgid_plural "%u resource packs are being installed"
-msgstr[0] "%s đang được cài đặt"
-msgstr[1] "%s đang được cài đặt"
+msgstr[0] "Đang cài đặt %u gói tài nguyên"
+msgstr[1] "Đang cài đặt %u gói tài nguyên"
 
 #: src/nuvashalauncher-content-page-install.c:1009
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader is being installed"
 msgid_plural "%u shaders are being installed"
-msgstr[0] "%s đang được cài đặt"
-msgstr[1] "%s đang được cài đặt"
+msgstr[0] "Đang cài đặt %u shader"
+msgstr[1] "Đang cài đặt %u shader"
 
 #: src/nuvashalauncher-content-page-install.c:1012
-#, fuzzy, c-format
+#, c-format
 msgid "%u item is being installed"
 msgid_plural "%u items are being installed"
-msgstr[0] "%s đang được cài đặt"
-msgstr[1] "%s đang được cài đặt"
+msgstr[0] "Đang cài đặt %u mục"
+msgstr[1] "Đang cài đặt %u mục"
 
 #: src/nuvashalauncher-content-page-install.c:1038
-#, fuzzy
 msgid "Install the following mod?"
 msgid_plural "Install the following mods?"
-msgstr[0] "Cập nhật %s sau"
-msgstr[1] "Cập nhật %s sau"
+msgstr[0] "Cài đặt mod sau?"
+msgstr[1] "Cài đặt mod sau?"
 
 #: src/nuvashalauncher-content-page-install.c:1041
-#, fuzzy
 msgid "Install the following resource pack?"
 msgid_plural "Install the following resource packs?"
-msgstr[0] "Cài đặt %s đã chọn?"
-msgstr[1] "Cài đặt %s đã chọn?"
+msgstr[0] "Cài đặt gói tài nguyên sau?"
+msgstr[1] "Cài đặt gói tài nguyên sau?"
 
 #: src/nuvashalauncher-content-page-install.c:1044
-#, fuzzy
 msgid "Install the following shader?"
 msgid_plural "Install the following shaders?"
-msgstr[0] "Cập nhật %s sau"
-msgstr[1] "Cập nhật %s sau"
+msgstr[0] "Cài đặt shader sau?"
+msgstr[1] "Cài đặt shader sau?"
 
 #: src/nuvashalauncher-content-page-install.c:1047
-#, fuzzy
 msgid "Install the following item?"
 msgid_plural "Install the following items?"
-msgstr[0] "Cập nhật %s sau"
-msgstr[1] "Cập nhật %s sau"
+msgstr[0] "Cài đặt mục sau?"
+msgstr[1] "Cài đặt mục sau?"
 
 #: src/nuvashalauncher-content-page-installed-delete.c:79
 msgid "The file cannot be deleted"
@@ -539,11 +535,11 @@ msgid "Create"
 msgstr "Tạo nên"
 
 #: src/nuvashalauncher-download-modpack-browser.c:249
-#, fuzzy, c-format
+#, c-format
 msgid "%u modpack selected"
 msgid_plural "%u modpacks selected"
-msgstr[0] "Đã chọn %u/%u"
-msgstr[1] "Đã chọn %u/%u"
+msgstr[0] "Đã chọn %u modpack"
+msgstr[1] "Đã chọn %u modpack"
 
 #: src/nuvashalauncher-download-modpack-browser.c:698
 #: src/nuvashalauncher-errors.c:33
@@ -590,11 +586,10 @@ msgid "The requested file, project, or compatible version was not found."
 msgstr "Không tìm thấy tệp, dự án hoặc phiên bản tương thích được yêu cầu."
 
 #: src/nuvashalauncher-download-modpack-details.c:693
-#, fuzzy
 msgid "Install the following modpack?"
 msgid_plural "Install the following modpacks?"
-msgstr[0] "Không thể cài đặt modpack"
-msgstr[1] "Không thể cài đặt modpack"
+msgstr[0] "Cài đặt modpack sau?"
+msgstr[1] "Cài đặt modpack sau?"
 
 #: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"

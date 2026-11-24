@@ -90,37 +90,37 @@ msgid "by %s"
 msgstr "autor: %s"
 
 #: src/nuvashalauncher-content-page-browser.c:92
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod selected"
 msgid_plural "%u mods selected"
-msgstr[0] "Wybrano: %u/%u"
-msgstr[1] "Wybrano: %u/%u"
+msgstr[0] "Wybrano %u mod"
+msgstr[1] "Wybrano %u mody"
 
 #: src/nuvashalauncher-content-page-browser.c:95
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack selected"
 msgid_plural "%u resource packs selected"
-msgstr[0] "Paki zasobów"
-msgstr[1] "Paki zasobów"
+msgstr[0] "Wybrano %u paczkę zasobów"
+msgstr[1] "Wybrano %u paczki zasobów"
 
 #: src/nuvashalauncher-content-page-browser.c:98
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader selected"
 msgid_plural "%u shaders selected"
-msgstr[0] "Wybrano: %u/%u"
-msgstr[1] "Wybrano: %u/%u"
+msgstr[0] "Wybrano %u shader"
+msgstr[1] "Wybrano %u shadery"
 
 #: src/nuvashalauncher-content-page-browser.c:101
-#, fuzzy, c-format
+#, c-format
 msgid "%u item selected"
 msgid_plural "%u items selected"
-msgstr[0] "Wybrano: %u/%u"
-msgstr[1] "Wybrano: %u/%u"
+msgstr[0] "Wybrano %u element"
+msgstr[1] "Wybrano %u elementy"
 
 #: src/nuvashalauncher-content-page-browser.c:274
 #: src/nuvashalauncher-download-modpack-browser.c:471
 msgid "Select"
-msgstr ""
+msgstr "Wybierz"
 
 #: src/nuvashalauncher-content-page-browser.c:286
 #: src/nuvashalauncher-content-page-install.c:609
@@ -273,60 +273,56 @@ msgid "This project publishes nothing that fits this instance."
 msgstr "Ten projekt nie publikuje niczego zgodnego z tą instancją."
 
 #: src/nuvashalauncher-content-page-install.c:1003
-#, fuzzy, c-format
+#, c-format
 msgid "%u mod is being installed"
 msgid_plural "%u mods are being installed"
-msgstr[0] "Instalowanie %s"
-msgstr[1] "Instalowanie %s"
+msgstr[0] "Instalowanie %u moda"
+msgstr[1] "Instalowanie %u modów"
 
 #: src/nuvashalauncher-content-page-install.c:1006
-#, fuzzy, c-format
+#, c-format
 msgid "%u resource pack is being installed"
 msgid_plural "%u resource packs are being installed"
-msgstr[0] "Instalowanie %s"
-msgstr[1] "Instalowanie %s"
+msgstr[0] "Instalowanie %u paczki zasobów"
+msgstr[1] "Instalowanie %u paczek zasobów"
 
 #: src/nuvashalauncher-content-page-install.c:1009
-#, fuzzy, c-format
+#, c-format
 msgid "%u shader is being installed"
 msgid_plural "%u shaders are being installed"
-msgstr[0] "Instalowanie %s"
-msgstr[1] "Instalowanie %s"
+msgstr[0] "Instalowanie %u shadera"
+msgstr[1] "Instalowanie %u shaderów"
 
 #: src/nuvashalauncher-content-page-install.c:1012
-#, fuzzy, c-format
+#, c-format
 msgid "%u item is being installed"
 msgid_plural "%u items are being installed"
-msgstr[0] "Instalowanie %s"
-msgstr[1] "Instalowanie %s"
+msgstr[0] "Instalowanie %u elementu"
+msgstr[1] "Instalowanie %u elementów"
 
 #: src/nuvashalauncher-content-page-install.c:1038
-#, fuzzy
 msgid "Install the following mod?"
 msgid_plural "Install the following mods?"
-msgstr[0] "Zaktualizować następujące %s"
-msgstr[1] "Zaktualizować następujące %s"
+msgstr[0] "Zainstalować następujący mod?"
+msgstr[1] "Zainstalować następujące mody?"
 
 #: src/nuvashalauncher-content-page-install.c:1041
-#, fuzzy
 msgid "Install the following resource pack?"
 msgid_plural "Install the following resource packs?"
-msgstr[0] "Zainstalować wybrane %s?"
-msgstr[1] "Zainstalować wybrane %s?"
+msgstr[0] "Zainstalować następującą paczkę zasobów?"
+msgstr[1] "Zainstalować następujące paczki zasobów?"
 
 #: src/nuvashalauncher-content-page-install.c:1044
-#, fuzzy
 msgid "Install the following shader?"
 msgid_plural "Install the following shaders?"
-msgstr[0] "Zaktualizować następujące %s"
-msgstr[1] "Zaktualizować następujące %s"
+msgstr[0] "Zainstalować następujący shader?"
+msgstr[1] "Zainstalować następujące shadery?"
 
 #: src/nuvashalauncher-content-page-install.c:1047
-#, fuzzy
 msgid "Install the following item?"
 msgid_plural "Install the following items?"
-msgstr[0] "Zaktualizować następujące %s"
-msgstr[1] "Zaktualizować następujące %s"
+msgstr[0] "Zainstalować następujący element?"
+msgstr[1] "Zainstalować następujące elementy?"
 
 #: src/nuvashalauncher-content-page-installed-delete.c:79
 msgid "The file cannot be deleted"
@@ -540,11 +536,11 @@ msgid "Create"
 msgstr "Stwórz"
 
 #: src/nuvashalauncher-download-modpack-browser.c:249
-#, fuzzy, c-format
+#, c-format
 msgid "%u modpack selected"
 msgid_plural "%u modpacks selected"
-msgstr[0] "Wybrano: %u/%u"
-msgstr[1] "Wybrano: %u/%u"
+msgstr[0] "Wybrano %u paczkę modów"
+msgstr[1] "Wybrano %u paczki modów"
 
 #: src/nuvashalauncher-download-modpack-browser.c:698
 #: src/nuvashalauncher-errors.c:33
@@ -591,11 +587,10 @@ msgid "The requested file, project, or compatible version was not found."
 msgstr "Nie znaleziono żądanego pliku, projektu lub zgodnej wersji."
 
 #: src/nuvashalauncher-download-modpack-details.c:693
-#, fuzzy
 msgid "Install the following modpack?"
 msgid_plural "Install the following modpacks?"
-msgstr[0] "Nie udało się zainstalować pakietu modów"
-msgstr[1] "Nie udało się zainstalować pakietu modów"
+msgstr[0] "Zainstalować następującą paczkę modów?"
+msgstr[1] "Zainstalować następujące paczki modów?"
 
 #: src/nuvashalauncher-download-modpack-dialog.c:256
 msgid "Reading modpack"
