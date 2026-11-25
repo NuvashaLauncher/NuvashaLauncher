@@ -68,12 +68,20 @@ jobs:
           apt-get update -o Acquire::Languages=none
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
              gcc make pkg-config gettext \
+             xvfb adwaita-icon-theme \
              libasan8 libubsan1 \
              libglib2.0-dev libgtk-4-dev libadwaita-1-dev libepoxy-dev \
              libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
 
       - name: Build and run tests
-        run: make -j$(nproc) all test CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
+        run: |
+          make -j$(nproc) all CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
+          xvfb-run -a -s "-screen 0 1280x800x24" \
+            env GDK_BACKEND=x11 GSK_RENDERER=cairo \
+            make -j$(nproc) test CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
 
       - name: Run sanitizer tests
-        run: make -j$(nproc) test-debug CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
+        run: |
+          xvfb-run -a -s "-screen 0 1280x800x24" \
+            env GDK_BACKEND=x11 GSK_RENDERER=cairo \
+            make -j$(nproc) test-debug CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
