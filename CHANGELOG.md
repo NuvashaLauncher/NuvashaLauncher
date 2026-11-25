@@ -2,6 +2,22 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [1.9] - 2026-11-25
+
+### Security & Flatpak Sandbox
+- **XDG Secret Portal in Flatpak**: Removed `--talk-name=org.freedesktop.secrets` from `packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml` so `libsecret` uses the sandboxed XDG Secret Portal instead of direct host keyring access.
+
+### UI & Modpack Import
+- **Headless Local `.mrpack` Import**: Importing a local `.mrpack` file now runs directly in the background via the header downloads indicator instead of opening the modpack browser dialog.
+- **Version Picker Icon**: Replaced the download icon on mod, resource pack, shader pack, and modpack browser row install buttons with `pan-down-symbolic`.
+- **Cleaner Empty States**: Removed small description subtitles from empty instance tabs (Mods, Resource packs, Shader packs, Worlds, Servers) and updated the empty instances prompt to "Press the + to create an instance." across all 28 translation catalogs (removing unused strings).
+
+### Documentation & CI
+- **Documentation Refresh**: Updated and streamlined `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, `docs/architecture.md`, and packaging READMEs.
+- **Headless Display Tests in CI**: Enabled display-backed GTK tests under `dbus-run-session` and `xvfb-run` in `.github/workflows/build.yml` on both `x86_64` and `ARM64`.
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.8...v1.9
+
 ## [1.8] - 2026-11-24
 
 ### Flatpak & Display Compatibility

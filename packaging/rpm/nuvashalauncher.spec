@@ -1,5 +1,5 @@
 Name:           nuvashalauncher
-Version:        %{?_version}%{!?_version:1.8}
+Version:        %{?_version}%{!?_version:1.9}
 Release:        1%{?dist}
 Summary:        Minecraft launcher for Linux
 
@@ -80,6 +80,9 @@ appstream-util validate-relax --nonet %{buildroot}%{_datadir}/metainfo/com.githu
 %{_datadir}/mime/packages/com.github.NuvashaLauncher.NuvashaLauncher.xml
 
 %changelog
+* Wed Nov 25 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.9-1
+- Release Nuvasha Launcher 1.9
+
 * Tue Nov 24 2026 aKpobzwviq <nuvashalauncher@gmail.com> - 1.8-1
 - Release Nuvasha Launcher 1.8
 

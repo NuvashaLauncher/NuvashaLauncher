@@ -82,6 +82,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.9" date="2026-11-25">
+      <description>
+        <p>Release 1.9 tightens Flatpak permissions by switching account storage to the XDG Secret Portal, runs local .mrpack imports in the background without opening the modpack browser, updates browser version-picker icons, streamlines empty states and translations, refreshes documentation, and enables headless display tests in CI.</p>
+      </description>
+    </release>
     <release version="1.8" date="2026-11-24">
       <description>
         <p>Release 1.8 enables X11/XWayland socket access in the Flatpak sandbox so Minecraft launches on Wayland sessions, automatically fetches Modrinth titles and icons for modpack-installed content, shows Default instead of 0 for unset instance RAM, and replaces text buttons in the skin dialog with right-aligned import and export icon buttons.</p>
