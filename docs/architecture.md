@@ -1,104 +1,67 @@
-# Nuvasha Launcher architecture
+# Architecture
 
-This document describes Nuvasha Launcher's module boundaries, cross-module flows,
-and invariants.
+This document covers Nuvasha Launcher's module boundaries, data flows, persistence layout, and security invariants. Public headers in `src/` serve as the API reference.
 
-It does not list every source file. Public headers contain the API reference;
-this document records the design decisions behind the module layout.
+## Overview
 
-## What the program is
+Nuvasha Launcher is a single-binary GTK 4 / libadwaita desktop application for Linux. It manages Minecraft instances, downloads Minecraft and Modrinth content, selects a compatible Java runtime, and spawns one game process per instance—without a background daemon.
 
-Nuvasha Launcher is a Linux GTK 4/libadwaita desktop application. It manages Minecraft
-instances, obtains Minecraft and Modrinth content, chooses a Java runtime, and
-starts one game process per instance. It is a single executable and does not
-require a separate daemon or background service.
+Long-running network, filesystem, and subprocess operations expose GIO-style async APIs that return results on the thread-default main context (normally the GTK main loop). UI widgets trigger operations and react to signals, while models, managers, and launchers own the underlying state and transfers.
 
-The application is event-driven. Network requests, subprocesses, and longer
-filesystem operations expose GIO-style asynchronous APIs. Results are handed
-back to the thread-default main context that started the operation, normally
-the GTK main loop. UI code starts operations and reacts to signals or
-callbacks; it does not own the lower-level transfer or process state.
-
-The main process contains two kinds of state:
-
-- **Application state:** instances, accounts, settings, active downloads, and
-  launchers.
-- **Content state:** Minecraft metadata, libraries, assets, natives, cached API
-  responses, and files inside instance directories.
-
-The boundary matters. An instance is a model object and knows how to validate
-and serialize itself, but it does not perform network I/O or create widgets.
-Likewise, the UI presents a launcher or a download entry but does not become
-the owner of that operation.
-
-## System context
+## System Context
 
 ```mermaid
 flowchart LR
     User[User]
-    launcher[Nuvasha Launcher]
+    Launcher[Nuvasha Launcher]
     CLI[CLI commands]
-    Mojang[Mojang launcher metadata
-and game resources]
-    Modrinth[Modrinth API and files]
-    Microsoft[Microsoft identity,
-Xbox Live, Minecraft services]
-    Secrets[Desktop Secret Service
-account keyring]
+    Mojang[Mojang metadata & assets]
+    Modrinth[Modrinth v2 API & files]
+    Microsoft[Microsoft / Xbox Live / MC services]
+    Secrets[libsecret / Secret Portal]
     Desktop[Desktop URI handler]
-    Java[Selected Java runtime]
-    Flatpak[Flatpak application sandbox]
+    Java[Java runtime]
+    Flatpak[Flatpak sandbox]
 
-    User <--> launcher
-    User --> CLI --> launcher
-    launcher --> Mojang
-    launcher --> Modrinth
-    launcher --> Microsoft
-    launcher <--> Secrets
-    launcher --> Java
-    Flatpak -. contains the Flatpak build .-> launcher
-    launcher --> Desktop
+    User <--> Launcher
+    User --> CLI --> Launcher
+    Launcher --> Mojang
+    Launcher --> Modrinth
+    Launcher --> Microsoft
+    Launcher <--> Secrets
+    Launcher --> Java
+    Flatpak -. wraps Flatpak build .-> Launcher
+    Launcher --> Desktop
 ```
 
-External services are used directly by their owning modules:
+External integrations live in dedicated modules:
 
-- Mojang's version manifest and version documents are parsed by
-  `nuvashalauncher-minecraft-versions.c`; resolved files are fetched by the download
-  service.
-- The Modrinth v2 API is handled by `nuvashalauncher-modrinth.c`.
-- Microsoft device authorization, Xbox Live/XSTS, Minecraft authentication,
-  entitlements, and profile requests are the steps in
-  `nuvashalauncher-auth-microsoft.c`.
-- Account records and the active-account selection are stored through the
-  desktop Secret Service by `nuvashalauncher-secret-store.c`. The launcher
-  requires a Secret Service provider for account persistence.
-- `gtk_show_uri()` / desktop URI handlers open external links and instance folders.
+- **Mojang metadata:** `nuvashalauncher-minecraft-versions.c` parses the version manifest and version JSONs; `nuvashalauncher-download.c` fetches artifacts.
+- **Modrinth API:** `nuvashalauncher-modrinth.c` and `nuvashalauncher-modrinth-requests.c` handle search, projects, versions, and hash lookups.
+- **Microsoft auth:** `nuvashalauncher-auth-microsoft.c` implements device-code login, Xbox Live / XSTS exchange, Minecraft auth, entitlements, and profile loading.
+- **Secrets:** `nuvashalauncher-secret-store.c` persists account records and active-account selection via `libsecret` (the XDG Secret Portal in Flatpak builds, or the desktop Secret Service natively).
+- **Desktop URIs:** External links and instance/content folders open asynchronously via `g_app_info_launch_default_for_uri_async()`.
 
-## Static structure
-
-The source is split by responsibility rather than by a framework layer. Most
-modules have a public header describing the contract and, where necessary, a
-private header for shared implementation state.
+## Module Layout
 
 ```mermaid
 flowchart TD
     Main[main.c]
-    Window[Main window and pages]
+    Window[Main window & pages]
     Model[Main-window model]
-    Instances[Instance model and manager]
-    Accounts[Accounts and authentication]
+    Instances[Instance model & manager]
+    Accounts[Accounts & auth]
     Settings[Settings]
-    Content[Modrinth and content models]
+    Content[Modrinth & content models]
     Packs[Modpack import/export/install]
-    Versions[Minecraft metadata and rules]
-    Loaders[Loader metadata and installation]
-    Resolve[Version resolve]
-    Downloads[Download service, slots, cache]
-    Launch[Launcher and process monitor]
+    Versions[Minecraft metadata & rules]
+    Loaders[Loader metadata & install]
+    Resolve[Version resolver]
+    Downloads[Download service & cache]
+    Launch[Launcher & process monitor]
     Java[Java detection]
-    Skins[Skins and capes]
-    Flatpak[Flatpak application sandbox]
-    FS[Filesystem and JSON helpers]
+    Skins[Skins & capes]
+    FS[Filesystem & JSON helpers]
 
     Main --> Window
     Window --> Model
@@ -120,299 +83,80 @@ flowchart TD
     Resolve --> Versions
     Resolve --> Loaders
     Resolve --> Downloads
-    Launch -. Flatpak build .-> Flatpak
     Instances --> FS
     Accounts --> FS
     Downloads --> FS
     Skins --> FS
 ```
 
-### Application and UI
+### Application & UI
 
-`main.c` initializes translations early in startup (before creating threads),
-creates the `AdwApplication`, loads the instance store, and normally presents
-the one `NuvashaLauncherMainWindow`. A second activation focuses the existing
-window rather than creating another one. Headless CLI commands (such as listing
-instances, accounts, worlds, or servers, creating/removing/exporting instances,
-clearing the cache, or launching with `--headless`, `--world`, or `--server`)
-are handled directly by `nuvashalauncher-cli.c` without requiring a display.
-When launching through the GUI path, the window/model is created to reuse the
-normal ownership and launcher state machine, while live output remains owned by
-the launcher's log buffer.
+`main.c` initializes translations before creating threads, handles headless CLI commands through `nuvashalauncher-cli.c` (such as listing/managing instances, accounts, worlds, and servers, clearing the cache, or `--launch --headless`), and otherwise starts `AdwApplication` with a single `NuvashaLauncherMainWindow`.
 
-The main window owns a `NuvashaLauncherMainWindowModel`. The model groups the
-process-wide objects used by the UI:
+`NuvashaLauncherMainWindowModel` groups the window's shared objects: `NuvashaLauncherInstanceManager`, `NuvashaLauncherDownloadService`, `NuvashaLauncherSettings`, `NuvashaLauncherAccounts`, and hash tables of active launchers and open instance dialogs keyed by instance ID.
 
-- `NuvashaLauncherInstanceManager`
-- `NuvashaLauncherDownloadService`
-- `NuvashaLauncherSettings`
-- `NuvashaLauncherAccounts`
-- launchers and instance dialogs, keyed by instance
+UI templates (`data/ui/*.ui`), `data/nuvashalauncher.css`, `data/pack.png`, and custom symbolic icons (`export-symbolic.svg`, `import-symbolic.svg`, `external-link-symbolic.svg`) are compiled into a GResource embedded in the binary.
 
-The window is the presentation boundary. `nuvashalauncher-main-window-*.c` files
-connect model signals and the process-wide `NuvashaLauncherDownloads` display
-manager (`nuvashalauncher_downloads_get_default()`) to widgets, create the
-header-bar `NuvashaLauncherUsersPopover`, and let page and dialog modules handle
-their own views. Widgets declared in `data/ui/*.ui`, `nuvashalauncher.css`,
-`pack.png`, and symbolic action icons (`export-symbolic.svg`,
-`import-symbolic.svg`, `external-link-symbolic.svg`) are compiled into a GResource by the Makefile. The
-UI is therefore available from the installed binary; it is not read from the
-source tree at runtime.
-
-The downloads display is separate from the dialog that started a
-download. `NuvashaLauncherDownloads` is process-wide, owns entries while they run, and
-lets the header show work started from any page. Closing an installer dialog
-does not cancel its operation.
+`NuvashaLauncherDownloads` (`nuvashalauncher_downloads_get_default()`) tracks active downloads process-wide for the header-bar popover, decoupled from the dialog that started them—closing a dialog does not cancel its in-flight install.
 
 ### Instances
 
-`NuvashaLauncherInstance` is a validated, serializable model for one Minecraft
-installation. It contains a stable ID, display name, directory, Minecraft
-version, loader, loader version, Java choice, memory limit (`memory-mib`), JVM
-arguments, and component metadata. It has no widgets, network calls, or
-persistence side effects.
+`NuvashaLauncherInstance` is a validated, serializable model holding an instance's ID, name, directory, Minecraft version, loader, loader version, Java path, memory limit (`memory-mib`), JVM arguments, and component metadata.
 
-`NuvashaLauncherInstanceManager` owns the `GListStore` of instances and persists the
-list to `instances.json`. It also owns operations that change the directory
-layout:
+`NuvashaLauncherInstanceManager` owns the `GListStore` of instances, persists `instances.json`, and handles create, update, duplicate, move, delete, and folder-open operations:
 
-- create and register an instance;
-- rename or update validated properties;
-- duplicate an instance;
-- move an instance to another directory;
-- delete an instance, with an explicit choice about deleting its files;
-- open its directory with the desktop file manager.
+- New directories must be absolute, free of `..`, and non-overlapping with any existing instance directory.
+- Default directories under `<user data>/nuvashalauncher/instances/<id>` are stored as relative paths (`instances/<id>`) so relocating a home directory or Flatpak sandbox keeps them valid; custom directories outside that root remain absolute.
+- Moves and deletes run asynchronously and update the model only after succeeding on disk.
+- Stale custom `java_path` entries are cleared automatically so the instance falls back to auto-detection.
+- A `GFileMonitor` (with a 30-second fallback check) prunes externally deleted instance directories.
 
-Directory checks happen before files are touched. A new instance directory
-must be absolute, must not contain `..`, and must not be the same as, inside,
-or a parent of another instance directory. Default instance directories under
-`<user data>/nuvashalauncher/instances/<id>` are serialized as relative paths
-(`instances/<id>`) in `instances.json` and resolved against the active data
-directory at load time so moving a home directory or Flatpak sandbox preserves
-instances, while custom directories outside the default root remain absolute.
-Moves and deletes are asynchronous and update the model only after the
-filesystem operation succeeds, so a failed operation leaves the registered
-instance and its old files in place. When a custom Java runtime is removed (or
-an instance's saved `java_path` is no longer executable), the manager clears the
-stale path in memory and on disk so the instance falls back to automatic Java
-selection. The manager also watches the default instances root with `GFileMonitor`
-(plus a 30-second fallback check) to prune externally deleted instance directories.
+### Accounts & Authentication
 
-### Accounts and authentication
+Accounts are either **Offline** (validated username + `OfflinePlayer:<name>` UUID) or **Microsoft** (profile, access token, expiry, refresh token, and cosmetic data). Complete account records and the active account ID are stored as separate `libsecret` items.
 
-Accounts support two modes:
+Microsoft sign-in follows an async chain: device code request → token polling → Xbox Live → XSTS → Minecraft token → Java entitlements check → profile fetch. No passwords pass through Nuvasha Launcher. Tokens are treated as expired slightly before their reported expiry; if refresh fails, the launcher enters `Needs sign-in`.
 
-- **Offline:** a validated player name and the UUID derived from
-  `OfflinePlayer:<name>`.
-- **Microsoft:** a Minecraft profile, access token, expiry, refresh token, and
-  cosmetic profile data.
-
-`NuvashaLauncherAccounts` owns the active account and emits changes for the UI. Complete
-account records—including offline accounts, cosmetic selections, and Microsoft
-credentials—are stored as separate items in the desktop Secret Service, keyed by the
-stable account ID. The active account ID is stored in a separate Secret Service item.
-
-The skin menu keeps the fetched profile, skin list, and cape list in memory for
-the lifetime of the launcher. Skin and cape textures are cached separately so
-cape images cannot appear in the saved-skin library.
-
-The Microsoft sign-in chain is asynchronous and explicit:
-
-1. Request a device code.
-2. Poll the Microsoft token endpoint until the user completes sign-in.
-3. Exchange the Microsoft token with Xbox Live.
-4. Exchange the Xbox token with XSTS.
-5. Obtain a Minecraft access token.
-6. Check Java entitlements.
-7. Fetch the Minecraft profile and store the resulting account.
-
-No password is handled by Nuvasha Launcher. A token is considered unusable slightly
-before its reported expiry so a launch does not begin with a token that will
-expire during startup. If refresh fails, the launcher enters
-`Needs sign-in` instead of attempting to start a game with stale credentials.
+Skins and capes are cached separately so cape textures never appear in the saved-skin library.
 
 ### Settings
 
-`NuvashaLauncherSettings` is a typed wrapper around the installed GSettings schema in
-`data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml`. It validates values and
-writes each accepted change. To support installed prefixes, development runs,
-and distribution build environments, schema lookup caches the resolved schema
-for the active `GSETTINGS_SCHEMA_DIR` after checking the default system schema
-source, an explicit `GSETTINGS_SCHEMA_DIR`, local build directories
-(`NUVASHALAUNCHER_BUILD_SCHEMA_DIR`, `build/schemas`, `../build/schemas`), and
-`<exe_dir>/../share/glib-2.0/schemas`, falling back to compiling the bundled
-schema into `<user cache>/nuvashalauncher/schemas` via `glib-compile-schemas`
-when no compiled schema is found. The settings include version and loader
-stability filters, log retention, language, Modrinth API caching and cache
-expiration, export behavior, dependency delete behavior, and custom Java
-runtime paths. Window geometry is kept separately by the window code.
+`NuvashaLauncherSettings` wraps the GSettings schema (`data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml`), covering version/loader stability filters, log line limit, language, Modrinth API caching and expiration, export metadata prompt, dependency deletion policy, and custom Java paths.
 
-## Asynchronous work and ownership
+Schema lookup checks the default system source, `GSETTINGS_SCHEMA_DIR`, local build directories, and `<exe_dir>/../share/glib-2.0/schemas`, falling back to compiling the bundled schema into `<user cache>/nuvashalauncher/schemas`. Window size and maximized state are saved separately by the main window.
 
-`nuvashalauncher-task.c` provides the common operation contract. There are two related
-types:
+## Async Ownership
 
-- `NuvashaLauncherTaskScope` owns one asynchronous operation, its cancellable, tracked
-  GLib sources, callback result, and lifecycle state.
-- `NuvashaLauncherTaskSequence` runs a series of asynchronous steps. A step starts one
-  operation and advances the sequence from its completion callback.
+`nuvashalauncher-task.c` defines two primitives:
 
-The scope is reference counted because the operation state and its caller may
-outlive one another. A caller holds a `NuvashaLauncherTaskScope *` (or ties
-it to a `GCancellable` via `nuvashalauncher_task_scope_follow_cancellable()`)
-and can cancel an operation via `nuvashalauncher_task_scope_cancel()` without
-freeing the state that a late callback still needs; callers clear their scope
-reference when the step completes. Source IDs are tracked
-and removed before task data is destroyed. Immediate results are deferred to an
-idle callback where necessary, so an `_async()` function never calls its
-completion callback before it returns its handle.
+- **`NuvashaLauncherTaskScope`:** Ref-counted owner of a single async operation, its `GCancellable`, tracked GLib source IDs, and lifecycle state. Callers can cancel via `nuvashalauncher_task_scope_cancel()` (or tie it to a cancellable with `nuvashalauncher_task_scope_follow_cancellable()`) without freeing state needed by late callbacks.
+- **`NuvashaLauncherTaskSequence`:** Runs a chain of async steps where each completion callback advances to the next.
 
-When adding asynchronous code:
+Because dialogs and pages can close while work is in flight, callbacks must never assume the initiating widget is still alive; state lives in scope-owned data and immediate completions defer to an idle callback so `_async()` functions always return their handle first.
 
-1. Create a scope before starting work.
-2. Keep all state needed by the callback in scope-owned data.
-3. Check cancellation at the operation's boundaries.
-4. Complete through the scope's result helpers.
-5. Release the caller's scope reference according to the ownership contract.
+## Downloads, Caches & Content
 
-This is the central lifetime rule of the project. A callback must not assume
-that the widget that started an operation still exists.
+### Download Service
 
-## Downloads, caches, and content
+`NuvashaLauncherDownloadService` (`nuvashalauncher-download.c`) owns one `SoupSession` with interactive and bulk queues. Limits are 8 concurrent transfers total and 6 bulk transfers (`MAX_CONCURRENT`, `MAX_BULK_CONCURRENT`).
 
-### Transfer service
+File transfers check the destination and global hash cache first (using `FICLONE` reflinks when supported, falling back to an async copy), stream into a temporary file while hashing, verify HTTP status and checksum, `fsync` on a worker thread, and atomically rename into place. Checksum mismatches retry once; network errors, HTTP 5xx, and HTTP 429 retry with bounded backoff and `Retry-After` (up to 3 attempts).
 
-`NuvashaLauncherDownloadService` owns one `SoupSession`, two waiting queues, and the
-active-transfer counts. Interactive work has priority over bulk installation
-work. The current limits are eight concurrent transfers overall and six bulk
-transfers; the scheduling logic lives in `nuvashalauncher-download.c`.
+API JSON responses can be cached with ETag and timestamp according to `cache-expiration`, with parsing offloaded to a worker thread and stale fallback when offline. Modrinth requests also deduplicate identical in-flight queries (`nuvashalauncher-modrinth-requests.c`). Clearing the cache removes only the global cache tree, not installed instance content.
 
-File transfers follow this sequence:
+### Minecraft Resolution & Mod Loaders
 
-1. Check for a verified destination or global hash cache hit.
-2. Wait for a transfer slot.
-3. Create a temporary file beside the destination.
-4. Stream the response into it while calculating the expected checksum.
-5. Check the HTTP result and checksum.
-6. Flush/sync the file on a worker thread (`fsync`) and atomically rename it into place.
-7. Release the slot and complete the task.
+- **Metadata & resolution (`nuvashalauncher-minecraft-versions.c`, `nuvashalauncher-minecraft-resolve.c`):** Evaluates OS/feature rules, resolves `inheritsFrom` chains (with cycle detection), downloads and verifies client JARs, libraries, logging configs, and assets (with worker-thread asset verification), extracts Linux native JARs safely, and assembles the classpath and arguments. Shared client artifacts live under `<user data>/nuvashalauncher/` and are reused across instances.
+- **Loaders (`nuvashalauncher-loaders.c`):** Supports Vanilla, Fabric, Quilt, Forge, and NeoForge. Fabric and Quilt merge version profiles directly; Forge and NeoForge download the installer JAR, run client processors with Java, and store the result in the shared data directory. Failed installers never register partial loaders.
 
-An existing file with the expected hash is reused. On a global hash cache hit,
-restoring into the exclusive temporary file attempts a `FICLONE` copy-on-write
-reflink before falling back to an async copy and atomic rename. A wrong checksum
-is retried once; network failures, HTTP 5xx responses, and HTTP 429 responses use
-bounded retries and `Retry-After` where appropriate. A 404 and other
-non-retryable statuses fail directly. Cancellation or failure discards the
-temporary file and never replaces a valid destination.
+### Modrinth Content & Modpacks
 
-JSON requests use the same transfer and retry machinery (with in-flight request
-deduplication implemented on top for Modrinth API queries in
-`nuvashalauncher-modrinth-requests.c`).
-API responses (including Mojang's version manifest) can be cached with their
-creation time and ETag using the configured `cache-expiration` interval, with
-cached envelope and JSON parsing offloaded to a worker thread. When enabled, an
-expired entry is revalidated without parsing the stale inner payload first; if
-the network is unavailable, a stale response can be used as a fallback. Cache
-clearing only removes the global cache tree, not installed instance content or
-its indexes.
+- **Content (`nuvashalauncher-modrinth.c`, `nuvashalauncher-content-index.c`):** Filters mods by Minecraft version and loader, and resource/shader packs by Minecraft version. Browser rows support multi-select checkboxes with a `GtkActionBar` batch-install footer and a per-row version-picker button. Local `.index` metadata tracks hashes, sizes, `mtime_usec`, project/version IDs, and dependencies so scans avoid re-hashing unchanged files.
+- **Modpacks (`nuvashalauncher-modpack*.c`):** Validates `modrinth.index.json`, resolves Minecraft and loader dependencies, enforces path/link/host/hash/size checks, and installs into a fresh directory before registering the instance. Modrinth downloads prompt for optional client files when the dialog stays open; local `.mrpack` imports run headlessly in the background (installing required files and overrides via the header downloads indicator).
 
-### Minecraft metadata and resolution
+## Launch Pipeline
 
-`nuvashalauncher-minecraft-versions.c` parses Mojang's version manifest and version
-documents. It evaluates the document's OS and feature rules, resolves
-`inheritsFrom` chains while detecting cycles, and supports both modern
-structured arguments and legacy `minecraftArguments`.
-
-`nuvashalauncher-minecraft-resolve.c` turns a version description into a
-`NuvashaLauncherResolvedVersion`:
-
-- applicable libraries are converted to Maven paths;
-- native classifiers are selected for the current Linux architecture;
-- the client JAR, libraries, logging configuration, asset index, and asset
-  objects are downloaded and hash-checked (asset index parsing runs on a worker
-  thread);
-- native JARs are extracted into a separate directory on a worker thread;
-- the final classpath and argument arrays are assembled in document order.
-
-Resolved Minecraft data is kept below the user's data/cache locations rather
-than inside the instance directory. The instance directory receives the game
-files and logs; shared client artifacts can be reused by multiple instances.
-
-Network-provided archive entries are not trusted. Native extraction rejects
-unsafe paths, enforces per-entry and total unpacked size bounds, and skips
-links. The resolver only writes regular files and real directories below the
-intended destination.
-
-### Mod loaders
-
-`nuvashalauncher-loaders.c` supports Vanilla, Fabric, Quilt, Forge, and NeoForge, but
-the installation paths are not identical:
-
-- Fabric and Quilt publish version lists and profile documents. Their profiles
-  are merged over the Minecraft version document and their Maven coordinates
-  are converted into the same resolved-file inputs used by vanilla versions.
-- Forge and NeoForge publish installer JARs. Nuvasha Launcher downloads the installer,
-  reads its install profile, runs the client-side processors with Java, and
-  stores the resulting loader installation under the shared data directory.
-
-Loader installations are separate from instance directories. The launcher
-uses the resulting client JAR and merged version document when resolving and
-launching an instance. A failed or unsupported installer stops before a game
-is started; it does not register a partially prepared loader as usable.
-
-### Modrinth content
-
-`nuvashalauncher-modrinth.c` is Modrinth-specific. It builds API facets,
-parses search/project/version answers, and filters compatibility before data
-reaches the UI:
-
-- mods must match the instance's Minecraft version and loader;
-- resource packs and shader packs must match the Minecraft version;
-- incompatible versions are rejected at install time; they are not
-  offered as compatible results.
-
-Content pages use models and rows, not raw API JSON. Details are converted from
-Modrinth Markdown to the restricted GTK markup the UI expects. Main-window
-instance rows open the instance dialog directly when activated alongside their
-Play/Stop action button; Modrinth content and modpack browser rows provide
-multi-select checkboxes (toggled on row click) with a `GtkActionBar` selection
-footer for batch installation (resolving dependencies for content items) plus
-a per-row download button that opens the version selector; installed content
-pages, Worlds, and Servers use single-row actions (such as toggle, update, or
-delete, with content deletion honoring the `delete-dependents` policy). Update
-All uses that page's asynchronous operation state and exposes its scan/install
-progress and cancellation through a downloads-style popover.
-
-`nuvashalauncher-content-index.c` maintains local metadata for installed content. The
-index records hashes, file sizes, modification timestamps (`mtime_usec`),
-filenames, provider/project identity, versions, environment flags, and
-required/optional/incompatible dependencies. Combined with batched Modrinth hash
-identification and project lookups, it lets the UI identify and update
-installed content without re-hashing unchanged archives on every scan.
-
-### Modpacks
-
-An `.mrpack` contains a root `modrinth.index.json`, downloaded files described
-by that index, and an overrides tree. The modpack module:
-
-- validates the format and supported game;
-- resolves the Minecraft version and loader from dependencies;
-- checks every path before writing it;
-- accepts downloads only from hosts permitted by the format;
-- verifies file hashes;
-- rejects links and unsafe archive entries;
-- caps archive entries and inflated content to limit decompression bombs;
-- installs into a fresh directory before registering the instance.
-
-Optional files are selected by the user. Required files are installed first;
-dependency deletion behavior is controlled by settings. An installation that
-cannot finish should leave the existing instance and metadata intact.
-
-## Launch pipeline
-
-`NuvashaLauncher` belongs to one instance and is the owner of that instance's
-launch state, log buffer, preparation scope, and child process. A launcher
-refuses a second start while its state is busy.
+`NuvashaLauncher` owns an instance's launch state machine, log buffer, preparation scope, and child process, and refuses concurrent launches on the same instance.
 
 ```mermaid
 sequenceDiagram
@@ -425,217 +169,62 @@ sequenceDiagram
     participant P as Game process
 
     UI->>L: start()
-    L->>A: get active account / refresh if needed
-    L->>V: fetch manifest and version description
-    L->>R: download and prepare required files
-    R-->>L: resolved version and progress
+    L->>A: get active account / refresh
+    L->>V: fetch manifest & version JSON
+    L->>R: download & verify game files
+    R-->>L: resolved version
     L->>J: detect/select compatible Java
-    L->>L: build and redact argv
+    L->>L: build & redact argv
     L->>P: spawn
     P-->>L: stdout/stderr lines
     P-->>L: exit status or signal
-    L-->>UI: state and output signals
+    L-->>UI: state & output signals
 ```
 
-The public state sequence is:
+States: `Preparing` → `Downloading` → `Launching` → `Running` → `Stopping` → `Stopped` or `Crashed` (plus `Failed` and `Needs sign-in` before start).
 
-`Preparing` → `Downloading` → `Launching` → `Running` → `Stopping` →
-`Stopped` or `Crashed`.
+Java discovery scans `<user data>/nuvashalauncher/java`, `$JAVA_HOME`, `PATH`, `/usr/lib/jvm`, `/usr/lib64/jvm`, `/usr/java`, `/usr/local/java`, `/opt`, `~/.jdks`, `~/.sdkman/candidates/java`, `~/.asdf/installs/java`, `~/.local/share/mise/installs/java`, and user-configured `custom-java-paths`. It checks for AWT's X11 bridge (`libawt_xawt.so`), rejects headless runtimes at launch, and avoids downgrading major versions.
 
-Failures before process start use `Failed`. An account that needs a new
-login uses `Needs sign-in`; that state is not busy, because no game process is
-running and the user may retry after signing in.
+Stopping sends `SIGTERM` to the process group and escalates to `SIGKILL` after 5 seconds. Process output is bounded per line and capped to the configured log-line limit.
 
-The command-line builder is kept testable without a JVM or network. It merges
-version arguments, instance JVM arguments, paths from the resolver, account
-placeholders, the main class, and game arguments into an argv array. The
-redacted form is the only form used in logs. Access tokens and values after
-the relevant password/token options are replaced before output is recorded.
+## Packaging & Sandbox
 
-Java detection probes candidates asynchronously across the launcher's dedicated
-Java directory (`<user data>/nuvashalauncher/java`, created on startup),
-`$JAVA_HOME`, `PATH`, standard Linux JVM roots (`/usr/lib/jvm`, `/usr/lib64/jvm`,
-`/usr/java`, `/usr/local/java`, `/opt`), user-home runtime managers (`~/.jdks`,
-`~/.sdkman/candidates/java`, `~/.asdf/installs/java`,
-`~/.local/share/mise/installs/java`), and user-configured `custom-java-paths`. It parses
-`java -version` and related properties, including whether the runtime has AWT's
-X11 bridge. It prefers a window-capable compatible runtime and chooses the
-instance's explicit Java when one is configured. If an instance's saved custom
-Java path has been removed or is no longer executable, the selection is cleared
-automatically and the instance falls back to auto-detected Java. Launch
-preparation rejects a selected headless runtime; it does not downgrade to a
-different major version.
+- **Flatpak (`packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml`):** Built with `FLATPAK=1` on the GNOME 51 runtime. Grants `--share=ipc`, `--share=network`, `--socket=x11`, `--socket=wayland`, `--socket=pulseaudio`, and `--device=dri`. Does **not** grant host filesystem access or direct `org.freedesktop.secrets` D-Bus access (`libsecret` uses the XDG Secret Portal). Does not bundle a JRE.
+- **Native packages:** Maintained for Fedora/RPM (`packaging/rpm/nuvashalauncher.spec`), Debian/Ubuntu (`packaging/debian/`), and Arch Linux (`packaging/arch/PKGBUILD`).
 
-Stopping sends `SIGTERM` first and escalates after five seconds. Process output
-is consumed by the line-reader helper, capped per line, and retained only up to
-the configured log-line limit. Crash reports are associated with the process start time so an
-old report is not mistaken for a crash from the current launch.
+## Persistence Layout
 
-## Packaging and runtime boundaries
+Base directories follow GLib's XDG user-data and user-cache paths:
 
-Nuvasha Launcher ships as a single native binary and supports both Flatpak and
-native Linux distribution packaging:
-
-- **Flatpak (`packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml`)**:
-  Builds the source with `FLATPAK=1` against the GNOME 51 runtime. The manifest
-  grants IPC, network access, Wayland and X11, audio (`pulseaudio`), and GPU
-  device access (`dri`), without granting `filesystem=home` or direct host
-  `org.freedesktop.secrets` D-Bus access (`libsecret` uses the XDG Secret Portal
-  inside the sandbox). Flatpak does not
-  bundle a JRE; custom runtimes added through the Java picker are stored in the
-  shared `custom-java-paths` setting and probed before acceptance.
-- **Native distribution packages**: Build recipes are maintained for
-  Fedora/RHEL (`packaging/rpm/nuvashalauncher.spec`), Debian/Ubuntu
-  (`packaging/debian/`), and Arch Linux (`packaging/arch/PKGBUILD`).
-
-## Persistence and filesystem layout
-
-The exact base directories follow GLib's user-data and user-cache locations.
-The main files are:
-
-| Data | Location/purpose |
+| Data | Location |
 | --- | --- |
 | Instance registry | `<user data>/nuvashalauncher/instances.json` |
-| Instance content | Registered instance directories (relative `instances/<id>` by default), each with game files and logs |
-| Account records | Desktop Secret Service, one item per account keyed by account ID |
-| Active account | Desktop Secret Service, separate active-account item |
-| Shared resolved content | `<user data>/nuvashalauncher/` shared client artifacts and assets |
-| Launcher Java runtimes | `<user data>/nuvashalauncher/java/` (auto-created and scanned for custom JDKs) |
-| Saved skins and cape textures | `<user data>/nuvashalauncher/skins/` (including `defaults/` and `capes/`) |
-| Version metadata | `<user cache>/nuvashalauncher/versions/` |
-| Cached icons and fallback schemas | `<user cache>/nuvashalauncher/icons/` and `<user cache>/nuvashalauncher/schemas/` |
-| API responses | `<user cache>/nuvashalauncher/` API cache tree |
-| GSettings | Installed schema and the user's GSettings backend |
+| Instance directories | `<user data>/nuvashalauncher/instances/<id>` by default (or custom path) |
+| Accounts & active account | `libsecret` (XDG Secret Portal in Flatpak; desktop Secret Service natively) |
+| Shared game files & loaders | `<user data>/nuvashalauncher/` |
+| Launcher Java runtimes | `<user data>/nuvashalauncher/java/` |
+| Skins & capes | `<user data>/nuvashalauncher/skins/` (`defaults/`, `capes/`) |
+| Version metadata cache | `<user cache>/nuvashalauncher/versions/` |
+| Icon & fallback schema cache | `<user cache>/nuvashalauncher/icons/`, `<user cache>/nuvashalauncher/schemas/` |
+| API & hash cache | `<user cache>/nuvashalauncher/` |
+| Preferences | GSettings (`com.github.NuvashaLauncher.NuvashaLauncher`) |
 
-Writes that represent a complete document use temporary files and replacement
-where the module contract promises atomicity. Do not add a direct
-`g_file_set_contents()` write to an existing registry or cache format without
-preserving the module's failure behavior.
+Complete document writes use temporary files and atomic replacement.
 
-## Security properties
+## Security Properties
 
-The security-sensitive code is distributed across the file, archive, account,
-and process boundaries:
+- **Transport & integrity:** Downloads require `https://` (`http://` is allowed only for loopback tests), enforce TLS validation, verify published hashes, and write atomically via temp files.
+- **Path & archive safety:** Paths reject `..`, absolute paths, backslashes, and overlapping instance directories. Recursive filesystem ops use `G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS`; archive extraction rejects symlinks/hardlinks and opens output files with `O_NOFOLLOW`.
+- **Resource bounds:** Remote JSON (64 MiB), native ZIP entries (64 MiB per entry, 256 MiB total), `modrinth.index.json` (8 MiB), `.mrpack` entries (65,536), and total unpacked `.mrpack` size (4 GiB) are strictly capped.
+- **Credentials & UI:** Account tokens are redacted from logs and error messages before recording (Minecraft still receives the token via launch arguments). External/service strings rendered in GTK widgets disable Pango markup.
 
-- Downloaded files require `https://` (allowing `http://` only for loopback test
-  endpoints), enforce strict TLS certificate validation, are hash-checked when
-  the source publishes a hash, and are never installed directly over an existing
-  destination.
-- Instance, archive, Maven, and remote version paths reject traversal (`..`),
-  absolute paths, backslashes, and overlapping instance directories where those
-  checks apply.
-- Recursive filesystem operations (instance copy, deletion, and `.mrpack`
-  override backup) do not follow symlinks (`G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS`),
-  and archive extraction (`tar`/`zip`) rejects symlinks and hardlinks and opens
-  destination files with `O_NOFOLLOW`.
-- Remote JSON loads (64 MiB), native ZIP entry extraction (64 MiB),
-  `modrinth.index.json` reads (8 MiB), `.mrpack` ZIP entry counts (65,536
-  entries), and total unpacked `.mrpack` size (4 GiB) are bounded.
-- Modpack download URLs are restricted to hosts allowed by the format.
-- Complete account records and tokens are stored in the desktop Secret Service.
-  This is intentional: the launcher must read the tokens to authenticate the
-  Minecraft process. Tokens never enter logs, error messages, or redacted
-  command output; Minecraft still receives the access token through the launch
-  arguments it requires.
-- UI text that can contain paths or service errors is treated as plain text,
-  not markup.
+## Build, Test & CI
 
-These are architectural properties, not optional cleanup. A new importer,
-content provider, or launcher argument path must preserve them at its own
-boundary.
+- `make -j$(nproc)` builds the release binary, resources, schemas, and locales.
+- `make test` links `tests/test-*.c` against `build/libnuvashalauncher.so` and runs them in parallel via `build/test-runner` (`tests/runner.c`) with isolated temp `XDG_*_HOME` dirs, `GSETTINGS_BACKEND=memory`, an isolated test secret store file, and fast timers.
+- `make test-debug` (alias `test-lsan`) runs the suite under ASan, UBSan, and LSan.
+- `make test-display` runs the suite against an active Wayland session (skips if none).
+- `make test-flatpak-runtime` smoke-tests an installed Flatpak's CLI (`--version`, `--list-instances`, `--list-accounts`), bundled locales, writable `$XDG_DATA_HOME`, and host-data isolation.
+- `make static-analysis` runs GCC `-fanalyzer` across `src/*.c`; `make check-potfiles` validates `po/POTFILES.in`.
 
-## Build and test shape
-
-The repository uses a hand-written `Makefile`:
-
-- `make` builds the release binary, compiled resources, schemas, and locales.
-- `make -j$(nproc)` builds the release target in parallel.
-- `make debug` builds a separate AddressSanitizer/UndefinedBehaviorSanitizer
-  binary under `build-debug/`.
-- `make test` links `tests/test-*.c` against `build/libnuvashalauncher.so`
-  (all `src/*.c` except `src/main.c`, plus compiled resources) and runs them in
-  parallel via `build/test-runner` (`tests/runner.c`), giving each binary an
-  isolated `TMPDIR`/`XDG_*_HOME` directory, `GSETTINGS_BACKEND=memory`, an
-  isolated `secrets.json` test secret store, and `NUVASHALAUNCHER_TEST_FAST_TIMERS=1`.
-  Supports `TESTS=`, `CASE=`, `V=1`, `FAIL_FAST=1`, `KEEP_TMP=1`, `TIMEOUT=`,
-  and `REPEAT=` flags (`make test-list` lists test binaries).
-- `make test-display` repeats the suite under an existing Wayland session,
-  and skips itself when there is no compositor.
-- `make test-flatpak-runtime` smoke-tests an installed Flatpak's CLI, sandbox
-  data directory, host-data isolation, and network permission without starting
-  Minecraft.
-- `make test-debug` (aliased as `make test-lsan`) builds both `build/nuvashalauncher`
-  and the `-O1` AddressSanitizer/UndefinedBehaviorSanitizer/LeakSanitizer binaries
-  in `build-debug/` and runs the test suite under LSan.
-- `make static-analysis` runs GCC's `-fanalyzer` in parallel across `src/*.c`.
-- `make check-potfiles` verifies that all `src/*.c` files and translatable
-  `data/ui/*.ui` files are listed in `po/POTFILES.in`.
-- `flatpak-builder` builds the manifest in
-  `packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml` with the GNOME 51
-  runtime.
-
-Tests are layered. Parsers, path rules, argument builders,
-security checks, and state machines can run without a display, network, JVM,
-or live account. Download and Modrinth tests use local fixtures/servers. UI
-tests instantiate the compiled resource templates, and display-sensitive tests
-skip (`exit 77`) when `gtk_init_check()` has no display.
-
-CI (`.github/workflows/build.yml` and `.github/workflows/flatpak.yml`) builds
-`build.yml` on both `x86_64` and `ARM64` Ubuntu containers (with `-Werror` on
-both `src/` and `tests/`, sanitizer tests, parallel static analysis, and
-`check-potfiles`), and builds and smoke-tests the `x86_64` Flatpak bundle in
-`flatpak.yml`. When `VERSION` is updated on `main`,
-`.github/workflows/release.yml` builds `.deb` (`amd64`, `arm64`), `.rpm`
-(`x86_64`, `aarch64`), Arch Linux (`x86_64` `.pkg.tar.zst`), and Flatpak
-(`x86_64`, `aarch64`, via direct `flatpak-builder` + `actions/cache`) packages
-and publishes them to GitHub Releases using the matching section from
-`CHANGELOG.md`.
-
-## Adding or changing a subsystem
-
-Use the existing boundary that owns the behavior:
-
-- Add a persisted instance field to `NuvashaLauncherInstance`, its JSON conversion,
-  validation, manager update path, and relevant tests together.
-- Add a preference to the GSettings schema, then expose validated accessors in
-  `NuvashaLauncherSettings` and bind it in the settings UI.
-- Add a network operation through the download service rather than creating a
-  second `SoupSession` or an ad-hoc retry loop.
-- Keep response parsing in a plain data function with fixture-based tests;
-  keep the live async request as a thin wrapper around it.
-- Add a launch preparation step without putting blocking work in the UI or
-  bypassing the launcher's state machine.
-- Keep long-lived operations owned by their manager or launcher, not by the
-  dialog that happened to start them.
-
-When a change alters one of the decisions above, update this document if the
-change affects security, persistence, external interfaces, dependency choice, or
-a quality property such as cancellability or atomicity.
-
-## Decisions worth preserving
-
-These are the choices most likely to be misunderstood later:
-
-1. **One process, shared main-context asynchronous APIs.** This keeps GTK
-   ownership predictable while allowing network, filesystem, and child-process
-   work to make progress without blocking the UI.
-2. **A reusable download service instead of per-feature HTTP code.** It gives
-   every caller the same slot scheduling, retry, cancellation, hashing, and
-   temporary-file behavior.
-3. **Plain parsers beside asynchronous wrappers.** Tests can cover protocol and
-   security rules with fixtures, while live code remains responsible for
-   transport and lifetime management.
-4. **Install into safe temporary/fresh locations before registration.** A
-   failed import or move must not leave metadata pointing at an incomplete
-   installation.
-5. **No provider abstraction for Modrinth yet.** Modrinth is the product's
-   current content source. An abstraction should be introduced only when a
-   second provider creates a real need, not as empty indirection.
-
-## Keeping this document useful
-
-Update this file when a change affects module ownership, a persisted format,
-an external protocol, a process boundary, a security invariant, or the build
-and test contract. Do not update it for a renamed local helper or an ordinary
-UI rearrangement. If a detail belongs to one function's ownership rules, put
-it in that function's header comment instead.
+GitHub Actions runs `build.yml` on `x86_64` and `ARM64` (strict `-Werror` build, `test`, `test-debug`, `static-analysis`, `check-potfiles`), `flatpak.yml` on `x86_64` pushes to `main`, and `release.yml` when `VERSION` changes on `main` to build and publish `.deb`, `.rpm`, Arch `.pkg.tar.zst`, and `.flatpak` packages with `SHA256SUMS`.

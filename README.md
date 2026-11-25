@@ -3,46 +3,16 @@
 </p>
 
 <p align="center">
-  Nuvasha Launcher is a simple Minecraft launcher that aims to make instance<br>
-  management easy without leaving out the features that matter.
+  A lightweight, native Linux Minecraft launcher built with GTK 4 and libadwaita.
 </p>
 
 ## Features
 
-### Modpack management
-
-Browse Modrinth and install compatible modpacks without manually assembling
-their files. Import and export `.mrpack` files with verified downloads,
-dependency handling, and safe archive extraction.
-
-### Mod and content management
-
-Find and manage individual mods, resource packs, and shader packs
-through Modrinth. Content is organized inside each instance and can be enabled
-or disabled without mixing files between setups.
-
-### Instance management
-
-Create separate Minecraft instances with their own worlds, mods, settings,
-loader versions, Java selection, icons, and logs. Duplicate, rename, move,
-export, and remove instances without affecting the others.
-
-### Loader and version support
-
-Install and resolve Fabric, Quilt, Forge, and NeoForge versions alongside
-vanilla Minecraft. Nuvasha Launcher handles version metadata, libraries, assets, native
-files, and loader-specific dependencies for each instance.
-
-### Accounts, skins, and capes
-
-Play with Microsoft or offline accounts, switch accounts per launch, and manage
-accounts from the command line. Customize skins, skin models, and capes while
-keeping previews available when the menu is reopened.
-
-### Native Linux application
-
-Built with GTK 4 and libadwaita, Nuvasha Launcher runs on Linux. It can be built
-as a regular installation or packaged with Flatpak.
+- **Instance management:** Keep separate Minecraft setups with their own worlds, mods, settings, mod loaders, Java runtimes, icons, and logs. Duplicate, rename, move, export, or delete instances independently.
+- **Mod loaders:** Install and launch Vanilla, Fabric, Quilt, Forge, and NeoForge. Version metadata, libraries, assets, and native libraries are resolved automatically.
+- **Modrinth browser & `.mrpack` support:** Search and install mods, resource packs, shader packs, and modpacks directly from Modrinth, or import and export local `.mrpack` files with checksum verification.
+- **Accounts & cosmetics:** Sign in with Microsoft accounts or create offline accounts, switch accounts per launch, and manage skins, skin models, and capes.
+- **CLI & scripting:** List or manage instances, accounts, worlds, and servers, or launch directly into a world or server from the command line (`nuvashalauncher --help`).
 
 ## Installation
 
@@ -59,20 +29,26 @@ flatpak install ./nuvashalauncher-$(uname -m).flatpak
 sudo dnf install "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/latest/download/nuvashalauncher-$(uname -m).rpm"
 ```
 
-### Debian
+### Debian / Ubuntu
 
 ```sh
 curl -fLO "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/latest/download/nuvashalauncher-$(dpkg --print-architecture).deb"
 sudo apt install ./nuvashalauncher-$(dpkg --print-architecture).deb
 ```
 
-### Arch
+### Arch Linux
 
 ```sh
 sudo pacman -U "https://github.com/NuvashaLauncher/NuvashaLauncher/releases/latest/download/nuvashalauncher-x86_64.pkg.tar.zst"
 ```
 
+## Documentation
+
+- [Building & contributing](CONTRIBUTING.md)
+- [Architecture overview](docs/architecture.md)
+- [Security policy](SECURITY.md)
+- Packaging guides: [Flatpak](packaging/flatpak/README.md), [Debian/Ubuntu](packaging/debian/README.md), [Fedora/RPM](packaging/rpm/README.md), [Arch Linux](packaging/arch/README.md)
+
 ## License
 
-Nuvasha Launcher is free software released under the GNU General Public License,
-version 3.0 only. See [LICENSE](LICENSE).
+Nuvasha Launcher is licensed under the GNU General Public License v3.0 only. See [LICENSE](LICENSE).

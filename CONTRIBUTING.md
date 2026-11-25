@@ -1,75 +1,70 @@
 # Contributing to Nuvasha Launcher
 
-Thank you for considering contributing to Nuvasha Launcher! Whether you are fixing a bug, improving accessibility, updating translations, or proposing a new feature, your help is welcome.
-
-Before making substantial changes, please read [docs/architecture.md](docs/architecture.md) to understand module boundaries, asynchronous ownership rules, and security invariants.
-
-## Ways to Contribute
-
-- **Bug Reports:** Open an issue with your launcher version, installation format (Flatpak, DEB, RPM, Arch, or source build), Linux distribution, steps to reproduce, and relevant logs. (For security issues, see [SECURITY.md](SECURITY.md).)
-- **Code & Bug Fixes:** Submit a Pull Request targeting `main`.
-- **Translations:** Update or add gettext catalogs in `po/` (see [Translations](#translations) below).
+Contributions—bug fixes, features, UI improvements, and translations—are welcome. Before making larger changes, read [docs/architecture.md](docs/architecture.md) for module boundaries, async ownership rules, and security invariants.
 
 ## Building from Source
 
-Nuvasha Launcher uses a standard `Makefile` and requires GTK 4, libadwaita, GLib/GIO, `json-glib`, `libsoup-3.0`, `libarchive`, `libsecret-1`, and `libepoxy`.
+Nuvasha Launcher uses a hand-written `Makefile` and depends on GTK 4, libadwaita, GLib/GIO, `json-glib`, `libsoup-3.0`, `libarchive`, `libsecret-1`, and `libepoxy`.
 
-```bash
-# Build release binary, resources, schemas, and locales
+```sh
+# Build the release binary, resources, schemas, and locales
 make -j$(nproc)
 
-# Build debug binary with AddressSanitizer and UndefinedBehaviorSanitizer
+# Build the debug binary with ASan and UBSan
 make -j$(nproc) debug
 ```
 
 ## Running Tests & Checks
 
-Every Pull Request must pass the full CI suite with zero compiler warnings (`-std=c17 -Wall -Wextra -Wpedantic -Werror`):
+CI builds with `-std=c17 -Wall -Wextra -Wpedantic -Werror` and runs the following checks:
 
-```bash
-# Run unit and integration tests
-make test
+```sh
+# Build with strict warnings and run unit/integration tests
+make -j$(nproc) all test CFLAGS="-std=c17 -Wall -Wextra -Wpedantic -Werror -MMD -MP"
 
-# Run tests under AddressSanitizer / LeakSanitizer
-make test-debug
+# Run tests with AddressSanitizer, UndefinedBehaviorSanitizer, and LeakSanitizer
+make -j$(nproc) test-debug
 
-# Run GCC static analyzer (-fanalyzer)
-make static-analysis
+# Run GCC static analysis (-fanalyzer)
+make -j$(nproc) static-analysis
 
 # Verify po/POTFILES.in includes all translatable source and UI files
 make check-potfiles
 
-# Repeat tests under an active Wayland/Broadway display session (when available)
+# Run the suite against an active Wayland session (skips if unavailable)
 make test-display
 ```
 
-## Code Style & Architecture Rules
+Run `make help` to see test filtering flags (`TESTS=`, `CASE=`, `V=1`, `FAIL_FAST=1`, `TIMEOUT=`, `REPEAT=`).
 
-- **C Standard:** Write strict ISO C17 (`-std=c17`) with no compiler warnings.
-- **GNOME HIG:** Follow the GNOME Human Interface Guidelines for UI layout, sentence-case labels, and standard Adwaita widgets (`AdwDialog`, `AdwAlertDialog`, `AdwToastOverlay`, `GtkActionBar`).
-- **Async Ownership:** Never assume a widget that started an async task still exists when the callback runs. Use `NuvashaLauncherTaskScope` / `NuvashaLauncherTaskSequence` and keep long-lived operations owned by their manager or launcher.
-- **Security Invariants:** Never bypass path traversal checks, symlink/hardlink protections (`O_NOFOLLOW`, `NOFOLLOW_SYMLINKS`), HTTPS/TLS verification, or checksum validation. Keep tokens and credentials out of logs and error messages.
-- **License Headers:** Include `SPDX-License-Identifier: GPL-3.0-only` on new source and header files.
+## Coding Guidelines
+
+- **Standard:** Strict ISO C17 (`-std=c17`) with zero compiler warnings.
+- **UI:** Follow the GNOME Human Interface Guidelines (sentence case, standard Adwaita widgets).
+- **Async ownership:** Callbacks must not assume the widget that started an operation still exists. Use `NuvashaLauncherTaskScope` / `NuvashaLauncherTaskSequence` and keep long-lived operations owned by their manager or launcher.
+- **Security:** Preserve path traversal checks, symlink/hardlink protections (`O_NOFOLLOW`, `G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS`), HTTPS/TLS verification, and checksum validation. Never log tokens or credentials.
+- **License headers:** Add `SPDX-License-Identifier: GPL-3.0-only` to new source and header files.
 
 ## Translations
 
-Translatable strings in C code must be written in English using `_("...")`, `N_("...")` (for static tables), or `ngettext("...", "...", n)` (for plurals).
+Mark user-facing strings in C code with `_("...")`, `N_("...")` (for static tables), or `ngettext("...", "...", n)` (for plurals).
 
-1. Regenerate the template and merge existing catalogs:
-   ```bash
+1. Update the POT template and merge catalogs:
+   ```sh
    xgettext --from-code=UTF-8 --keyword=_ --keyword=N_ --keyword=ngettext:1,2 \
      --files-from=po/POTFILES.in --output=po/nuvashalauncher.pot
    for f in po/*.po; do msgmerge --update --backup=none "$f" po/nuvashalauncher.pot; done
+   rm -f po/nuvashalauncher.pot
    ```
-2. Edit the relevant `po/<lang>.po` file(s) and remove `#, fuzzy` markers once verified.
-3. Validate with `msgfmt --check -o /dev/null po/<lang>.po` and run `make test TESTS=test-i18n`.
+2. Translate the strings in `po/<lang>.po` and remove any `#, fuzzy` markers after verifying them.
+3. Validate with `msgfmt --check -o /dev/null po/<lang>.po` and `make test TESTS=test-i18n`.
 
-## Pull Request Process
+## Pull Requests
 
-1. Fork the repository and create a descriptive branch from `main`.
-2. Keep commits focused and write clear commit messages (e.g., `fix(ui): ...`, `feat(modpack): ...`, `i18n: ...`).
-3. Ensure `make test`, `make static-analysis`, and `make check-potfiles` pass before opening your PR.
+1. Branch from `main` and keep changes focused.
+2. Make sure `make test`, `make test-debug`, `make static-analysis`, and `make check-potfiles` pass before opening a PR.
+3. For security issues, follow [SECURITY.md](SECURITY.md) instead of opening a public issue or PR.
 
 ## Contact
 
-For general maintainer inquiries, you can reach out at `nuvashalauncher@gmail.com`.
+For general maintainer inquiries: `nuvashalauncher@gmail.com`.

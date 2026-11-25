@@ -1,10 +1,10 @@
 # Debian / Ubuntu (.deb) packaging
 
-The files in `packaging/debian/` build a native `.deb` package for Debian and Ubuntu.
+Builds a native `.deb` package using the metadata in `packaging/debian/`.
 
 ## Local build
 
-Install the Debian packaging tools and development dependencies:
+Install the build dependencies:
 
 ```sh
 sudo apt install build-essential debhelper devscripts desktop-file-utils \
@@ -12,7 +12,7 @@ sudo apt install build-essential debhelper devscripts desktop-file-utils \
   libepoxy-dev libjson-glib-dev libsoup-3.0-dev libarchive-dev libsecret-1-dev
 ```
 
-From the repository root, copy the packaging metadata into `debian/` and run `dpkg-buildpackage`:
+From the repository root:
 
 ```sh
 cp -r packaging/debian ./debian
@@ -21,7 +21,7 @@ dpkg-buildpackage -us -uc -b
 rm -rf ./debian
 ```
 
-The resulting `.deb` package is written to the parent directory (`../nuvashalauncher_<version>-1_<arch>.deb`) and can be installed with:
+Install the resulting package from the parent directory:
 
 ```sh
 sudo apt install ../nuvashalauncher_*.deb

@@ -1,10 +1,10 @@
 # RPM packaging
 
-The spec file builds an RPM package of Nuvasha Launcher for Fedora.
+Builds an RPM package for Fedora using `packaging/rpm/nuvashalauncher.spec`.
 
 ## Local build
 
-Install the RPM build tooling and development dependencies:
+Install the build dependencies:
 
 ```sh
 sudo dnf install rpm-build rpmdevtools \
@@ -14,7 +14,7 @@ sudo dnf install rpm-build rpmdevtools \
   desktop-file-utils libappstream-glib
 ```
 
-From the repository root, create the source archive and build the package:
+From the repository root, create the source tarball and build the RPM:
 
 ```sh
 VERSION=$(tr -d '[:space:]' < VERSION)
