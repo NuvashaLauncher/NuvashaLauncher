@@ -232,10 +232,6 @@ msgstr "Xung đột\n"
 msgid "%s is being installed"
 msgstr "%s đang được cài đặt"
 
-#: src/nuvashalauncher-content-page-install.c:609
-msgid "Update"
-msgstr "Cập nhật"
-
 #: src/nuvashalauncher-content-page-install.c:614
 #: src/nuvashalauncher-download-modpack-details.c:215
 #, c-format
@@ -428,10 +424,6 @@ msgstr "Mở thư mục"
 msgid "Nothing installed yet"
 msgstr "Chưa có gì được cài đặt"
 
-#: src/nuvashalauncher-content-page-ui.c:220
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Duyệt tìm thứ gì đó để đưa vào thư mục của phiên bản này"
-
 #: src/nuvashalauncher-content-page-ui.c:222
 #: src/nuvashalauncher-content-page-ui.c:493
 #: src/nuvashalauncher-content-page-ui.c:566
@@ -456,12 +448,6 @@ msgstr "Lọc theo danh mục"
 #: data/ui/nuvashalauncher-modpack-browser-states.ui:18
 msgid "Nothing to show yet"
 msgstr "Chưa có gì để hiển thị"
-
-#: src/nuvashalauncher-content-page-ui.c:388
-msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
-msgstr ""
-"Nhập nội dung cần tìm hoặc duyệt mọi thứ Modrinth có cho trường hợp này"
 
 #: src/nuvashalauncher-content-page-ui.c:591
 #: src/nuvashalauncher-main-window-ui.c:165
@@ -501,14 +487,6 @@ msgstr "Không thể tạo “%s”: %s"
 #: src/nuvashalauncher-content-page.c:178
 msgid "No mod loader"
 msgstr "Không có trình tải mod"
-
-#: src/nuvashalauncher-content-page.c:181
-msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
-msgstr ""
-"Mod cần một trình tải mod. Trước tiên hãy chọn Fabric, Quilt, Forge hoặc "
-"NeoForge trong cài đặt của phiên bản này"
 
 #: src/nuvashalauncher-create-instance-dialog.c:139
 msgid "Pick a Minecraft version from the list."
@@ -1625,8 +1603,8 @@ msgid "No instances yet"
 msgstr "Chưa có trường hợp nào"
 
 #: src/nuvashalauncher-main-window-ui.c:149
-msgid "Create an instance to start playing."
-msgstr "Tạo một phiên bản để bắt đầu chơi."
+msgid "Press the + to create an instance."
+msgstr "Nhấn + để tạo phiên bản."
 
 #: src/nuvashalauncher-main-window.c:147
 msgid "Minecraft crashed"
@@ -1957,10 +1935,6 @@ msgstr "Làm mới"
 msgid "No servers"
 msgstr "Không có máy chủ nào"
 
-#: src/nuvashalauncher-servers-page.c:703
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Máy chủ thêm ở đây được lưu vào servers.dat cho phiên bản này."
-
 #: src/nuvashalauncher-sign-in-dialog.c:14
 msgid "Asking Microsoft for a code…"
 msgstr "yêu cầu Microsoft cung cấp mã…"
@@ -2107,12 +2081,6 @@ msgstr "Thêm thế giới…"
 #: src/nuvashalauncher-worlds-page.c:1237
 msgid "No worlds"
 msgstr "Không có thế giới nào"
-
-#: src/nuvashalauncher-worlds-page.c:1238
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr ""
-"Các thế giới được Minecraft lưu hoặc nhập vào đây sẽ xuất hiện trong danh "
-"sách này."
 
 #~ msgid "Colored Lighting"
 #~ msgstr "Ánh sáng màu"

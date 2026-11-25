@@ -155,7 +155,7 @@ manager (`nuvashalauncher_downloads_get_default()`) to widgets, create the
 header-bar `NuvashaLauncherUsersPopover`, and let page and dialog modules handle
 their own views. Widgets declared in `data/ui/*.ui`, `nuvashalauncher.css`,
 `pack.png`, and symbolic action icons (`export-symbolic.svg`,
-`external-link-symbolic.svg`) are compiled into a GResource by the Makefile. The
+`import-symbolic.svg`, `external-link-symbolic.svg`) are compiled into a GResource by the Makefile. The
 UI is therefore available from the installed binary; it is not read from the
 source tree at runtime.
 
@@ -478,8 +478,10 @@ native Linux distribution packaging:
 
 - **Flatpak (`packaging/flatpak/com.github.NuvashaLauncher.NuvashaLauncher.yml`)**:
   Builds the source with `FLATPAK=1` against the GNOME 51 runtime. The manifest
-  grants network access, Wayland and fallback X11, audio, `org.freedesktop.secrets`,
-  and GPU device access, without granting `filesystem=home`. Flatpak does not
+  grants IPC, network access, Wayland and X11, audio (`pulseaudio`), and GPU
+  device access (`dri`), without granting `filesystem=home` or direct host
+  `org.freedesktop.secrets` D-Bus access (`libsecret` uses the XDG Secret Portal
+  inside the sandbox). Flatpak does not
   bundle a JRE; custom runtimes added through the Java picker are stored in the
   shared `custom-java-paths` setting and probed before acceptance.
 - **Native distribution packages**: Build recipes are maintained for

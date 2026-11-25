@@ -235,10 +235,6 @@ msgstr "Конфликты\n"
 msgid "%s is being installed"
 msgstr "Устанавливается %s"
 
-#: src/nuvashalauncher-content-page-install.c:609
-msgid "Update"
-msgstr "Обновить"
-
 #: src/nuvashalauncher-content-page-install.c:614
 #: src/nuvashalauncher-download-modpack-details.c:215
 #, c-format
@@ -431,10 +427,6 @@ msgstr "Открыть папку"
 msgid "Nothing installed yet"
 msgstr "Ничего не установлено…"
 
-#: src/nuvashalauncher-content-page-ui.c:220
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Найдите что-то, что нужно поместить в папку этого экземпляра"
-
 #: src/nuvashalauncher-content-page-ui.c:222
 #: src/nuvashalauncher-content-page-ui.c:493
 #: src/nuvashalauncher-content-page-ui.c:566
@@ -459,13 +451,6 @@ msgstr "Фильтр по категории"
 #: data/ui/nuvashalauncher-modpack-browser-states.ui:18
 msgid "Nothing to show yet"
 msgstr "Здесь пока пусто"
-
-#: src/nuvashalauncher-content-page-ui.c:388
-msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
-msgstr ""
-"Введите, что искать, или просмотрите все, что есть у Modrinth для этого "
-"экземпляра"
 
 #: src/nuvashalauncher-content-page-ui.c:591
 #: src/nuvashalauncher-main-window-ui.c:165
@@ -505,14 +490,6 @@ msgstr "Не удалось создать «%s»: %s"
 #: src/nuvashalauncher-content-page.c:178
 msgid "No mod loader"
 msgstr "Нет мод-загрузчика"
-
-#: src/nuvashalauncher-content-page.c:181
-msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
-msgstr ""
-"Модам нужен мод-загрузчик. Сначала выберите Fabric, Quilt, Forge или "
-"NeoForge в настройках этого экземпляра"
 
 #: src/nuvashalauncher-create-instance-dialog.c:139
 msgid "Pick a Minecraft version from the list."
@@ -1643,8 +1620,8 @@ msgid "No instances yet"
 msgstr "Экземпляров пока нет"
 
 #: src/nuvashalauncher-main-window-ui.c:149
-msgid "Create an instance to start playing."
-msgstr "Создайте экземпляр, чтобы начать играть."
+msgid "Press the + to create an instance."
+msgstr "Нажмите +, чтобы создать сборку."
 
 #: src/nuvashalauncher-main-window.c:147
 msgid "Minecraft crashed"
@@ -1975,10 +1952,6 @@ msgstr "Обновить"
 msgid "No servers"
 msgstr "Нет серверов"
 
-#: src/nuvashalauncher-servers-page.c:703
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Добавленные здесь серверы сохраняются в servers.dat этого экземпляра."
-
 #: src/nuvashalauncher-sign-in-dialog.c:14
 msgid "Asking Microsoft for a code…"
 msgstr "попросить у Microsoft код…"
@@ -2132,11 +2105,6 @@ msgstr "Добавить мир…"
 #: src/nuvashalauncher-worlds-page.c:1237
 msgid "No worlds"
 msgstr "Нет миров"
-
-#: src/nuvashalauncher-worlds-page.c:1238
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr ""
-"Миры, сохранённые Minecraft или импортированные сюда, появятся в этом списке."
 
 #~ msgid "Colored Lighting"
 #~ msgstr "Цветное освещение"

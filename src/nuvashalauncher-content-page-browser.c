@@ -283,7 +283,7 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
                                  G_CALLBACK (on_row_check_toggled), self, 0);
 
         GtkWidget *button =
-          row_action_button ("folder-download-symbolic", _("Install"), stored,
+          row_action_button ("pan-down-symbolic", _("Install"), stored,
                              G_CALLBACK (on_row_versions_clicked), self);
 
         adw_action_row_add_suffix (ADW_ACTION_ROW (row), check);
@@ -342,6 +342,7 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
 
     if (self->browse.results_loading != NULL)
       gtk_widget_set_visible (GTK_WIDGET (self->browse.results_loading), FALSE);
+    adw_status_page_set_description (ADW_STATUS_PAGE (self->browse.results_status), NULL);
     gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), empty);
     gtk_widget_set_visible (GTK_WIDGET (self->browse.results_scroller), !empty);
     gtk_widget_set_visible (GTK_WIDGET (self->browse.results_group), TRUE);

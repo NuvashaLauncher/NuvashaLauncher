@@ -1235,7 +1235,6 @@ nuvashalauncher_worlds_page_new (NuvashaLauncherInstance *instance,
   gtk_widget_set_vexpand (GTK_WIDGET (empty), TRUE);
   adw_status_page_set_icon_name (empty, "applications-games-symbolic");
   adw_status_page_set_title (empty, _("No worlds"));
-  adw_status_page_set_description (empty, _("Worlds saved by Minecraft or imported here will appear in this list."));
 
   GtkWidget *empty_add_btn = gtk_button_new_with_label (_("Add world…"));
   gtk_widget_add_css_class (empty_add_btn, "suggested-action");

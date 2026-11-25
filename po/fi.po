@@ -233,10 +233,6 @@ msgstr "Konfliktit\n"
 msgid "%s is being installed"
 msgstr "%s asennetaan"
 
-#: src/nuvashalauncher-content-page-install.c:609
-msgid "Update"
-msgstr "Päivittää"
-
 #: src/nuvashalauncher-content-page-install.c:614
 #: src/nuvashalauncher-download-modpack-details.c:215
 #, c-format
@@ -429,10 +425,6 @@ msgstr "Avaa kansio"
 msgid "Nothing installed yet"
 msgstr "Mitään ei ole vielä asennettu"
 
-#: src/nuvashalauncher-content-page-ui.c:220
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Selaa, mitä haluat lisätä tämän ilmentymän kansioon"
-
 #: src/nuvashalauncher-content-page-ui.c:222
 #: src/nuvashalauncher-content-page-ui.c:493
 #: src/nuvashalauncher-content-page-ui.c:566
@@ -457,13 +449,6 @@ msgstr "Suodata luokan mukaan"
 #: data/ui/nuvashalauncher-modpack-browser-states.ui:18
 msgid "Nothing to show yet"
 msgstr "Ei vielä mitään näytettävää"
-
-#: src/nuvashalauncher-content-page-ui.c:388
-msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
-msgstr ""
-"Kirjoita mitä etsiä, tai selaa kaikkea, mitä Modrinth tarjoaa tähän "
-"tapaukseen"
 
 #: src/nuvashalauncher-content-page-ui.c:591
 #: src/nuvashalauncher-main-window-ui.c:165
@@ -503,14 +488,6 @@ msgstr "Ei voida luoda “%s”: %s"
 #: src/nuvashalauncher-content-page.c:178
 msgid "No mod loader"
 msgstr "Ei mod loaderia"
-
-#: src/nuvashalauncher-content-page.c:181
-msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
-msgstr ""
-"Modit tarvitsevat modloaderin. Valitse ensin Fabric, Quilt, Forge tai "
-"NeoForge tämän esiintymän asetuksista"
 
 #: src/nuvashalauncher-create-instance-dialog.c:139
 msgid "Pick a Minecraft version from the list."
@@ -1639,8 +1616,8 @@ msgid "No instances yet"
 msgstr "Ei vielä tapauksia"
 
 #: src/nuvashalauncher-main-window-ui.c:149
-msgid "Create an instance to start playing."
-msgstr "Luo ilmentymä aloittaaksesi pelaamisen."
+msgid "Press the + to create an instance."
+msgstr "Luo instanssi painamalla +."
 
 #: src/nuvashalauncher-main-window.c:147
 msgid "Minecraft crashed"
@@ -1972,12 +1949,6 @@ msgstr "Päivitä"
 msgid "No servers"
 msgstr "Ei palvelimia"
 
-#: src/nuvashalauncher-servers-page.c:703
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr ""
-"Tänne lisätyt palvelimet tallennetaan tämän instanssin servers.dat-"
-"tiedostoon."
-
 #: src/nuvashalauncher-sign-in-dialog.c:14
 msgid "Asking Microsoft for a code…"
 msgstr "pyytää Microsoftilta koodia…"
@@ -2124,11 +2095,6 @@ msgstr "Lisää maailma…"
 #: src/nuvashalauncher-worlds-page.c:1237
 msgid "No worlds"
 msgstr "Ei maailmoja"
-
-#: src/nuvashalauncher-worlds-page.c:1238
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr ""
-"Minecraftin tallentamat tai tänne tuodut maailmat näkyvät tässä luettelossa."
 
 #~ msgid "Colored Lighting"
 #~ msgstr "Värillinen valaistus"

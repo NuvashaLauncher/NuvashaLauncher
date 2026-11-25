@@ -237,10 +237,6 @@ msgstr "Konflikty\n"
 msgid "%s is being installed"
 msgstr "%s se instaluje"
 
-#: src/nuvashalauncher-content-page-install.c:609
-msgid "Update"
-msgstr "Aktualizovat"
-
 #: src/nuvashalauncher-content-page-install.c:614
 #: src/nuvashalauncher-download-modpack-details.c:215
 #, c-format
@@ -441,10 +437,6 @@ msgstr "Otevřete složku"
 msgid "Nothing installed yet"
 msgstr "Zatím nic nainstalováno"
 
-#: src/nuvashalauncher-content-page-ui.c:220
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Vyhledejte něco, co chcete vložit do složky této instance"
-
 #: src/nuvashalauncher-content-page-ui.c:222
 #: src/nuvashalauncher-content-page-ui.c:493
 #: src/nuvashalauncher-content-page-ui.c:566
@@ -469,12 +461,6 @@ msgstr "Filtrujte podle kategorie"
 #: data/ui/nuvashalauncher-modpack-browser-states.ui:18
 msgid "Nothing to show yet"
 msgstr "Zatím není co ukázat"
-
-#: src/nuvashalauncher-content-page-ui.c:388
-msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
-msgstr ""
-"Napište, co hledat, nebo procházejte vše, co má Modrinth pro tento případ"
 
 #: src/nuvashalauncher-content-page-ui.c:591
 #: src/nuvashalauncher-main-window-ui.c:165
@@ -515,14 +501,6 @@ msgstr "Nelze vytvořit “%s”: %s"
 #: src/nuvashalauncher-content-page.c:178
 msgid "No mod loader"
 msgstr "Žádný zavaděč modů"
-
-#: src/nuvashalauncher-content-page.c:181
-msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
-msgstr ""
-"Mody potřebují nakladač modů. Nejprve v nastavení této instance vyberte "
-"Fabric, Quilt, Forge nebo NeoForge"
 
 #: src/nuvashalauncher-create-instance-dialog.c:139
 msgid "Pick a Minecraft version from the list."
@@ -1648,8 +1626,8 @@ msgid "No instances yet"
 msgstr "Zatím žádné instance"
 
 #: src/nuvashalauncher-main-window-ui.c:149
-msgid "Create an instance to start playing."
-msgstr "Vytvořte instanci a začněte hrát."
+msgid "Press the + to create an instance."
+msgstr "Stisknutím + vytvoříte instanci."
 
 #: src/nuvashalauncher-main-window.c:147
 msgid "Minecraft crashed"
@@ -1980,10 +1958,6 @@ msgstr "Obnovit"
 msgid "No servers"
 msgstr "Žádné servery"
 
-#: src/nuvashalauncher-servers-page.c:703
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "Zde přidané servery se ukládají do servers.dat této instance."
-
 #: src/nuvashalauncher-sign-in-dialog.c:14
 msgid "Asking Microsoft for a code…"
 msgstr "požádat Microsoft o kód…"
@@ -2130,11 +2104,6 @@ msgstr "Přidat svět…"
 #: src/nuvashalauncher-worlds-page.c:1237
 msgid "No worlds"
 msgstr "Žádné světy"
-
-#: src/nuvashalauncher-worlds-page.c:1238
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr ""
-"Světy uložené hrou Minecraft nebo importované zde se zobrazí v tomto seznamu."
 
 #~ msgid "Colored Lighting"
 #~ msgstr "Barevné osvětlení"

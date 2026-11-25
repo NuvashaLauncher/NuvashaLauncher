@@ -6,8 +6,8 @@ Security updates are provided for the latest stable release and the `main` branc
 
 | Version | Supported |
 | ------- | --------- |
-| `1.7.x` (latest) | Yes |
-| `<= 1.6` | No |
+| `1.8.x` (latest) | Yes |
+| `<= 1.7` | No |
 
 ## Reporting a Vulnerability
 

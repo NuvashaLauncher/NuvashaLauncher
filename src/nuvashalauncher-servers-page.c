@@ -700,7 +700,6 @@ nuvashalauncher_servers_page_new (NuvashaLauncherInstance *instance,
   gtk_widget_set_vexpand (GTK_WIDGET (empty), TRUE);
   adw_status_page_set_icon_name (empty, "network-server-symbolic");
   adw_status_page_set_title (empty, _("No servers"));
-  adw_status_page_set_description (empty, _("Servers added here are saved to servers.dat for this instance."));
 
   GtkWidget *empty_add = gtk_button_new_with_label (_("Add server"));
   gtk_widget_add_css_class (empty_add, "suggested-action");

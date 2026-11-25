@@ -244,10 +244,10 @@ nuvashalauncher_download_modpack_dialog_new_for_file (NuvashaLauncherInstanceMan
     g_object_new (NUVASHALAUNCHER_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL);
 
   self->manager = g_object_ref (manager);
-  build_browse_page (self, FALSE);
 
   self->pack_path = g_strdup (path);
   self->imported = TRUE;
+  self->closed = TRUE;
   {
     g_autofree char *name = g_path_get_basename (path);
 

@@ -480,7 +480,7 @@ results_arrived (NuvashaLauncherDownloadModpackDialog *self, NuvashaLauncherModr
                                      G_CALLBACK (on_modpack_row_check_toggled), self, 0);
 
             GtkWidget *button =
-              modpack_row_action_button ("folder-download-symbolic", _("Install"),
+              modpack_row_action_button ("pan-down-symbolic", _("Install"),
                                          stored,
                                          G_CALLBACK (on_modpack_versions_clicked),
                                          self);

@@ -88,9 +88,9 @@ nuvashalauncher_main_window_import_file (NuvashaLauncherMainWindow *self, const 
   g_return_if_fail (NUVASHALAUNCHER_IS_MAIN_WINDOW (self));
   g_return_if_fail (path != NULL && *path != '\0');
 
-  dialog = nuvashalauncher_download_modpack_dialog_new_for_file (
-    self->model->manager, path);
-  adw_dialog_present (ADW_DIALOG (dialog), GTK_WIDGET (self));
+  dialog = g_object_ref_sink (nuvashalauncher_download_modpack_dialog_new_for_file (
+    self->model->manager, path));
+  g_object_unref (dialog);
 }
 
 /* Tracks launch count, play time, last session, and crashes on @instance. */

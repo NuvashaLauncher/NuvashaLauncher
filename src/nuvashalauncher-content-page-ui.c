@@ -215,9 +215,6 @@ nuvashalauncher_content_page_build_installed (NuvashaLauncherContentPage *self)
                                  nuvashalauncher_content_type_icon (self->type));
   adw_status_page_set_title (ADW_STATUS_PAGE (self->installed.status),
                                _("Nothing installed yet"));
-  adw_status_page_set_description (
-      ADW_STATUS_PAGE (self->installed.status),
-       _("Browse for something to put into the folder of this instance"));
 
   GtkWidget *empty_browse_btn = gtk_button_new_with_label (_("Browse"));
   gtk_widget_add_css_class (empty_browse_btn, "suggested-action");
@@ -383,10 +380,6 @@ nuvashalauncher_content_page_build_browse (NuvashaLauncherContentPage *self)
                                  "system-search-symbolic");
   adw_status_page_set_title (ADW_STATUS_PAGE (self->browse.results_status),
                                _("Nothing to show yet"));
-  adw_status_page_set_description (
-      ADW_STATUS_PAGE (self->browse.results_status),
-        _("Type what to look for, or browse everything Modrinth has for this "
-        "instance"));
   gtk_widget_set_visible (GTK_WIDGET (self->browse.results_status), FALSE);
 
   self->browse.results_loading = ADW_SPINNER (adw_spinner_new ());

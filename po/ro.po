@@ -238,10 +238,6 @@ msgstr "Conflicte\n"
 msgid "%s is being installed"
 msgstr "%s este în curs de instalare"
 
-#: src/nuvashalauncher-content-page-install.c:609
-msgid "Update"
-msgstr "Actualizare"
-
 #: src/nuvashalauncher-content-page-install.c:614
 #: src/nuvashalauncher-download-modpack-details.c:215
 #, c-format
@@ -443,10 +439,6 @@ msgstr "Deschideți folderul"
 msgid "Nothing installed yet"
 msgstr "Nimic instalat încă"
 
-#: src/nuvashalauncher-content-page-ui.c:220
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Căutați ceva de pus în folderul acestei instanțe"
-
 #: src/nuvashalauncher-content-page-ui.c:222
 #: src/nuvashalauncher-content-page-ui.c:493
 #: src/nuvashalauncher-content-page-ui.c:566
@@ -471,13 +463,6 @@ msgstr "Filtrați după categorie"
 #: data/ui/nuvashalauncher-modpack-browser-states.ui:18
 msgid "Nothing to show yet"
 msgstr "Nimic de arătat încă"
-
-#: src/nuvashalauncher-content-page-ui.c:388
-msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
-msgstr ""
-"Introdu ce să cauți sau răsfoiește tot ce are Modrinth pentru această "
-"instanță"
 
 #: src/nuvashalauncher-content-page-ui.c:591
 #: src/nuvashalauncher-main-window-ui.c:165
@@ -518,14 +503,6 @@ msgstr "Nu se poate crea „%s”: %s"
 #: src/nuvashalauncher-content-page.c:178
 msgid "No mod loader"
 msgstr "Fără încărcător de mod"
-
-#: src/nuvashalauncher-content-page.c:181
-msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
-msgstr ""
-"Modurile au nevoie de un încărcător de mod. Alegeți mai întâi Fabric, Quilt, "
-"Forge sau NeoForge din setările acestei instanțe"
 
 #: src/nuvashalauncher-create-instance-dialog.c:139
 msgid "Pick a Minecraft version from the list."
@@ -1665,8 +1642,8 @@ msgid "No instances yet"
 msgstr "Nicio instanță încă"
 
 #: src/nuvashalauncher-main-window-ui.c:149
-msgid "Create an instance to start playing."
-msgstr "Creați o instanță pentru a începe să jucați."
+msgid "Press the + to create an instance."
+msgstr "Apasă pe + pentru a crea o instanță."
 
 #: src/nuvashalauncher-main-window.c:147
 msgid "Minecraft crashed"
@@ -1999,11 +1976,6 @@ msgstr "Reîmprospătează"
 msgid "No servers"
 msgstr "Niciun server"
 
-#: src/nuvashalauncher-servers-page.c:703
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr ""
-"Serverele adăugate aici sunt salvate în servers.dat pentru această instanță."
-
 #: src/nuvashalauncher-sign-in-dialog.c:14
 msgid "Asking Microsoft for a code…"
 msgstr "cerând Microsoft un cod…"
@@ -2150,11 +2122,6 @@ msgstr "Adaugă lume…"
 #: src/nuvashalauncher-worlds-page.c:1237
 msgid "No worlds"
 msgstr "Nicio lume"
-
-#: src/nuvashalauncher-worlds-page.c:1238
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr ""
-"Lumile salvate de Minecraft sau importate aici vor apărea în această listă."
 
 #~ msgid "Colored Lighting"
 #~ msgstr "Iluminare colorată"

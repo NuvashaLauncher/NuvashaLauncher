@@ -176,10 +176,6 @@ nuvashalauncher_content_page_new_with_base (NuvashaLauncherInstance *instance,
                                          nuvashalauncher_content_type_icon (type));
           adw_status_page_set_title (ADW_STATUS_PAGE (status),
                                       _("No mod loader"));
-          adw_status_page_set_description (
-              ADW_STATUS_PAGE (status),
-              _("Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge "
-              "in the settings of this instance first"));
           gtk_box_append (GTK_BOX (self), GTK_WIDGET (status));
 
           return self;

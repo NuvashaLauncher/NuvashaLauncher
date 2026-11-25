@@ -233,10 +233,6 @@ msgstr "Conflitti\n"
 msgid "%s is being installed"
 msgstr "Installazione di %s"
 
-#: src/nuvashalauncher-content-page-install.c:609
-msgid "Update"
-msgstr "Aggiorna"
-
 #: src/nuvashalauncher-content-page-install.c:614
 #: src/nuvashalauncher-download-modpack-details.c:215
 #, c-format
@@ -429,10 +425,6 @@ msgstr "Apri cartella"
 msgid "Nothing installed yet"
 msgstr "Non è stato ancora installato nulla"
 
-#: src/nuvashalauncher-content-page-ui.c:220
-msgid "Browse for something to put into the folder of this instance"
-msgstr "Cerca qualcosa da inserire nella cartella di questa istanza"
-
 #: src/nuvashalauncher-content-page-ui.c:222
 #: src/nuvashalauncher-content-page-ui.c:493
 #: src/nuvashalauncher-content-page-ui.c:566
@@ -457,12 +449,6 @@ msgstr "Filtra per categoria"
 #: data/ui/nuvashalauncher-modpack-browser-states.ui:18
 msgid "Nothing to show yet"
 msgstr "Niente da visualizzare"
-
-#: src/nuvashalauncher-content-page-ui.c:388
-msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
-msgstr ""
-"Digita cosa cercare o sfoglia tutto ciò che Modrinth ha per questa istanza"
 
 #: src/nuvashalauncher-content-page-ui.c:591
 #: src/nuvashalauncher-main-window-ui.c:165
@@ -502,14 +488,6 @@ msgstr "Impossibile creare «%s»: %s"
 #: src/nuvashalauncher-content-page.c:178
 msgid "No mod loader"
 msgstr "Nessun caricatore di mod"
-
-#: src/nuvashalauncher-content-page.c:181
-msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
-msgstr ""
-"Le mod hanno bisogno di un caricatore di mod. Scegli prima Fabric, Quilt, "
-"Forge o NeoForge nelle impostazioni di questa istanza"
 
 #: src/nuvashalauncher-create-instance-dialog.c:139
 msgid "Pick a Minecraft version from the list."
@@ -1650,8 +1628,8 @@ msgid "No instances yet"
 msgstr "Nessuna istanza"
 
 #: src/nuvashalauncher-main-window-ui.c:149
-msgid "Create an instance to start playing."
-msgstr "Crea un'istanza per iniziare a giocare."
+msgid "Press the + to create an instance."
+msgstr "Premi + per creare un'istanza."
 
 #: src/nuvashalauncher-main-window.c:147
 msgid "Minecraft crashed"
@@ -1984,11 +1962,6 @@ msgstr "Aggiorna"
 msgid "No servers"
 msgstr "Nessun server"
 
-#: src/nuvashalauncher-servers-page.c:703
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr ""
-"I server aggiunti qui vengono salvati in servers.dat per questa istanza."
-
 #: src/nuvashalauncher-sign-in-dialog.c:14
 msgid "Asking Microsoft for a code…"
 msgstr "chiedere a Microsoft un codice…"
@@ -2142,11 +2115,6 @@ msgstr "Aggiungi mondo…"
 #: src/nuvashalauncher-worlds-page.c:1237
 msgid "No worlds"
 msgstr "Nessun mondo"
-
-#: src/nuvashalauncher-worlds-page.c:1238
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr ""
-"I mondi salvati da Minecraft o importati qui appariranno in questo elenco."
 
 #~ msgid "Colored Lighting"
 #~ msgstr "Illuminazione colorata"

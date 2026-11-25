@@ -228,10 +228,6 @@ msgstr "갈등\n"
 msgid "%s is being installed"
 msgstr "%s 설치 중"
 
-#: src/nuvashalauncher-content-page-install.c:609
-msgid "Update"
-msgstr "업데이트"
-
 #: src/nuvashalauncher-content-page-install.c:614
 #: src/nuvashalauncher-download-modpack-details.c:215
 #, c-format
@@ -416,10 +412,6 @@ msgstr "폴더 열기"
 msgid "Nothing installed yet"
 msgstr "아직 아무것도 설치되지 않음"
 
-#: src/nuvashalauncher-content-page-ui.c:220
-msgid "Browse for something to put into the folder of this instance"
-msgstr "이 인스턴스의 폴더에 넣을 항목을 찾습니다"
-
 #: src/nuvashalauncher-content-page-ui.c:222
 #: src/nuvashalauncher-content-page-ui.c:493
 #: src/nuvashalauncher-content-page-ui.c:566
@@ -444,13 +436,6 @@ msgstr "카테고리별 필터링"
 #: data/ui/nuvashalauncher-modpack-browser-states.ui:18
 msgid "Nothing to show yet"
 msgstr "보여줄 항목 없음"
-
-#: src/nuvashalauncher-content-page-ui.c:388
-msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
-msgstr ""
-"검색할 항목을 입력하거나 Modrinth가 이 회차에 대해 가지고 있는 모든 것을 찾아"
-"보세요."
 
 #: src/nuvashalauncher-content-page-ui.c:591
 #: src/nuvashalauncher-main-window-ui.c:165
@@ -489,14 +474,6 @@ msgstr "“%s”을(를) 만들 수 없습니다: %s"
 #: src/nuvashalauncher-content-page.c:178
 msgid "No mod loader"
 msgstr "모드 로더 없음"
-
-#: src/nuvashalauncher-content-page.c:181
-msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
-msgstr ""
-"모드는 모드 로더가 필요합니다. 먼저 이 인스턴스 설정에서 Fabric, Quilt, "
-"Forge 또는 NeoForge를 선택하세요"
 
 #: src/nuvashalauncher-create-instance-dialog.c:139
 msgid "Pick a Minecraft version from the list."
@@ -1614,8 +1591,8 @@ msgid "No instances yet"
 msgstr "아직 인스턴스가 없습니다"
 
 #: src/nuvashalauncher-main-window-ui.c:149
-msgid "Create an instance to start playing."
-msgstr "플레이를 시작하려면 인스턴스를 생성하세요."
+msgid "Press the + to create an instance."
+msgstr "+를 눌러 인스턴스를 만드세요."
 
 #: src/nuvashalauncher-main-window.c:147
 msgid "Minecraft crashed"
@@ -1948,10 +1925,6 @@ msgstr "새로 고침"
 msgid "No servers"
 msgstr "서버 없음"
 
-#: src/nuvashalauncher-servers-page.c:703
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "여기에 추가한 서버는 이 인스턴스의 servers.dat에 저장됩니다."
-
 #: src/nuvashalauncher-sign-in-dialog.c:14
 msgid "Asking Microsoft for a code…"
 msgstr "microsoft에 코드 요청…"
@@ -2105,10 +2078,6 @@ msgstr "월드 추가…"
 #: src/nuvashalauncher-worlds-page.c:1237
 msgid "No worlds"
 msgstr "월드 없음"
-
-#: src/nuvashalauncher-worlds-page.c:1238
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "Minecraft에서 저장하거나 여기로 가져온 월드가 이 목록에 표시됩니다."
 
 #~ msgid "Colored Lighting"
 #~ msgstr "색상 조명"

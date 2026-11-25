@@ -250,10 +250,6 @@ msgstr "الصراعات\n"
 msgid "%s is being installed"
 msgstr "يتم الآن تثبيت %s"
 
-#: src/nuvashalauncher-content-page-install.c:609
-msgid "Update"
-msgstr "تحديث"
-
 #: src/nuvashalauncher-content-page-install.c:614
 #: src/nuvashalauncher-download-modpack-details.c:215
 #, c-format
@@ -478,10 +474,6 @@ msgstr "افتح المجلد"
 msgid "Nothing installed yet"
 msgstr "لم يتم تثبيت أي شيء حتى الآن"
 
-#: src/nuvashalauncher-content-page-ui.c:220
-msgid "Browse for something to put into the folder of this instance"
-msgstr "استعرض بحثًا عن شيء ما لوضعه في مجلد هذه الحالة"
-
 #: src/nuvashalauncher-content-page-ui.c:222
 #: src/nuvashalauncher-content-page-ui.c:493
 #: src/nuvashalauncher-content-page-ui.c:566
@@ -506,11 +498,6 @@ msgstr "تصفية حسب الفئة"
 #: data/ui/nuvashalauncher-modpack-browser-states.ui:18
 msgid "Nothing to show yet"
 msgstr "لا شيء لإظهاره حتى الآن"
-
-#: src/nuvashalauncher-content-page-ui.c:388
-msgid ""
-"Type what to look for, or browse everything Modrinth has for this instance"
-msgstr "اكتب ما تبحث عنه، أو تصفح كل ما لدى Modrinth في هذه الحالة"
 
 #: src/nuvashalauncher-content-page-ui.c:591
 #: src/nuvashalauncher-main-window-ui.c:165
@@ -554,14 +541,6 @@ msgstr "لا يمكن إنشاء “%s”: %s"
 #: src/nuvashalauncher-content-page.c:178
 msgid "No mod loader"
 msgstr "لا يوجد محمل وزارة الدفاع"
-
-#: src/nuvashalauncher-content-page.c:181
-msgid ""
-"Mods need a mod loader. Pick Fabric, Quilt, Forge or NeoForge in the "
-"settings of this instance first"
-msgstr ""
-"تحتاج التعديلات إلى محمل تعديل. اختر Fabric أو Quilt أو Forge أو NeoForge في "
-"إعدادات هذا المثيل أولاً"
 
 #: src/nuvashalauncher-create-instance-dialog.c:139
 msgid "Pick a Minecraft version from the list."
@@ -1679,8 +1658,8 @@ msgid "No instances yet"
 msgstr "لا توجد حالات حتى الآن"
 
 #: src/nuvashalauncher-main-window-ui.c:149
-msgid "Create an instance to start playing."
-msgstr "أنشئ نسخة لبدء اللعب."
+msgid "Press the + to create an instance."
+msgstr "اضغط على + لإنشاء نسخة."
 
 #: src/nuvashalauncher-main-window.c:147
 msgid "Minecraft crashed"
@@ -2013,10 +1992,6 @@ msgstr "تحديث"
 msgid "No servers"
 msgstr "لا توجد خوادم"
 
-#: src/nuvashalauncher-servers-page.c:703
-msgid "Servers added here are saved to servers.dat for this instance."
-msgstr "تُحفظ الخوادم المضافة هنا في servers.dat لهذه النسخة."
-
 #: src/nuvashalauncher-sign-in-dialog.c:14
 msgid "Asking Microsoft for a code…"
 msgstr "يطلب من Microsoft الحصول على رمز…"
@@ -2162,10 +2137,6 @@ msgstr "إضافة عالم…"
 #: src/nuvashalauncher-worlds-page.c:1237
 msgid "No worlds"
 msgstr "لا توجد عوالم"
-
-#: src/nuvashalauncher-worlds-page.c:1238
-msgid "Worlds saved by Minecraft or imported here will appear in this list."
-msgstr "ستظهر العوالم المحفوظة في Minecraft أو المستوردة هنا في هذه القائمة."
 
 #~ msgid "Colored Lighting"
 #~ msgstr "إضاءة ملونة"

@@ -146,7 +146,7 @@ nuvashalauncher_main_window_build_ui (NuvashaLauncherMainWindow *self)
   /* Empty state conforming to GNOME HIG */
   adw_status_page_set_title (ADW_STATUS_PAGE (empty_page), _("No instances yet"));
   adw_status_page_set_description (ADW_STATUS_PAGE (empty_page),
-                                   _("Create an instance to start playing."));
+                                   _("Press the + to create an instance."));
   gtk_widget_set_hexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (empty_page), TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (empty_page), "nuvashalauncher-empty-state");
