@@ -623,6 +623,8 @@ append_profile_skins (SkinMenu *menu, const char *json)
   JsonNode *root;
   JsonArray *skins;
 
+  int insert_index = 0;
+
   if (!json_parser_load_from_data (parser, json, -1, NULL))
     return;
   root = json_parser_get_root (parser);
@@ -661,7 +663,7 @@ append_profile_skins (SkinMenu *menu, const char *json)
             g_autoptr (AdwActionRow) row = skin_row_new (
               menu, alias != NULL && *alias != '\0' ? alias : fallback_name,
               url);
-            gtk_list_box_append (menu->skins, GTK_WIDGET (row));
+            gtk_list_box_insert (menu->skins, GTK_WIDGET (row), insert_index++);
           }
         }
     }
@@ -1016,9 +1018,10 @@ nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImag
   g_value_unset (&vertical);
   adw_dialog_set_title (dialog, _("Skin"));
   adw_dialog_set_content_width (dialog, 860);
-  adw_dialog_set_content_height (dialog, 560);
+  adw_dialog_set_content_height (dialog, 520);
   gtk_widget_set_size_request (GTK_WIDGET (dialog), 420, 400);
   adw_dialog_add_breakpoint (dialog, g_steal_pointer (&narrow_breakpoint));
+  adw_header_bar_set_show_title (header, FALSE);
   adw_header_bar_set_show_back_button (header, FALSE);
   adw_toolbar_view_add_top_bar (toolbar, GTK_WIDGET (header));
   adw_toolbar_view_set_content (toolbar, GTK_WIDGET (root));
@@ -1038,7 +1041,7 @@ nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImag
           g_autoptr (AdwActionRow) row =
             skin_row_new (data, avatar_skin_name, account->avatar_url);
           data->current_skin_row = row;
-          gtk_list_box_append (skins, GTK_WIDGET (row));
+          gtk_list_box_insert (skins, GTK_WIDGET (row), 0);
         }
     }
   data->applying_profile = TRUE;

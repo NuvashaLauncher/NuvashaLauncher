@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <object class="GtkBox" id="root">
-    <property name="css-classes">nuvashalauncher-dialog-content</property>
     <property name="orientation">horizontal</property>
     <property name="spacing">18</property>
     <property name="margin-start">24</property>
     <property name="margin-end">24</property>
-    <property name="margin-top">24</property>
-    <property name="margin-bottom">24</property>
+    <property name="margin-top">6</property>
+    <property name="margin-bottom">18</property>
     <child>
       <object class="GtkBox" id="left">
         <property name="orientation">vertical</property>
