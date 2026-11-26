@@ -427,10 +427,33 @@ apply_server_icon (NuvashaLauncherServersPage *self,
     }
 }
 
+static GdkTexture *
+server_fallback_pack_texture (NuvashaLauncherServersPage *self)
+{
+  static const char *fallback_key = "__pack_png_fallback__";
+  GdkTexture *cached = self->icon_cache != NULL
+    ? g_hash_table_lookup (self->icon_cache, fallback_key)
+    : NULL;
+
+  if (cached != NULL)
+    return g_object_ref (cached);
+
+  GdkTexture *texture = gdk_texture_new_from_resource (
+    "/com/github/NuvashaLauncher/NuvashaLauncher/pack.png");
+  if (texture != NULL && self->icon_cache != NULL)
+    g_hash_table_replace (self->icon_cache, g_strdup (fallback_key),
+                          g_object_ref (texture));
+  return texture;
+}
+
 static GtkWidget *
 server_icon_widget (NuvashaLauncherServersPage *self, const char *icon_b64)
 {
   GtkWidget *icon = nuvashalauncher_icon_widget_new ("network-server-symbolic");
+  g_autoptr (GdkTexture) fallback = server_fallback_pack_texture (self);
+
+  if (fallback != NULL)
+    nuvashalauncher_icon_widget_set_texture (icon, fallback);
 
   apply_server_icon (self, icon, icon_b64);
   return icon;

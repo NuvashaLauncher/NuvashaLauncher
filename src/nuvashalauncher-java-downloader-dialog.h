@@ -24,9 +24,12 @@ G_DECLARE_FINAL_TYPE (NuvashaLauncherJavaDownloaderDialog,
 
 /* Creates the Java downloader dialog. If @java_row is non-NULL, it is
  * reloaded automatically when a JDK finishes installing (even if the dialog
- * was closed while the download continued in the background). */
+ * was closed while the download continued in the background). When
+ * @required_java > 0, the best compatible release for that major version is
+ * labeled as recommended. */
 NuvashaLauncherJavaDownloaderDialog *nuvashalauncher_java_downloader_dialog_new (
-  NuvashaLauncherJavaRow *java_row);
+  NuvashaLauncherJavaRow *java_row,
+  int required_java);
 
 G_END_DECLS
 

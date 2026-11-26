@@ -2517,3 +2517,9 @@ msgstr "線上"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld 位玩家"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (建議)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (建議)"

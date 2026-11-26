@@ -2562,3 +2562,9 @@ msgstr "Çevrimiçi"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld oyuncu"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (önerilen)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (önerilen)"

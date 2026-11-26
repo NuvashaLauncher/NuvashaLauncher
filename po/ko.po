@@ -2539,3 +2539,9 @@ msgstr "온라인"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld명"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (권장)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (권장)"

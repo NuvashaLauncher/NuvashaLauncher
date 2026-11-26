@@ -2558,3 +2558,9 @@ msgstr "Tilkoblet"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld spillere"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (anbefalt)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (anbefalt)"

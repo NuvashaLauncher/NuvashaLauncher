@@ -2513,3 +2513,9 @@ msgstr "在线"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld 名玩家"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (推荐)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (推荐)"

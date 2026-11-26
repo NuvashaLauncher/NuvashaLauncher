@@ -2550,3 +2550,9 @@ msgstr "Daring"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld pemain"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (disarankan)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (disarankan)"

@@ -2569,3 +2569,9 @@ msgstr "У мережі"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld гравців"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (рекомендовано)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (рекомендовано)"

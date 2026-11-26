@@ -2556,3 +2556,9 @@ msgstr "Yhdistetty"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld pelaajaa"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (suositeltu)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (suositeltu)"

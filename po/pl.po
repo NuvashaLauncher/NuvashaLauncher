@@ -2574,3 +2574,9 @@ msgstr "Online"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld graczy"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (zalecane)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (zalecane)"

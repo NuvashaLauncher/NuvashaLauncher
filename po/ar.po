@@ -2601,3 +2601,9 @@ msgstr "متصل"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld لاعب"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (موصى به)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (موصى به)"

@@ -23,6 +23,7 @@ struct _NuvashaLauncherJavaDownloaderDialog
   AdwPreferencesGroup *releases_group;
 
   GWeakRef java_row_ref;
+  int required_java;
   NuvashaLauncherTaskScope *list_scope;
   GPtrArray *rows; /* GtkWidget* added to releases_group */
 };
@@ -249,7 +250,8 @@ clear_release_rows (NuvashaLauncherJavaDownloaderDialog *self)
 
 static GtkWidget *
 build_release_row (NuvashaLauncherJavaDownloaderDialog *self,
-                   const NuvashaLauncherJavaRelease *release)
+                   const NuvashaLauncherJavaRelease *release,
+                   gboolean recommended)
 {
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   g_autofree char *title = NULL;
@@ -263,8 +265,12 @@ build_release_row (NuvashaLauncherJavaDownloaderDialog *self,
 
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
 
-  if (release->lts)
+  if (release->lts && recommended)
+    title = g_strdup_printf (_("Java %d (LTS) (recommended)"), release->major_version);
+  else if (release->lts)
     title = g_strdup_printf (_("Java %d (LTS)"), release->major_version);
+  else if (recommended)
+    title = g_strdup_printf (_("Java %d (recommended)"), release->major_version);
   else
     title = g_strdup_printf (_("Java %d"), release->major_version);
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title);
@@ -353,10 +359,25 @@ on_releases_loaded (GObject *source G_GNUC_UNUSED,
       return;
     }
 
+  /* Pick the closest compatible release (smallest major >= required_java). */
+  int recommended_major = 0;
+  if (self->required_java > 0)
+    {
+      for (guint i = 0; i < releases->len; i++)
+        {
+          const NuvashaLauncherJavaRelease *release = g_ptr_array_index (releases, i);
+          if (release->major_version >= self->required_java &&
+              (recommended_major == 0 || release->major_version < recommended_major))
+            recommended_major = release->major_version;
+        }
+    }
+
   for (guint i = 0; i < releases->len; i++)
     {
       const NuvashaLauncherJavaRelease *release = g_ptr_array_index (releases, i);
-      GtkWidget *row = build_release_row (self, release);
+      gboolean is_recommended = (recommended_major > 0 &&
+                                 release->major_version == recommended_major);
+      GtkWidget *row = build_release_row (self, release, is_recommended);
       adw_preferences_group_add (self->releases_group, row);
       g_ptr_array_add (self->rows, row);
     }
@@ -460,12 +481,14 @@ nuvashalauncher_java_downloader_dialog_init (
 }
 
 NuvashaLauncherJavaDownloaderDialog *
-nuvashalauncher_java_downloader_dialog_new (NuvashaLauncherJavaRow *java_row)
+nuvashalauncher_java_downloader_dialog_new (NuvashaLauncherJavaRow *java_row,
+                                            int required_java)
 {
   NuvashaLauncherJavaDownloaderDialog *self =
     g_object_new (NUVASHALAUNCHER_TYPE_JAVA_DOWNLOADER_DIALOG, NULL);
 
   g_weak_ref_set (&self->java_row_ref, java_row);
+  self->required_java = required_java;
   load_releases (self);
   return self;
 }

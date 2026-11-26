@@ -454,7 +454,7 @@ on_java_downloader_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_
 {
   NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
   NuvashaLauncherJavaDownloaderDialog *dialog =
-    nuvashalauncher_java_downloader_dialog_new (self->java_row);
+    nuvashalauncher_java_downloader_dialog_new (self->java_row, self->required_java);
 
   adw_dialog_present (ADW_DIALOG (dialog), instance_page_dialog_parent (self));
 }

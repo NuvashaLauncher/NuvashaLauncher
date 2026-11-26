@@ -2541,3 +2541,9 @@ msgstr "Trực tuyến"
 
 msgid "%lld / %lld players"
 msgstr "%lld / %lld người chơi"
+
+msgid "Java %d (recommended)"
+msgstr "Java %d (khuyên dùng)"
+
+msgid "Java %d (LTS) (recommended)"
+msgstr "Java %d (LTS) (khuyên dùng)"

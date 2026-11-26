@@ -91,7 +91,7 @@ test_custom_templates_instantiate (void)
   g_autoptr (NuvashaLauncherSignInDialog) sign_in =
     g_object_ref_sink (nuvashalauncher_sign_in_dialog_new ());
   g_autoptr (NuvashaLauncherJavaDownloaderDialog) java_dl =
-    g_object_ref_sink (nuvashalauncher_java_downloader_dialog_new (NULL));
+    g_object_ref_sink (nuvashalauncher_java_downloader_dialog_new (NULL, 0));
 
   g_assert_true (NUVASHALAUNCHER_IS_OFFLINE_ACCOUNT_DIALOG (offline));
   g_assert_true (NUVASHALAUNCHER_IS_CREATE_INSTANCE_DIALOG (create));
