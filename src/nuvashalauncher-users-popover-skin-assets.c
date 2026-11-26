@@ -177,7 +177,10 @@ local_avatar_cache (void)
 gboolean
 nuvashalauncher_users_set_local_avatar (GtkImage *image, const char *path)
 {
-  GHashTable *cache = path != NULL ? local_avatar_cache () : NULL;
+  if (path == NULL || *path == '\0')
+    return FALSE;
+
+  GHashTable *cache = local_avatar_cache ();
   GdkTexture *cached = cache != NULL ? g_hash_table_lookup (cache, path) : NULL;
 
   if (cached != NULL)

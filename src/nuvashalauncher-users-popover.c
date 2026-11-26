@@ -239,8 +239,9 @@ append_account_row (NuvashaLauncherUsersPopover *self, const NuvashaLauncherAcco
       else
         {
           g_autofree char *steve = nuvashalauncher_users_default_steve_path ();
-          if (!nuvashalauncher_users_set_local_avatar (GTK_IMAGE (image), steve))
-            nuvashalauncher_users_set_avatar_icon (GTK_IMAGE (image));
+          if (steve == NULL || !nuvashalauncher_users_set_local_avatar (GTK_IMAGE (image), steve))
+            nuvashalauncher_users_set_avatar (self, GTK_IMAGE (image),
+                                              nuvashalauncher_users_default_steve_url ());
         }
     }
   else
