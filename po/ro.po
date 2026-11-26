@@ -1654,8 +1654,6 @@ msgid "Minecraft could not start"
 msgstr "Minecraft nu a putut porni"
 
 #: src/nuvashalauncher-main-window.c:155
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft are nevoie de conectare"
 
 # Minecraft Services API errors
 #: src/nuvashalauncher-minecraft-services.c:104

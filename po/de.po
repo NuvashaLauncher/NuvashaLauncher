@@ -1650,8 +1650,6 @@ msgid "Minecraft could not start"
 msgstr "Minecraft konnte nicht gestartet werden"
 
 #: src/nuvashalauncher-main-window.c:155
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft benötigt eine Anmeldung"
 
 # Minecraft Services API errors
 #: src/nuvashalauncher-minecraft-services.c:104

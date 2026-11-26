@@ -1632,8 +1632,6 @@ msgid "Minecraft could not start"
 msgstr "Не вдалося запустити Minecraft"
 
 #: src/nuvashalauncher-main-window.c:155
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft потребує входу"
 
 # Minecraft Services API errors
 #: src/nuvashalauncher-minecraft-services.c:104

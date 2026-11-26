@@ -1628,8 +1628,6 @@ msgid "Minecraft could not start"
 msgstr "Minecraft kunne ikke starte"
 
 #: src/nuvashalauncher-main-window.c:155
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft trenger en pålogging"
 
 # Minecraft Services API errors
 #: src/nuvashalauncher-minecraft-services.c:104

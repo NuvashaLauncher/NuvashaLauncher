@@ -46,8 +46,7 @@ update_the_button (NuvashaLauncherUsersPopover *self)
     }
 
   self->active_name = g_strdup (account->name);
-  nuvashalauncher_users_show_account_head (self, GTK_IMAGE (self->avatar_image),
-                                           account);
+  nuvashalauncher_users_set_avatar_icon (GTK_IMAGE (self->avatar_image));
 
 }
 

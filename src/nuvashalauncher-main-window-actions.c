@@ -50,7 +50,9 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
                             GTK_DIALOG_ERROR_CANCELLED) &&
           !g_error_matches (error, GTK_DIALOG_ERROR,
                             GTK_DIALOG_ERROR_DISMISSED))
-        nuvashalauncher_ui_error_banner (self->ui.banner, error);
+        nuvashalauncher_ui_error_toast (GTK_WIDGET (self),
+                                        GTK_WIDGET (self->ui.toast_overlay),
+                                        error);
       g_object_unref (self);
       return;
     }
@@ -60,10 +62,9 @@ on_import_modpack_chosen (GObject *source, GAsyncResult *result,
 
     if (path == NULL)
       {
-        nuvashalauncher_ui_error_banner (self->ui.banner, NULL);
-        adw_banner_set_title (self->ui.banner,
-                              _("The selected modpack file is not local."));
-        adw_banner_set_revealed (self->ui.banner, TRUE);
+        nuvashalauncher_ui_show_toast (GTK_WIDGET (self),
+                                       GTK_WIDGET (self->ui.toast_overlay),
+                                       _("The selected modpack file is not local."));
         g_object_unref (self);
         return;
       }

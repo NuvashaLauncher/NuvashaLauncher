@@ -1637,8 +1637,6 @@ msgid "Minecraft could not start"
 msgstr "A Minecraft nem tudott elindulni"
 
 #: src/nuvashalauncher-main-window.c:155
-msgid "Minecraft needs a sign-in"
-msgstr "A Minecraftnak be kell jelentkeznie"
 
 # Minecraft Services API errors
 #: src/nuvashalauncher-minecraft-services.c:104

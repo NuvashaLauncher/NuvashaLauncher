@@ -1603,8 +1603,6 @@ msgid "Minecraft could not start"
 msgstr "Minecraft를 시작할 수 없습니다"
 
 #: src/nuvashalauncher-main-window.c:155
-msgid "Minecraft needs a sign-in"
-msgstr "Minecraft에 로그인이 필요합니다"
 
 # Minecraft Services API errors
 #: src/nuvashalauncher-minecraft-services.c:104

@@ -152,7 +152,7 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
       break;
 
     case NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN:
-      what = _("Minecraft needs a sign-in");
+      what = _("Sign in with a Microsoft account to play.");
       break;
 
     default:
@@ -168,20 +168,27 @@ on_window_launcher_state (NuvashaLauncher *launcher G_GNUC_UNUSED,
       nuvashalauncher_main_window_show_crash_logs (self, launcher);
     }
 
-  if (self->ui.banner == NULL)
-    return;
-
-  nuvashalauncher_ui_error_banner (self->ui.banner,
-    g_object_get_data (G_OBJECT (launcher), "launch-error"));
-
-  if (detail != NULL && *detail != '\0')
+  if (state == NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN)
+    message = g_strdup (detail != NULL && *detail != '\0' ? detail : what);
+  else if (detail != NULL && *detail != '\0')
     message = g_strdup_printf ("%s: %s", what, detail);
   else
     message = g_strdup (what);
 
-  adw_banner_set_use_markup (ADW_BANNER (self->ui.banner), FALSE);
-  adw_banner_set_title (ADW_BANNER (self->ui.banner), message);
-  adw_banner_set_revealed (ADW_BANNER (self->ui.banner), TRUE);
+  if (self->ui.toast_overlay != NULL)
+    {
+      const GError *launch_error =
+        g_object_get_data (G_OBJECT (launcher), "launch-error");
+
+      if (launch_error != NULL)
+        nuvashalauncher_ui_error_toast (GTK_WIDGET (self),
+                                        GTK_WIDGET (self->ui.toast_overlay),
+                                        launch_error);
+      else
+        nuvashalauncher_ui_show_toast (GTK_WIDGET (self),
+                                       GTK_WIDGET (self->ui.toast_overlay),
+                                       message);
+    }
 
   if (state != NUVASHALAUNCHER_LAUNCH_CRASHED)
     nuvashalauncher_main_window_maybe_quit_background (self);

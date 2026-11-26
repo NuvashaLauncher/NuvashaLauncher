@@ -169,7 +169,7 @@ nuvashalauncher_ui_error_toast (GtkWidget *page, GtkWidget *overlay, const GErro
   details->error = error != NULL ? g_error_copy (error) : NULL;
   toast = adw_toast_new (nuvashalauncher_error_message (error));
   adw_toast_set_use_markup (toast, FALSE);
-  adw_toast_set_timeout (toast, 0);
+  adw_toast_set_timeout (toast, 5);
   adw_toast_set_button_label (toast, _("Technical details"));
   g_object_set_data_full (G_OBJECT (toast), "nuvashalauncher-error", details, error_toast_free);
   g_signal_connect (toast, "button-clicked", G_CALLBACK (on_error_toast_details), details);

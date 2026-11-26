@@ -19,13 +19,15 @@
 void
 show_error (NuvashaLauncherContentPage *self, const char *what, GError *error)
 {
-  if (self->banner == NULL)
+  if (self->toasts == NULL)
     return;
 
-  nuvashalauncher_ui_error_banner (self->banner, error);
-  g_autofree char *message = g_strdup_printf (
-    "%s: %s", what, nuvashalauncher_error_message (error));
-  adw_banner_set_title (ADW_BANNER (self->banner), message);
+  if (error != NULL)
+    nuvashalauncher_ui_error_toast (GTK_WIDGET (self),
+                                    GTK_WIDGET (self->toasts), error);
+  else
+    nuvashalauncher_ui_show_toast (GTK_WIDGET (self),
+                                   GTK_WIDGET (self->toasts), what);
 }
 
 /* Remove all rows from a preferences group. */

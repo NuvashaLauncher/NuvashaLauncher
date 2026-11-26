@@ -1593,8 +1593,6 @@ msgid "Minecraft could not start"
 msgstr "我的世界無法啟動"
 
 #: src/nuvashalauncher-main-window.c:155
-msgid "Minecraft needs a sign-in"
-msgstr "我的世界需要登入"
 
 # Minecraft Services API errors
 #: src/nuvashalauncher-minecraft-services.c:104

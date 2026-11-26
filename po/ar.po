@@ -1670,8 +1670,6 @@ msgid "Minecraft could not start"
 msgstr "ماين كرافت لا يمكن أن تبدأ"
 
 #: src/nuvashalauncher-main-window.c:155
-msgid "Minecraft needs a sign-in"
-msgstr "تحتاج لعبة Minecraft إلى تسجيل دخول"
 
 # Minecraft Services API errors
 #: src/nuvashalauncher-minecraft-services.c:104
