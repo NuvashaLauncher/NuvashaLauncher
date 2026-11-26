@@ -2563,3 +2563,15 @@ msgstr "請先新增 Microsoft 帳戶，再建立離線帳戶。"
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "請使用 Microsoft 帳戶登入以開始遊戲。"
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "正在準備檔案…"
+
+msgid "Downloading dependencies…"
+msgstr "正在下載相依項目…"
+
+msgid "Downloading assets…"
+msgstr "正在下載資源…"

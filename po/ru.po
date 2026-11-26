@@ -2613,3 +2613,15 @@ msgstr "Сначала добавьте учётную запись Microsoft, �
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Войдите в учётную запись Microsoft, чтобы играть."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Подготовка файлов…"
+
+msgid "Downloading dependencies…"
+msgstr "Загрузка зависимостей…"
+
+msgid "Downloading assets…"
+msgstr "Загрузка ресурсов…"

@@ -138,7 +138,7 @@ Because dialogs and pages can close while work is in flight, callbacks must neve
 
 ### Download Service
 
-`NuvashaLauncherDownloadService` (`nuvashalauncher-download.c`) owns one `SoupSession` with interactive and bulk queues. Limits are 8 concurrent transfers total and 6 bulk transfers (`MAX_CONCURRENT`, `MAX_BULK_CONCURRENT`).
+`NuvashaLauncherDownloadService` (`nuvashalauncher-download.c`) owns one `SoupSession` with interactive and bulk queues. Limits are 24 concurrent transfers total and 20 bulk transfers (`MAX_CONCURRENT`, `MAX_BULK_CONCURRENT`).
 
 File transfers check the destination and global hash cache first (skipping the global hash cache for already-shared Minecraft `assets/`, `libraries/`, and `versions/` under `<user data>/nuvashalauncher/`, and using `FICLONE` reflinks when supported with an async copy fallback), stream into a temporary file while hashing, verify HTTP status and checksum, `fsync` on a worker thread, and atomically rename into place. Checksum mismatches retry once; network errors, HTTP 5xx, and HTTP 429 retry with bounded backoff and `Retry-After` (up to 3 attempts).
 

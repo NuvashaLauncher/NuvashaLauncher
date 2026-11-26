@@ -2659,3 +2659,15 @@ msgstr "أضف حساب Microsoft أولاً لإنشاء حسابات دون ا
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "سجّل الدخول بحساب Microsoft للعب."
+
+msgid "Minecraft %s"
+msgstr "ماينكرافت %s"
+
+msgid "Preparing files…"
+msgstr "جارٍ تحضير الملفات…"
+
+msgid "Downloading dependencies…"
+msgstr "جارٍ تنزيل التبعيات…"
+
+msgid "Downloading assets…"
+msgstr "جارٍ تنزيل الأصول…"

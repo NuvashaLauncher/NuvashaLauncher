@@ -64,12 +64,37 @@ resolve_java_check_free (ResolveJavaCheck *check)
 }
 
 static void
+on_download_cancelled (GCancellable *cancellable G_GNUC_UNUSED, gpointer user_data)
+{
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
+
+  nuvashalauncher_launcher_stop (self);
+}
+
+static void
 begin_description_resolve (NuvashaLauncher                   *self,
                            NuvashaLauncherVersionDescription *merged,
                            const char                        *client_jar)
 {
   g_autofree char *natives_dir =
     g_build_filename (self->game_directory, "natives", NULL);
+  g_autofree char *title = g_strdup_printf (
+    _("Minecraft %s"), self->version != NULL ? self->version : "");
+
+  if (self->preparation.download != NULL)
+    {
+      nuvashalauncher_download_finish (self->preparation.download);
+      g_clear_object (&self->preparation.download);
+    }
+  self->preparation.download = g_object_ref (
+    nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_GAME, title));
+  nuvashalauncher_download_set_detail (self->preparation.download,
+                                       _("Preparing files…"));
+  nuvashalauncher_download_set_progress (self->preparation.download, 0, 0);
+  g_signal_connect_object (
+    nuvashalauncher_download_get_cancellable (self->preparation.download),
+    "cancelled", G_CALLBACK (on_download_cancelled), self, 0);
+
   NuvashaLauncherTaskScope *resolving = nuvashalauncher_resolve_description_async (
     merged, merged->id, client_jar, NULL, natives_dir, NULL,
     on_resolve_progress, self, on_resolved, g_object_ref (self));

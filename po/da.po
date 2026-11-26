@@ -2602,3 +2602,15 @@ msgstr "Tilføj en Microsoft-konto først for at oprette offlinekonti."
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Log ind med en Microsoft-konto for at spille."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Forbereder filer…"
+
+msgid "Downloading dependencies…"
+msgstr "Downloader afhængigheder…"
+
+msgid "Downloading assets…"
+msgstr "Downloader ressourcer…"

@@ -422,6 +422,12 @@ on_resolved (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   g_autoptr (GError) error = NULL;
   NuvashaLauncherResolvedVersion *resolved = nuvashalauncher_resolve_version_finish (result, &error);
 
+  if (self->preparation.download != NULL)
+    {
+      nuvashalauncher_download_finish (self->preparation.download);
+      g_clear_object (&self->preparation.download);
+    }
+
   if (resolved == NULL)
     {
       launch_finished_with_error (self, g_steal_pointer (&error));
@@ -504,6 +510,26 @@ on_resolve_progress (const NuvashaLauncherResolveProgress *progress, gpointer us
 
   if (self->process.stop_requested)
     return;
+
+  if (progress->stage != NULL &&
+      g_strcmp0 (self->process.last_stage, progress->stage) != 0)
+    {
+      g_free (self->process.last_stage);
+      self->process.last_stage = g_strdup (progress->stage);
+      self->process.last_percent = G_MAXUINT;
+      log_line (self, TAG_STATE, "downloading %s for Minecraft %s",
+                progress->stage, self->version != NULL ? self->version : "");
+      if (self->preparation.download != NULL)
+        nuvashalauncher_download_set_detail (
+          self->preparation.download,
+          g_strcmp0 (progress->stage, "assets") == 0
+            ? _("Downloading assets…")
+            : _("Downloading dependencies…"));
+    }
+
+  if (self->preparation.download != NULL)
+    nuvashalauncher_download_set_progress (self->preparation.download,
+                                           progress->done, progress->total);
 
   if (progress->total > progress->done)
     {

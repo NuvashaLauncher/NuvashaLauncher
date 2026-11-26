@@ -2612,3 +2612,15 @@ msgstr "Offline fiókok létrehozásához először adjon hozzá egy Microsoft-f
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "A játékhoz jelentkezzen be egy Microsoft-fiókkal."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Fájlok előkészítése…"
+
+msgid "Downloading dependencies…"
+msgstr "Függőségek letöltése…"
+
+msgid "Downloading assets…"
+msgstr "Erőforrások letöltése…"

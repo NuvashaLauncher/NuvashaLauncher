@@ -2608,3 +2608,15 @@ msgstr "Çevrimdışı hesaplar oluşturmak için önce bir Microsoft hesabı ek
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Oynamak için bir Microsoft hesabıyla oturum açın."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Dosyalar hazırlanıyor…"
+
+msgid "Downloading dependencies…"
+msgstr "Bağımlılıklar indiriliyor…"
+
+msgid "Downloading assets…"
+msgstr "Varlıklar indiriliyor…"

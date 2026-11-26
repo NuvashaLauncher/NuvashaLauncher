@@ -2596,3 +2596,15 @@ msgstr "Tambahkan akun Microsoft terlebih dahulu untuk membuat akun luring."
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Masuk dengan akun Microsoft untuk bermain."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Menyiapkan berkas…"
+
+msgid "Downloading dependencies…"
+msgstr "Mengunduh dependensi…"
+
+msgid "Downloading assets…"
+msgstr "Mengunduh aset…"

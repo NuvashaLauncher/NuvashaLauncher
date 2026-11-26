@@ -2602,3 +2602,15 @@ msgstr "Lisää ensin Microsoft-tili luodaksesi offline-tilejä."
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Kirjaudu sisään Microsoft-tilillä pelataksesi."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Valmistellaan tiedostoja…"
+
+msgid "Downloading dependencies…"
+msgstr "Ladataan riippuvuuksia…"
+
+msgid "Downloading assets…"
+msgstr "Ladataan resursseja…"

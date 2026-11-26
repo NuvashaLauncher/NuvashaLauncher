@@ -9,8 +9,8 @@
 
 #include <libsoup/soup.h>
 
-#define MAX_CONCURRENT 8
-#define MAX_BULK_CONCURRENT 6
+#define MAX_CONCURRENT 24
+#define MAX_BULK_CONCURRENT 20
 #define DOWNLOAD_PRIORITY_BULK 0
 #define DOWNLOAD_PRIORITY_INTERACTIVE 100
 

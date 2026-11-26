@@ -2635,3 +2635,15 @@ msgstr "Añade primero una cuenta de Microsoft para crear cuentas sin conexión.
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Inicia sesión con una cuenta de Microsoft para jugar."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Preparando archivos…"
+
+msgid "Downloading dependencies…"
+msgstr "Descargando dependencias…"
+
+msgid "Downloading assets…"
+msgstr "Descargando recursos…"

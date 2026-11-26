@@ -78,6 +78,14 @@ set_state (NuvashaLauncher *self,
   self->detail = g_strdup (detail);
   self->state = state;
 
+  if (self->preparation.download != NULL &&
+      state != NUVASHALAUNCHER_LAUNCH_PREPARING &&
+      state != NUVASHALAUNCHER_LAUNCH_DOWNLOADING)
+    {
+      nuvashalauncher_download_finish (self->preparation.download);
+      g_clear_object (&self->preparation.download);
+    }
+
   if (changed)
     g_signal_emit (self, nuvashalauncher_launcher_signals[NUVASHALAUNCHER_LAUNCHER_SIGNAL_STATE], 0,
                    state, detail);
@@ -251,6 +259,11 @@ nuvashalauncher_launcher_finalize (GObject *object)
   NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (object);
 
   g_clear_object (&self->preparation.cancellable);
+  if (self->preparation.download != NULL)
+    {
+      nuvashalauncher_download_finish (self->preparation.download);
+      g_clear_object (&self->preparation.download);
+    }
   nuvashalauncher_task_scope_unref (self->scope);
   self->scope = NULL;
   g_clear_object (&self->process.process);
@@ -271,6 +284,7 @@ nuvashalauncher_launcher_finalize (GObject *object)
   g_free (self->version);
   g_free (self->game_directory);
   g_free (self->preparation.java_executable);
+  g_free (self->process.last_stage);
 
   G_OBJECT_CLASS (nuvashalauncher_launcher_parent_class)->finalize (object);
 }

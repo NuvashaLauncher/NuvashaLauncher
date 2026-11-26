@@ -2582,3 +2582,15 @@ msgstr "오프라인 계정을 만들려면 먼저 Microsoft 계정을 추가하
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "플레이하려면 Microsoft 계정으로 로그인하세요."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "파일 준비 중…"
+
+msgid "Downloading dependencies…"
+msgstr "종속성 다운로드 중…"
+
+msgid "Downloading assets…"
+msgstr "에셋 다운로드 중…"

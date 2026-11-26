@@ -206,7 +206,8 @@ nuvashalauncher_launcher_start (NuvashaLauncher *self)
   g_clear_object (&self->preparation.cancellable);
   self->preparation.cancellable = g_cancellable_new ();
   self->process.stop_requested = FALSE;
-  self->process.last_percent = 0;
+  self->process.last_percent = G_MAXUINT;
+  g_clear_pointer (&self->process.last_stage, g_free);
 
   /* The Java of the launch before this one says nothing about this one:
      a loader that has to be installed first chooses its own. */

@@ -2556,3 +2556,15 @@ msgstr "请先添加 Microsoft 账户，然后再创建离线账户。"
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "请使用 Microsoft 账户登录以开始游戏。"
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "正在准备文件…"
+
+msgid "Downloading dependencies…"
+msgstr "正在下载依赖…"
+
+msgid "Downloading assets…"
+msgstr "正在下载资源…"

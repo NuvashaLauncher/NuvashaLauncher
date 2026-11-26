@@ -2587,3 +2587,15 @@ msgstr "Hãy thêm tài khoản Microsoft trước để tạo tài khoản ngo�
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Đăng nhập bằng tài khoản Microsoft để chơi."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Đang chuẩn bị tệp…"
+
+msgid "Downloading dependencies…"
+msgstr "Đang tải phần phụ thuộc…"
+
+msgid "Downloading assets…"
+msgstr "Đang tải tài nguyên…"

@@ -2604,3 +2604,15 @@ msgstr "オフラインアカウントを作成するには、まず Microsoft �
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "プレイするには Microsoft アカウントでサインインしてください。"
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "ファイルを準備中…"
+
+msgid "Downloading dependencies…"
+msgstr "依存関係をダウンロード中…"
+
+msgid "Downloading assets…"
+msgstr "アセットをダウンロード中…"

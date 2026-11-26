@@ -2634,3 +2634,15 @@ msgstr "Adaugă mai întâi un cont Microsoft pentru a crea conturi offline."
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Conectează-te cu un cont Microsoft pentru a juca."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Se pregătesc fișierele…"
+
+msgid "Downloading dependencies…"
+msgstr "Se descarcă dependențele…"
+
+msgid "Downloading assets…"
+msgstr "Se descarcă resursele…"

@@ -2604,3 +2604,15 @@ msgstr "Legg til en Microsoft-konto først for å opprette frakoblede kontoer."
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Logg på med en Microsoft-konto for å spille."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Forbereder filer…"
+
+msgid "Downloading dependencies…"
+msgstr "Laster ned avhengigheter…"
+
+msgid "Downloading assets…"
+msgstr "Laster ned ressurser…"

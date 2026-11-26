@@ -2619,3 +2619,15 @@ msgstr "Voeg eerst een Microsoft-account toe om offline accounts aan te maken."
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Meld u aan met een Microsoft-account om te spelen."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Bestanden voorbereiden…"
+
+msgid "Downloading dependencies…"
+msgstr "Afhankelijkheden downloaden…"
+
+msgid "Downloading assets…"
+msgstr "Middelen downloaden…"

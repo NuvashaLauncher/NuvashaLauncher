@@ -2629,3 +2629,15 @@ msgstr "Ajoutez d’abord un compte Microsoft pour créer des comptes hors ligne
 
 msgid "Sign in with a Microsoft account to play."
 msgstr "Connectez-vous avec un compte Microsoft pour jouer."
+
+msgid "Minecraft %s"
+msgstr "Minecraft %s"
+
+msgid "Preparing files…"
+msgstr "Préparation des fichiers…"
+
+msgid "Downloading dependencies…"
+msgstr "Téléchargement des dépendances…"
+
+msgid "Downloading assets…"
+msgstr "Téléchargement des ressources…"

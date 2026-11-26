@@ -6,6 +6,7 @@
 #define NUVASHALAUNCHER_LAUNCHER_PRIVATE_H
 
 #include "nuvashalauncher-launcher.h"
+#include "nuvashalauncher-downloads.h"
 #include "nuvashalauncher-java.h"
 #include "nuvashalauncher-task.h"
 
@@ -36,6 +37,7 @@ struct _NuvashaLauncher
   /* Values selected during launch preparation. */
   struct {
     GCancellable *cancellable;
+    NuvashaLauncherDownload *download;
     NuvashaLauncherResolvedVersion *resolved;
     char *java_executable;
     int java_major_version;
@@ -52,6 +54,7 @@ struct _NuvashaLauncher
     guint readers;
     guint stop_timeout;
     guint last_percent;
+    char *last_stage;
     gboolean stop_requested;
   } process;
 
