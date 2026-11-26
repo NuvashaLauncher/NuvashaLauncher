@@ -2610,3 +2610,6 @@ msgstr[2] "Nainstalovat následující datapacky?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "Zakázání závislosti zakáže mod, který na ní závisel"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "Pro vytvoření offline účtů nejprve přidejte účet Microsoft."

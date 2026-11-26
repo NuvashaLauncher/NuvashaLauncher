@@ -2598,3 +2598,6 @@ msgstr[1] "Asennetaanko seuraavat datapaketit?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "Riippuvuuden poistaminen käytöstä poistaa käytöstä siitä riippuvan modin"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "Lisää ensin Microsoft-tili luodaksesi offline-tilejä."

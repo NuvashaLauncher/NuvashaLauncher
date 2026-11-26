@@ -2611,3 +2611,6 @@ msgstr[1] "Встановити ці датапаки?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "Вимкнення залежності вимикає мод, який від неї залежав"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "Спочатку додайте обліковий запис Microsoft, щоб створювати офлайн-облікові записи."

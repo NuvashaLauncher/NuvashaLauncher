@@ -2598,3 +2598,6 @@ msgstr[1] "Installer følgende datapakker?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "Deaktivering af en afhængighed deaktiverer den mod, der afhang af den"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "Tilføj en Microsoft-konto først for at oprette offlinekonti."

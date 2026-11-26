@@ -18,11 +18,12 @@
     directly in the app. Local <code>.mrpack</code> files can be imported and
     exported, with downloads checked before they are installed.</p>
     <p>The launcher supports vanilla Minecraft and the Fabric, Quilt, Forge, and
-    NeoForge loaders. It can use Microsoft or offline accounts, and includes
-    account-specific skins and capes.</p>
+    NeoForge loaders. It supports Microsoft accounts (as well as offline accounts
+    once a Microsoft account is added), and includes account-specific skins and capes.</p>
     <p>Instances can be duplicated, moved, renamed, exported, and removed
     independently. Nuvasha Launcher is built with GTK 4 and libadwaita for Linux
     and is also available as a Flatpak.</p>
+    <p>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
   </description>
   <url type="homepage">https://github.com/NuvashaLauncher/NuvashaLauncher</url>
   <url type="bugtracker">https://github.com/NuvashaLauncher/NuvashaLauncher/issues</url>

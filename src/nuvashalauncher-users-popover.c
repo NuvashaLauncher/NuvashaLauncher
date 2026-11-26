@@ -330,6 +330,11 @@ static void
 on_add_offline_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   NuvashaLauncherUsersPopover *self = NUVASHALAUNCHER_USERS_POPOVER (user_data);
+
+  if (self->accounts == NULL ||
+      !nuvashalauncher_accounts_has_microsoft (self->accounts))
+    return;
+
   NuvashaLauncherOfflineAccountDialog *dialog = nuvashalauncher_offline_account_dialog_new ();
 
   nuvashalauncher_offline_account_dialog_set_accounts (dialog, self->accounts);
@@ -380,6 +385,14 @@ rebuild (NuvashaLauncherUsersPopover *self)
           append_account_row (self, account);
       }
 
+  {
+    gboolean has_microsoft = nuvashalauncher_accounts_has_microsoft (self->accounts);
+    gtk_widget_set_sensitive (GTK_WIDGET (self->offline_button), has_microsoft);
+    gtk_widget_set_tooltip_text (
+      GTK_WIDGET (self->offline_button),
+      has_microsoft ? NULL : _("Add a Microsoft account first to create offline accounts."));
+  }
+
   update_the_button (self);
 }
 
@@ -419,6 +432,11 @@ nuvashalauncher_users_popover_init (NuvashaLauncherUsersPopover *self)
 
   self->list_box = GTK_LIST_BOX (rows);
   self->list_scroller = GTK_SCROLLED_WINDOW (scrolled);
+  self->offline_button = offline;
+  gtk_widget_set_sensitive (GTK_WIDGET (self->offline_button), FALSE);
+  gtk_widget_set_tooltip_text (
+    GTK_WIDGET (self->offline_button),
+    _("Add a Microsoft account first to create offline accounts."));
 
   self->error_label = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (GTK_LABEL (self->error_label), TRUE);

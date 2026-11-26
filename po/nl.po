@@ -2615,3 +2615,6 @@ msgstr[1] "De volgende datapacks installeren?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "Een afhankelijkheid uitschakelen schakelt de mod uit die ervan afhankelijk was"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "Voeg eerst een Microsoft-account toe om offline accounts aan te maken."

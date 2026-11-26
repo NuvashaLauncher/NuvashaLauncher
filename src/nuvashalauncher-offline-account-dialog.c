@@ -64,6 +64,15 @@ update_add_button (NuvashaLauncherOfflineAccountDialog *self)
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherAccount) account = NULL;
 
+  gboolean missing_microsoft =
+    self->accounts != NULL && !nuvashalauncher_accounts_has_microsoft (self->accounts);
+  if (missing_microsoft)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (self->add_button), FALSE);
+      show_error (self, _("Add a Microsoft account first to create offline accounts."));
+      return;
+    }
+
   g_strstrip (name);
   account = nuvashalauncher_account_new_offline (name, &error);
 
@@ -97,6 +106,15 @@ on_add_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
     g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->name_row)));
   g_autoptr (GError) error = NULL;
   g_autoptr (NuvashaLauncherAccount) account = NULL;
+
+  gboolean missing_microsoft =
+    self->accounts != NULL && !nuvashalauncher_accounts_has_microsoft (self->accounts);
+  if (missing_microsoft)
+    {
+      gtk_widget_set_sensitive (GTK_WIDGET (self->add_button), FALSE);
+      show_error (self, _("Add a Microsoft account first to create offline accounts."));
+      return;
+    }
 
   g_strstrip (name);
   account = nuvashalauncher_account_new_offline (name, &error);

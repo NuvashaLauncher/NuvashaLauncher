@@ -265,7 +265,8 @@ test_extended_cli_commands (void)
       g_free (batch[i].stdout_buf);
   }
 
-  /* --add-offline-account creates an offline account and --list-accounts --json lists it. */
+  /* --add-offline-account requires a Microsoft account first, then creates
+   * an offline account and --list-accounts --json lists it. */
   {
     g_autoptr (NuvashaLauncherAccount) probe = NULL;
     g_autoptr (GError) probe_error = NULL;
@@ -276,11 +277,24 @@ test_extended_cli_commands (void)
     g_autofree char *accounts_dir = g_path_get_dirname (accounts_path);
 
     g_assert_cmpint (g_mkdir_with_parents (accounts_dir, 0700), ==, 0);
-    probe = nuvashalauncher_account_new_offline ("Probe", &probe_error);
-    g_assert_no_error (probe_error);
+    probe = g_new0 (NuvashaLauncherAccount, 1);
+    probe->type = NUVASHALAUNCHER_ACCOUNT_MICROSOFT;
+    probe->id = g_strdup ("069a79f444e94726a5befca90e38aaf5");
+    probe->name = g_strdup ("CliMicrosoft");
+    probe->uuid = g_strdup ("069a79f4-44e9-4726-a5be-fca90e38aaf5");
+    probe->access_token = g_strdup ("test-token");
+    probe->expires_at = G_MAXINT64;
     if (nuvashalauncher_accounts_add (accounts, probe, &probe_error))
       {
+        /* Without a Microsoft account, --add-offline-account is refused. */
         g_assert_true (nuvashalauncher_accounts_remove (accounts, probe->id, NULL));
+        output = run_cli ("--add-offline-account", "CliOffline", &status);
+        g_assert_cmpint (status, !=, 0);
+        g_clear_pointer (&output, g_free);
+
+        /* With a Microsoft account stored, --add-offline-account succeeds. */
+        g_assert_true (nuvashalauncher_accounts_add (accounts, probe, &probe_error));
+        g_assert_no_error (probe_error);
 
         output = run_cli ("--add-offline-account", "CliOffline", &status);
         g_assert_cmpint (status, ==, 0);
@@ -297,6 +311,10 @@ test_extended_cli_commands (void)
         }
 
         output = run_cli ("--remove-account", "CliOffline", &status);
+        g_assert_cmpint (status, ==, 0);
+        g_clear_pointer (&output, g_free);
+
+        output = run_cli ("--remove-account", "CliMicrosoft", &status);
         g_assert_cmpint (status, ==, 0);
         g_clear_pointer (&output, g_free);
       }

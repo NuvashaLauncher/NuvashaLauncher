@@ -509,6 +509,11 @@ add_offline_account (const char *name)
     }
 
   g_autoptr (NuvashaLauncherAccounts) accounts = nuvashalauncher_accounts_new ();
+  if (!nuvashalauncher_accounts_has_microsoft (accounts))
+    {
+      g_printerr ("Add a Microsoft account first to create offline accounts.\n");
+      return 1;
+    }
   if (!nuvashalauncher_accounts_add (accounts, account, &error))
     {
       g_printerr ("%s\n", nuvashalauncher_error_message (error));

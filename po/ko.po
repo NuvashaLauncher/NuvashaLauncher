@@ -2578,3 +2578,6 @@ msgstr[0] "다음 데이터 팩을 설치할까요?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "종속성을 비활성화하면 해당 종속성에 의존하는 모드도 비활성화됩니다"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "오프라인 계정을 만들려면 먼저 Microsoft 계정을 추가하세요."

@@ -110,16 +110,39 @@ cached_cape_path (const char *url)
   return g_build_filename (dir, "capes", name, NULL);
 }
 
+typedef struct
+{
+  const char *name;
+  const char *url;
+} DefaultSkinEntry;
+
+/* Official Mojang default skins fetched on demand from textures.minecraft.net
+ * and cached locally rather than bundled in the repository. */
+static const DefaultSkinEntry default_skins[] = {
+  { "Steve",  "https://textures.minecraft.net/texture/31f477eb1a7beee631c2ca64d06f8f68fa93a3386d04452ab27f43acdf1b60cb" },
+  { "Alex",   "https://textures.minecraft.net/texture/1abc803022d8300ab7578b189294cce39622d9a404cdc00d3feacfdf45be6981" },
+  { "Sunny",  "https://textures.minecraft.net/texture/a3bd16079f764cd541e072e888fe43885e711f98658323db0f9a6045da91ee7a" },
+  { "Kai",    "https://textures.minecraft.net/texture/e5cdc3243b2153ab28a159861be643a4fc1e3c17d291cdd3e57a7f370ad676f3" },
+  { "Makena", "https://textures.minecraft.net/texture/dc0fcfaf2aa040a83dc0de4e56058d1bbb2ea40157501f3e7d15dc245e493095" },
+  { "Zuri",   "https://textures.minecraft.net/texture/f5dddb41dcafef616e959c2817808e0be741c89ffbfed39134a13e75b811863d" },
+  { "Efe",    "https://textures.minecraft.net/texture/daf3d88ccb38f11f74814e92053d92f7728ddb1a7955652a60e30cb27ae6659f" },
+  { "Ari",    "https://textures.minecraft.net/texture/4c05ab9e07b3505dc3ec11370c3bdce5570ad2fb2b562e9b9dd9cf271f81aa44" },
+  { "Noor",   "https://textures.minecraft.net/texture/90e75cd429ba6331cd210b9bd19399527ee3bab467b5a9f61cb8a27b177f6789" },
+};
+
+const char *
+nuvashalauncher_users_default_steve_url (void)
+{
+  return default_skins[0].url;
+}
+
 gboolean
 is_default_skin_alias (const char *alias)
 {
-  static const char *defaults[] = {
-    "STEVE", "ALEX", "SUNNY", "KAI", "MAKENA", "ZURI", "EFE", "ARI", "NOOR"
-  };
   if (alias == NULL)
     return FALSE;
-  for (guint i = 0; i < G_N_ELEMENTS (defaults); i++)
-    if (g_ascii_strcasecmp (alias, defaults[i]) == 0)
+  for (guint i = 0; i < G_N_ELEMENTS (default_skins); i++)
+    if (g_ascii_strcasecmp (alias, default_skins[i].name) == 0)
       return TRUE;
   return FALSE;
 }
@@ -127,14 +150,20 @@ is_default_skin_alias (const char *alias)
 gboolean
 skin_url_is_default (const char *url)
 {
-  g_autofree char *defaults =
-    g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", "defaults", NULL);
+  g_autofree char *defaults = NULL;
   g_autofree char *path = NULL;
   g_autofree char *prefix = NULL;
   g_autoptr (GFile) file = NULL;
 
-  if (url == NULL || !g_str_has_prefix (url, "file://"))
+  if (url == NULL)
     return FALSE;
+  for (guint i = 0; i < G_N_ELEMENTS (default_skins); i++)
+    if (g_strcmp0 (url, default_skins[i].url) == 0)
+      return TRUE;
+  if (!g_str_has_prefix (url, "file://"))
+    return FALSE;
+  defaults =
+    g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", "defaults", NULL);
   file = g_file_new_for_uri (url);
   path = g_file_get_path (file);
   prefix = g_strconcat (defaults, G_DIR_SEPARATOR_S, NULL);
@@ -194,47 +223,20 @@ append_default_skins (GtkListBox                   *skins,
                       NuvashaLauncherSkinRowFactory row_factory,
                       gpointer                      user_data)
 {
-  static const char *defaults[] = {
-    "Steve", "Alex", "Sunny", "Kai", "Makena", "Zuri", "Efe", "Ari", "Noor"
-  };
-  g_autofree char *source_dir = g_build_filename (NUVASHALAUNCHER_DATA_DIR, "skins", "defaults", NULL);
-  g_autofree char *source_fallback = g_build_filename (NUVASHALAUNCHER_SOURCE_DATA_DIR, "skins", "defaults", NULL);
-  g_autofree char *target_dir = g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", "defaults", NULL);
   AdwActionRow *steve_row = NULL;
 
-  if (*defaults_added || !nuvashalauncher_fs_make_directory (target_dir, 0755, NULL))
+  if (*defaults_added)
     return NULL;
-  for (guint i = 0; i < G_N_ELEMENTS (defaults); i++)
+  for (guint i = 0; i < G_N_ELEMENTS (default_skins); i++)
     {
-      const char *name = defaults[i];
-      g_autofree char *filename = g_strconcat (name, ".png", NULL);
-      g_autofree char *target_path = g_build_filename (target_dir, filename, NULL);
-      g_autofree char *uri = NULL;
+      const char *name = default_skins[i].name;
+      const char *url = default_skins[i].url;
+      g_autofree char *identity = skin_name_for_url (url);
 
-      if (!g_file_test (target_path, G_FILE_TEST_IS_REGULAR))
-        {
-          g_autofree char *source_path = g_build_filename (source_dir, filename, NULL);
-          g_autofree char *fallback_path = g_build_filename (source_fallback, filename, NULL);
-          g_autoptr (GFile) source = NULL;
-          g_autoptr (GFile) target = NULL;
-
-          if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
-            {
-              g_clear_pointer (&source_path, g_free);
-              source_path = g_strdup (fallback_path);
-            }
-          if (!g_file_test (source_path, G_FILE_TEST_IS_REGULAR))
-            continue;
-          source = g_file_new_for_path (source_path);
-          target = g_file_new_for_path (target_path);
-          nuvashalauncher_fs_copy_file (source, target, G_FILE_COPY_NONE, NULL, NULL);
-        }
-      uri = g_filename_to_uri (target_path, NULL, NULL);
-      g_autofree char *identity = uri != NULL ? skin_name_for_url (uri) : NULL;
-      if (uri != NULL && !g_hash_table_contains (skin_urls, identity) &&
+      if (!g_hash_table_contains (skin_urls, identity) &&
           !g_hash_table_contains (deleted_skin_ids, identity))
         {
-          g_autoptr (AdwActionRow) row = row_factory (name, uri, user_data);
+          g_autoptr (AdwActionRow) row = row_factory (name, url, user_data);
           gtk_list_box_append (skins, GTK_WIDGET (row));
           if (g_str_equal (name, "Steve"))
             steve_row = row;

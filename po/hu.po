@@ -2608,3 +2608,6 @@ msgstr[1] "Telepíti a következő adatcsomagokat?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "Egy függőség letiltása letiltja a tőle függő modot is"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "Offline fiókok létrehozásához először adjon hozzá egy Microsoft-fiókot."

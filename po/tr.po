@@ -2604,3 +2604,6 @@ msgstr[1] "Aşağıdaki veri paketleri yüklensin mi?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "Bir bağımlılığı devre dışı bırakmak, ona bağlı modu da devre dışı bırakır"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "Çevrimdışı hesaplar oluşturmak için önce bir Microsoft hesabı ekleyin."

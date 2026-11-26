@@ -598,7 +598,8 @@ select_saved_skin (SkinMenu *menu)
         }
 
       if (saved_url == NULL && url != NULL && skin_url_is_default (url) &&
-          g_str_has_suffix (url, "/Steve.png"))
+          (g_strcmp0 (url, nuvashalauncher_users_default_steve_url ()) == 0 ||
+           g_str_has_suffix (url, "/Steve.png")))
         row = GTK_LIST_BOX_ROW (child);
     }
 

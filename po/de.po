@@ -2632,3 +2632,6 @@ msgstr[1] "Folgende Datenpakete installieren?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "Das Deaktivieren einer Abhängigkeit deaktiviert die Mod, die davon abhängt"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "Fügen Sie zuerst ein Microsoft-Konto hinzu, um Offline-Konten zu erstellen."

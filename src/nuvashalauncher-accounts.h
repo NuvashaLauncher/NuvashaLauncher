@@ -129,6 +129,9 @@ GPtrArray *nuvashalauncher_accounts_list (NuvashaLauncherAccounts *self);
 
 guint nuvashalauncher_accounts_count (NuvashaLauncherAccounts *self);
 
+/* TRUE when at least one Microsoft account is stored. */
+gboolean nuvashalauncher_accounts_has_microsoft (NuvashaLauncherAccounts *self);
+
 /* Return the active account, or NULL when none is selected. */
 NuvashaLauncherAccount *nuvashalauncher_accounts_get_active (NuvashaLauncherAccounts *self);
 

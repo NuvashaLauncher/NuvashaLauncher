@@ -2600,3 +2600,6 @@ msgstr[0] "次のデータパックをインストールしますか？"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "依存関係を無効にすると、それに依存する Mod も無効になります"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "オフラインアカウントを作成するには、まず Microsoft アカウントを追加してください。"

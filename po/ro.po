@@ -2630,3 +2630,6 @@ msgstr[2] "Instalezi următoarele pachete de date?"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "Dezactivarea unei dependențe dezactivează modul care depindea de ea"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "Adaugă mai întâi un cont Microsoft pentru a crea conturi offline."

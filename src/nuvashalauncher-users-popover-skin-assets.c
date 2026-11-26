@@ -100,6 +100,15 @@ on_skin_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
 
   if (face != NULL)
     {
+      g_autofree char *cached = cached_skin_path (load->url);
+      if (cached != NULL && !g_file_test (cached, G_FILE_TEST_IS_REGULAR))
+        {
+          g_autofree char *dir = g_path_get_dirname (cached);
+          gsize len = 0;
+          const char *raw = g_bytes_get_data (bytes, &len);
+          if (nuvashalauncher_fs_make_directory (dir, 0755, NULL))
+            g_file_set_contents (cached, raw, (gssize) len, NULL);
+        }
       g_hash_table_replace (load->cache, g_strdup (load->url),
                             g_object_ref (face));
       gtk_image_set_from_paintable (load->image, GDK_PAINTABLE (face));
@@ -193,10 +202,11 @@ nuvashalauncher_users_set_local_avatar (GtkImage *image, const char *path)
 char *
 nuvashalauncher_users_default_steve_path (void)
 {
-  g_autofree char *global = g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", "defaults", "Steve.png", NULL);
-  g_autofree char *installed = g_build_filename (NUVASHALAUNCHER_DATA_DIR, "skins", "defaults", "Steve.png", NULL);
-  g_autofree char *source = g_build_filename (NUVASHALAUNCHER_SOURCE_DATA_DIR, "skins", "defaults", "Steve.png", NULL);
-  if (g_file_test (global, G_FILE_TEST_IS_REGULAR)) return g_steal_pointer (&global);
-  if (g_file_test (installed, G_FILE_TEST_IS_REGULAR)) return g_steal_pointer (&installed);
-  return g_steal_pointer (&source);
+  g_autofree char *cached = cached_skin_path (nuvashalauncher_users_default_steve_url ());
+  g_autofree char *legacy = g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", "defaults", "Steve.png", NULL);
+  if (cached != NULL && g_file_test (cached, G_FILE_TEST_IS_REGULAR))
+    return g_steal_pointer (&cached);
+  if (g_file_test (legacy, G_FILE_TEST_IS_REGULAR))
+    return g_steal_pointer (&legacy);
+  return NULL;
 }

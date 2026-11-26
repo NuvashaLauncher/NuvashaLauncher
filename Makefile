@@ -275,9 +275,6 @@ install: $(if $(SRCS),$(BIN)) $(LOCALE_MOS) $(SCHEMA_COMPILED)
 	install -Dm755 $(BIN) "$(DESTDIR)$(PREFIX)/bin/nuvashalauncher"
 	install -Dm644 data/pack.png "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/pack.png"
 	install -Dm644 data/nuvashalauncher.css "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/nuvashalauncher.css"
-	@for skin in data/skins/defaults/*.png; do \
-		install -Dm644 "$$skin" "$(DESTDIR)$(PREFIX)/share/nuvashalauncher/skins/defaults/$$(basename "$$skin")"; \
-	done
 	install -Dm644 data/com.github.NuvashaLauncher.NuvashaLauncher.desktop \
 		"$(DESTDIR)$(PREFIX)/share/applications/com.github.NuvashaLauncher.NuvashaLauncher.desktop"
 	install -Dm644 data/nuvashalauncher.bash \

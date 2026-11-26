@@ -113,11 +113,11 @@ UI templates (`data/ui/*.ui`), `data/nuvashalauncher.css`, `data/pack.png`, and 
 
 ### Accounts & Authentication
 
-Accounts are either **Offline** (validated username + `OfflinePlayer:<name>` UUID) or **Microsoft** (profile, access token, expiry, refresh token, and cosmetic data). Complete account records and the active account ID are stored as separate `libsecret` items.
+Accounts are either **Microsoft** (profile, access token, expiry, refresh token, and cosmetic data) or **Offline** (validated username + `OfflinePlayer:<name>` UUID; creation requires at least one Microsoft account to be stored). Complete account records and the active account ID are stored as separate `libsecret` items.
 
 Microsoft sign-in follows an async chain: device code request → token polling → Xbox Live → XSTS → Minecraft token → Java entitlements check → profile fetch. No passwords pass through Nuvasha Launcher. Tokens are treated as expired slightly before their reported expiry; if refresh fails, the launcher enters `Needs sign-in`.
 
-Skins and capes are cached separately so cape textures never appear in the saved-skin library.
+Default Minecraft skins are fetched on demand from Mojang's `textures.minecraft.net` CDN and cached locally rather than bundled in the repository. Skins and capes are cached separately so cape textures never appear in the saved-skin library.
 
 ### Settings
 
@@ -204,7 +204,7 @@ Base directories follow GLib's XDG user-data and user-cache paths:
 | Accounts & active account | `libsecret` (XDG Secret Portal in Flatpak; desktop Secret Service natively) |
 | Shared game files & loaders | `<user data>/nuvashalauncher/` |
 | Launcher Java runtimes | `<user data>/nuvashalauncher/java/` |
-| Skins & capes | `<user data>/nuvashalauncher/skins/` (`defaults/`, `capes/`) |
+| Skins & capes | `<user data>/nuvashalauncher/skins/` (`capes/`) |
 | Version metadata cache | `<user cache>/nuvashalauncher/versions/` |
 | Icon & fallback schema cache | `<user cache>/nuvashalauncher/icons/`, `<user cache>/nuvashalauncher/schemas/` |
 | API & hash cache | `<user cache>/nuvashalauncher/` |

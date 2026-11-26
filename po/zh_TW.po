@@ -2559,3 +2559,6 @@ msgstr[1] "要安裝以下資料包嗎？"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "停用相依項目會同時停用依賴它的模組"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "請先新增 Microsoft 帳戶，再建立離線帳戶。"

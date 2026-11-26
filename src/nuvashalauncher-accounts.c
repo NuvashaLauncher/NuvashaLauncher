@@ -326,6 +326,21 @@ nuvashalauncher_accounts_count (NuvashaLauncherAccounts *self)
   return self->accounts->len;
 }
 
+gboolean
+nuvashalauncher_accounts_has_microsoft (NuvashaLauncherAccounts *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_ACCOUNTS (self), FALSE);
+
+  for (guint i = 0; i < self->accounts->len; i++)
+    {
+      NuvashaLauncherAccount *account = g_ptr_array_index (self->accounts, i);
+      if (account->type == NUVASHALAUNCHER_ACCOUNT_MICROSOFT)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 NuvashaLauncherAccount *
 nuvashalauncher_accounts_get_active (NuvashaLauncherAccounts *self)
 {

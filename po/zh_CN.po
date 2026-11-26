@@ -2552,3 +2552,6 @@ msgstr[0] "要安装以下数据包吗？"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "禁用依赖项会同时禁用依赖它的模组"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "请先添加 Microsoft 账户，然后再创建离线账户。"

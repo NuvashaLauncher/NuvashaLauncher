@@ -2655,3 +2655,6 @@ msgstr[5] "تثبيت حزم البيانات التالية؟"
 
 msgid "Disabling a dependency disables the mod that depended on it"
 msgstr "تعطيل التبعية يعطّل المود الذي يعتمد عليها"
+
+msgid "Add a Microsoft account first to create offline accounts."
+msgstr "أضف حساب Microsoft أولاً لإنشاء حسابات دون اتصال."
