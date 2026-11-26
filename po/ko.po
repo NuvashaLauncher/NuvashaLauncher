@@ -2581,3 +2581,6 @@ msgstr "종속성을 비활성화하면 해당 종속성에 의존하는 모드�
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "오프라인 계정을 만들려면 먼저 Microsoft 계정을 추가하세요."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "플레이하려면 Microsoft 계정으로 로그인하세요."

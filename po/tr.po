@@ -2607,3 +2607,6 @@ msgstr "Bir bağımlılığı devre dışı bırakmak, ona bağlı modu da devre
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Çevrimdışı hesaplar oluşturmak için önce bir Microsoft hesabı ekleyin."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Oynamak için bir Microsoft hesabıyla oturum açın."

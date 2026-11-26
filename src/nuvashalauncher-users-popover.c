@@ -36,17 +36,18 @@ update_the_button (NuvashaLauncherUsersPopover *self)
   NuvashaLauncherAccount *account = nuvashalauncher_accounts_get_active (self->accounts);
 
   g_clear_pointer (&self->active_name, g_free);
-  nuvashalauncher_users_set_avatar_icon (GTK_IMAGE (self->avatar_image));
   gtk_widget_set_tooltip_text (GTK_WIDGET (self), NULL);
 
   if (account == NULL)
     {
+      nuvashalauncher_users_set_avatar_icon (GTK_IMAGE (self->avatar_image));
       self->active_name = g_strdup ("");
       return;
     }
 
   self->active_name = g_strdup (account->name);
-  nuvashalauncher_users_set_avatar_icon (GTK_IMAGE (self->avatar_image));
+  nuvashalauncher_users_show_account_head (self, GTK_IMAGE (self->avatar_image),
+                                           account);
 
 }
 
@@ -231,21 +232,7 @@ append_account_row (NuvashaLauncherUsersPopover *self, const NuvashaLauncherAcco
   if (needs_sign_in)
     gtk_widget_add_css_class (GTK_WIDGET (row), "warning");
 
-  nuvashalauncher_users_set_avatar_icon (GTK_IMAGE (image));
-  if (account->type == NUVASHALAUNCHER_ACCOUNT_OFFLINE)
-    {
-      if (account->avatar_url != NULL && *account->avatar_url != '\0')
-        nuvashalauncher_users_set_avatar (self, GTK_IMAGE (image), account->avatar_url);
-      else
-        {
-          g_autofree char *steve = nuvashalauncher_users_default_steve_path ();
-          if (steve == NULL || !nuvashalauncher_users_set_local_avatar (GTK_IMAGE (image), steve))
-            nuvashalauncher_users_set_avatar (self, GTK_IMAGE (image),
-                                              nuvashalauncher_users_default_steve_url ());
-        }
-    }
-  else
-    nuvashalauncher_users_set_avatar (self, GTK_IMAGE (image), account->avatar_url);
+  nuvashalauncher_users_show_account_head (self, GTK_IMAGE (image), account);
   gtk_image_set_pixel_size (GTK_IMAGE (image), AVATAR_SIZE);
   gtk_widget_set_valign (GTK_WIDGET (image), GTK_ALIGN_CENTER);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-account-image", image);

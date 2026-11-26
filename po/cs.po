@@ -2613,3 +2613,6 @@ msgstr "Zakázání závislosti zakáže mod, který na ní závisel"
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Pro vytvoření offline účtů nejprve přidejte účet Microsoft."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Pro hraní se přihlaste účtem Microsoft."

@@ -123,15 +123,26 @@ on_account_refreshed (GObject      *source G_GNUC_UNUSED,
   start_preparing (self);
 }
 
-/* The account a launch runs as. Nobody signed in is not a reason to
- * refuse: the game starts offline as Player. An account whose token has
- * run out is signed in again before anything is downloaded, because a
- * game that is going to need a token later can fail now in words
+/* The account a launch runs as. Minecraft is only launched when at least
+ * one Microsoft account is stored: offline accounts are a convenience for
+ * people who own the game, never a way around owning it. An account whose
+ * token has run out is signed in again before anything is downloaded,
+ * because a game that is going to need a token later can fail now in words
  * instead. */
 static gboolean
 account_for_launch (NuvashaLauncher *self)
 {
   NuvashaLauncherAccount *account = active_account (self);
+
+  if (self->accounts == NULL ||
+      !nuvashalauncher_accounts_has_microsoft (self->accounts))
+    {
+      const char *detail = _("Sign in with a Microsoft account to play.");
+
+      log_line (self, TAG_STATE, "%s", detail);
+      set_state (self, NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN, detail);
+      return FALSE;
+    }
 
   if (account == NULL)
     return TRUE;
@@ -204,9 +215,9 @@ nuvashalauncher_launcher_start (NuvashaLauncher *self)
 
   set_state (self, NUVASHALAUNCHER_LAUNCH_PREPARING, self->version);
 
-  /* Without an account there is nobody to play as, and nothing to
-     download for. An account that has to be signed in again is signed in
-     again first, and carries on from here when it has one. */
+  /* Without a Microsoft account there is nobody entitled to play, and
+     nothing to download for. An account that has to be signed in again is
+     signed in again first, and carries on from here when it has one. */
   if (!account_for_launch (self))
     return;
 

@@ -159,11 +159,10 @@ microsoft_account (gboolean with_refresh_token)
  * No account at all
  * ---------------------------------------------------------- */
 
-/* A launch with nobody to play as still starts: the game plays offline
-   as Player, the name a fresh Minecraft falls back to. The launch is
-   stopped again at once, before the manifest request it just made. */
+/* A launch with no Microsoft account is refused: offline play is never a
+   way around owning the game. Offline-only stores are refused too. */
 static void
-test_no_account_plays_offline (void)
+test_no_account_is_refused (void)
 {
   g_autoptr (NuvashaLauncherInstance) instance = new_instance ();
   g_autoptr (NuvashaLauncherAccounts) accounts = new_store ("no-accounts.json");
@@ -174,29 +173,45 @@ test_no_account_plays_offline (void)
 
   nuvashalauncher_launcher_start (launcher);
 
-  /* Preparing means the gate let it through: a launch that stopped at an
-     account would be Failed before this. */
-  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_PREPARING);
-  assert_log_lacks (launcher, "no account to play as");
-  assert_log_has (launcher, "preparing Minecraft 1.20.1");
+  g_assert_cmpint (nuvashalauncher_launcher_get_state (launcher), ==, NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN);
+  assert_log_has (launcher, "Sign in with a Microsoft account to play.");
+  assert_log_lacks (launcher, "preparing Minecraft");
+  g_assert_false (nuvashalauncher_launch_state_is_busy (nuvashalauncher_launcher_get_state (launcher)));
 
-  nuvashalauncher_launcher_stop (launcher);
-
-  /* A launcher without any accounts at all behaves the same rather than
-     refusing to read a store that is not there. */
+  /* A launcher without any accounts at all is refused the same way. */
   {
     g_autoptr (NuvashaLauncher) bare = nuvashalauncher_launcher_new (instance, NULL, NULL);
 
     g_assert_null (nuvashalauncher_launcher_get_accounts (bare));
 
     nuvashalauncher_launcher_start (bare);
-    g_assert_cmpint (nuvashalauncher_launcher_get_state (bare), ==, NUVASHALAUNCHER_LAUNCH_PREPARING);
-    assert_log_lacks (bare, "no account to play as");
-
-    nuvashalauncher_launcher_stop (bare);
+    g_assert_cmpint (nuvashalauncher_launcher_get_state (bare), ==, NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN);
+    assert_log_lacks (bare, "preparing Minecraft");
   }
 
-  g_print ("ok - a launch with no account plays offline as Player\n");
+  /* An offline account on its own does not make a launch possible. */
+  {
+    g_autoptr (NuvashaLauncherAccounts) offline_only = new_store ("offline-only.json");
+    g_autoptr (NuvashaLauncherAccount) offline = NULL;
+    g_autoptr (GError) error = NULL;
+
+    offline = nuvashalauncher_account_new_offline ("OfflineOnly", &error);
+    g_assert_no_error (error);
+
+    if (nuvashalauncher_accounts_add (offline_only, offline, &error))
+      {
+        g_autoptr (NuvashaLauncher) other =
+          nuvashalauncher_launcher_new (instance, NULL, offline_only);
+
+        nuvashalauncher_launcher_start (other);
+        g_assert_cmpint (nuvashalauncher_launcher_get_state (other), ==, NUVASHALAUNCHER_LAUNCH_NEEDS_SIGN_IN);
+        assert_log_lacks (other, "preparing Minecraft");
+        nuvashalauncher_secret_store_remove_account ("OfflineOnly", NULL);
+        nuvashalauncher_secret_store_clear_active (NULL);
+      }
+  }
+
+  g_print ("ok - a launch without a Microsoft account is refused\n");
 }
 
 /* ---------------------------------------------------------- *
@@ -409,7 +424,7 @@ main (void)
 
   root = directory;
 
-  test_no_account_plays_offline ();
+  test_no_account_is_refused ();
   test_a_dead_token_asks_for_a_sign_in ();
   test_a_ready_account_gets_past_the_gate ();
   test_launch_can_use_another_account ();

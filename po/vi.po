@@ -2586,3 +2586,6 @@ msgstr "Tắt phần phụ thuộc sẽ tắt mod phụ thuộc vào nó"
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Hãy thêm tài khoản Microsoft trước để tạo tài khoản ngoại tuyến."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Đăng nhập bằng tài khoản Microsoft để chơi."

@@ -2601,3 +2601,6 @@ msgstr "Riippuvuuden poistaminen käytöstä poistaa käytöstä siitä riippuva
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Lisää ensin Microsoft-tili luodaksesi offline-tilejä."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Kirjaudu sisään Microsoft-tilillä pelataksesi."

@@ -2618,3 +2618,6 @@ msgstr "Een afhankelijkheid uitschakelen schakelt de mod uit die ervan afhankeli
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Voeg eerst een Microsoft-account toe om offline accounts aan te maken."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Meld u aan met een Microsoft-account om te spelen."

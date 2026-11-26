@@ -29,11 +29,15 @@ void nuvashalauncher_users_set_avatar (NuvashaLauncherUsersPopover *, GtkImage *
 GdkTexture *face_texture (GdkTexture *skin);
 void nuvashalauncher_users_set_avatar_icon (GtkImage *);
 gboolean nuvashalauncher_users_set_local_avatar (GtkImage *, const char *);
-char *nuvashalauncher_users_default_steve_path (void);
-const char *nuvashalauncher_users_default_steve_url (void);
 /* TRUE when NUVASHALAUNCHER_TEST_NO_NETWORK is set, so tests never reach
- * textures.minecraft.net for avatars and skin previews. */
+ * the network for avatars and skin previews. */
 gboolean nuvashalauncher_users_network_disabled (void);
+/* Shows the head of @account in @image: instantly from the skin on disk
+ * when it is there, and fetched once (then kept on disk) when it is not.
+ * The default icon stays only when the account has no skin at all. */
+void nuvashalauncher_users_show_account_head (NuvashaLauncherUsersPopover *owner,
+                                              GtkImage                    *image,
+                                              const NuvashaLauncherAccount *account);
 AdwDialog *nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *, GtkImage *, NuvashaLauncherAccount *);
 
 void load_view_texture (NuvashaLauncherSkinView *, const char *, gboolean);
@@ -49,17 +53,10 @@ char *unique_skin_filename (const char *, const char *);
 char *cached_skin_path (const char *);
 char *cached_cape_path (const char *);
 gboolean is_default_skin_alias (const char *);
-gboolean skin_url_is_default (const char *);
 void append_local_skins (GtkListBox                   *skins,
                          GHashTable                   *skin_urls,
                          GHashTable                   *deleted_skin_ids,
                          NuvashaLauncherSkinRowFactory row_factory,
                          gpointer                      user_data);
-AdwActionRow *append_default_skins (GtkListBox                   *skins,
-                                    GHashTable                   *skin_urls,
-                                    GHashTable                   *deleted_skin_ids,
-                                    gboolean                     *defaults_added,
-                                    NuvashaLauncherSkinRowFactory row_factory,
-                                    gpointer                      user_data);
 
 #endif

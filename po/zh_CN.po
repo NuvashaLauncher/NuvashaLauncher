@@ -2555,3 +2555,6 @@ msgstr "禁用依赖项会同时禁用依赖它的模组"
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "请先添加 Microsoft 账户，然后再创建离线账户。"
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "请使用 Microsoft 账户登录以开始游戏。"

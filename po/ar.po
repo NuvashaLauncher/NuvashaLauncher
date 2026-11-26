@@ -2658,3 +2658,6 @@ msgstr "تعطيل التبعية يعطّل المود الذي يعتمد عل
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "أضف حساب Microsoft أولاً لإنشاء حسابات دون اتصال."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "سجّل الدخول بحساب Microsoft للعب."

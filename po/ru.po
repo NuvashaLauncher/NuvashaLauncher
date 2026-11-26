@@ -2612,3 +2612,6 @@ msgstr "Отключение зависимости отключает мод, �
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Сначала добавьте учётную запись Microsoft, чтобы создавать автономные учётные записи."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Войдите в учётную запись Microsoft, чтобы играть."

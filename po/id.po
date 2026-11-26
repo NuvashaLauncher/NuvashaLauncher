@@ -2595,3 +2595,6 @@ msgstr "Menonaktifkan dependensi juga menonaktifkan mod yang bergantung padanya"
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Tambahkan akun Microsoft terlebih dahulu untuk membuat akun luring."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Masuk dengan akun Microsoft untuk bermain."

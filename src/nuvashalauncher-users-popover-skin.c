@@ -35,7 +35,6 @@ typedef struct _SkinMenu
   gboolean applying_profile;
   gboolean closed;
   GCancellable *cancellable;
-  gboolean defaults_added;
   GHashTable *deleted_skin_ids;
   NuvashaLauncherAccount *account;
 } SkinMenu;
@@ -356,11 +355,9 @@ on_remove_skin_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
   SkinMenu *menu = user_data;
   GtkListBoxRow *row = gtk_list_box_get_selected_row (menu->skins);
-  const char *url;
 
   if (row == NULL ||
-      (url = g_object_get_data (G_OBJECT (row), "nuvashalauncher-skin-url")) == NULL ||
-      skin_url_is_default (url))
+      g_object_get_data (G_OBJECT (row), "nuvashalauncher-skin-url") == NULL)
     return;
 
   {
@@ -488,7 +485,7 @@ on_skin_selected (GtkListBox *list, GtkListBoxRow *row, gpointer user_data)
   url = g_object_get_data (G_OBJECT (row), "nuvashalauncher-skin-url");
   if (menu->remove_button != NULL)
     gtk_widget_set_sensitive (GTK_WIDGET (menu->remove_button),
-                              url != NULL && !skin_url_is_default (url));
+                              url != NULL);
 
   if (url == NULL)
     return;
@@ -581,7 +578,6 @@ static void
 select_saved_skin (SkinMenu *menu)
 {
   GtkListBoxRow *match = NULL;
-  GtkListBoxRow *row = NULL;
   GtkWidget *child = NULL;
   const char *saved_url = menu->account != NULL ? menu->account->avatar_url : NULL;
 
@@ -596,15 +592,7 @@ select_saved_skin (SkinMenu *menu)
           match = GTK_LIST_BOX_ROW (child);
           break;
         }
-
-      if (saved_url == NULL && url != NULL && skin_url_is_default (url) &&
-          (g_strcmp0 (url, nuvashalauncher_users_default_steve_url ()) == 0 ||
-           g_str_has_suffix (url, "/Steve.png")))
-        row = GTK_LIST_BOX_ROW (child);
     }
-
-  if (match == NULL)
-    match = row;
 
   if (match != NULL)
     {
@@ -747,8 +735,6 @@ apply_profile_json (SkinMenu *menu, const char *json)
         }
       menu->applying_profile = FALSE;
     }
-  append_default_skins (menu->skins, menu->skin_urls, menu->deleted_skin_ids,
-                        &menu->defaults_added, skin_row_factory, menu);
   select_saved_skin (menu);
   g_object_set_data (G_OBJECT (menu->dialog), "nuvashalauncher-capes-loaded",
                      GINT_TO_POINTER (1));
@@ -798,8 +784,6 @@ on_capes_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
 
 done:
   menu->applying_profile = FALSE;
-  append_default_skins (menu->skins, menu->skin_urls, menu->deleted_skin_ids,
-                        &menu->defaults_added, skin_row_factory, menu);
   select_saved_skin (menu);
   g_object_set_data (G_OBJECT (menu->dialog), "nuvashalauncher-capes-loaded",
                      GINT_TO_POINTER (1));
@@ -1029,8 +1013,6 @@ nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *owner, GtkImag
   adw_dialog_set_child (dialog, GTK_WIDGET (toolbar));
   append_local_skins (data->skins, data->skin_urls, data->deleted_skin_ids,
                       skin_row_factory, data);
-  append_default_skins (data->skins, data->skin_urls, data->deleted_skin_ids,
-                        &data->defaults_added, skin_row_factory, data);
   if (account != NULL && account->avatar_url != NULL && *account->avatar_url != '\0')
     {
       g_autofree char *avatar_skin_name =

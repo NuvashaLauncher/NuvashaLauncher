@@ -2610,3 +2610,6 @@ msgstr "Desativar uma dependência desativa o mod que dependia dela"
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Adicione primeiro uma conta Microsoft para criar contas offline."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Inicie sessão com uma conta Microsoft para jogar."

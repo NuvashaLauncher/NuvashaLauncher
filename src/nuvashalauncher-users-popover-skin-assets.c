@@ -6,6 +6,7 @@
 #include "nuvashalauncher-users-popover-private.h"
 #include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-i18n.h"
+#include "nuvashalauncher-minecraft-services.h"
 #include <libsoup/soup.h>
 
 #define AVATAR_SIZE 40
@@ -61,6 +62,7 @@ typedef struct
   NuvashaLauncherUsersPopover *owner;
   GtkImage *image;
   GHashTable *cache;
+  SoupMessage *message;
   char *url;
 } AvatarLoad;
 
@@ -69,36 +71,31 @@ avatar_load_free (AvatarLoad *load)
 {
   g_clear_object (&load->image);
   g_clear_pointer (&load->cache, g_hash_table_unref);
+  g_clear_object (&load->message);
   g_free (load->url);
   g_free (load);
 }
 
 static void
-on_skin_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
+apply_avatar_bytes (AvatarLoad *load, GBytes *bytes)
 {
-  /* The image is held by a reference for as long as the fetch lasts, so
-     that a row which is gone by the time the skin arrives is not written
-     to. */
-  AvatarLoad *load = user_data;
   g_autoptr (GError) error = NULL;
-  g_autoptr (GBytes) bytes = NULL;
   g_autoptr (GdkTexture) skin = NULL;
   g_autoptr (GdkTexture) face = NULL;
 
-  bytes = g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
-
-  /* Keep the default avatar when the skin cannot be loaded. */
   if (bytes == NULL)
-    goto done;
+    return;
 
   skin = gdk_texture_new_from_bytes (bytes, &error);
-
   if (skin == NULL)
-    goto done;
+    return;
 
   face = face_texture (skin);
+  if (face == NULL)
+    return;
 
-  if (face != NULL)
+  if (g_str_has_prefix (load->url, "http://") ||
+      g_str_has_prefix (load->url, "https://"))
     {
       g_autofree char *cached = cached_skin_path (load->url);
       if (cached != NULL && !g_file_test (cached, G_FILE_TEST_IS_REGULAR))
@@ -107,14 +104,37 @@ on_skin_downloaded (GObject *source, GAsyncResult *result, gpointer user_data)
           gsize len = 0;
           const char *raw = g_bytes_get_data (bytes, &len);
           if (nuvashalauncher_fs_make_directory (dir, 0755, NULL))
-            g_file_set_contents (cached, raw, (gssize) len, NULL);
+            nuvashalauncher_fs_replace_contents (cached, raw, (gssize) len, 0600, NULL);
         }
-      g_hash_table_replace (load->cache, g_strdup (load->url),
-                            g_object_ref (face));
-      gtk_image_set_from_paintable (load->image, GDK_PAINTABLE (face));
     }
+  g_hash_table_replace (load->cache, g_strdup (load->url),
+                        g_object_ref (face));
+  gtk_image_set_from_paintable (load->image, GDK_PAINTABLE (face));
+}
 
-done:
+static void
+on_skin_file_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AvatarLoad *load = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes =
+    g_file_load_bytes_finish (G_FILE (source), result, NULL, &error);
+
+  apply_avatar_bytes (load, bytes);
+  avatar_load_free (load);
+}
+
+static void
+on_skin_http_loaded (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  AvatarLoad *load = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GBytes) bytes = soup_session_send_and_read_finish (
+    SOUP_SESSION (source), result, &error);
+  guint status = load->message != NULL ? soup_message_get_status (load->message) : 0;
+
+  if (bytes != NULL && (load->message == NULL || SOUP_STATUS_IS_SUCCESSFUL (status)))
+    apply_avatar_bytes (load, bytes);
   avatar_load_free (load);
 }
 
@@ -130,9 +150,9 @@ nuvashalauncher_users_set_avatar (NuvashaLauncherUsersPopover *self,
             GtkImage        *image,
             const char       *url)
 {
-  g_autoptr (GFile) file = NULL;
   GdkTexture *cached = NULL;
   AvatarLoad *load = NULL;
+  gboolean is_http;
 
   if (url == NULL || *url == '\0')
     return;
@@ -144,16 +164,34 @@ nuvashalauncher_users_set_avatar (NuvashaLauncherUsersPopover *self,
       return;
     }
 
-  if ((g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://")) &&
-      nuvashalauncher_users_network_disabled ())
-    return;
+  is_http = g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://");
+  if (is_http)
+    {
+      g_autofree char *disk_cached = cached_skin_path (url);
+      if (disk_cached != NULL && nuvashalauncher_users_set_local_avatar (image, disk_cached))
+        return;
+      if (nuvashalauncher_users_network_disabled ())
+        return;
+    }
 
-  file = g_file_new_for_uri (url);
   load = g_new0 (AvatarLoad, 1);
   load->image = g_object_ref (image);
   load->cache = g_hash_table_ref (self->avatar_cache);
   load->url = g_strdup (url);
-  g_file_load_bytes_async (file, self->avatars, on_skin_downloaded, load);
+
+  if (is_http)
+    {
+      g_autoptr (SoupSession) session = nuvashalauncher_minecraft_services_session ();
+      load->message = soup_message_new ("GET", url);
+      soup_session_send_and_read_async (session, load->message,
+                                        G_PRIORITY_DEFAULT, self->avatars,
+                                        on_skin_http_loaded, load);
+    }
+  else
+    {
+      g_autoptr (GFile) file = g_file_new_for_uri (url);
+      g_file_load_bytes_async (file, self->avatars, on_skin_file_loaded, load);
+    }
 }
 
 /* The icon every account has, and what an offline account has as its
@@ -212,14 +250,35 @@ nuvashalauncher_users_set_local_avatar (GtkImage *image, const char *path)
   return TRUE;
 }
 
-char *
-nuvashalauncher_users_default_steve_path (void)
+void
+nuvashalauncher_users_show_account_head (NuvashaLauncherUsersPopover  *owner,
+                                         GtkImage                     *image,
+                                         const NuvashaLauncherAccount *account)
 {
-  g_autofree char *cached = cached_skin_path (nuvashalauncher_users_default_steve_url ());
-  g_autofree char *legacy = g_build_filename (g_get_user_data_dir (), "nuvashalauncher", "skins", "defaults", "Steve.png", NULL);
-  if (cached != NULL && g_file_test (cached, G_FILE_TEST_IS_REGULAR))
-    return g_steal_pointer (&cached);
-  if (g_file_test (legacy, G_FILE_TEST_IS_REGULAR))
-    return g_steal_pointer (&legacy);
-  return NULL;
+  const char *url = account != NULL ? account->avatar_url : NULL;
+
+  nuvashalauncher_users_set_avatar_icon (image);
+  if (url == NULL || *url == '\0')
+    return;
+
+  if (g_str_has_prefix (url, "file://"))
+    {
+      g_autoptr (GFile) file = g_file_new_for_uri (url);
+      g_autofree char *path = g_file_get_path (file);
+
+      nuvashalauncher_users_set_local_avatar (image, path);
+      return;
+    }
+
+  /* The skin of a profile is kept on disk the first time it is fetched, so
+   * every later head is read from there at once instead of waiting on the
+   * network. */
+  {
+    g_autofree char *cached = cached_skin_path (url);
+
+    if (cached != NULL && nuvashalauncher_users_set_local_avatar (image, cached))
+      return;
+  }
+  if (owner != NULL)
+    nuvashalauncher_users_set_avatar (owner, image, url);
 }

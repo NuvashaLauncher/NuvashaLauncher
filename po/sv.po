@@ -2604,3 +2604,6 @@ msgstr "Att inaktivera ett beroende inaktiverar modden som var beroende av det"
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Lägg till ett Microsoft-konto först för att skapa offlinekonton."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Logga in med ett Microsoft-konto för att spela."

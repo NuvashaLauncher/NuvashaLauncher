@@ -2635,3 +2635,6 @@ msgstr "Das Deaktivieren einer Abhängigkeit deaktiviert die Mod, die davon abh�
 
 msgid "Add a Microsoft account first to create offline accounts."
 msgstr "Fügen Sie zuerst ein Microsoft-Konto hinzu, um Offline-Konten zu erstellen."
+
+msgid "Sign in with a Microsoft account to play."
+msgstr "Melden Sie sich mit einem Microsoft-Konto an, um zu spielen."

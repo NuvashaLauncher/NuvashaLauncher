@@ -113,11 +113,11 @@ UI templates (`data/ui/*.ui`), `data/nuvashalauncher.css`, `data/pack.png`, and 
 
 ### Accounts & Authentication
 
-Accounts are either **Microsoft** (profile, access token, expiry, refresh token, and cosmetic data) or **Offline** (validated username + `OfflinePlayer:<name>` UUID; creation requires at least one Microsoft account to be stored). Complete account records and the active account ID are stored as separate `libsecret` items.
+Accounts are either **Microsoft** (profile, access token, expiry, refresh token, and cosmetic data) or **Offline** (validated username + `OfflinePlayer:<name>` UUID; creation requires at least one Microsoft account to be stored). Launching Minecraft also requires at least one Microsoft account to be stored. Complete account records and the active account ID are stored as separate `libsecret` items.
 
 Microsoft sign-in follows an async chain: device code request → token polling → Xbox Live → XSTS → Minecraft token → Java entitlements check → profile fetch. No passwords pass through Nuvasha Launcher. Tokens are treated as expired slightly before their reported expiry; if refresh fails, the launcher enters `Needs sign-in`.
 
-Default Minecraft skins are fetched on demand from Mojang's `textures.minecraft.net` CDN and cached locally rather than bundled in the repository. Skins and capes are cached separately so cape textures never appear in the saved-skin library.
+Default Mojang skins are neither bundled nor fetched. Account heads are extracted from cached skin PNGs synchronously when present on disk (or fetched over `libsoup` and cached on disk), and skins and capes are cached separately so cape textures never appear in the saved-skin library.
 
 ### Settings
 
