@@ -2401,8 +2401,8 @@ msgstr "Ei maailmoja"
 #~ msgid "Edit Server"
 #~ msgstr "Muokkaa palvelinta"
 
-#~ msgid "Datapacks"
-#~ msgstr "Datapaketit"
+msgid "Datapacks"
+msgstr "Datapaketit"
 
 #~ msgid "No Worlds"
 #~ msgstr "Ei maailmoja"
@@ -2562,3 +2562,36 @@ msgstr "Java %d (suositeltu)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (suositeltu)"
+
+msgid "Use dedicated GPU"
+msgstr "Käytä erillistä näytönohjainta"
+
+msgid "Use GameMode"
+msgstr "Käytä GameModea"
+
+msgid "Use MangoHud"
+msgstr "Käytä MangoHudia"
+
+msgid "Not installed"
+msgstr "Ei asennettu"
+
+msgid "Performance"
+msgstr "Suorituskyky"
+
+msgid "Custom performance settings"
+msgstr "Mukautetut suorituskykyasetukset"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u datapaketti valittu"
+msgstr[1] "%u datapakettia valittu"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "%u datapakettia asennetaan"
+msgstr[1] "%u datapakettia asennetaan"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Asennetaanko seuraava datapaketti?"
+msgstr[1] "Asennetaanko seuraavat datapaketit?"

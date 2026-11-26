@@ -132,11 +132,17 @@ run_the_game (NuvashaLauncher *self)
   guint game_width = 0;
   guint game_height = 0;
   gint game_fullscreen = -1;
+  gint use_dedicated_gpu = -1;
+  gint use_gamemode = -1;
+  gint use_mangohud = -1;
   g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
   const char *effective_jvm_args = NULL;
   guint effective_width = 0;
   guint effective_height = 0;
   gboolean effective_fullscreen = FALSE;
+  gboolean effective_gpu = FALSE;
+  gboolean effective_gamemode = FALSE;
+  gboolean effective_mangohud = FALSE;
 
   g_object_get (self->instance,
                 "jvm-args", &jvm_args,
@@ -144,6 +150,9 @@ run_the_game (NuvashaLauncher *self)
                 "game-width", &game_width,
                 "game-height", &game_height,
                 "game-fullscreen", &game_fullscreen,
+                "use-dedicated-gpu", &use_dedicated_gpu,
+                "use-gamemode", &use_gamemode,
+                "use-mangohud", &use_mangohud,
                 NULL);
 
   if (memory_mib == 0)
@@ -162,6 +171,17 @@ run_the_game (NuvashaLauncher *self)
   effective_fullscreen = game_fullscreen >= 0
                            ? (game_fullscreen != 0)
                            : nuvashalauncher_settings_get_default_game_fullscreen (settings);
+  effective_gpu = use_dedicated_gpu >= 0
+                    ? (use_dedicated_gpu != 0)
+                    : nuvashalauncher_settings_get_default_use_dedicated_gpu (settings);
+  effective_gamemode = use_gamemode >= 0
+                         ? (use_gamemode != 0)
+                         : nuvashalauncher_settings_get_default_use_gamemode (settings);
+  effective_mangohud = use_mangohud >= 0
+                         ? (use_mangohud != 0)
+                         : nuvashalauncher_settings_get_default_use_mangohud (settings);
+
+  self->preparation.use_dedicated_gpu = effective_gpu;
 
   argv = nuvashalauncher_launch_build_arguments_with_memory (
                                      self->preparation.resolved, &session,
@@ -228,6 +248,23 @@ run_the_game (NuvashaLauncher *self)
     g_object_set_data (G_OBJECT (self), "nuvashalauncher-quick-play-world", NULL);
     g_object_set_data (G_OBJECT (self), "nuvashalauncher-quick-play-server", NULL);
   }
+
+  /* Optional performance wrappers: gamemoderun wraps mangohud which wraps java. */
+  if (effective_mangohud)
+    {
+      g_autofree char *mangohud_bin = g_find_program_in_path ("mangohud");
+
+      if (mangohud_bin != NULL)
+        g_ptr_array_insert (argv, 0, g_steal_pointer (&mangohud_bin));
+    }
+
+  if (effective_gamemode)
+    {
+      g_autofree char *gamemode_bin = g_find_program_in_path ("gamemoderun");
+
+      if (gamemode_bin != NULL)
+        g_ptr_array_insert (argv, 0, g_steal_pointer (&gamemode_bin));
+    }
 
   /* Who the game is about to run as. The token is not in this line: the
      command line that is logged by the spawn carries it redacted, and

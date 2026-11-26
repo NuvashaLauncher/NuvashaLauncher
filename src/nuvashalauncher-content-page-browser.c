@@ -97,6 +97,9 @@ update_selection_ui (NuvashaLauncherContentPage *self)
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       format = ngettext ("%u shader selected", "%u shaders selected", count);
       break;
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
+      format = ngettext ("%u datapack selected", "%u datapacks selected", count);
+      break;
     default:
       format = ngettext ("%u item selected", "%u items selected", count);
       break;
@@ -241,7 +244,7 @@ results_arrived (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthResult
         continue;
 
       row = GTK_WIDGET (g_object_ref_sink (adw_action_row_new ()));
-      icon = nuvashalauncher_icon_widget_new (nuvashalauncher_content_type_icon (self->type));
+      icon = nuvashalauncher_icon_widget_new_pack_placeholder ();
 
       /* Show the icon, title, and short description. Details contain the
          author, downloads, game version, and loader. */

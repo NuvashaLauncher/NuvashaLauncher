@@ -2446,8 +2446,8 @@ msgstr "لا توجد عوالم"
 #~ msgid "Edit Server"
 #~ msgstr "تحرير الخادم"
 
-#~ msgid "Datapacks"
-#~ msgstr "حزم البيانات"
+msgid "Datapacks"
+msgstr "حزم البيانات"
 
 #~ msgid "No Worlds"
 #~ msgstr "لا توجد عوالم"
@@ -2607,3 +2607,48 @@ msgstr "Java %d (موصى به)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (موصى به)"
+
+msgid "Use dedicated GPU"
+msgstr "استخدام بطاقة الرسوميات المنفصلة"
+
+msgid "Use GameMode"
+msgstr "استخدام GameMode"
+
+msgid "Use MangoHud"
+msgstr "استخدام MangoHud"
+
+msgid "Not installed"
+msgstr "غير مثبّت"
+
+msgid "Performance"
+msgstr "الأداء"
+
+msgid "Custom performance settings"
+msgstr "إعدادات أداء مخصّصة"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u حزمة بيانات محددة"
+msgstr[1] "%u حزمة بيانات محددة"
+msgstr[2] "%u حزم بيانات محددة"
+msgstr[3] "%u حزم بيانات محددة"
+msgstr[4] "%u حزم بيانات محددة"
+msgstr[5] "%u حزم بيانات محددة"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "جارٍ تثبيت %u حزمة بيانات"
+msgstr[1] "جارٍ تثبيت %u حزمة بيانات"
+msgstr[2] "جارٍ تثبيت %u حزم بيانات"
+msgstr[3] "جارٍ تثبيت %u حزم بيانات"
+msgstr[4] "جارٍ تثبيت %u حزم بيانات"
+msgstr[5] "جارٍ تثبيت %u حزم بيانات"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "تثبيت حزمة البيانات التالية؟"
+msgstr[1] "تثبيت حزمة البيانات التالية؟"
+msgstr[2] "تثبيت حزم البيانات التالية؟"
+msgstr[3] "تثبيت حزم البيانات التالية؟"
+msgstr[4] "تثبيت حزم البيانات التالية؟"
+msgstr[5] "تثبيت حزم البيانات التالية؟"

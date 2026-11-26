@@ -39,6 +39,7 @@ struct _NuvashaLauncher
     NuvashaLauncherResolvedVersion *resolved;
     char *java_executable;
     int java_major_version;
+    gboolean use_dedicated_gpu;
   } preparation;
   struct {
     GSubprocess *process;

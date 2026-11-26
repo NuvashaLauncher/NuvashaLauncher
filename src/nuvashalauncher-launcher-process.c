@@ -180,6 +180,14 @@ nuvashalauncher_launcher_spawn (NuvashaLauncher *self, GPtrArray *argv, GError *
      else about the environment is changed, DISPLAY included. */
   g_subprocess_launcher_unsetenv (launcher, "GDK_BACKEND");
 
+  if (self->preparation.use_dedicated_gpu)
+    {
+      g_subprocess_launcher_setenv (launcher, "DRI_PRIME", "1", TRUE);
+      g_subprocess_launcher_setenv (launcher, "__NV_PRIME_RENDER_OFFLOAD", "1", TRUE);
+      g_subprocess_launcher_setenv (launcher, "__GLX_VENDOR_LIBRARY_NAME", "nvidia", TRUE);
+      g_subprocess_launcher_setenv (launcher, "__VK_LAYER_NV_optimus", "NVIDIA_only", TRUE);
+    }
+
   /* The game writes its own files next to the instance: its worlds, its
      logs, its crash reports. */
   g_subprocess_launcher_set_cwd (launcher, self->game_directory);

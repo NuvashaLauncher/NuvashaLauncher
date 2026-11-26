@@ -2410,8 +2410,8 @@ msgstr "Žádné světy"
 #~ msgid "Edit Server"
 #~ msgstr "Upravit server"
 
-#~ msgid "Datapacks"
-#~ msgstr "Datapacky"
+msgid "Datapacks"
+msgstr "Datapacky"
 
 #~ msgid "No Worlds"
 #~ msgstr "Žádné světy"
@@ -2571,3 +2571,39 @@ msgstr "Java %d (doporučeno)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (doporučeno)"
+
+msgid "Use dedicated GPU"
+msgstr "Použít dedikovanou GPU"
+
+msgid "Use GameMode"
+msgstr "Použít GameMode"
+
+msgid "Use MangoHud"
+msgstr "Použít MangoHud"
+
+msgid "Not installed"
+msgstr "Není nainstalováno"
+
+msgid "Performance"
+msgstr "Výkon"
+
+msgid "Custom performance settings"
+msgstr "Vlastní nastavení výkonu"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "Vybrán %u datapack"
+msgstr[1] "Vybrány %u datapacky"
+msgstr[2] "Vybrány %u datapacky"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "Instaluje se %u datapack"
+msgstr[1] "Instalují se %u datapacky"
+msgstr[2] "Instalují se %u datapacky"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Nainstalovat následující datapack?"
+msgstr[1] "Nainstalovat následující datapacky?"
+msgstr[2] "Nainstalovat následující datapacky?"

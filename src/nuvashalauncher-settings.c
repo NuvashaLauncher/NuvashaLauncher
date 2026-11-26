@@ -20,6 +20,9 @@
 #define DEFAULT_GAME_WIDTH_KEY "default-game-width"
 #define DEFAULT_GAME_HEIGHT_KEY "default-game-height"
 #define DEFAULT_GAME_FULLSCREEN_KEY "default-game-fullscreen"
+#define DEFAULT_USE_DEDICATED_GPU_KEY "default-use-dedicated-gpu"
+#define DEFAULT_USE_GAMEMODE_KEY "default-use-gamemode"
+#define DEFAULT_USE_MANGOHUD_KEY "default-use-mangohud"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -41,6 +44,9 @@ struct _NuvashaLauncherSettings
   guint default_game_width;
   guint default_game_height;
   gboolean default_game_fullscreen;
+  gboolean default_use_dedicated_gpu;
+  gboolean default_use_gamemode;
+  gboolean default_use_mangohud;
   GSettings *desktop_settings;
 };
 
@@ -90,6 +96,12 @@ load (NuvashaLauncherSettings *self)
   }
   self->default_game_fullscreen = g_settings_get_boolean (
     self->desktop_settings, DEFAULT_GAME_FULLSCREEN_KEY);
+  self->default_use_dedicated_gpu = g_settings_get_boolean (
+    self->desktop_settings, DEFAULT_USE_DEDICATED_GPU_KEY);
+  self->default_use_gamemode = g_settings_get_boolean (
+    self->desktop_settings, DEFAULT_USE_GAMEMODE_KEY);
+  self->default_use_mangohud = g_settings_get_boolean (
+    self->desktop_settings, DEFAULT_USE_MANGOHUD_KEY);
 }
 
 static gboolean
@@ -526,6 +538,84 @@ nuvashalauncher_settings_set_default_game_fullscreen (NuvashaLauncherSettings *s
   return FALSE;
 }
 
+gboolean
+nuvashalauncher_settings_get_default_use_dedicated_gpu (NuvashaLauncherSettings *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  return self->default_use_dedicated_gpu;
+}
+
+gboolean
+nuvashalauncher_settings_set_default_use_dedicated_gpu (NuvashaLauncherSettings *self,
+                                                        gboolean value,
+                                                        GError **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->default_use_dedicated_gpu;
+  self->default_use_dedicated_gpu = value;
+  if (save_boolean (self, DEFAULT_USE_DEDICATED_GPU_KEY, value))
+    return TRUE;
+
+  self->default_use_dedicated_gpu = previous;
+  return FALSE;
+}
+
+gboolean
+nuvashalauncher_settings_get_default_use_gamemode (NuvashaLauncherSettings *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  return self->default_use_gamemode;
+}
+
+gboolean
+nuvashalauncher_settings_set_default_use_gamemode (NuvashaLauncherSettings *self,
+                                                   gboolean value,
+                                                   GError **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->default_use_gamemode;
+  self->default_use_gamemode = value;
+  if (save_boolean (self, DEFAULT_USE_GAMEMODE_KEY, value))
+    return TRUE;
+
+  self->default_use_gamemode = previous;
+  return FALSE;
+}
+
+gboolean
+nuvashalauncher_settings_get_default_use_mangohud (NuvashaLauncherSettings *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  return self->default_use_mangohud;
+}
+
+gboolean
+nuvashalauncher_settings_set_default_use_mangohud (NuvashaLauncherSettings *self,
+                                                   gboolean value,
+                                                   GError **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->default_use_mangohud;
+  self->default_use_mangohud = value;
+  if (save_boolean (self, DEFAULT_USE_MANGOHUD_KEY, value))
+    return TRUE;
+
+  self->default_use_mangohud = previous;
+  return FALSE;
+}
+
 static void
 nuvashalauncher_settings_dispose (GObject *object)
 {
@@ -727,6 +817,9 @@ nuvashalauncher_settings_init (NuvashaLauncherSettings *self)
   self->default_game_width = NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_WIDTH;
   self->default_game_height = NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_HEIGHT;
   self->default_game_fullscreen = FALSE;
+  self->default_use_dedicated_gpu = FALSE;
+  self->default_use_gamemode = FALSE;
+  self->default_use_mangohud = FALSE;
 
   if (self->desktop_settings != NULL)
     load (self);

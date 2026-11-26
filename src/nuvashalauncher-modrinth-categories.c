@@ -130,6 +130,8 @@ nuvashalauncher_modrinth_category_label (const char *name)
 char *
 nuvashalauncher_modrinth_project_type_for_content (NuvashaLauncherContentType type)
 {
+  if (type == NUVASHALAUNCHER_CONTENT_DATAPACK)
+    return g_strdup ("mod");
   return g_strdup (nuvashalauncher_content_type_to_string (type));
 }
 

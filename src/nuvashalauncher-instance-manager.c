@@ -772,6 +772,50 @@ nuvashalauncher_instance_manager_set_window_settings (NuvashaLauncherInstanceMan
   return TRUE;
 }
 
+gboolean
+nuvashalauncher_instance_manager_set_performance_settings (NuvashaLauncherInstanceManager *self,
+                                                           NuvashaLauncherInstance *instance,
+                                                           gint use_dedicated_gpu,
+                                                           gint use_gamemode,
+                                                           gint use_mangohud,
+                                                           GError **error)
+{
+  gint old_gpu = -1, old_gm = -1, old_mh = -1;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!g_list_store_find (self->instances, instance, NULL))
+    {
+      g_set_error_literal (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                           "the instance is not registered");
+      return FALSE;
+    }
+
+  g_object_get (instance,
+                "use-dedicated-gpu", &old_gpu,
+                "use-gamemode", &old_gm,
+                "use-mangohud", &old_mh,
+                NULL);
+  g_object_set (instance,
+                "use-dedicated-gpu", use_dedicated_gpu,
+                "use-gamemode", use_gamemode,
+                "use-mangohud", use_mangohud,
+                NULL);
+  if (!nuvashalauncher_instance_manager_save (self, error))
+    {
+      g_object_set (instance,
+                    "use-dedicated-gpu", old_gpu,
+                    "use-gamemode", old_gm,
+                    "use-mangohud", old_mh,
+                    NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
 static gboolean
 ensure_registered (NuvashaLauncherInstanceManager *self,
                    NuvashaLauncherInstance *instance,

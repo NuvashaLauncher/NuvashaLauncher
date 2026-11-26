@@ -2407,8 +2407,8 @@ msgstr "Dünya Yok"
 #~ msgid "Edit Server"
 #~ msgstr "Sunucuyu Düzenle"
 
-#~ msgid "Datapacks"
-#~ msgstr "Veri Paketleri"
+msgid "Datapacks"
+msgstr "Veri Paketleri"
 
 #~ msgid "No Worlds"
 #~ msgstr "Dünya Yok"
@@ -2568,3 +2568,36 @@ msgstr "Java %d (önerilen)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (önerilen)"
+
+msgid "Use dedicated GPU"
+msgstr "Harici GPU kullan"
+
+msgid "Use GameMode"
+msgstr "GameMode kullan"
+
+msgid "Use MangoHud"
+msgstr "MangoHud kullan"
+
+msgid "Not installed"
+msgstr "Yüklü değil"
+
+msgid "Performance"
+msgstr "Performans"
+
+msgid "Custom performance settings"
+msgstr "Özel performans ayarları"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u veri paketi seçildi"
+msgstr[1] "%u veri paketi seçildi"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "%u veri paketi yükleniyor"
+msgstr[1] "%u veri paketi yükleniyor"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Aşağıdaki veri paketi yüklensin mi?"
+msgstr[1] "Aşağıdaki veri paketleri yüklensin mi?"

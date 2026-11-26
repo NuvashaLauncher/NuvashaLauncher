@@ -2395,8 +2395,8 @@ msgstr "Tidak Ada Dunia"
 #~ msgid "Edit Server"
 #~ msgstr "Sunting Server"
 
-#~ msgid "Datapacks"
-#~ msgstr "Paket Data"
+msgid "Datapacks"
+msgstr "Paket Data"
 
 #~ msgid "No Worlds"
 #~ msgstr "Tidak Ada Dunia"
@@ -2556,3 +2556,36 @@ msgstr "Java %d (disarankan)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (disarankan)"
+
+msgid "Use dedicated GPU"
+msgstr "Gunakan GPU khusus"
+
+msgid "Use GameMode"
+msgstr "Gunakan GameMode"
+
+msgid "Use MangoHud"
+msgstr "Gunakan MangoHud"
+
+msgid "Not installed"
+msgstr "Tidak terpasang"
+
+msgid "Performance"
+msgstr "Performa"
+
+msgid "Custom performance settings"
+msgstr "Pengaturan performa khusus"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u paket data dipilih"
+msgstr[1] "%u paket data dipilih"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "%u paket data sedang dipasang"
+msgstr[1] "%u paket data sedang dipasang"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Pasang paket data berikut?"
+msgstr[1] "Pasang paket data berikut?"

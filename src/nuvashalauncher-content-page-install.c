@@ -381,6 +381,9 @@ content_download_kind (NuvashaLauncherContentType type)
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return NUVASHALAUNCHER_DOWNLOAD_SHADER;
 
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
+      return NUVASHALAUNCHER_DOWNLOAD_DATAPACK;
+
     case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return NUVASHALAUNCHER_DOWNLOAD_MOD;
@@ -1110,6 +1113,9 @@ on_batch_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       msg_format = ngettext ("%u shader is being installed", "%u shaders are being installed", count);
       break;
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
+      msg_format = ngettext ("%u datapack is being installed", "%u datapacks are being installed", count);
+      break;
     default:
       msg_format = ngettext ("%u item is being installed", "%u items are being installed", count);
       break;
@@ -1144,6 +1150,9 @@ show_batch_plan (NuvashaLauncherContentPage *self, BatchPlanRun *batch)
       break;
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       heading_format = ngettext ("Install the following shader?", "Install the following shaders?", count);
+      break;
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
+      heading_format = ngettext ("Install the following datapack?", "Install the following datapacks?", count);
       break;
     default:
       heading_format = ngettext ("Install the following item?", "Install the following items?", count);

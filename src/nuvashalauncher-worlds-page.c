@@ -5,6 +5,7 @@
 #define _GNU_SOURCE
 
 #include "nuvashalauncher-worlds-page.h"
+#include "nuvashalauncher-content-page.h"
 #include "nuvashalauncher-dialogs.h"
 #include "nuvashalauncher-fs.h"
 #include "nuvashalauncher-i18n.h"
@@ -57,6 +58,9 @@ struct _NuvashaLauncherWorldsPage {
   char *saves_dir;
 
   AdwToastOverlay *toasts;
+  AdwNavigationView *nav_view;
+  NuvashaLauncherContentPage *datapacks_page;
+  GtkWidget *back_button;
   GtkBox *bar;
   GtkWidget *add_button;
   GtkWidget *right_actions;
@@ -860,6 +864,8 @@ on_world_drag_end (GtkGestureDrag *gesture G_GNUC_UNUSED,
     reorder_world (drag->page, from, to);
 }
 
+static void on_world_datapacks_clicked (GtkButton *button, gpointer user_data);
+
 static GtkWidget *
 build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w, guint index)
 {
@@ -908,6 +914,8 @@ build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w, guint index)
                                             G_CALLBACK (on_rename_world_clicked), self));
   gtk_box_append (box, popover_menu_button (_("Duplicate"), w, popover,
                                             G_CALLBACK (on_duplicate_world_clicked), self));
+  gtk_box_append (box, popover_menu_button (_("Datapacks"), w, popover,
+                                            G_CALLBACK (on_world_datapacks_clicked), self));
   if (w->has_seed)
     gtk_box_append (box, popover_menu_button (_("Copy seed"), w, popover,
                                               G_CALLBACK (on_copy_seed_clicked), self));
@@ -992,6 +1000,9 @@ on_world_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
                      gpointer user_data)
 {
   NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (user_data);
+
+  if (self->datapacks_page != NULL)
+    return GDK_EVENT_PROPAGATE;
 
   if (keyval == GDK_KEY_f && (state & GDK_CONTROL_MASK))
     {
@@ -1405,6 +1416,9 @@ nuvashalauncher_worlds_page_dispose (GObject *object)
 
   if (self->header_bar != NULL)
     nuvashalauncher_worlds_page_detach_header (self, self->header_bar);
+  self->datapacks_page = NULL;
+  self->nav_view = NULL;
+  g_clear_object (&self->back_button);
   g_clear_object (&self->header_search_clamp);
   g_clear_object (&self->search_bar);
   g_clear_object (&self->add_button);
@@ -1432,6 +1446,72 @@ nuvashalauncher_worlds_page_init (NuvashaLauncherWorldsPage *self)
   self->worlds = g_ptr_array_new_with_free_func ((GDestroyNotify) world_entry_free);
   gtk_orientable_set_orientation (GTK_ORIENTABLE (self), GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
+}
+
+static void worlds_attach_own_header (NuvashaLauncherWorldsPage *self, AdwHeaderBar *header);
+static void worlds_detach_own_header (NuvashaLauncherWorldsPage *self, AdwHeaderBar *header);
+static void worlds_attach_datapacks_header (NuvashaLauncherWorldsPage *self, AdwHeaderBar *header);
+static void worlds_detach_datapacks_header (NuvashaLauncherWorldsPage *self, AdwHeaderBar *header);
+
+static void
+on_back_to_worlds_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (user_data);
+
+  if (self->nav_view != NULL)
+    adw_navigation_view_pop (self->nav_view);
+}
+
+static void
+on_nav_view_popped (AdwNavigationView *nav_view G_GNUC_UNUSED,
+                    AdwNavigationPage *page G_GNUC_UNUSED,
+                    gpointer user_data)
+{
+  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (user_data);
+
+  if (self->datapacks_page == NULL)
+    return;
+
+  if (self->header_bar != NULL)
+    worlds_detach_datapacks_header (self, self->header_bar);
+
+  self->datapacks_page = NULL;
+
+  if (self->header_bar != NULL)
+    worlds_attach_own_header (self, self->header_bar);
+}
+
+static void
+on_world_datapacks_clicked (GtkButton *button, gpointer user_data)
+{
+  NuvashaLauncherWorldsPage *self = NUVASHALAUNCHER_WORLDS_PAGE (user_data);
+  WorldEntry *w = g_object_get_data (G_OBJECT (button), "nuvashalauncher-world");
+
+  if (w == NULL || w->path == NULL || self->nav_view == NULL || self->datapacks_page != NULL)
+    return;
+
+  NuvashaLauncherContentPage *dp =
+    nuvashalauncher_content_page_new_with_base (self->instance,
+                                                NUVASHALAUNCHER_CONTENT_DATAPACK,
+                                                w->path);
+  if (dp == NULL)
+    return;
+
+  self->datapacks_page = dp;
+  nuvashalauncher_content_page_reset_for_tab_switch (dp);
+
+  AdwNavigationPage *dp_nav = adw_navigation_page_new (
+    GTK_WIDGET (dp),
+    w->name != NULL && *w->name != '\0' ? w->name : _("Datapacks"));
+  adw_navigation_page_set_tag (dp_nav, "datapacks");
+
+  if (self->header_bar != NULL)
+    {
+      worlds_detach_own_header (self, self->header_bar);
+      worlds_attach_datapacks_header (self, self->header_bar);
+    }
+
+  adw_navigation_view_push (self->nav_view, dp_nav);
 }
 
 NuvashaLauncherWorldsPage *
@@ -1528,7 +1608,26 @@ nuvashalauncher_worlds_page_new (NuvashaLauncherInstance *instance,
 
   self->toasts = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   adw_toast_overlay_set_child (self->toasts, GTK_WIDGET (inner));
-  gtk_box_append (GTK_BOX (self), GTK_WIDGET (self->toasts));
+
+  self->nav_view = ADW_NAVIGATION_VIEW (adw_navigation_view_new ());
+  gtk_widget_set_vexpand (GTK_WIDGET (self->nav_view), TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (self->nav_view), TRUE);
+  {
+    AdwNavigationPage *worlds_nav_page =
+      adw_navigation_page_new (GTK_WIDGET (self->toasts), _("Worlds"));
+    adw_navigation_page_set_tag (worlds_nav_page, "worlds");
+    adw_navigation_view_add (self->nav_view, worlds_nav_page);
+  }
+  g_signal_connect_object (self->nav_view, "popped",
+                           G_CALLBACK (on_nav_view_popped), self, 0);
+  gtk_box_append (GTK_BOX (self), GTK_WIDGET (self->nav_view));
+
+  GtkWidget *back_btn = gtk_button_new_from_icon_name ("go-previous-symbolic");
+  gtk_widget_set_valign (back_btn, GTK_ALIGN_CENTER);
+  nuvashalauncher_ui_prepare_icon_button (back_btn, _("Back"));
+  g_signal_connect_object (back_btn, "clicked",
+                           G_CALLBACK (on_back_to_worlds_clicked), self, 0);
+  self->back_button = g_object_ref_sink (back_btn);
 
   self->search_bar = GTK_SEARCH_ENTRY (g_object_ref_sink (gtk_search_entry_new ()));
   gtk_search_entry_set_placeholder_text (self->search_bar, _("Search"));
@@ -1552,6 +1651,12 @@ nuvashalauncher_worlds_page_set_search_visible (NuvashaLauncherWorldsPage *self,
                                                 gboolean visible)
 {
   g_return_if_fail (NUVASHALAUNCHER_IS_WORLDS_PAGE (self));
+  if (self->datapacks_page != NULL)
+    {
+      nuvashalauncher_content_page_set_installed_search_visible (
+        self->datapacks_page, visible);
+      return;
+    }
   if (self->search_bar == NULL)
     return;
 
@@ -1571,23 +1676,16 @@ gboolean
 nuvashalauncher_worlds_page_is_search_visible (NuvashaLauncherWorldsPage *self)
 {
   g_return_val_if_fail (NUVASHALAUNCHER_IS_WORLDS_PAGE (self), FALSE);
+  if (self->datapacks_page != NULL)
+    return nuvashalauncher_content_page_is_installed_search_visible (
+      self->datapacks_page);
   return self->search_bar != NULL &&
          gtk_widget_get_visible (GTK_WIDGET (self->search_bar));
 }
 
-void
-nuvashalauncher_worlds_page_attach_header (NuvashaLauncherWorldsPage *self,
-                                           AdwHeaderBar *header)
+static void
+worlds_attach_own_header (NuvashaLauncherWorldsPage *self, AdwHeaderBar *header)
 {
-  g_return_if_fail (NUVASHALAUNCHER_IS_WORLDS_PAGE (self));
-  g_return_if_fail (ADW_IS_HEADER_BAR (header));
-
-  if (self->header_bar == header)
-    return;
-  if (self->header_bar != NULL)
-    nuvashalauncher_worlds_page_detach_header (self, self->header_bar);
-
-  self->header_bar = header;
   if (self->header_search_clamp == NULL)
     {
       self->header_search_clamp = ADW_CLAMP (g_object_ref_sink (adw_clamp_new ()));
@@ -1611,15 +1709,9 @@ nuvashalauncher_worlds_page_attach_header (NuvashaLauncherWorldsPage *self,
   gtk_widget_set_visible (GTK_WIDGET (self->bar), FALSE);
 }
 
-void
-nuvashalauncher_worlds_page_detach_header (NuvashaLauncherWorldsPage *self,
-                                           AdwHeaderBar *header)
+static void
+worlds_detach_own_header (NuvashaLauncherWorldsPage *self, AdwHeaderBar *header)
 {
-  g_return_if_fail (NUVASHALAUNCHER_IS_WORLDS_PAGE (self));
-  if (self->header_bar != header || header == NULL)
-    return;
-
-  self->header_bar = NULL;
   adw_header_bar_set_title_widget (header, NULL);
   if (gtk_widget_is_ancestor (self->add_button, GTK_WIDGET (header)))
     adw_header_bar_remove (header, self->add_button);
@@ -1632,4 +1724,58 @@ nuvashalauncher_worlds_page_detach_header (NuvashaLauncherWorldsPage *self,
   gtk_widget_set_visible (GTK_WIDGET (self->bar), TRUE);
   if (self->header_search_clamp != NULL)
     adw_clamp_set_child (self->header_search_clamp, NULL);
+}
+
+static void
+worlds_attach_datapacks_header (NuvashaLauncherWorldsPage *self, AdwHeaderBar *header)
+{
+  if (self->back_button != NULL &&
+      !gtk_widget_is_ancestor (self->back_button, GTK_WIDGET (header)))
+    adw_header_bar_pack_start (header, self->back_button);
+  if (self->datapacks_page != NULL)
+    nuvashalauncher_content_page_attach_header (self->datapacks_page, header);
+}
+
+static void
+worlds_detach_datapacks_header (NuvashaLauncherWorldsPage *self, AdwHeaderBar *header)
+{
+  if (self->datapacks_page != NULL)
+    nuvashalauncher_content_page_detach_header (self->datapacks_page, header);
+  if (self->back_button != NULL &&
+      gtk_widget_is_ancestor (self->back_button, GTK_WIDGET (header)))
+    adw_header_bar_remove (header, self->back_button);
+}
+
+void
+nuvashalauncher_worlds_page_attach_header (NuvashaLauncherWorldsPage *self,
+                                           AdwHeaderBar *header)
+{
+  g_return_if_fail (NUVASHALAUNCHER_IS_WORLDS_PAGE (self));
+  g_return_if_fail (ADW_IS_HEADER_BAR (header));
+
+  if (self->header_bar == header)
+    return;
+  if (self->header_bar != NULL)
+    nuvashalauncher_worlds_page_detach_header (self, self->header_bar);
+
+  self->header_bar = header;
+  if (self->datapacks_page != NULL)
+    worlds_attach_datapacks_header (self, header);
+  else
+    worlds_attach_own_header (self, header);
+}
+
+void
+nuvashalauncher_worlds_page_detach_header (NuvashaLauncherWorldsPage *self,
+                                           AdwHeaderBar *header)
+{
+  g_return_if_fail (NUVASHALAUNCHER_IS_WORLDS_PAGE (self));
+  if (self->header_bar != header || header == NULL)
+    return;
+
+  self->header_bar = NULL;
+  if (self->datapacks_page != NULL)
+    worlds_detach_datapacks_header (self, header);
+  else
+    worlds_detach_own_header (self, header);
 }

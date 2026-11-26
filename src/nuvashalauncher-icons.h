@@ -28,6 +28,7 @@ G_BEGIN_DECLS
 /* A square widget for one row: it shows @placeholder until an icon is
  * put in it. Nothing is downloaded here. */
 GtkWidget *nuvashalauncher_icon_widget_new (const char *placeholder_icon_name);
+GtkWidget *nuvashalauncher_icon_widget_new_pack_placeholder (void);
 
 /* Puts @path in @widget, scaled to fit the square and never stretched.
  * TRUE when the file could be decoded and is now shown, FALSE when it

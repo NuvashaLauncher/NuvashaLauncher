@@ -295,7 +295,7 @@ file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
 
   AdwActionRow *row = ADW_ACTION_ROW (g_object_ref_sink (adw_action_row_new ()));
   gtk_widget_add_css_class (GTK_WIDGET (row), "nuvashalauncher-content-file-row");
-  GtkWidget *icon = nuvashalauncher_icon_widget_new (nuvashalauncher_content_type_icon (self->type));
+  GtkWidget *icon = nuvashalauncher_icon_widget_new_pack_placeholder ();
 
   /* Treat file names and paths as plain text. The tooltip contains the path;
      the subtitle contains project metadata when available. */

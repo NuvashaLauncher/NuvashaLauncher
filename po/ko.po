@@ -2384,8 +2384,8 @@ msgstr "월드 없음"
 #~ msgid "Edit Server"
 #~ msgstr "서버 편집"
 
-#~ msgid "Datapacks"
-#~ msgstr "데이터 팩"
+msgid "Datapacks"
+msgstr "데이터 팩"
 
 #~ msgid "No Worlds"
 #~ msgstr "월드 없음"
@@ -2545,3 +2545,33 @@ msgstr "Java %d (권장)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (권장)"
+
+msgid "Use dedicated GPU"
+msgstr "외장 GPU 사용"
+
+msgid "Use GameMode"
+msgstr "GameMode 사용"
+
+msgid "Use MangoHud"
+msgstr "MangoHud 사용"
+
+msgid "Not installed"
+msgstr "설치되지 않음"
+
+msgid "Performance"
+msgstr "성능"
+
+msgid "Custom performance settings"
+msgstr "사용자 지정 성능 설정"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "데이터 팩 %u개 선택됨"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "데이터 팩 %u개 설치 중"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "다음 데이터 팩을 설치할까요?"

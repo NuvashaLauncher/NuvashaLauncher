@@ -2412,8 +2412,8 @@ msgstr "Нет миров"
 #~ msgid "Edit Server"
 #~ msgstr "Изменить сервер"
 
-#~ msgid "Datapacks"
-#~ msgstr "Наборы данных"
+msgid "Datapacks"
+msgstr "Наборы данных"
 
 #~ msgid "No Worlds"
 #~ msgstr "Нет миров"
@@ -2573,3 +2573,36 @@ msgstr "Java %d (рекомендуется)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (рекомендуется)"
+
+msgid "Use dedicated GPU"
+msgstr "Использовать дискретную видеокарту"
+
+msgid "Use GameMode"
+msgstr "Использовать GameMode"
+
+msgid "Use MangoHud"
+msgstr "Использовать MangoHud"
+
+msgid "Not installed"
+msgstr "Не установлено"
+
+msgid "Performance"
+msgstr "Производительность"
+
+msgid "Custom performance settings"
+msgstr "Пользовательские настройки производительности"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "Выбран %u датапак"
+msgstr[1] "Выбрано %u датапаков"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "Устанавливается %u датапак"
+msgstr[1] "Устанавливается %u датапаков"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Установить следующий датапак?"
+msgstr[1] "Установить следующие датапаки?"

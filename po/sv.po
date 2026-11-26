@@ -2404,8 +2404,8 @@ msgstr "Inga världar"
 #~ msgid "Edit Server"
 #~ msgstr "Redigera server"
 
-#~ msgid "Datapacks"
-#~ msgstr "Datapaket"
+msgid "Datapacks"
+msgstr "Datapaket"
 
 #~ msgid "No Worlds"
 #~ msgstr "Inga världar"
@@ -2565,3 +2565,36 @@ msgstr "Java %d (rekommenderas)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (rekommenderas)"
+
+msgid "Use dedicated GPU"
+msgstr "Använd dedikerad GPU"
+
+msgid "Use GameMode"
+msgstr "Använd GameMode"
+
+msgid "Use MangoHud"
+msgstr "Använd MangoHud"
+
+msgid "Not installed"
+msgstr "Inte installerad"
+
+msgid "Performance"
+msgstr "Prestanda"
+
+msgid "Custom performance settings"
+msgstr "Anpassade prestandainställningar"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u datapaket valt"
+msgstr[1] "%u datapaket valda"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "%u datapaket installeras"
+msgstr[1] "%u datapaket installeras"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Installera följande datapaket?"
+msgstr[1] "Installera följande datapaket?"

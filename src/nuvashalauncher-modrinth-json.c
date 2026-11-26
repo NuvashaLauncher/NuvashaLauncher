@@ -36,6 +36,8 @@ nuvashalauncher_content_type_to_string (NuvashaLauncherContentType type)
       return "shader";
     case NUVASHALAUNCHER_CONTENT_MODPACK:
       return "modpack";
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
+      return "datapack";
     case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return "mod";
@@ -51,6 +53,8 @@ nuvashalauncher_content_type_folder (NuvashaLauncherContentType type)
       return "resourcepacks";
     case NUVASHALAUNCHER_CONTENT_SHADER_PACK:
       return "shaderpacks";
+    case NUVASHALAUNCHER_CONTENT_DATAPACK:
+      return "datapacks";
     case NUVASHALAUNCHER_CONTENT_MOD:
     default:
       return "mods";
@@ -419,7 +423,10 @@ nuvashalauncher_modrinth_facets (const NuvashaLauncherModrinthSearch *search)
 
   g_return_val_if_fail (search != NULL, g_strdup ("[[\"project_type:mod\"]]"));
 
-  facet_add (facets, "project_type", nuvashalauncher_content_type_to_string (search->type));
+  if (search->type == NUVASHALAUNCHER_CONTENT_DATAPACK)
+    facet_add (facets, "categories", "datapack");
+  else
+    facet_add (facets, "project_type", nuvashalauncher_content_type_to_string (search->type));
 
   if (search->minecraft_version != NULL && *search->minecraft_version != '\0')
     facet_add (facets, "versions", search->minecraft_version);

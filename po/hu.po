@@ -2411,8 +2411,8 @@ msgstr "Nincsenek világok"
 #~ msgid "Edit Server"
 #~ msgstr "Szerver szerkesztése"
 
-#~ msgid "Datapacks"
-#~ msgstr "Adatcsomagok"
+msgid "Datapacks"
+msgstr "Adatcsomagok"
 
 #~ msgid "No Worlds"
 #~ msgstr "Nincsenek világok"
@@ -2572,3 +2572,36 @@ msgstr "Java %d (ajánlott)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (ajánlott)"
+
+msgid "Use dedicated GPU"
+msgstr "Dedikált GPU használata"
+
+msgid "Use GameMode"
+msgstr "GameMode használata"
+
+msgid "Use MangoHud"
+msgstr "MangoHud használata"
+
+msgid "Not installed"
+msgstr "Nincs telepítve"
+
+msgid "Performance"
+msgstr "Teljesítmény"
+
+msgid "Custom performance settings"
+msgstr "Egyéni teljesítménybeállítások"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u adatcsomag kijelölve"
+msgstr[1] "%u adatcsomag kijelölve"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "%u adatcsomag telepítése folyamatban"
+msgstr[1] "%u adatcsomag telepítése folyamatban"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Telepíti a következő adatcsomagot?"
+msgstr[1] "Telepíti a következő adatcsomagokat?"

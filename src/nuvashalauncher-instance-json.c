@@ -140,6 +140,25 @@ get_nonneg_uint (JsonObject *object, const char *member)
   return val > G_MAXUINT ? G_MAXUINT : (guint) val;
 }
 
+static gint
+get_tristate_bool (JsonObject *object, const char *member)
+{
+  if (!json_object_has_member (object, member))
+    return -1;
+  JsonNode *node = json_object_get_member (object, member);
+  if (node == NULL || !JSON_NODE_HOLDS_VALUE (node))
+    return -1;
+  if (json_node_get_value_type (node) == G_TYPE_BOOLEAN)
+    return json_node_get_boolean (node) ? 1 : 0;
+  if (json_node_get_value_type (node) == G_TYPE_INT64)
+    {
+      gint64 v = json_node_get_int (node);
+      if (v == 0 || v == 1)
+        return (gint) v;
+    }
+  return -1;
+}
+
 NuvashaLauncherInstance *
 nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
 {
@@ -223,22 +242,10 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
   guint game_height = get_nonneg_uint (object, "game_height");
   if (game_height > 4320)
     game_height = 0;
-  gint game_fullscreen = -1;
-  if (json_object_has_member (object, "game_fullscreen"))
-    {
-      JsonNode *node = json_object_get_member (object, "game_fullscreen");
-      if (node != NULL && JSON_NODE_HOLDS_VALUE (node))
-        {
-          if (json_node_get_value_type (node) == G_TYPE_BOOLEAN)
-            game_fullscreen = json_node_get_boolean (node) ? 1 : 0;
-          else if (json_node_get_value_type (node) == G_TYPE_INT64)
-            {
-              gint64 v = json_node_get_int (node);
-              if (v == 0 || v == 1)
-                game_fullscreen = (gint) v;
-            }
-        }
-    }
+  gint game_fullscreen = get_tristate_bool (object, "game_fullscreen");
+  gint use_dedicated_gpu = get_tristate_bool (object, "use_dedicated_gpu");
+  gint use_gamemode = get_tristate_bool (object, "use_gamemode");
+  gint use_mangohud = get_tristate_bool (object, "use_mangohud");
 
   guint64 play_seconds = (guint64) get_nonneg_int64 (object, "play_seconds");
   gint64 last_played_at = get_nonneg_int64 (object, "last_played_at");
@@ -274,6 +281,9 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
                  "game-width", game_width,
                  "game-height", game_height,
                  "game-fullscreen", game_fullscreen,
+                 "use-dedicated-gpu", use_dedicated_gpu,
+                 "use-gamemode", use_gamemode,
+                 "use-mangohud", use_mangohud,
                  "play-seconds", play_seconds,
                  "last-played-at", last_played_at,
                  "created-at", created_at,
@@ -361,6 +371,21 @@ nuvashalauncher_instance_to_json (NuvashaLauncherInstance *self)
     {
       json_builder_set_member_name (builder, "game_fullscreen");
       json_builder_add_boolean_value (builder, self->game_fullscreen != 0);
+    }
+  if (self->use_dedicated_gpu >= 0)
+    {
+      json_builder_set_member_name (builder, "use_dedicated_gpu");
+      json_builder_add_boolean_value (builder, self->use_dedicated_gpu != 0);
+    }
+  if (self->use_gamemode >= 0)
+    {
+      json_builder_set_member_name (builder, "use_gamemode");
+      json_builder_add_boolean_value (builder, self->use_gamemode != 0);
+    }
+  if (self->use_mangohud >= 0)
+    {
+      json_builder_set_member_name (builder, "use_mangohud");
+      json_builder_add_boolean_value (builder, self->use_mangohud != 0);
     }
   add_positive_int64 (builder, "play_seconds", (gint64) self->play_seconds);
   add_positive_int64 (builder, "last_played_at", self->last_played_at);

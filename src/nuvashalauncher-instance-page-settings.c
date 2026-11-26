@@ -94,7 +94,6 @@ on_memory_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED, gpointer us
 
 typedef struct {
   NuvashaLauncherInstancePage *page;
-  AdwSwitchRow *override_row;
   AdwSpinRow *width_row;
   AdwSpinRow *height_row;
   AdwSwitchRow *fullscreen_row;
@@ -105,25 +104,16 @@ static void
 window_override_controls_save (WindowOverrideControls *ctrl)
 {
   NuvashaLauncherInstancePage *self = ctrl->page;
-  gboolean active;
-  guint width = 0, height = 0;
-  gint fullscreen = -1;
+  guint width, height;
+  gint fullscreen;
   g_autoptr (GError) error = NULL;
 
   if (ctrl->syncing)
     return;
 
-  active = adw_switch_row_get_active (ctrl->override_row);
-  gtk_widget_set_sensitive (GTK_WIDGET (ctrl->width_row), active);
-  gtk_widget_set_sensitive (GTK_WIDGET (ctrl->height_row), active);
-  gtk_widget_set_sensitive (GTK_WIDGET (ctrl->fullscreen_row), active);
-
-  if (active)
-    {
-      width = (guint) adw_spin_row_get_value (ctrl->width_row);
-      height = (guint) adw_spin_row_get_value (ctrl->height_row);
-      fullscreen = adw_switch_row_get_active (ctrl->fullscreen_row) ? 1 : 0;
-    }
+  width = (guint) adw_spin_row_get_value (ctrl->width_row);
+  height = (guint) adw_spin_row_get_value (ctrl->height_row);
+  fullscreen = adw_switch_row_get_active (ctrl->fullscreen_row) ? 1 : 0;
 
   if (!nuvashalauncher_instance_manager_set_window_settings (
         self->manager, self->instance, width, height, fullscreen, &error))
@@ -136,6 +126,50 @@ on_window_override_changed (GObject *object G_GNUC_UNUSED,
                             gpointer user_data)
 {
   window_override_controls_save (user_data);
+}
+
+typedef struct {
+  NuvashaLauncherInstancePage *page;
+  AdwSwitchRow *gpu_row;
+  AdwSwitchRow *gamemode_row;
+  AdwSwitchRow *mangohud_row;
+  gboolean has_gamemode;
+  gboolean has_mangohud;
+  gboolean syncing;
+} PerformanceOverrideControls;
+
+static void
+performance_override_controls_save (PerformanceOverrideControls *ctrl)
+{
+  NuvashaLauncherInstancePage *self = ctrl->page;
+  gint gpu, gamemode, mangohud;
+  g_autoptr (GError) error = NULL;
+
+  if (ctrl->syncing)
+    return;
+
+  gtk_widget_set_sensitive (GTK_WIDGET (ctrl->gamemode_row),
+                            ctrl->has_gamemode ||
+                            adw_switch_row_get_active (ctrl->gamemode_row));
+  gtk_widget_set_sensitive (GTK_WIDGET (ctrl->mangohud_row),
+                            ctrl->has_mangohud ||
+                            adw_switch_row_get_active (ctrl->mangohud_row));
+
+  gpu = adw_switch_row_get_active (ctrl->gpu_row) ? 1 : 0;
+  gamemode = adw_switch_row_get_active (ctrl->gamemode_row) ? 1 : 0;
+  mangohud = adw_switch_row_get_active (ctrl->mangohud_row) ? 1 : 0;
+
+  if (!nuvashalauncher_instance_manager_set_performance_settings (
+        self->manager, self->instance, gpu, gamemode, mangohud, &error))
+    instance_page_show_error (self, error);
+}
+
+static void
+on_performance_override_changed (GObject *object G_GNUC_UNUSED,
+                                 GParamSpec *pspec G_GNUC_UNUSED,
+                                 gpointer user_data)
+{
+  performance_override_controls_save (user_data);
 }
 
 typedef struct
@@ -1042,7 +1076,7 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   adw_preferences_group_add (java, GTK_WIDGET (jvm_args_row));
   settings_search_add_row (java_group, GTK_WIDGET (jvm_args_row));
 
-  /* Window overrides (falls back to global defaults when off). */
+  /* Window (pre-filled from global defaults until edited for this instance). */
   AdwPreferencesGroup *window_group_widget = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   SettingsSearchGroup *window_search_group =
     settings_search_add_group (search_state, window_group_widget);
@@ -1052,7 +1086,6 @@ create_settings_page (NuvashaLauncherInstancePage *self)
   {
     guint inst_width = 0, inst_height = 0;
     gint inst_fullscreen = -1;
-    gboolean has_override;
     guint shown_width, shown_height;
     gboolean shown_fullscreen;
     WindowOverrideControls *ctrl = g_new0 (WindowOverrideControls, 1);
@@ -1062,7 +1095,6 @@ create_settings_page (NuvashaLauncherInstancePage *self)
                   "game-height", &inst_height,
                   "game-fullscreen", &inst_fullscreen,
                   NULL);
-    has_override = (inst_width > 0 || inst_height > 0 || inst_fullscreen >= 0);
     shown_width = inst_width > 0
                     ? inst_width
                     : nuvashalauncher_settings_get_default_game_width (self->settings);
@@ -1075,39 +1107,29 @@ create_settings_page (NuvashaLauncherInstancePage *self)
 
     ctrl->page = self;
     ctrl->syncing = TRUE;
-    ctrl->override_row = ADW_SWITCH_ROW (adw_switch_row_new ());
-    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->override_row), FALSE);
-    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->override_row),
-                                   _("Custom window settings"));
-    adw_switch_row_set_active (ctrl->override_row, has_override);
 
     ctrl->width_row = ADW_SPIN_ROW (adw_spin_row_new_with_range (320, 7680, 10));
     adw_spin_row_set_digits (ctrl->width_row, 0);
     adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->width_row), FALSE);
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->width_row), _("Window width"));
     adw_spin_row_set_value (ctrl->width_row, (double) shown_width);
-    gtk_widget_set_sensitive (GTK_WIDGET (ctrl->width_row), has_override);
 
     ctrl->height_row = ADW_SPIN_ROW (adw_spin_row_new_with_range (240, 4320, 10));
     adw_spin_row_set_digits (ctrl->height_row, 0);
     adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->height_row), FALSE);
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->height_row), _("Window height"));
     adw_spin_row_set_value (ctrl->height_row, (double) shown_height);
-    gtk_widget_set_sensitive (GTK_WIDGET (ctrl->height_row), has_override);
 
     ctrl->fullscreen_row = ADW_SWITCH_ROW (adw_switch_row_new ());
     adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->fullscreen_row), FALSE);
     adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->fullscreen_row),
                                    _("Start in fullscreen"));
     adw_switch_row_set_active (ctrl->fullscreen_row, shown_fullscreen);
-    gtk_widget_set_sensitive (GTK_WIDGET (ctrl->fullscreen_row), has_override);
 
     ctrl->syncing = FALSE;
     g_object_set_data_full (G_OBJECT (window_group_widget),
                             "nuvashalauncher-window-override", ctrl, g_free);
 
-    g_signal_connect (ctrl->override_row, "notify::active",
-                      G_CALLBACK (on_window_override_changed), ctrl);
     g_signal_connect (ctrl->width_row, "notify::value",
                       G_CALLBACK (on_window_override_changed), ctrl);
     g_signal_connect (ctrl->height_row, "notify::value",
@@ -1115,14 +1137,91 @@ create_settings_page (NuvashaLauncherInstancePage *self)
     g_signal_connect (ctrl->fullscreen_row, "notify::active",
                       G_CALLBACK (on_window_override_changed), ctrl);
 
-    adw_preferences_group_add (window_group_widget, GTK_WIDGET (ctrl->override_row));
-    settings_search_add_row (window_search_group, GTK_WIDGET (ctrl->override_row));
     adw_preferences_group_add (window_group_widget, GTK_WIDGET (ctrl->width_row));
     settings_search_add_row (window_search_group, GTK_WIDGET (ctrl->width_row));
     adw_preferences_group_add (window_group_widget, GTK_WIDGET (ctrl->height_row));
     settings_search_add_row (window_search_group, GTK_WIDGET (ctrl->height_row));
     adw_preferences_group_add (window_group_widget, GTK_WIDGET (ctrl->fullscreen_row));
     settings_search_add_row (window_search_group, GTK_WIDGET (ctrl->fullscreen_row));
+  }
+
+  /* Performance (pre-filled from global defaults until edited for this instance). */
+  AdwPreferencesGroup *perf_group_widget = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  SettingsSearchGroup *perf_search_group =
+    settings_search_add_group (search_state, perf_group_widget);
+  gtk_widget_add_css_class (GTK_WIDGET (perf_group_widget),
+                            "nuvashalauncher-preferences-surface");
+  adw_preferences_group_set_title (perf_group_widget, _("Performance"));
+  {
+    gint inst_gpu = -1, inst_gamemode = -1, inst_mangohud = -1;
+    gboolean shown_gpu, shown_gamemode, shown_mangohud;
+    g_autofree char *gamemode_bin = g_find_program_in_path ("gamemoderun");
+    g_autofree char *mangohud_bin = g_find_program_in_path ("mangohud");
+    PerformanceOverrideControls *ctrl = g_new0 (PerformanceOverrideControls, 1);
+
+    g_object_get (self->instance,
+                  "use-dedicated-gpu", &inst_gpu,
+                  "use-gamemode", &inst_gamemode,
+                  "use-mangohud", &inst_mangohud,
+                  NULL);
+    shown_gpu = inst_gpu >= 0
+                  ? (inst_gpu != 0)
+                  : nuvashalauncher_settings_get_default_use_dedicated_gpu (self->settings);
+    shown_gamemode = inst_gamemode >= 0
+                       ? (inst_gamemode != 0)
+                       : nuvashalauncher_settings_get_default_use_gamemode (self->settings);
+    shown_mangohud = inst_mangohud >= 0
+                       ? (inst_mangohud != 0)
+                       : nuvashalauncher_settings_get_default_use_mangohud (self->settings);
+
+    ctrl->page = self;
+    ctrl->has_gamemode = (gamemode_bin != NULL);
+    ctrl->has_mangohud = (mangohud_bin != NULL);
+    ctrl->syncing = TRUE;
+
+    ctrl->gpu_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->gpu_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->gpu_row),
+                                   _("Use dedicated GPU"));
+    adw_switch_row_set_active (ctrl->gpu_row, shown_gpu);
+
+    ctrl->gamemode_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->gamemode_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->gamemode_row),
+                                   _("Use GameMode"));
+    if (!ctrl->has_gamemode)
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (ctrl->gamemode_row), _("Not installed"));
+    adw_switch_row_set_active (ctrl->gamemode_row, shown_gamemode);
+    gtk_widget_set_sensitive (GTK_WIDGET (ctrl->gamemode_row),
+                              ctrl->has_gamemode || shown_gamemode);
+
+    ctrl->mangohud_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->mangohud_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->mangohud_row),
+                                   _("Use MangoHud"));
+    if (!ctrl->has_mangohud)
+      adw_action_row_set_subtitle (ADW_ACTION_ROW (ctrl->mangohud_row), _("Not installed"));
+    adw_switch_row_set_active (ctrl->mangohud_row, shown_mangohud);
+    gtk_widget_set_sensitive (GTK_WIDGET (ctrl->mangohud_row),
+                              ctrl->has_mangohud || shown_mangohud);
+
+    ctrl->syncing = FALSE;
+    g_object_set_data_full (G_OBJECT (perf_group_widget),
+                            "nuvashalauncher-performance-override", ctrl, g_free);
+
+    g_signal_connect (ctrl->gpu_row, "notify::active",
+                      G_CALLBACK (on_performance_override_changed), ctrl);
+    g_signal_connect (ctrl->gamemode_row, "notify::active",
+                      G_CALLBACK (on_performance_override_changed), ctrl);
+    g_signal_connect (ctrl->mangohud_row, "notify::active",
+                      G_CALLBACK (on_performance_override_changed), ctrl);
+
+    adw_preferences_group_add (perf_group_widget, GTK_WIDGET (ctrl->gpu_row));
+    settings_search_add_row (perf_search_group, GTK_WIDGET (ctrl->gpu_row));
+    adw_preferences_group_add (perf_group_widget, GTK_WIDGET (ctrl->gamemode_row));
+    settings_search_add_row (perf_search_group, GTK_WIDGET (ctrl->gamemode_row));
+    adw_preferences_group_add (perf_group_widget, GTK_WIDGET (ctrl->mangohud_row));
+    settings_search_add_row (perf_search_group, GTK_WIDGET (ctrl->mangohud_row));
   }
 
   /* The Java row's compatibility warning needs the javaVersion field of
@@ -1158,6 +1257,8 @@ create_settings_page (NuvashaLauncherInstancePage *self)
                             java);
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             window_group_widget);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                            perf_group_widget);
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             actions);
 

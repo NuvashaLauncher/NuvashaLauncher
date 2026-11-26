@@ -2430,8 +2430,8 @@ msgstr "Nicio lume"
 #~ msgid "Edit Server"
 #~ msgstr "Editează serverul"
 
-#~ msgid "Datapacks"
-#~ msgstr "Pachete de date"
+msgid "Datapacks"
+msgstr "Pachete de date"
 
 #~ msgid "No Worlds"
 #~ msgstr "Nicio lume"
@@ -2591,3 +2591,39 @@ msgstr "Java %d (recomandat)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (recomandat)"
+
+msgid "Use dedicated GPU"
+msgstr "Folosește GPU dedicat"
+
+msgid "Use GameMode"
+msgstr "Folosește GameMode"
+
+msgid "Use MangoHud"
+msgstr "Folosește MangoHud"
+
+msgid "Not installed"
+msgstr "Neinstalat"
+
+msgid "Performance"
+msgstr "Performanță"
+
+msgid "Custom performance settings"
+msgstr "Setări de performanță personalizate"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u pachet de date selectat"
+msgstr[1] "%u pachete de date selectate"
+msgstr[2] "%u pachete de date selectate"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "Se instalează %u pachet de date"
+msgstr[1] "Se instalează %u pachete de date"
+msgstr[2] "Se instalează %u pachete de date"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Instalezi următorul pachet de date?"
+msgstr[1] "Instalezi următoarele pachete de date?"
+msgstr[2] "Instalezi următoarele pachete de date?"

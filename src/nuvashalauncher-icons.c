@@ -373,6 +373,53 @@ nuvashalauncher_icon_load_finish (GAsyncResult *result, GError **error)
  * The widget
  * ---------------------------------------------------------- */
 
+static GHashTable *icon_texture_cache (void);
+
+GtkWidget *
+nuvashalauncher_icon_widget_new_pack_placeholder (void)
+{
+  static const char *resource_path = "/com/github/NuvashaLauncher/NuvashaLauncher/pack.png";
+  static const char *cache_key = "resource:/com/github/NuvashaLauncher/NuvashaLauncher/pack.png";
+  GtkStack *stack = GTK_STACK (gtk_stack_new ());
+  GHashTable *cache = icon_texture_cache ();
+  g_autoptr (GdkTexture) texture = NULL;
+  GtkWidget *placeholder = NULL;
+
+  if (cache != NULL)
+    {
+      GdkTexture *cached = g_hash_table_lookup (cache, cache_key);
+      if (cached != NULL)
+        texture = g_object_ref (cached);
+    }
+
+  if (texture == NULL)
+    {
+      texture = gdk_texture_new_from_resource (resource_path);
+      if (texture != NULL && cache != NULL)
+        g_hash_table_replace (cache, g_strdup (cache_key), g_object_ref (texture));
+    }
+
+  gtk_widget_add_css_class (GTK_WIDGET (stack), "nuvashalauncher-content-icon");
+  gtk_widget_set_overflow (GTK_WIDGET (stack), GTK_OVERFLOW_HIDDEN);
+  gtk_widget_set_size_request (GTK_WIDGET (stack), NUVASHALAUNCHER_ICON_SIZE,
+                               NUVASHALAUNCHER_ICON_SIZE);
+
+  placeholder = texture != NULL
+                  ? gtk_image_new_from_paintable (GDK_PAINTABLE (texture))
+                  : gtk_image_new ();
+  gtk_image_set_pixel_size (GTK_IMAGE (placeholder), NUVASHALAUNCHER_ICON_SIZE);
+  gtk_widget_set_size_request (placeholder, NUVASHALAUNCHER_ICON_SIZE,
+                               NUVASHALAUNCHER_ICON_SIZE);
+  gtk_widget_set_overflow (placeholder, GTK_OVERFLOW_HIDDEN);
+  gtk_widget_set_halign (placeholder, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (placeholder, GTK_ALIGN_CENTER);
+
+  gtk_stack_add_named (stack, placeholder, "placeholder");
+  gtk_stack_set_visible_child_name (stack, "placeholder");
+
+  return GTK_WIDGET (stack);
+}
+
 GtkWidget *
 nuvashalauncher_icon_widget_new (const char *placeholder_icon_name)
 {

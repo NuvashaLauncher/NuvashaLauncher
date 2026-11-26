@@ -2414,8 +2414,8 @@ msgstr "Немає світів"
 #~ msgid "Edit Server"
 #~ msgstr "Редагувати сервер"
 
-#~ msgid "Datapacks"
-#~ msgstr "Пакети даних"
+msgid "Datapacks"
+msgstr "Пакети даних"
 
 #~ msgid "No Worlds"
 #~ msgstr "Немає світів"
@@ -2575,3 +2575,36 @@ msgstr "Java %d (рекомендовано)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (рекомендовано)"
+
+msgid "Use dedicated GPU"
+msgstr "Використовувати дискретну відеокарту"
+
+msgid "Use GameMode"
+msgstr "Використовувати GameMode"
+
+msgid "Use MangoHud"
+msgstr "Використовувати MangoHud"
+
+msgid "Not installed"
+msgstr "Не встановлено"
+
+msgid "Performance"
+msgstr "Продуктивність"
+
+msgid "Custom performance settings"
+msgstr "Власні налаштування продуктивності"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "Вибрано %u датапак"
+msgstr[1] "Вибрано %u датапаків"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "Встановлюється %u датапак"
+msgstr[1] "Встановлюється %u датапаків"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Встановити цей датапак?"
+msgstr[1] "Встановити ці датапаки?"

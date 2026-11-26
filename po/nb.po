@@ -2403,8 +2403,8 @@ msgstr "Ingen verdener"
 #~ msgid "Edit Server"
 #~ msgstr "Rediger server"
 
-#~ msgid "Datapacks"
-#~ msgstr "Datapakker"
+msgid "Datapacks"
+msgstr "Datapakker"
 
 #~ msgid "No Worlds"
 #~ msgstr "Ingen verdener"
@@ -2564,3 +2564,36 @@ msgstr "Java %d (anbefalt)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (anbefalt)"
+
+msgid "Use dedicated GPU"
+msgstr "Bruk dedikert GPU"
+
+msgid "Use GameMode"
+msgstr "Bruk GameMode"
+
+msgid "Use MangoHud"
+msgstr "Bruk MangoHud"
+
+msgid "Not installed"
+msgstr "Ikke installert"
+
+msgid "Performance"
+msgstr "Ytelse"
+
+msgid "Custom performance settings"
+msgstr "Tilpassede ytelsesinnstillinger"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u datapakke valgt"
+msgstr[1] "%u datapakker valgt"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "%u datapakke installeres"
+msgstr[1] "%u datapakker installeres"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Installere følgende datapakke?"
+msgstr[1] "Installere følgende datapakker?"

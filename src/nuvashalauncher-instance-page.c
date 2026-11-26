@@ -223,6 +223,27 @@ on_content_page_subview_changed (GObject *obj G_GNUC_UNUSED,
 }
 
 static void
+on_content_header_title_widget_changed (GObject *obj,
+                                        GParamSpec *pspec G_GNUC_UNUSED,
+                                        gpointer user_data)
+{
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
+  GtkWidget *title_widget = adw_header_bar_get_title_widget (ADW_HEADER_BAR (obj));
+
+  if (title_widget != NULL)
+    {
+      g_signal_handlers_disconnect_by_data (title_widget, self);
+      g_signal_connect_object (title_widget, "notify::visible",
+                               G_CALLBACK (on_content_page_subview_changed), self, 0);
+      if (ADW_IS_CLAMP (title_widget))
+        g_signal_connect_object (title_widget, "notify::child",
+                                 G_CALLBACK (on_content_page_subview_changed), self, 0);
+    }
+
+  sync_sidebar_search_button (self);
+}
+
+static void
 detach_header_page (NuvashaLauncherInstancePage *self)
 {
   GtkWidget *page = self->attached_header_page;
@@ -681,6 +702,8 @@ nuvashalauncher_instance_page_new (NuvashaLauncherInstanceManager *manager, Nuva
 
   AdwHeaderBar *content_header = ADW_HEADER_BAR (adw_header_bar_new ());
   adw_header_bar_set_centering_policy (content_header, ADW_CENTERING_POLICY_LOOSE);
+  g_signal_connect_object (content_header, "notify::title-widget",
+                           G_CALLBACK (on_content_header_title_widget_changed), self, 0);
   self->content_header = content_header;
 
   AdwToolbarView *content_toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());

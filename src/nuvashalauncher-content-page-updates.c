@@ -253,7 +253,9 @@ update_check_done (NuvashaLauncherContentPage *self, UpdateRun *run)
                          ? "mods"
                          : self->type == NUVASHALAUNCHER_CONTENT_RESOURCE_PACK
                              ? "resource packs"
-                             : "shader packs";
+                             : self->type == NUVASHALAUNCHER_CONTENT_DATAPACK
+                                 ? "datapacks"
+                                 : "shader packs";
     g_autofree char *heading =
       g_strdup_printf (_("Update the following %s"), what);
     g_autoptr (GString) body = g_string_new (NULL);

@@ -2410,8 +2410,8 @@ msgstr "Sem mundos"
 #~ msgid "Edit Server"
 #~ msgstr "Editar servidor"
 
-#~ msgid "Datapacks"
-#~ msgstr "Pacotes de dados"
+msgid "Datapacks"
+msgstr "Pacotes de dados"
 
 #~ msgid "No Worlds"
 #~ msgstr "Sem mundos"
@@ -2571,3 +2571,36 @@ msgstr "Java %d (recomendado)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (recomendado)"
+
+msgid "Use dedicated GPU"
+msgstr "Usar GPU dedicada"
+
+msgid "Use GameMode"
+msgstr "Usar GameMode"
+
+msgid "Use MangoHud"
+msgstr "Usar MangoHud"
+
+msgid "Not installed"
+msgstr "Não instalado"
+
+msgid "Performance"
+msgstr "Desempenho"
+
+msgid "Custom performance settings"
+msgstr "Definições de desempenho personalizadas"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u pacote de dados selecionado"
+msgstr[1] "%u pacotes de dados selecionados"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "%u pacote de dados a ser instalado"
+msgstr[1] "%u pacotes de dados a serem instalados"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Instalar o seguinte pacote de dados?"
+msgstr[1] "Instalar os seguintes pacotes de dados?"

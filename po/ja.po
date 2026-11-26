@@ -2406,8 +2406,8 @@ msgstr "ワールドがありません"
 #~ msgid "Edit Server"
 #~ msgstr "サーバーを編集"
 
-#~ msgid "Datapacks"
-#~ msgstr "データパック"
+msgid "Datapacks"
+msgstr "データパック"
 
 #~ msgid "No Worlds"
 #~ msgstr "ワールドがありません"
@@ -2567,3 +2567,33 @@ msgstr "Java %d (推奨)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (推奨)"
+
+msgid "Use dedicated GPU"
+msgstr "専用 GPU を使用"
+
+msgid "Use GameMode"
+msgstr "GameMode を使用"
+
+msgid "Use MangoHud"
+msgstr "MangoHud を使用"
+
+msgid "Not installed"
+msgstr "未インストール"
+
+msgid "Performance"
+msgstr "パフォーマンス"
+
+msgid "Custom performance settings"
+msgstr "カスタムパフォーマンス設定"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "%u 個のデータパックを選択"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "%u 個のデータパックをインストール中"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "次のデータパックをインストールしますか？"

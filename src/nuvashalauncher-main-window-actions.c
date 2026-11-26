@@ -459,6 +459,66 @@ on_default_game_fullscreen_toggled (GObject *object, GParamSpec *pspec G_GNUC_UN
     }
 }
 
+static void
+on_default_use_dedicated_gpu_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                                      gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+  g_autoptr (GError) error = NULL;
+
+  if (active == nuvashalauncher_settings_get_default_use_dedicated_gpu (self->model->settings))
+    return;
+
+  if (!nuvashalauncher_settings_set_default_use_dedicated_gpu (self->model->settings, active, &error))
+    {
+      adw_switch_row_set_active (
+        row, nuvashalauncher_settings_get_default_use_dedicated_gpu (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
+    }
+}
+
+static void
+on_default_use_gamemode_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                                 gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+  g_autoptr (GError) error = NULL;
+
+  if (active == nuvashalauncher_settings_get_default_use_gamemode (self->model->settings))
+    return;
+
+  if (!nuvashalauncher_settings_set_default_use_gamemode (self->model->settings, active, &error))
+    {
+      adw_switch_row_set_active (
+        row, nuvashalauncher_settings_get_default_use_gamemode (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
+    }
+}
+
+static void
+on_default_use_mangohud_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                                 gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+  g_autoptr (GError) error = NULL;
+
+  if (active == nuvashalauncher_settings_get_default_use_mangohud (self->model->settings))
+    return;
+
+  if (!nuvashalauncher_settings_set_default_use_mangohud (self->model->settings, active, &error))
+    {
+      adw_switch_row_set_active (
+        row, nuvashalauncher_settings_get_default_use_mangohud (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
+    }
+}
+
 static AdwDialog *
 create_settings_dialog (NuvashaLauncherMainWindow *self)
 {
@@ -713,6 +773,59 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
     g_signal_connect_object (fullscreen_row, "notify::active",
                              G_CALLBACK (on_default_game_fullscreen_toggled), self, 0);
     adw_preferences_group_add (defaults_group, GTK_WIDGET (fullscreen_row));
+
+    AdwSwitchRow *gpu_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (gpu_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (gpu_row),
+                                   _("Use dedicated GPU"));
+    adw_switch_row_set_active (
+      gpu_row,
+      nuvashalauncher_settings_get_default_use_dedicated_gpu (self->model->settings));
+    g_signal_connect_object (gpu_row, "notify::active",
+                             G_CALLBACK (on_default_use_dedicated_gpu_toggled), self, 0);
+    adw_preferences_group_add (defaults_group, GTK_WIDGET (gpu_row));
+
+    {
+      g_autofree char *gamemode_bin = g_find_program_in_path ("gamemoderun");
+      gboolean gamemode_active =
+        nuvashalauncher_settings_get_default_use_gamemode (self->model->settings);
+      AdwSwitchRow *gamemode_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (gamemode_row), FALSE);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (gamemode_row),
+                                     _("Use GameMode"));
+      if (gamemode_bin == NULL)
+        {
+          adw_action_row_set_subtitle (ADW_ACTION_ROW (gamemode_row), _("Not installed"));
+          if (!gamemode_active)
+            gtk_widget_set_sensitive (GTK_WIDGET (gamemode_row), FALSE);
+        }
+      adw_switch_row_set_active (gamemode_row, gamemode_active);
+      g_signal_connect_object (gamemode_row, "notify::active",
+                               G_CALLBACK (on_default_use_gamemode_toggled), self, 0);
+      adw_preferences_group_add (defaults_group, GTK_WIDGET (gamemode_row));
+    }
+
+    {
+      g_autofree char *mangohud_bin = g_find_program_in_path ("mangohud");
+      gboolean mangohud_active =
+        nuvashalauncher_settings_get_default_use_mangohud (self->model->settings);
+      AdwSwitchRow *mangohud_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+
+      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (mangohud_row), FALSE);
+      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (mangohud_row),
+                                     _("Use MangoHud"));
+      if (mangohud_bin == NULL)
+        {
+          adw_action_row_set_subtitle (ADW_ACTION_ROW (mangohud_row), _("Not installed"));
+          if (!mangohud_active)
+            gtk_widget_set_sensitive (GTK_WIDGET (mangohud_row), FALSE);
+        }
+      adw_switch_row_set_active (mangohud_row, mangohud_active);
+      g_signal_connect_object (mangohud_row, "notify::active",
+                               G_CALLBACK (on_default_use_mangohud_toggled), self, 0);
+      adw_preferences_group_add (defaults_group, GTK_WIDGET (mangohud_row));
+    }
   }
 
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),

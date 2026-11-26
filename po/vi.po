@@ -2386,8 +2386,8 @@ msgstr "Không có thế giới nào"
 #~ msgid "Edit Server"
 #~ msgstr "Chỉnh sửa máy chủ"
 
-#~ msgid "Datapacks"
-#~ msgstr "Gói dữ liệu"
+msgid "Datapacks"
+msgstr "Gói dữ liệu"
 
 #~ msgid "No Worlds"
 #~ msgstr "Không có thế giới nào"
@@ -2547,3 +2547,36 @@ msgstr "Java %d (khuyên dùng)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (khuyên dùng)"
+
+msgid "Use dedicated GPU"
+msgstr "Dùng GPU rời"
+
+msgid "Use GameMode"
+msgstr "Dùng GameMode"
+
+msgid "Use MangoHud"
+msgstr "Dùng MangoHud"
+
+msgid "Not installed"
+msgstr "Chưa cài đặt"
+
+msgid "Performance"
+msgstr "Hiệu năng"
+
+msgid "Custom performance settings"
+msgstr "Cài đặt hiệu năng tùy chỉnh"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "Đã chọn %u gói dữ liệu"
+msgstr[1] "Đã chọn %u gói dữ liệu"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "Đang cài đặt %u gói dữ liệu"
+msgstr[1] "Đang cài đặt %u gói dữ liệu"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "Cài đặt gói dữ liệu sau?"
+msgstr[1] "Cài đặt các gói dữ liệu sau?"

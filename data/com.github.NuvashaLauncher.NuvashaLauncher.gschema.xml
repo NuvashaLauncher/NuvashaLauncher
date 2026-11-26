@@ -15,6 +15,9 @@
     <key name="default-game-width" type="u"><default>854</default></key>
     <key name="default-game-height" type="u"><default>480</default></key>
     <key name="default-game-fullscreen" type="b"><default>false</default></key>
+    <key name="default-use-dedicated-gpu" type="b"><default>false</default></key>
+    <key name="default-use-gamemode" type="b"><default>false</default></key>
+    <key name="default-use-mangohud" type="b"><default>false</default></key>
     <key name="window-width" type="i">
       <default>960</default>
     </key>

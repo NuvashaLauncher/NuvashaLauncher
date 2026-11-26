@@ -139,6 +139,21 @@ gboolean nuvashalauncher_settings_set_default_game_fullscreen (NuvashaLauncherSe
                                                                gboolean value,
                                                                GError **error);
 
+gboolean nuvashalauncher_settings_get_default_use_dedicated_gpu (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_default_use_dedicated_gpu (NuvashaLauncherSettings *self,
+                                                                 gboolean value,
+                                                                 GError **error);
+
+gboolean nuvashalauncher_settings_get_default_use_gamemode (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_default_use_gamemode (NuvashaLauncherSettings *self,
+                                                            gboolean value,
+                                                            GError **error);
+
+gboolean nuvashalauncher_settings_get_default_use_mangohud (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_default_use_mangohud (NuvashaLauncherSettings *self,
+                                                            gboolean value,
+                                                            GError **error);
+
 G_END_DECLS
 
 #endif /* NUVASHALAUNCHER_SETTINGS_H */

@@ -2358,8 +2358,8 @@ msgstr "无世界"
 #~ msgid "Edit Server"
 #~ msgstr "编辑服务器"
 
-#~ msgid "Datapacks"
-#~ msgstr "数据包"
+msgid "Datapacks"
+msgstr "数据包"
 
 #~ msgid "No Worlds"
 #~ msgstr "无世界"
@@ -2519,3 +2519,33 @@ msgstr "Java %d (推荐)"
 
 msgid "Java %d (LTS) (recommended)"
 msgstr "Java %d (LTS) (推荐)"
+
+msgid "Use dedicated GPU"
+msgstr "使用独立显卡"
+
+msgid "Use GameMode"
+msgstr "使用 GameMode"
+
+msgid "Use MangoHud"
+msgstr "使用 MangoHud"
+
+msgid "Not installed"
+msgstr "未安装"
+
+msgid "Performance"
+msgstr "性能"
+
+msgid "Custom performance settings"
+msgstr "自定义性能设置"
+
+msgid "%u datapack selected"
+msgid_plural "%u datapacks selected"
+msgstr[0] "已选择 %u 个数据包"
+
+msgid "%u datapack is being installed"
+msgid_plural "%u datapacks are being installed"
+msgstr[0] "正在安装 %u 个数据包"
+
+msgid "Install the following datapack?"
+msgid_plural "Install the following datapacks?"
+msgstr[0] "要安装以下数据包吗？"

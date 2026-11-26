@@ -24,6 +24,9 @@ struct _NuvashaLauncherInstance
   guint game_width;
   guint game_height;
   gint game_fullscreen; /* -1 = global default, 0 = windowed, 1 = fullscreen */
+  gint use_dedicated_gpu; /* -1 = global default, 0 = off, 1 = on */
+  gint use_gamemode;      /* -1 = global default, 0 = off, 1 = on */
+  gint use_mangohud;      /* -1 = global default, 0 = off, 1 = on */
   guint64 play_seconds;
   gint64 last_played_at;
   gint64 created_at;

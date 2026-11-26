@@ -484,6 +484,9 @@ nuvashalauncher_modrinth_version_fits (NuvashaLauncherModrinthVersion *version, 
   if (!nuvashalauncher_modrinth_string_array_has (version->game_versions, minecraft_version))
     return FALSE;
 
+  if (type == NUVASHALAUNCHER_CONTENT_DATAPACK)
+    return nuvashalauncher_modrinth_string_array_has (version->loaders, "datapack");
+
   if (!nuvashalauncher_content_type_needs_loader (type) || loader == NULL ||
       *loader == '\0')
     return TRUE;

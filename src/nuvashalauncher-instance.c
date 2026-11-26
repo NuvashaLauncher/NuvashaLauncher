@@ -56,6 +56,9 @@ enum
   PROP_GAME_WIDTH,
   PROP_GAME_HEIGHT,
   PROP_GAME_FULLSCREEN,
+  PROP_USE_DEDICATED_GPU,
+  PROP_USE_GAMEMODE,
+  PROP_USE_MANGOHUD,
   PROP_PLAY_SECONDS,
   PROP_LAST_PLAYED_AT,
   PROP_CREATED_AT,
@@ -656,6 +659,18 @@ nuvashalauncher_instance_set_property (GObject      *object,
       self->game_fullscreen = g_value_get_int (value);
       break;
 
+    case PROP_USE_DEDICATED_GPU:
+      self->use_dedicated_gpu = g_value_get_int (value);
+      break;
+
+    case PROP_USE_GAMEMODE:
+      self->use_gamemode = g_value_get_int (value);
+      break;
+
+    case PROP_USE_MANGOHUD:
+      self->use_mangohud = g_value_get_int (value);
+      break;
+
     case PROP_PLAY_SECONDS:
       self->play_seconds = g_value_get_uint64 (value);
       break;
@@ -757,6 +772,18 @@ nuvashalauncher_instance_get_property (GObject    *object,
 
     case PROP_GAME_FULLSCREEN:
       g_value_set_int (value, self->game_fullscreen);
+      break;
+
+    case PROP_USE_DEDICATED_GPU:
+      g_value_set_int (value, self->use_dedicated_gpu);
+      break;
+
+    case PROP_USE_GAMEMODE:
+      g_value_set_int (value, self->use_gamemode);
+      break;
+
+    case PROP_USE_MANGOHUD:
+      g_value_set_int (value, self->use_mangohud);
       break;
 
     case PROP_PLAY_SECONDS:
@@ -906,6 +933,24 @@ nuvashalauncher_instance_class_init (NuvashaLauncherInstanceClass *klass)
                       -1, 1, -1,
                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+  properties[PROP_USE_DEDICATED_GPU] =
+    g_param_spec_int ("use-dedicated-gpu", "Use dedicated GPU",
+                      "Dedicated GPU override (-1 for global default, 0 off, 1 on)",
+                      -1, 1, -1,
+                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_USE_GAMEMODE] =
+    g_param_spec_int ("use-gamemode", "Use GameMode",
+                      "GameMode override (-1 for global default, 0 off, 1 on)",
+                      -1, 1, -1,
+                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_USE_MANGOHUD] =
+    g_param_spec_int ("use-mangohud", "Use MangoHud",
+                      "MangoHud override (-1 for global default, 0 off, 1 on)",
+                      -1, 1, -1,
+                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
   properties[PROP_PLAY_SECONDS] =
     g_param_spec_uint64 ("play-seconds", "Play time (seconds)",
                          "Total time the instance has been played",
@@ -964,6 +1009,9 @@ nuvashalauncher_instance_init (NuvashaLauncherInstance *self)
   self->game_width = 0;
   self->game_height = 0;
   self->game_fullscreen = -1;
+  self->use_dedicated_gpu = -1;
+  self->use_gamemode = -1;
+  self->use_mangohud = -1;
   self->loader = NUVASHALAUNCHER_LOADER_VANILLA;
   self->components = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                              g_free);

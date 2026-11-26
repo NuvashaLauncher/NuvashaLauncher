@@ -111,6 +111,12 @@ gboolean nuvashalauncher_instance_manager_set_window_settings (NuvashaLauncherIn
                                                                guint game_height,
                                                                gint game_fullscreen,
                                                                GError **error);
+gboolean nuvashalauncher_instance_manager_set_performance_settings (NuvashaLauncherInstanceManager *self,
+                                                                    NuvashaLauncherInstance *instance,
+                                                                    gint use_dedicated_gpu,
+                                                                    gint use_gamemode,
+                                                                    gint use_mangohud,
+                                                                    GError **error);
 /* Records that @instance started running or finished a session, and saves. */
 gboolean nuvashalauncher_instance_manager_record_launch (NuvashaLauncherInstanceManager *self,
                                                 NuvashaLauncherInstance *instance,

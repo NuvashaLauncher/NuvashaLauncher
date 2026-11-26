@@ -117,6 +117,9 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
   guint game_width = 0;
   guint game_height = 0;
   gint game_fullscreen = -1;
+  gint use_dedicated_gpu = -1;
+  gint use_gamemode = -1;
+  gint use_mangohud = -1;
   NuvashaLauncherLoader loader = NUVASHALAUNCHER_LOADER_VANILLA;
 
   g_object_get (source_instance,
@@ -130,6 +133,9 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
                 "game-width", &game_width,
                 "game-height", &game_height,
                 "game-fullscreen", &game_fullscreen,
+                "use-dedicated-gpu", &use_dedicated_gpu,
+                "use-gamemode", &use_gamemode,
+                "use-mangohud", &use_mangohud,
                 "modpack-name", &modpack_name,
                 "modpack-summary", &modpack_summary,
                 "modpack-version-id", &modpack_version_id,
@@ -180,6 +186,9 @@ nuvashalauncher_instance_manager_duplicate_async (NuvashaLauncherInstanceManager
                 "game-width", game_width,
                 "game-height", game_height,
                 "game-fullscreen", game_fullscreen,
+                "use-dedicated-gpu", use_dedicated_gpu,
+                "use-gamemode", use_gamemode,
+                "use-mangohud", use_mangohud,
                 "created-at", g_get_real_time () / G_USEC_PER_SEC,
                 "modpack-name", modpack_name,
                 "modpack-summary", modpack_summary,

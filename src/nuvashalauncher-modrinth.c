@@ -205,8 +205,13 @@ nuvashalauncher_modrinth_versions_async (const char *project_id, NuvashaLauncher
    * loaders=minecraft answers with an empty list, which is how a shader
    * that plainly supports the Minecraft version came to be reported as
    * having no compatible version. */
-  if (nuvashalauncher_content_type_needs_loader (type) && loader != NULL &&
-      *loader != '\0')
+  if (type == NUVASHALAUNCHER_CONTENT_DATAPACK)
+    {
+      loaders = nuvashalauncher_modrinth_loaders_json ("datapack");
+      escaped_loaders = g_uri_escape_string (loaders, NULL, FALSE);
+    }
+  else if (nuvashalauncher_content_type_needs_loader (type) && loader != NULL &&
+           *loader != '\0')
     {
       loaders = nuvashalauncher_modrinth_loaders_json (loader);
       escaped_loaders = g_uri_escape_string (loaders, NULL, FALSE);
@@ -377,9 +382,11 @@ build_batch_update_body (GPtrArray *hashes, NuvashaLauncherContentType type,
   g_autoptr (JsonBuilder) builder = json_builder_new ();
   g_autoptr (JsonNode) root = NULL;
   const char *loader_name =
-    nuvashalauncher_content_type_needs_loader (type) && loader != NULL
-      ? loader
-      : "minecraft";
+    type == NUVASHALAUNCHER_CONTENT_DATAPACK
+      ? "datapack"
+      : (nuvashalauncher_content_type_needs_loader (type) && loader != NULL
+           ? loader
+           : "minecraft");
 
   json_builder_begin_object (builder);
 

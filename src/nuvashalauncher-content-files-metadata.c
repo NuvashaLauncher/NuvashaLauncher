@@ -778,7 +778,8 @@ nuvashalauncher_content_apply_local_metadata (NuvashaLauncherContentFile *file, 
     file->optional_dependencies = g_ptr_array_new_with_free_func (g_free);
   if (file->incompatible_dependencies == NULL)
     file->incompatible_dependencies = g_ptr_array_new_with_free_func (g_free);
-  if (type == NUVASHALAUNCHER_CONTENT_RESOURCE_PACK)
+  if (type == NUVASHALAUNCHER_CONTENT_RESOURCE_PACK ||
+      type == NUVASHALAUNCHER_CONTENT_DATAPACK)
     {
       apply_resource_metadata (file);
       return;
