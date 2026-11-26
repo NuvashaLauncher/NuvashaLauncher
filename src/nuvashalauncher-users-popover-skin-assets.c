@@ -118,6 +118,12 @@ done:
   avatar_load_free (load);
 }
 
+gboolean
+nuvashalauncher_users_network_disabled (void)
+{
+  return g_getenv ("NUVASHALAUNCHER_TEST_NO_NETWORK") != NULL;
+}
+
 /* Load the face from @url without blocking the UI. */
 void
 nuvashalauncher_users_set_avatar (NuvashaLauncherUsersPopover *self,
@@ -137,6 +143,10 @@ nuvashalauncher_users_set_avatar (NuvashaLauncherUsersPopover *self,
       gtk_image_set_from_paintable (image, GDK_PAINTABLE (cached));
       return;
     }
+
+  if ((g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://")) &&
+      nuvashalauncher_users_network_disabled ())
+    return;
 
   file = g_file_new_for_uri (url);
   load = g_new0 (AvatarLoad, 1);

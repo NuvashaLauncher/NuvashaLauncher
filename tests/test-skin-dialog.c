@@ -230,6 +230,7 @@ int
 main (int argc, char **argv)
 {
   g_setenv ("NUVASHALAUNCHER_TEST_SECRET_STORE", "1", TRUE);
+  g_setenv ("NUVASHALAUNCHER_TEST_NO_NETWORK", "1", TRUE);
   g_test_init (&argc, &argv, NULL);
   if (!gtk_init_check ())
     return 77;

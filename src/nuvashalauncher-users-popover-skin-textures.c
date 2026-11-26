@@ -200,6 +200,10 @@ load_view_texture (NuvashaLauncherSkinView *view, const char *url, gboolean cape
     }
   if (file == NULL)
     file = g_file_new_for_uri (url);
+  if ((g_str_has_prefix (url, "http://") || g_str_has_prefix (url, "https://")) &&
+      (cached == NULL || !g_file_test (cached, G_FILE_TEST_IS_REGULAR)) &&
+      nuvashalauncher_users_network_disabled ())
+    return;
   load = g_new0 (SkinTextureLoad, 1);
   load->view = g_object_ref (view);
   load->cape = cape;

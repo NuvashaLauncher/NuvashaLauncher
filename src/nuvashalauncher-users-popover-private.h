@@ -31,6 +31,9 @@ void nuvashalauncher_users_set_avatar_icon (GtkImage *);
 gboolean nuvashalauncher_users_set_local_avatar (GtkImage *, const char *);
 char *nuvashalauncher_users_default_steve_path (void);
 const char *nuvashalauncher_users_default_steve_url (void);
+/* TRUE when NUVASHALAUNCHER_TEST_NO_NETWORK is set, so tests never reach
+ * textures.minecraft.net for avatars and skin previews. */
+gboolean nuvashalauncher_users_network_disabled (void);
 AdwDialog *nuvashalauncher_users_skin_menu_new (NuvashaLauncherUsersPopover *, GtkImage *, NuvashaLauncherAccount *);
 
 void load_view_texture (NuvashaLauncherSkinView *, const char *, gboolean);
