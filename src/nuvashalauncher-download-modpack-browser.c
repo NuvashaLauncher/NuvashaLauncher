@@ -283,6 +283,28 @@ on_modpack_row_check_toggled (GtkCheckButton *check, gpointer user_data)
   update_modpack_selection_ui (self);
 }
 
+void
+modpack_dialog_clear_selection (NuvashaLauncherDownloadModpackDialog *self)
+{
+  if (self == NULL)
+    return;
+
+  if (self->selected_projects != NULL)
+    g_hash_table_remove_all (self->selected_projects);
+  update_modpack_selection_ui (self);
+
+  if (self->rows != NULL)
+    {
+      for (guint i = 0; i < self->rows->len; i++)
+        {
+          GtkWidget *row = g_ptr_array_index (self->rows, i);
+          GtkWidget *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-check");
+          if (check != NULL && GTK_IS_CHECK_BUTTON (check))
+            gtk_check_button_set_active (GTK_CHECK_BUTTON (check), FALSE);
+        }
+    }
+}
+
 static void
 on_modpack_batch_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
 {
@@ -301,20 +323,6 @@ on_modpack_batch_install_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user
   g_hash_table_iter_init (&iter, self->selected_projects);
   while (g_hash_table_iter_next (&iter, &key, &value))
     g_ptr_array_add (projects, nuvashalauncher_modrinth_project_copy (value));
-
-  g_hash_table_remove_all (self->selected_projects);
-  update_modpack_selection_ui (self);
-
-  if (self->rows != NULL)
-    {
-      for (guint i = 0; i < self->rows->len; i++)
-        {
-          GtkWidget *row = g_ptr_array_index (self->rows, i);
-          GtkWidget *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-check");
-          if (check != NULL && GTK_IS_CHECK_BUTTON (check))
-            gtk_check_button_set_active (GTK_CHECK_BUTTON (check), FALSE);
-        }
-    }
 
   modpack_dialog_install_batch (self, projects);
 }
@@ -432,7 +440,7 @@ results_arrived (NuvashaLauncherDownloadModpackDialog *self, NuvashaLauncherModr
             continue;
 
           row = adw_action_row_new ();
-          icon = nuvashalauncher_icon_widget_new ("view-list-symbolic");
+          icon = nuvashalauncher_icon_widget_new_pack_placeholder ();
 
           g_hash_table_add (self->seen_ids, g_strdup (project->project_id));
 

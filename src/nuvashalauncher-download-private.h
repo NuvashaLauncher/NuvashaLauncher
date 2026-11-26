@@ -85,6 +85,7 @@ typedef struct _DownloadRequest
 NuvashaLauncherSettings *nuvashalauncher_download_get_cache_settings (DownloadRequest *request);
 char *nuvashalauncher_download_api_cache_path (DownloadRequest *request);
 char *nuvashalauncher_download_global_cache_path (const char *hash);
+gboolean nuvashalauncher_download_should_global_cache (const char *dest_path);
 JsonParser *nuvashalauncher_download_cache_parser (const char *contents, gsize length,
                                        gint64 max_age_seconds,
                                        gboolean *out_fresh,

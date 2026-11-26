@@ -15,6 +15,7 @@
 #define CACHE_EXPIRATION_KEY "cache-expiration"
 #define EXPORT_METADATA_KEY "export-metadata"
 #define DELETE_DEPENDENTS_KEY "delete-dependents"
+#define DISABLE_DEPENDENTS_KEY "disable-dependents"
 #define DEFAULT_MEMORY_MIB_KEY "default-memory-mib"
 #define DEFAULT_JVM_ARGS_KEY "default-jvm-args"
 #define DEFAULT_GAME_WIDTH_KEY "default-game-width"
@@ -39,6 +40,7 @@ struct _NuvashaLauncherSettings
   NuvashaLauncherSettingsCacheExpiration cache_expiration;
   gboolean export_metadata;
   gboolean delete_dependents;
+  gboolean disable_dependents;
   guint default_memory_mib;
   char *default_jvm_args;
   guint default_game_width;
@@ -82,6 +84,8 @@ load (NuvashaLauncherSettings *self)
     self->desktop_settings, EXPORT_METADATA_KEY);
   self->delete_dependents = g_settings_get_boolean (
     self->desktop_settings, DELETE_DEPENDENTS_KEY);
+  self->disable_dependents = g_settings_get_boolean (
+    self->desktop_settings, DISABLE_DEPENDENTS_KEY);
   {
     guint mem = g_settings_get_uint (self->desktop_settings, DEFAULT_MEMORY_MIB_KEY);
     self->default_memory_mib = mem >= 512 ? mem : NUVASHALAUNCHER_SETTINGS_DEFAULT_MEMORY_MIB;
@@ -183,6 +187,31 @@ nuvashalauncher_settings_set_delete_dependents (NuvashaLauncherSettings *self, g
     return TRUE;
 
   self->delete_dependents = previous;
+  return FALSE;
+}
+
+gboolean
+nuvashalauncher_settings_get_disable_dependents (NuvashaLauncherSettings *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  return self->disable_dependents;
+}
+
+gboolean
+nuvashalauncher_settings_set_disable_dependents (NuvashaLauncherSettings *self, gboolean value,
+                                                 GError **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->disable_dependents;
+  self->disable_dependents = value;
+  if (save_boolean (self, DISABLE_DEPENDENTS_KEY, value))
+    return TRUE;
+
+  self->disable_dependents = previous;
   return FALSE;
 }
 
@@ -812,6 +841,7 @@ nuvashalauncher_settings_init (NuvashaLauncherSettings *self)
   self->cache_expiration = NUVASHALAUNCHER_SETTINGS_DEFAULT_CACHE_EXPIRATION;
   self->export_metadata = FALSE;
   self->delete_dependents = TRUE;
+  self->disable_dependents = FALSE;
   self->default_memory_mib = NUVASHALAUNCHER_SETTINGS_DEFAULT_MEMORY_MIB;
   self->default_jvm_args = g_strdup ("");
   self->default_game_width = NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_WIDTH;

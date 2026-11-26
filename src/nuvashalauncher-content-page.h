@@ -68,6 +68,7 @@ typedef struct {
    * know or while the network is not there. */
   char *project_id;
   char *local_id;
+  GPtrArray *provided_ids; /* alias/bundled mod IDs provided by this file */
   char *project_name;
   char *search_key;  /* casefolded title and filename for installed search */
   char *description;

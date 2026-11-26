@@ -8,9 +8,10 @@
 
 ## Features
 
-- **Instance management:** Keep separate Minecraft setups with their own worlds, mods, settings, mod loaders, Java runtimes, icons, and logs. Duplicate, rename, move, export, or delete instances independently.
-- **Mod loaders:** Install and launch Vanilla, Fabric, Quilt, Forge, and NeoForge. Version metadata, libraries, assets, and native libraries are resolved automatically.
-- **Modrinth browser & `.mrpack` support:** Search and install mods, resource packs, shader packs, and modpacks directly from Modrinth, or import and export local `.mrpack` files with checksum verification.
+- **Instance management:** Keep separate Minecraft setups with their own worlds, datapacks, servers, mods, settings, mod loaders, Java runtimes, icons, and logs. Duplicate, rename, move, export, or delete instances independently.
+- **Mod loaders & Java downloader:** Install and launch Vanilla, Fabric, Quilt, Forge, and NeoForge, and download verified Eclipse Temurin Java runtimes directly from inside the launcher with automatic recommended-version detection.
+- **Modrinth browser & `.mrpack` support:** Search and install mods, resource packs, shader packs, per-world datapacks, and modpacks directly from Modrinth, or import and export local `.mrpack` files with checksum verification.
+- **Worlds, servers & performance:** Manage worlds and per-world datapacks, check live server status/ping/player counts, reorder worlds and servers by dragging, configure global and per-instance launch defaults, and toggle dedicated GPU offload, GameMode, and MangoHud.
 - **Accounts & cosmetics:** Sign in with Microsoft accounts or create offline accounts, switch accounts per launch, and manage skins, skin models, and capes.
 - **CLI & scripting:** List or manage instances, accounts, worlds, and servers, or launch directly into a world or server from the command line (`nuvashalauncher --help`).
 

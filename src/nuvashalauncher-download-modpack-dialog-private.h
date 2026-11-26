@@ -107,6 +107,7 @@ void details_watch (gpointer field, GtkWidget *widget);
 void build_browse_page (NuvashaLauncherDownloadModpackDialog *, gboolean start_search);
 void modpack_dialog_install_batch (NuvashaLauncherDownloadModpackDialog *self,
                                   GPtrArray *projects);
+void modpack_dialog_clear_selection (NuvashaLauncherDownloadModpackDialog *self);
 void modpack_quick_install_project (NuvashaLauncherDownloadModpackDialog *,
                                     NuvashaLauncherModrinthProject *);
 void modpack_choose_version (NuvashaLauncherDownloadModpackDialog *,
@@ -118,6 +119,15 @@ void push_error (NuvashaLauncherDownloadModpackDialog *, const char *, const cha
                  GCallback);
 void dialog_details_show_again (NuvashaLauncherDownloadModpackDialog *);
 void on_pack_parsed (GObject *, GAsyncResult *, gpointer);
+
+typedef void (*ModpackInstallFinishedFunc) (gboolean success, gpointer user_data);
+
+void start_modpack_direct_install (NuvashaLauncherDownloadModpackDialog *self,
+                                   NuvashaLauncherModrinthProject *project,
+                                   NuvashaLauncherModrinthVersion *version,
+                                   ModpackInstallFinishedFunc on_finished,
+                                   gpointer user_data,
+                                   GDestroyNotify destroy_data);
 gboolean dialog_start_features (NuvashaLauncherDownloadModpackDialog *);
 void start_install (NuvashaLauncherDownloadModpackDialog *);
 void remove_pack_file (NuvashaLauncherDownloadModpackDialog *);

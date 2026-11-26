@@ -118,6 +118,7 @@ persist_identified_file (NuvashaLauncherContentPage *self, NuvashaLauncherConten
                                                     : "unsupported";
   entry.provider = "Modrinth";
   entry.project_id = file->project_id;
+  entry.local_id = file->local_id;
   entry.project_name = file->project_name;
   entry.icon_url = file->icon_url;
   entry.metadata_checked = file->metadata_checked;
@@ -125,6 +126,7 @@ persist_identified_file (NuvashaLauncherContentPage *self, NuvashaLauncherConten
   entry.local_icon_path = file->local_icon_path;
   entry.version_id = file->version_id;
   entry.version_name = file->version_name;
+  entry.provided_ids = file->provided_ids;
   entry.required_dependencies = file->required_dependencies;
   entry.optional_dependencies = file->optional_dependencies;
   entry.incompatible_dependencies = file->incompatible_dependencies;

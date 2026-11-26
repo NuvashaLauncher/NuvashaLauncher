@@ -35,6 +35,7 @@ nuvashalauncher_content_file_free (NuvashaLauncherContentFile *file)
   g_free (file->download_url);
   g_free (file->project_id);
   g_free (file->local_id);
+  g_clear_pointer (&file->provided_ids, g_ptr_array_unref);
   g_free (file->project_name);
   g_free (file->search_key);
   g_free (file->description);
@@ -144,17 +145,58 @@ nuvashalauncher_content_ensure_folder (const char *path, GError **error)
   return nuvashalauncher_fs_make_directory (path, 0755, error);
 }
 
+static void
+delete_directory_thread (GTask *task, gpointer source_object,
+                         gpointer task_data G_GNUC_UNUSED,
+                         GCancellable *cancellable G_GNUC_UNUSED)
+{
+  g_autofree char *path = g_file_get_path (G_FILE (source_object));
+
+  if (path == NULL)
+    {
+      g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_INVALID_FILENAME,
+                               "Directory has no local path");
+      return;
+    }
+
+  nuvashalauncher_fs_remove_tree (path);
+  if (g_file_test (path, G_FILE_TEST_EXISTS))
+    {
+      g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_FAILED,
+                               "Could not remove directory \"%s\"", path);
+      return;
+    }
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static const char delete_dir_tag[] = "nuvashalauncher-content-delete-dir";
+
 void
 nuvashalauncher_content_delete_async (GFile *file, int io_priority,
                           GCancellable *cancellable,
                           GAsyncReadyCallback callback, gpointer user_data)
 {
+  if (file != NULL &&
+      g_file_query_file_type (file, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL) ==
+        G_FILE_TYPE_DIRECTORY)
+    {
+      g_autoptr (GTask) task = g_task_new (file, cancellable, callback, user_data);
+      g_task_set_source_tag (task, (gpointer) delete_dir_tag);
+      g_task_run_in_thread (task, delete_directory_thread);
+      return;
+    }
+
   nuvashalauncher_fs_delete_async (file, io_priority, cancellable, callback, user_data);
 }
 
 gboolean
 nuvashalauncher_content_delete_finish (GFile *file, GAsyncResult *result, GError **error)
 {
+  if (G_IS_TASK (result) &&
+      g_task_get_source_tag (G_TASK (result)) == (gpointer) delete_dir_tag)
+    return g_task_propagate_boolean (G_TASK (result), error);
+
   return nuvashalauncher_fs_delete_finish (file, result, error);
 }
 
@@ -256,7 +298,10 @@ metadata_work (gpointer data, gpointer user_data G_GNUC_UNUSED)
   if (!g_cancellable_is_cancelled (nuvashalauncher_task_scope_get_cancellable (run->scope)))
     {
       NuvashaLauncherContentFile *file = work->file;
-      gboolean needs_metadata = !file->metadata_checked;
+      gboolean needs_metadata =
+        !file->metadata_checked ||
+        (run->type == NUVASHALAUNCHER_CONTENT_MOD &&
+         (file->local_id == NULL || *file->local_id == '\0'));
 
       if (needs_metadata)
         nuvashalauncher_content_apply_local_metadata (file, run->type);
@@ -396,6 +441,10 @@ apply_index_entry (ScanRun *run, NuvashaLauncherContentFile *file)
     file->sha1 = g_strdup (entry->hash);
   if (entry->project_id != NULL && *entry->project_id != '\0')
     file->project_id = g_strdup (entry->project_id);
+  if (entry->local_id != NULL && *entry->local_id != '\0')
+    file->local_id = g_strdup (entry->local_id);
+  nuvashalauncher_content_merge_dependencies (&file->provided_ids,
+                                              entry->provided_ids);
   if (entry->hash512 != NULL && *entry->hash512 != '\0')
     file->sha512 = g_strdup (entry->hash512);
   if (entry->download_url != NULL && *entry->download_url != '\0')
@@ -462,11 +511,34 @@ batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       g_autoptr (GFile) child = NULL;
       NuvashaLauncherContentFile *file = NULL;
 
-      if (name == NULL ||
-          g_file_info_get_file_type (info) != G_FILE_TYPE_REGULAR)
+      GFileType ftype = g_file_info_get_file_type (info);
+      gboolean is_dir_pack = FALSE;
+
+      if (name == NULL || name[0] == '.')
         continue;
 
-      if (!name_is_content (name, run->extension))
+      if (ftype == G_FILE_TYPE_DIRECTORY &&
+          run->type != NUVASHALAUNCHER_CONTENT_MOD)
+        {
+          child = g_file_get_child (run->folder, name);
+          g_autofree char *dir_path = g_file_get_path (child);
+          if (dir_path != NULL)
+            {
+              if (run->type == NUVASHALAUNCHER_CONTENT_SHADER_PACK)
+                {
+                  g_autofree char *shaders = g_build_filename (dir_path, "shaders", NULL);
+                  is_dir_pack = g_file_test (shaders, G_FILE_TEST_IS_DIR);
+                }
+              else
+                {
+                  g_autofree char *mcmeta = g_build_filename (dir_path, "pack.mcmeta", NULL);
+                  is_dir_pack = g_file_test (mcmeta, G_FILE_TEST_IS_REGULAR);
+                }
+            }
+          if (!is_dir_pack)
+            continue;
+        }
+      else if (ftype != G_FILE_TYPE_REGULAR || !name_is_content (name, run->extension))
         continue;
 
       guint64 mtime_sec = g_file_info_get_attribute_uint64 (
@@ -474,16 +546,19 @@ batch_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
       guint32 mtime_subsec = g_file_info_get_attribute_uint32 (
         info, G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC);
 
-      child = g_file_get_child (run->folder, name);
+      if (child == NULL)
+        child = g_file_get_child (run->folder, name);
       file = g_new0 (NuvashaLauncherContentFile, 1);
       file->path = g_file_get_path (child);
-      file->filename = nuvashalauncher_content_disabled_name (name, TRUE);
-      file->size = g_file_info_get_size (info);
+      file->filename = is_dir_pack
+                         ? g_strdup (name)
+                         : nuvashalauncher_content_disabled_name (name, TRUE);
+      file->size = is_dir_pack ? 0 : g_file_info_get_size (info);
       file->mtime_usec = mtime_sec <= (guint64) (G_MAXINT64 / G_USEC_PER_SEC - 1)
                            ? (gint64) mtime_sec * G_USEC_PER_SEC +
                              (gint64) mtime_subsec
                            : 0;
-      file->enabled = g_strcmp0 (name, file->filename) == 0;
+      file->enabled = is_dir_pack || g_strcmp0 (name, file->filename) == 0;
       apply_index_entry (run, file);
       g_ptr_array_add (run->files, file);
     }
@@ -633,7 +708,7 @@ scan_hash_start_more (ScanRun *run)
       NuvashaLauncherContentFile *file =
         g_ptr_array_index (run->files, run->hash_next_index++);
 
-      if (file->sha1 != NULL)
+      if (file->sha1 != NULL || g_file_test (file->path, G_FILE_TEST_IS_DIR))
         continue;
 
       g_autoptr (GFile) handle = g_file_new_for_path (file->path);

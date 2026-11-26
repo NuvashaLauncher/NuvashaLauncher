@@ -2,6 +2,36 @@
 
 All notable changes to Nuvasha Launcher are documented in this file.
 
+## [2.0] - 2026-11-26
+
+### Java Runtime Downloader
+- **Built-in Eclipse Temurin Downloader**: Added an in-app Java downloader in Instance Settings that fetches Adoptium Eclipse Temurin releases for the host architecture (`x64` / `aarch64`), verifies SHA-256 checksums, extracts `.tar.gz` archives safely into the launcher data directory, and automatically detects installed runtimes.
+- **Dynamic Recommended Java Label**: Automatically highlights the best Java major version for the instance's Minecraft version with `(recommended)` next to the version/LTS label.
+- **Fail-Fast Java Verification**: Checks for a compatible Java runtime before downloading Minecraft game files and libraries.
+
+### Per-World Datapacks Browser
+- **Datapacks in World Menu**: Added a **Datapacks** option below **Duplicate** in each world's 3-dots menu that slides via `AdwNavigationView` (with a top-left `<` back button) into a full Modrinth datapack browser and **Installed** manager scoped to `<world>/datapacks`.
+- **Hybrid Modrinth Datapack Support**: Queries Modrinth with `categories:datapack` and filters versions and updates with `loaders=["datapack"]` so both standalone datapacks and hybrid mod/datapack projects only offer compatible `.zip` datapack files, with local `pack.mcmeta` and `pack.png` metadata extraction.
+
+### Global Launch Defaults & Performance Controls
+- **Global Launch Defaults**: Added global defaults in **Settings → Launch defaults** for RAM (`2048 MiB`), JVM arguments, window width/height, fullscreen, **Use dedicated GPU**, **Use GameMode**, and **Use MangoHud**, with direct per-instance editing in Instance Settings.
+- **Linux GPU Offload & Wrappers**: Launches Minecraft with `DRI_PRIME=1`, `__NV_PRIME_RENDER_OFFLOAD=1`, `__GLX_VENDOR_LIBRARY_NAME=nvidia`, and `__VK_LAYER_NV_optimus=NVIDIA_only` when dedicated GPU is enabled, and wraps execution with `gamemoderun` / `mangohud` when enabled and installed on `PATH` (showing **Not installed** when unavailable).
+
+### Servers, Worlds & Browser Polish
+- **Live Server Status Ping**: Added Minecraft Server List Ping (SLP) to the Servers tab displaying live online/offline status, latency in milliseconds, player counts, and fetched server favicons, alongside a 3-dots server action menu.
+- **Floating-Ghost Drag Reordering**: Added smooth `GtkGestureDrag` row reordering with a floating ghost preview for both Servers and Worlds without Wayland `GtkDropTargetAsync` warnings.
+- **Direct Version-Picker Downloads**: Updated version pickers across mods, resource packs, shader packs, datapacks, and modpacks to use a per-row **Download** button with an inline `AdwSpinner`, starting downloads directly without closing the dialog or showing redundant confirmation popups.
+- **Persistent Batch Selection & Open Modpack Browser**: Multi-selected items across all Modrinth browsers now remain selected until **Install** is confirmed, and batch-installing modpacks starts downloads in the background without auto-closing the modpack dialog.
+- **`pack.png` Default Icons & Instant Cached Scrolling**: Switched fallback icons for servers, mods, resource packs, shader packs, datapacks, and modpacks to `pack.png`, applied disk-cached icons synchronously on row creation, added an `800px` scroll preload margin, and increased the in-memory texture cache to 1024 entries to eliminate icon flicker during fast scrolling.
+
+### Dependencies, Cache & Localization Fixes
+- **Modpack & Fabric Dependency Tracking**: Persisted `local_id` and `provided_ids` (`provides` aliases and Jar-in-Jar bundled sub-modules from `fabric.mod.json`/`quilt.mod.json`) in `.index` and switched dependent lookup to transitive resolution, fixing dependent listing and cleanup for modpack mods (such as Fabric API dependents).
+- **Disable Dependents Setting**: Added **Disabling a dependency disables the mod that depended on it** (off by default) in **Settings → General** across all 28 translation catalogs; re-enabling a dependency automatically re-enables the dependents it disabled.
+- **No Duplicate Minecraft Assets in File Cache**: Skipped copying globally shared Minecraft `assets/`, `libraries/`, and `versions/` into `~/.cache/nuvashalauncher/files/`, eliminating duplicate cached audio/library files while keeping hash caching for per-instance content.
+- **Clean Language Overrides**: Stopped mutating `LC_MESSAGES` when switching the interface language and terminated `LANGUAGE` with `:C`, eliminating `Locale not supported by C library` GTK warnings on non-system languages.
+
+**Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.9...v2.0
+
 ## [1.9] - 2026-11-25
 
 ### Security & Flatpak Sandbox

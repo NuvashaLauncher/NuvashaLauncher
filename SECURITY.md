@@ -6,8 +6,8 @@ Security fixes are released for the latest stable version and the `main` branch.
 
 | Version | Supported |
 | ------- | --------- |
-| `1.9.x` (latest) | Yes |
-| `<= 1.8` | No |
+| `2.0.x` (latest) | Yes |
+| `<= 1.9` | No |
 
 ## Reporting a Vulnerability
 

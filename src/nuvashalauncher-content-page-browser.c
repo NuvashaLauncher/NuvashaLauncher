@@ -141,6 +141,28 @@ on_row_check_toggled (GtkCheckButton *check, gpointer user_data)
 }
 
 void
+nuvashalauncher_content_page_clear_selection (NuvashaLauncherContentPage *self)
+{
+  if (self == NULL)
+    return;
+
+  if (self->browse.selected_projects != NULL)
+    g_hash_table_remove_all (self->browse.selected_projects);
+  update_selection_ui (self);
+
+  if (self->browse.result_rows != NULL)
+    {
+      for (GList *l = self->browse.result_rows; l != NULL; l = l->next)
+        {
+          GtkWidget *row = GTK_WIDGET (l->data);
+          GtkWidget *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-check");
+          if (check != NULL && GTK_IS_CHECK_BUTTON (check))
+            gtk_check_button_set_active (GTK_CHECK_BUTTON (check), FALSE);
+        }
+    }
+}
+
+void
 nuvashalauncher_content_page_on_batch_install_clicked (GtkButton *button G_GNUC_UNUSED,
                                                       gpointer user_data)
 {
@@ -157,20 +179,6 @@ nuvashalauncher_content_page_on_batch_install_clicked (GtkButton *button G_GNUC_
   g_hash_table_iter_init (&iter, self->browse.selected_projects);
   while (g_hash_table_iter_next (&iter, &key, &value))
     g_ptr_array_add (projects, nuvashalauncher_modrinth_project_copy (value));
-
-  g_hash_table_remove_all (self->browse.selected_projects);
-  update_selection_ui (self);
-
-  if (self->browse.result_rows != NULL)
-    {
-      for (GList *l = self->browse.result_rows; l != NULL; l = l->next)
-        {
-          GtkWidget *row = GTK_WIDGET (l->data);
-          GtkWidget *check = g_object_get_data (G_OBJECT (row), "nuvashalauncher-check");
-          if (check != NULL && GTK_IS_CHECK_BUTTON (check))
-            gtk_check_button_set_active (GTK_CHECK_BUTTON (check), FALSE);
-        }
-    }
 
   nuvashalauncher_content_page_start_batch_plan (self, projects);
 }

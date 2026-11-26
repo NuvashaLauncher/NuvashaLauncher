@@ -29,6 +29,7 @@ typedef struct {
   char *env_server;
   char *provider;
   char *project_id;
+  char *local_id;
   char *project_name;
   char *icon_url;
   gboolean metadata_checked;
@@ -36,6 +37,7 @@ typedef struct {
   char *local_icon_path;
   char *version_id;
   char *version_name;
+  GPtrArray *provided_ids;
   GPtrArray *required_dependencies;
   GPtrArray *optional_dependencies;
   GPtrArray *incompatible_dependencies;

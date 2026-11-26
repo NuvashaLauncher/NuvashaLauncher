@@ -10,6 +10,7 @@
     <key name="export-metadata" type="b"><default>false</default></key>
     <key name="custom-java-paths" type="as"><default>[]</default></key>
     <key name="delete-dependents" type="b"><default>true</default></key>
+    <key name="disable-dependents" type="b"><default>false</default></key>
     <key name="default-memory-mib" type="u"><default>2048</default></key>
     <key name="default-jvm-args" type="s"><default>''</default></key>
     <key name="default-game-width" type="u"><default>854</default></key>

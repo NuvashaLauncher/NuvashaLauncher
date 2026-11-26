@@ -35,6 +35,7 @@ GtkWidget *nuvashalauncher_icon_widget_new_pack_placeholder (void);
  * could not, in which case @widget keeps the placeholder it already
  * has: an image the toolkit cannot read must not become a blank hole. */
 gboolean nuvashalauncher_icon_widget_set_file (GtkWidget *widget, const char *path);
+gboolean nuvashalauncher_icon_widget_set_cached_url (GtkWidget *widget, const char *url);
 
 /* Puts @texture in @widget, sized to fit the square. */
 gboolean nuvashalauncher_icon_widget_set_texture (GtkWidget *widget, GdkTexture *texture);

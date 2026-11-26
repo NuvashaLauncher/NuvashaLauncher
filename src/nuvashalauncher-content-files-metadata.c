@@ -450,6 +450,66 @@ write_cached_local_icon (const char *sha1, const guint8 *data, gsize len,
 }
 
 static void
+local_provided_ids_from_json (JsonObject *object, GPtrArray *provided_ids)
+{
+  if (object == NULL || provided_ids == NULL)
+    return;
+
+  JsonNode *provides = json_object_get_member (object, "provides");
+  if (provides != NULL && JSON_NODE_HOLDS_ARRAY (provides))
+    {
+      JsonArray *arr = json_node_get_array (provides);
+      for (guint i = 0; i < json_array_get_length (arr); i++)
+        {
+          JsonNode *item = json_array_get_element (arr, i);
+          const char *val = NULL;
+          if (JSON_NODE_HOLDS_VALUE (item) &&
+              json_node_get_value_type (item) == G_TYPE_STRING)
+            val = json_node_get_string (item);
+          else if (JSON_NODE_HOLDS_OBJECT (item))
+            val = json_object_get_string_member_with_default (
+              json_node_get_object (item), "id", NULL);
+          if (val != NULL && *val != '\0')
+            g_ptr_array_add (provided_ids, g_strdup (val));
+        }
+    }
+
+  JsonNode *jars = json_object_get_member (object, "jars");
+  if (jars != NULL && JSON_NODE_HOLDS_ARRAY (jars))
+    {
+      JsonArray *arr = json_node_get_array (jars);
+      for (guint i = 0; i < json_array_get_length (arr); i++)
+        {
+          JsonNode *item = json_array_get_element (arr, i);
+          if (!JSON_NODE_HOLDS_OBJECT (item))
+            continue;
+          const char *path = json_object_get_string_member_with_default (
+            json_node_get_object (item), "file", NULL);
+          if (path == NULL || *path == '\0')
+            continue;
+          g_autofree char *base = g_path_get_basename (path);
+          if (!g_str_has_suffix (base, ".jar"))
+            continue;
+          /* Strip "-<version>.jar" to recover the bundled mod ID (e.g.
+           * "fabric-resource-loader-v0-3.0.1+abc.jar" -> "fabric-resource-loader-v0"). */
+          const char *dash = base;
+          const char *cut = NULL;
+          while ((dash = strchr (dash, '-')) != NULL)
+            {
+              if (g_ascii_isdigit (dash[1]))
+                {
+                  cut = dash;
+                  break;
+                }
+              dash++;
+            }
+          if (cut != NULL && cut > base)
+            g_ptr_array_add (provided_ids, g_strndup (base, (gsize) (cut - base)));
+        }
+    }
+}
+
+static void
 apply_local_json (NuvashaLauncherContentFile *file, const char *name,
                   const guint8 *data, gsize length, char **icon_member)
 {
@@ -505,6 +565,7 @@ apply_local_json (NuvashaLauncherContentFile *file, const char *name,
           }
       }
       local_dependency_node (object, "depends", file->required_dependencies);
+      local_provided_ids_from_json (object, file->provided_ids);
       file->local_metadata = TRUE;
       return;
     }
@@ -519,6 +580,7 @@ apply_local_json (NuvashaLauncherContentFile *file, const char *name,
   file->version_name = json_string_member (object, "version");
   *icon_member = json_icon_member (object);
   local_dependency_node (object, "depends", file->required_dependencies);
+  local_provided_ids_from_json (object, file->provided_ids);
   file->local_metadata = TRUE;
 }
 
@@ -616,6 +678,42 @@ apply_local_toml (NuvashaLauncherContentFile *file, const guint8 *data, gsize le
 static void
 apply_resource_metadata (NuvashaLauncherContentFile *file)
 {
+  if (file->path != NULL && g_file_test (file->path, G_FILE_TEST_IS_DIR))
+    {
+      g_autofree char *mcmeta_path = g_build_filename (file->path, "pack.mcmeta", NULL);
+      g_autofree char *pack_png = g_build_filename (file->path, "pack.png", NULL);
+      g_autofree char *contents = NULL;
+      gsize length = 0;
+
+      if (g_file_get_contents (mcmeta_path, &contents, &length, NULL) && contents != NULL)
+        {
+          g_autoptr (JsonParser) parser = json_parser_new ();
+          if (json_parser_load_from_data (parser, contents, (gssize) length, NULL))
+            {
+              JsonNode *root = json_parser_get_root (parser);
+              JsonNode *pack = root != NULL && JSON_NODE_HOLDS_OBJECT (root)
+                                 ? json_object_get_member (
+                                     json_node_get_object (root), "pack") : NULL;
+              JsonNode *description = pack != NULL && JSON_NODE_HOLDS_OBJECT (pack)
+                                        ? json_object_get_member (
+                                            json_node_get_object (pack), "description")
+                                        : NULL;
+              if (description != NULL && JSON_NODE_HOLDS_VALUE (description) &&
+                  json_node_get_value_type (description) == G_TYPE_STRING)
+                file->description = json_node_dup_string (description);
+            }
+        }
+
+      if (g_file_test (pack_png, G_FILE_TEST_IS_REGULAR))
+        {
+          g_free (file->local_icon_path);
+          file->local_icon_path = g_steal_pointer (&pack_png);
+        }
+
+      file->local_metadata = TRUE;
+      return;
+    }
+
   static const char * const members[] = { "pack.mcmeta", "pack.png" };
   GByteArray *results[2] = { NULL, NULL };
   g_autoptr (GByteArray) metadata = NULL;
@@ -772,6 +870,8 @@ nuvashalauncher_content_load_local_icon_finish (GAsyncResult *result, GError **e
 void
 nuvashalauncher_content_apply_local_metadata (NuvashaLauncherContentFile *file, NuvashaLauncherContentType type)
 {
+  if (file->provided_ids == NULL)
+    file->provided_ids = g_ptr_array_new_with_free_func (g_free);
   if (file->required_dependencies == NULL)
     file->required_dependencies = g_ptr_array_new_with_free_func (g_free);
   if (file->optional_dependencies == NULL)

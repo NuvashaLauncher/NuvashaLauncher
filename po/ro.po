@@ -2627,3 +2627,6 @@ msgid_plural "Install the following datapacks?"
 msgstr[0] "Instalezi următorul pachet de date?"
 msgstr[1] "Instalezi următoarele pachete de date?"
 msgstr[2] "Instalezi următoarele pachete de date?"
+
+msgid "Disabling a dependency disables the mod that depended on it"
+msgstr "Dezactivarea unei dependențe dezactivează modul care depindea de ea"

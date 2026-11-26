@@ -580,3 +580,258 @@ dialog_start_features (NuvashaLauncherDownloadModpackDialog *self)
 
   return TRUE;
 }
+
+/* Self-contained direct modpack install used by the version picker:
+ * keeps the dialog open, skips confirmation popups, and notifies the
+ * caller when the install completes or fails. */
+typedef struct {
+  NuvashaLauncherInstanceManager *manager;
+  NuvashaLauncherDownload *download;
+  NuvashaLauncherModpack *modpack;
+  NuvashaLauncherTaskScope *operation;
+  char *pack_path;
+  char *instance_name;
+  char *icon_url;
+  ModpackInstallFinishedFunc on_finished;
+  gpointer user_data;
+  GDestroyNotify destroy_data;
+} DirectModpackJob;
+
+static void
+direct_modpack_job_finish (DirectModpackJob *job, gboolean success)
+{
+  if (job == NULL)
+    return;
+
+  if (job->pack_path != NULL)
+    {
+      nuvashalauncher_modpack_remove_archive (job->pack_path, NULL);
+      g_clear_pointer (&job->pack_path, g_free);
+    }
+
+  if (job->download != NULL)
+    {
+      nuvashalauncher_download_finish (job->download);
+      g_clear_object (&job->download);
+    }
+
+  if (job->operation != NULL)
+    {
+      nuvashalauncher_task_scope_unref (job->operation);
+      job->operation = NULL;
+    }
+
+  if (job->on_finished != NULL)
+    job->on_finished (success, job->user_data);
+
+  if (job->destroy_data != NULL && job->user_data != NULL)
+    job->destroy_data (job->user_data);
+
+  g_clear_pointer (&job->modpack, nuvashalauncher_modpack_free);
+  g_clear_object (&job->manager);
+  g_free (job->instance_name);
+  g_free (job->icon_url);
+  g_free (job);
+}
+
+static void
+on_direct_install_progress (guint done, guint total, const char *path, gpointer user_data)
+{
+  DirectModpackJob *job = user_data;
+
+  if (job->download == NULL)
+    return;
+
+  if (path == NULL)
+    nuvashalauncher_download_set_detail (job->download, _("Extracting files"));
+  nuvashalauncher_download_set_progress (job->download, done, total);
+}
+
+static void
+on_direct_install_done (GObject *source G_GNUC_UNUSED,
+                        GAsyncResult *result,
+                        gpointer user_data)
+{
+  DirectModpackJob *job = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaLauncherInstance) instance =
+    nuvashalauncher_modpack_install_finish (result, &error);
+
+  if (instance == NULL)
+    {
+      if (error != NULL &&
+          !g_error_matches (error, NUVASHALAUNCHER_MODPACK_ERROR,
+                            NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED) &&
+          !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+        g_warning ("%s", nuvashalauncher_error_message (error));
+
+      direct_modpack_job_finish (job, FALSE);
+      return;
+    }
+
+  if (job->icon_url != NULL && *job->icon_url != '\0' && job->manager != NULL)
+    {
+      ModpackInstallIconData *data = g_new0 (ModpackInstallIconData, 1);
+      data->manager = g_object_ref (job->manager);
+      data->instance = g_object_ref (instance);
+      data->scope = nuvashalauncher_icon_load_async (job->icon_url,
+                                                     on_modpack_install_icon_finished,
+                                                     data);
+    }
+
+  direct_modpack_job_finish (job, TRUE);
+}
+
+static void
+on_direct_pack_parsed (GObject *source G_GNUC_UNUSED,
+                       GAsyncResult *result,
+                       gpointer user_data)
+{
+  DirectModpackJob *job = user_data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) empty_optional = NULL;
+  const char *name = NULL;
+
+  job->modpack = nuvashalauncher_modpack_new_from_zip_finish (result, &error);
+  if (job->modpack == NULL)
+    {
+      if (error != NULL)
+        g_warning ("%s", nuvashalauncher_error_message (error));
+      direct_modpack_job_finish (job, FALSE);
+      return;
+    }
+
+  if (!nuvashalauncher_modpack_resolve (job->modpack, &error))
+    {
+      if (error != NULL)
+        g_warning ("%s", nuvashalauncher_error_message (error));
+      direct_modpack_job_finish (job, FALSE);
+      return;
+    }
+
+  name = job->instance_name;
+  if (name == NULL || *name == '\0')
+    name = job->modpack->name;
+  if (name == NULL || *name == '\0')
+    name = "modpack";
+
+  nuvashalauncher_download_set_detail (
+    job->download, job->modpack->files->len > 0 ? _("Downloading files")
+                                                : _("Extracting files"));
+
+  empty_optional = g_ptr_array_new ();
+  job->operation = nuvashalauncher_modpack_install_async (
+    job->modpack, job->manager, name, NULL, empty_optional,
+    on_direct_install_progress, on_direct_install_done, job);
+  nuvashalauncher_task_scope_follow_cancellable (
+    job->operation, nuvashalauncher_download_get_cancellable (job->download));
+}
+
+static void
+on_direct_pack_progress (goffset bytes_done, goffset total, gpointer user_data)
+{
+  DirectModpackJob *job = user_data;
+
+  if (job->download != NULL)
+    nuvashalauncher_download_set_bytes (job->download, (guint64) bytes_done,
+                                        total > 0 ? (guint64) total : 0);
+}
+
+static void
+on_direct_pack_downloaded (GObject *source G_GNUC_UNUSED,
+                           GAsyncResult *result,
+                           gpointer user_data)
+{
+  DirectModpackJob *job = user_data;
+  g_autoptr (GError) error = NULL;
+
+  if (!nuvashalauncher_download_file_finish (result, &error))
+    {
+      if (error != NULL &&
+          !g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR,
+                            NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED))
+        g_warning ("%s", nuvashalauncher_error_message (error));
+      direct_modpack_job_finish (job, FALSE);
+      return;
+    }
+
+  nuvashalauncher_task_scope_release_when_done (
+    nuvashalauncher_modpack_new_from_zip_async (job->pack_path, on_direct_pack_parsed, job),
+    nuvashalauncher_download_get_cancellable (job->download));
+}
+
+void
+start_modpack_direct_install (NuvashaLauncherDownloadModpackDialog *self,
+                              NuvashaLauncherModrinthProject *project,
+                              NuvashaLauncherModrinthVersion *version,
+                              ModpackInstallFinishedFunc on_finished,
+                              gpointer user_data,
+                              GDestroyNotify destroy_data)
+{
+  NuvashaLauncherModrinthFile *file = NULL;
+  const char *name = NULL;
+  DirectModpackJob *job = NULL;
+
+  if (self != NULL && version != NULL && version->files != NULL)
+    {
+      for (guint i = 0; i < version->files->len; i++)
+        {
+          NuvashaLauncherModrinthFile *candidate = g_ptr_array_index (version->files, i);
+
+          if (candidate->filename != NULL &&
+              g_str_has_suffix (candidate->filename, ".mrpack"))
+            {
+              file = candidate;
+              break;
+            }
+        }
+    }
+
+  if (file == NULL)
+    {
+      if (on_finished != NULL)
+        on_finished (FALSE, user_data);
+      if (destroy_data != NULL && user_data != NULL)
+        destroy_data (user_data);
+      return;
+    }
+
+  name = (project != NULL && project->title != NULL && *project->title != '\0')
+           ? project->title
+           : "modpack";
+
+  g_autofree char *template = g_build_filename (
+    g_get_tmp_dir (), ".nuvashalauncher-pack-XXXXXX", NULL);
+  int fd = g_mkstemp (template);
+
+  if (fd < 0)
+    {
+      if (on_finished != NULL)
+        on_finished (FALSE, user_data);
+      if (destroy_data != NULL && user_data != NULL)
+        destroy_data (user_data);
+      return;
+    }
+
+  close (fd);
+  nuvashalauncher_fs_unlink (template, NULL);
+
+  job = g_new0 (DirectModpackJob, 1);
+  job->manager = self->manager != NULL ? g_object_ref (self->manager) : NULL;
+  job->download = g_object_ref (
+    nuvashalauncher_downloads_add (NUVASHALAUNCHER_DOWNLOAD_MODPACK, name));
+  nuvashalauncher_download_set_detail (job->download, _("Downloading modpack"));
+  job->pack_path = g_steal_pointer (&template);
+  job->instance_name = g_strdup (name);
+  job->icon_url = project != NULL ? g_strdup (project->icon_url) : NULL;
+  job->on_finished = on_finished;
+  job->user_data = user_data;
+  job->destroy_data = destroy_data;
+
+  nuvashalauncher_task_scope_release_when_done (
+    nuvashalauncher_download_file_async (
+      nuvashalauncher_downloads_get_service (), file->url, job->pack_path,
+      file->sha1, G_CHECKSUM_SHA1, on_direct_pack_progress,
+      on_direct_pack_downloaded, job),
+    nuvashalauncher_download_get_cancellable (job->download));
+}

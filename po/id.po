@@ -2589,3 +2589,6 @@ msgid "Install the following datapack?"
 msgid_plural "Install the following datapacks?"
 msgstr[0] "Pasang paket data berikut?"
 msgstr[1] "Pasang paket data berikut?"
+
+msgid "Disabling a dependency disables the mod that depended on it"
+msgstr "Menonaktifkan dependensi juga menonaktifkan mod yang bergantung padanya"

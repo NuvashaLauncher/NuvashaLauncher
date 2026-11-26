@@ -113,6 +113,12 @@ gboolean nuvashalauncher_settings_set_delete_dependents (NuvashaLauncherSettings
                                               gboolean value,
                                               GError **error);
 
+/* FALSE by default: disabling a dependency also disables its dependents. */
+gboolean nuvashalauncher_settings_get_disable_dependents (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_disable_dependents (NuvashaLauncherSettings *self,
+                                                          gboolean value,
+                                                          GError **error);
+
 /* Global launch defaults (overridable per instance). */
 guint nuvashalauncher_settings_get_default_memory_mib (NuvashaLauncherSettings *self);
 gboolean nuvashalauncher_settings_set_default_memory_mib (NuvashaLauncherSettings *self,

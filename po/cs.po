@@ -2607,3 +2607,6 @@ msgid_plural "Install the following datapacks?"
 msgstr[0] "Nainstalovat následující datapack?"
 msgstr[1] "Nainstalovat následující datapacky?"
 msgstr[2] "Nainstalovat následující datapacky?"
+
+msgid "Disabling a dependency disables the mod that depended on it"
+msgstr "Zakázání závislosti zakáže mod, který na ní závisel"

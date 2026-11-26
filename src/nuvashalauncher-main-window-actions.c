@@ -214,6 +214,27 @@ on_delete_dependents_toggled (GObject *object,
 }
 
 static void
+on_disable_dependents_toggled (GObject *object,
+                               GParamSpec *pspec G_GNUC_UNUSED,
+                               gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+  g_autoptr (GError) error = NULL;
+
+  if (active == nuvashalauncher_settings_get_disable_dependents (self->model->settings))
+    return;
+
+  if (!nuvashalauncher_settings_set_disable_dependents (self->model->settings, active, &error))
+    {
+      adw_switch_row_set_active (
+        row, nuvashalauncher_settings_get_disable_dependents (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
+    }
+}
+
+static void
 on_language_selected (GObject *object,
                       GParamSpec *pspec G_GNUC_UNUSED,
                       gpointer user_data)
@@ -539,6 +560,7 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
   AdwActionRow *clear_cache_row = ADW_ACTION_ROW (adw_action_row_new ());
   AdwSwitchRow *export_metadata_row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSwitchRow *delete_dependents_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+  AdwSwitchRow *disable_dependents_row = ADW_SWITCH_ROW (adw_switch_row_new ());
 
    /* Bound the settings surface to a usable width and a scrollable
     * maximum-height-sized page. */
@@ -555,6 +577,7 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (clear_cache_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (export_metadata_row), FALSE);
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (delete_dependents_row), FALSE);
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (disable_dependents_row), FALSE);
 
   adw_dialog_set_title (dialog, _("Settings"));
   adw_preferences_dialog_set_search_enabled (ADW_PREFERENCES_DIALOG (dialog),
@@ -585,6 +608,17 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
                              G_CALLBACK (on_delete_dependents_toggled), self, 0);
    adw_preferences_group_add (general_group,
                                  GTK_WIDGET (delete_dependents_row));
+
+   adw_preferences_row_set_title (
+     ADW_PREFERENCES_ROW (disable_dependents_row),
+     _("Disabling a dependency disables the mod that depended on it"));
+   adw_switch_row_set_active (
+     disable_dependents_row,
+     nuvashalauncher_settings_get_disable_dependents (self->model->settings));
+   g_signal_connect_object (disable_dependents_row, "notify::active",
+                            G_CALLBACK (on_disable_dependents_toggled), self, 0);
+   adw_preferences_group_add (general_group,
+                              GTK_WIDGET (disable_dependents_row));
 
 
    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),

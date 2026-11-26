@@ -42,6 +42,29 @@ nuvashalauncher_download_global_cache_path (const char *hash)
   return g_build_filename (directory, hash, NULL);
 }
 
+/* Minecraft assets, libraries, and version JARs already live in globally
+ * shared directories under <user data>/nuvashalauncher/, so duplicating
+ * them into ~/.cache/nuvashalauncher/files/ wastes space and I/O. */
+gboolean
+nuvashalauncher_download_should_global_cache (const char *dest_path)
+{
+  if (dest_path == NULL || *dest_path == '\0')
+    return FALSE;
+
+  g_autofree char *data_root =
+    g_build_filename (g_get_user_data_dir (), "nuvashalauncher", NULL);
+  static const char *const shared_subdirs[] = { "assets", "libraries", "versions" };
+
+  for (gsize i = 0; i < G_N_ELEMENTS (shared_subdirs); i++)
+    {
+      g_autofree char *prefix = g_strdup_printf ("%s/%s/", data_root, shared_subdirs[i]);
+      if (g_str_has_prefix (dest_path, prefix))
+        return FALSE;
+    }
+
+  return TRUE;
+}
+
 JsonParser *
 nuvashalauncher_download_cache_parser (const char *contents, gsize length,
               gint64 max_age_seconds, gboolean *out_fresh,

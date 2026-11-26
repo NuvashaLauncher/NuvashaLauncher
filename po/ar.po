@@ -2652,3 +2652,6 @@ msgstr[2] "تثبيت حزم البيانات التالية؟"
 msgstr[3] "تثبيت حزم البيانات التالية؟"
 msgstr[4] "تثبيت حزم البيانات التالية؟"
 msgstr[5] "تثبيت حزم البيانات التالية؟"
+
+msgid "Disabling a dependency disables the mod that depended on it"
+msgstr "تعطيل التبعية يعطّل المود الذي يعتمد عليها"

@@ -121,7 +121,7 @@ Skins and capes are cached separately so cape textures never appear in the saved
 
 ### Settings
 
-`NuvashaLauncherSettings` wraps the GSettings schema (`data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml`), covering version/loader stability filters, log line limit, language, Modrinth API caching and expiration, export metadata prompt, dependency deletion policy, and custom Java paths.
+`NuvashaLauncherSettings` wraps the GSettings schema (`data/com.github.NuvashaLauncher.NuvashaLauncher.gschema.xml`), covering version/loader stability filters, log line limit, language, Modrinth API caching and expiration, export metadata prompt, dependency deletion/disabling policies, custom Java paths, and global launch defaults (memory, JVM arguments, window size, fullscreen, dedicated GPU offload, GameMode, and MangoHud).
 
 Schema lookup checks the default system source, `GSETTINGS_SCHEMA_DIR`, local build directories, and `<exe_dir>/../share/glib-2.0/schemas`, falling back to compiling the bundled schema into `<user cache>/nuvashalauncher/schemas`. Window size and maximized state are saved separately by the main window.
 
@@ -140,7 +140,7 @@ Because dialogs and pages can close while work is in flight, callbacks must neve
 
 `NuvashaLauncherDownloadService` (`nuvashalauncher-download.c`) owns one `SoupSession` with interactive and bulk queues. Limits are 8 concurrent transfers total and 6 bulk transfers (`MAX_CONCURRENT`, `MAX_BULK_CONCURRENT`).
 
-File transfers check the destination and global hash cache first (using `FICLONE` reflinks when supported, falling back to an async copy), stream into a temporary file while hashing, verify HTTP status and checksum, `fsync` on a worker thread, and atomically rename into place. Checksum mismatches retry once; network errors, HTTP 5xx, and HTTP 429 retry with bounded backoff and `Retry-After` (up to 3 attempts).
+File transfers check the destination and global hash cache first (skipping the global hash cache for already-shared Minecraft `assets/`, `libraries/`, and `versions/` under `<user data>/nuvashalauncher/`, and using `FICLONE` reflinks when supported with an async copy fallback), stream into a temporary file while hashing, verify HTTP status and checksum, `fsync` on a worker thread, and atomically rename into place. Checksum mismatches retry once; network errors, HTTP 5xx, and HTTP 429 retry with bounded backoff and `Retry-After` (up to 3 attempts).
 
 API JSON responses can be cached with ETag and timestamp according to `cache-expiration`, with parsing offloaded to a worker thread and stale fallback when offline. Modrinth requests also deduplicate identical in-flight queries (`nuvashalauncher-modrinth-requests.c`). Clearing the cache removes only the global cache tree, not installed instance content.
 
@@ -151,8 +151,9 @@ API JSON responses can be cached with ETag and timestamp according to `cache-exp
 
 ### Modrinth Content & Modpacks
 
-- **Content (`nuvashalauncher-modrinth.c`, `nuvashalauncher-content-index.c`):** Filters mods by Minecraft version and loader, and resource/shader packs by Minecraft version. Browser rows support multi-select checkboxes with a `GtkActionBar` batch-install footer and a per-row version-picker button. Local `.index` metadata tracks hashes, sizes, `mtime_usec`, project/version IDs, and dependencies so scans avoid re-hashing unchanged files.
-- **Modpacks (`nuvashalauncher-modpack*.c`):** Validates `modrinth.index.json`, resolves Minecraft and loader dependencies, enforces path/link/host/hash/size checks, and installs into a fresh directory before registering the instance. Modrinth downloads prompt for optional client files when the dialog stays open; local `.mrpack` imports run headlessly in the background (installing required files and overrides via the header downloads indicator).
+- **Content (`nuvashalauncher-modrinth.c`, `nuvashalauncher-content-index.c`):** Filters mods by Minecraft version and loader, resource/shader packs by Minecraft version, and per-world datapacks by Minecraft version and the `datapack` loader (`<world>/datapacks`). Browser rows support multi-select checkboxes with a `GtkActionBar` batch-install footer and a per-row version picker with inline download buttons and spinners. Local `.index` metadata tracks hashes, sizes, `mtime_usec`, project/version/local IDs, provided alias/Jar-in-Jar IDs, and dependencies so scans avoid re-hashing unchanged files and transitive dependent checks work offline; disk-cached icons are applied synchronously on row creation to avoid scroll flicker.
+- **Modpacks (`nuvashalauncher-modpack*.c`):** Validates `modrinth.index.json`, resolves Minecraft and loader dependencies, enforces path/link/host/hash/size checks, and installs into a fresh directory before registering the instance. Version-picker downloads run directly in the background without closing the dialog; local `.mrpack` imports run headlessly via the header downloads indicator.
+- **Java Downloader & Worlds/Servers (`nuvashalauncher-java-download.c`, `nuvashalauncher-worlds-page.c`, `nuvashalauncher-servers-page.c`, `nuvashalauncher-server-ping.c`):** Fetches host-architecture Eclipse Temurin builds with SHA-256 verification and safe `.tar.gz` extraction, pings Minecraft servers over SLP for live status/latency/icons, embeds an `AdwNavigationView` in Worlds for per-world datapack management, and supports `GtkGestureDrag` row reordering.
 
 ## Launch Pipeline
 

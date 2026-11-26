@@ -2556,3 +2556,6 @@ msgid "Install the following datapack?"
 msgid_plural "Install the following datapacks?"
 msgstr[0] "要安裝以下資料包嗎？"
 msgstr[1] "要安裝以下資料包嗎？"
+
+msgid "Disabling a dependency disables the mod that depended on it"
+msgstr "停用相依項目會同時停用依賴它的模組"

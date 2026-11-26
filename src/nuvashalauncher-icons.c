@@ -46,13 +46,32 @@ nuvashalauncher_icon_load_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *re
   nuvashalauncher_icon_load_free (load);
 }
 
+static char *cache_path_for (const char *url);
+
+gboolean
+nuvashalauncher_icon_widget_set_cached_url (GtkWidget *widget, const char *url)
+{
+  if (widget == NULL || url == NULL || *url == '\0')
+    return FALSE;
+
+  g_autofree char *path = cache_path_for (url);
+  if (path == NULL || !g_file_test (path, G_FILE_TEST_IS_REGULAR))
+    return FALSE;
+
+  return nuvashalauncher_icon_widget_set_file (widget, path);
+}
+
 NuvashaLauncherIconLoad *
 nuvashalauncher_icon_load_start (GtkWidget *icon, const char *url)
 {
-  NuvashaLauncherIconLoad *load = g_new0 (NuvashaLauncherIconLoad, 1);
-
   g_object_set_data_full (G_OBJECT (icon), "nuvashalauncher-icon-url", g_strdup (url),
                           g_free);
+
+  if (nuvashalauncher_icon_widget_set_cached_url (icon, url))
+    return NULL;
+
+  NuvashaLauncherIconLoad *load = g_new0 (NuvashaLauncherIconLoad, 1);
+
   load->icon = g_object_ref (icon);
   load->operation = nuvashalauncher_icon_load_async (url, nuvashalauncher_icon_load_ready, load);
   return load;
@@ -607,7 +626,7 @@ nuvashalauncher_icon_widget_set_file (GtkWidget *widget, const char *path)
 
   if (cache != NULL)
     {
-      if (g_hash_table_size (cache) >= 256)
+      if (g_hash_table_size (cache) >= 1024)
         g_hash_table_remove_all (cache);
       g_hash_table_replace (cache, g_strdup (path), g_object_ref (texture));
     }

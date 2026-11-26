@@ -2575,3 +2575,6 @@ msgstr[0] "데이터 팩 %u개 설치 중"
 msgid "Install the following datapack?"
 msgid_plural "Install the following datapacks?"
 msgstr[0] "다음 데이터 팩을 설치할까요?"
+
+msgid "Disabling a dependency disables the mod that depended on it"
+msgstr "종속성을 비활성화하면 해당 종속성에 의존하는 모드도 비활성화됩니다"

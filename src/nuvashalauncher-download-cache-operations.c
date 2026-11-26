@@ -500,6 +500,11 @@ cache_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
     }
 
   g_clear_error (&error);
+  if (!nuvashalauncher_download_should_global_cache (request->dest_path))
+    {
+      start_attempt (request);
+      return;
+    }
   request->global_cache_path = nuvashalauncher_download_global_cache_path (request->expected_hash);
   {
     g_autoptr (GFile) global =

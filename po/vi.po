@@ -2580,3 +2580,6 @@ msgid "Install the following datapack?"
 msgid_plural "Install the following datapacks?"
 msgstr[0] "Cài đặt gói dữ liệu sau?"
 msgstr[1] "Cài đặt các gói dữ liệu sau?"
+
+msgid "Disabling a dependency disables the mod that depended on it"
+msgstr "Tắt phần phụ thuộc sẽ tắt mod phụ thuộc vào nó"

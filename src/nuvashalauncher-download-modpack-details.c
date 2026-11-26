@@ -350,30 +350,114 @@ modpack_picker_list_free (ModpackPickerList *list)
   g_free (list);
 }
 
-static void
-on_modpack_picker_version_activated (AdwActionRow *row, gpointer user_data)
+static GHashTable *
+get_active_modpack_downloads (void)
 {
-  NuvashaLauncherDownloadModpackDialog *self =
-    NUVASHALAUNCHER_DOWNLOAD_MODPACK_DIALOG (user_data);
-  NuvashaLauncherModrinthProject *project =
-    g_object_get_data (G_OBJECT (row), "nuvashalauncher-project");
-  NuvashaLauncherModrinthVersion *version =
-    g_object_get_data (G_OBJECT (row), "nuvashalauncher-version");
-  AdwDialog *picker =
-    g_object_get_data (G_OBJECT (row), "nuvashalauncher-picker-dialog");
+  static GHashTable *active = NULL;
+  if (active == NULL)
+    active = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+  return active;
+}
 
-  if (self == NULL || project == NULL || version == NULL)
+typedef struct {
+  char *version_id;
+  GWeakRef button_ref;
+  GWeakRef spinner_ref;
+} ModpackPickerDownloadJob;
+
+static void
+modpack_picker_download_job_free (gpointer data)
+{
+  ModpackPickerDownloadJob *job = data;
+  if (job == NULL)
+    return;
+  g_free (job->version_id);
+  g_weak_ref_clear (&job->button_ref);
+  g_weak_ref_clear (&job->spinner_ref);
+  g_free (job);
+}
+
+static void
+on_modpack_picker_download_finished (gboolean success, gpointer user_data)
+{
+  ModpackPickerDownloadJob *job = user_data;
+  GtkWidget *button = g_weak_ref_get (&job->button_ref);
+  GtkWidget *spinner = g_weak_ref_get (&job->spinner_ref);
+
+  if (job->version_id != NULL)
+    g_hash_table_remove (get_active_modpack_downloads (), job->version_id);
+
+  if (spinner != NULL)
+    {
+      gtk_widget_set_visible (spinner, FALSE);
+      g_object_unref (spinner);
+    }
+
+  if (button != NULL)
+    {
+      if (success)
+        {
+          gtk_button_set_label (GTK_BUTTON (button), _("Installed"));
+          gtk_widget_set_sensitive (button, FALSE);
+        }
+      else
+        {
+          gtk_button_set_label (GTK_BUTTON (button), _("Download"));
+          gtk_widget_set_sensitive (button, TRUE);
+        }
+      g_object_unref (button);
+    }
+}
+
+typedef struct {
+  NuvashaLauncherDownloadModpackDialog *dialog;
+  NuvashaLauncherModrinthProject *project;
+  NuvashaLauncherModrinthVersion *version;
+  GtkButton *button;
+  GtkWidget *spinner;
+} ModpackPickerRowAction;
+
+static void
+modpack_picker_row_action_free (gpointer data, GClosure *closure G_GNUC_UNUSED)
+{
+  ModpackPickerRowAction *action = data;
+  if (action == NULL)
+    return;
+  g_clear_pointer (&action->project, nuvashalauncher_modrinth_project_free);
+  g_clear_pointer (&action->version, nuvashalauncher_modrinth_version_free);
+  g_free (action);
+}
+
+static void
+on_modpack_picker_download_clicked (GtkButton *button, gpointer user_data)
+{
+  ModpackPickerRowAction *action = user_data;
+  NuvashaLauncherDownloadModpackDialog *self = action->dialog;
+  const char *vid;
+  ModpackPickerDownloadJob *job;
+
+  if (self == NULL || action->project == NULL || action->version == NULL)
     return;
 
-  g_autoptr (NuvashaLauncherModrinthProject) project_copy =
-    nuvashalauncher_modrinth_project_copy (project);
-  g_autoptr (NuvashaLauncherModrinthVersion) version_copy =
-    nuvashalauncher_modrinth_version_copy (version);
+  vid = action->version->version_id;
+  if (vid != NULL && g_hash_table_contains (get_active_modpack_downloads (), vid))
+    return;
 
-  if (picker != NULL)
-    adw_dialog_close (picker);
+  if (vid != NULL)
+    g_hash_table_add (get_active_modpack_downloads (), g_strdup (vid));
 
-  start_modpack_install (self, project_copy, version_copy);
+  gtk_widget_set_sensitive (GTK_WIDGET (button), FALSE);
+  gtk_button_set_label (button, _("Downloading…"));
+  gtk_widget_set_visible (action->spinner, TRUE);
+
+  job = g_new0 (ModpackPickerDownloadJob, 1);
+  job->version_id = g_strdup (vid);
+  g_weak_ref_init (&job->button_ref, button);
+  g_weak_ref_init (&job->spinner_ref, action->spinner);
+
+  start_modpack_direct_install (self, action->project, action->version,
+                                on_modpack_picker_download_finished,
+                                job, modpack_picker_download_job_free);
 }
 
 static void
@@ -388,6 +472,13 @@ append_modpack_version_rows (ModpackPickerList *list,
       NuvashaLauncherModrinthVersion *v = g_ptr_array_index (list->versions, list->loaded);
       char label[160];
       AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
+      GtkWidget *spinner = GTK_WIDGET (adw_spinner_new ());
+      GtkButton *button = GTK_BUTTON (gtk_button_new ());
+      gboolean downloading = v->version_id != NULL &&
+                             g_hash_table_contains (get_active_modpack_downloads (),
+                                                    v->version_id);
+      ModpackPickerRowAction *action;
+
       version_row_label (v, label, sizeof label);
       adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
       adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), label);
@@ -395,19 +486,32 @@ append_modpack_version_rows (ModpackPickerList *list,
           v->version_number != NULL && g_strcmp0 (v->name, v->version_number) != 0)
         adw_action_row_set_subtitle (ADW_ACTION_ROW (row), v->name);
 
-      gtk_list_box_row_set_activatable (GTK_LIST_BOX_ROW (row), TRUE);
+      gtk_widget_set_valign (spinner, GTK_ALIGN_CENTER);
+      gtk_widget_set_visible (spinner, downloading);
+      adw_action_row_add_suffix (row, spinner);
 
-      g_object_set_data_full (G_OBJECT (row), "nuvashalauncher-project",
-                              nuvashalauncher_modrinth_project_copy (list->project),
-                              (GDestroyNotify) nuvashalauncher_modrinth_project_free);
-      g_object_set_data_full (G_OBJECT (row), "nuvashalauncher-version",
-                              nuvashalauncher_modrinth_version_copy (v),
-                              (GDestroyNotify) nuvashalauncher_modrinth_version_free);
-      g_object_set_data (G_OBJECT (row), "nuvashalauncher-picker-dialog",
-                         list->picker);
-      g_signal_connect_object (row, "activated",
-                               G_CALLBACK (on_modpack_picker_version_activated),
-                               self, 0);
+      gtk_widget_set_valign (GTK_WIDGET (button), GTK_ALIGN_CENTER);
+      if (downloading)
+        {
+          gtk_button_set_label (button, _("Downloading…"));
+          gtk_widget_set_sensitive (GTK_WIDGET (button), FALSE);
+        }
+      else
+        {
+          gtk_button_set_label (button, _("Download"));
+        }
+
+      action = g_new0 (ModpackPickerRowAction, 1);
+      action->dialog = self;
+      action->project = nuvashalauncher_modrinth_project_copy (list->project);
+      action->version = nuvashalauncher_modrinth_version_copy (v);
+      action->button = button;
+      action->spinner = spinner;
+      g_signal_connect_data (button, "clicked",
+                             G_CALLBACK (on_modpack_picker_download_clicked),
+                             action, modpack_picker_row_action_free, 0);
+
+      adw_action_row_add_suffix (row, GTK_WIDGET (button));
       adw_preferences_group_add (list->group, GTK_WIDGET (row));
     }
 }
@@ -647,6 +751,7 @@ on_modpack_batch_confirmed (GObject *source, GAsyncResult *result, gpointer user
 
   if (g_strcmp0 (response, "install") == 0 && !self->closed)
     {
+      modpack_dialog_clear_selection (self);
       for (guint i = 0; i < confirm->projects->len; i++)
         {
           NuvashaLauncherModrinthProject *p = g_ptr_array_index (confirm->projects, i);
@@ -669,8 +774,6 @@ on_modpack_batch_confirmed (GObject *source, GAsyncResult *result, gpointer user
               on_batch_single_modpack_versions_ready, fetch),
             NULL);
         }
-      self->closed = TRUE;
-      adw_dialog_close (ADW_DIALOG (self));
     }
 
   batch_modpack_confirm_free (confirm);

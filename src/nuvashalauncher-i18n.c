@@ -97,21 +97,25 @@ nuvashalauncher_i18n_init (const char *override_code)
       *override_code != '\0' &&
       g_strcmp0 (override_code, "system") != 0)
     {
+      /* Use GNU gettext's LANGUAGE list (terminated with ":C" so English
+       * never falls back to the system locale) without mutating LC_MESSAGES,
+       * which would make GTK's setlocale(LC_ALL, "") warn when the selected
+       * language has no installed glibc locale. */
       if (g_str_has_prefix (override_code, "es_"))
         {
-          g_autofree char *compound = g_strdup_printf ("%s:es", override_code);
+          g_autofree char *compound = g_strdup_printf ("%s:es:C", override_code);
           g_setenv ("LANGUAGE", compound, TRUE);
         }
       else if (g_str_has_prefix (override_code, "pt_"))
         {
-          g_autofree char *compound = g_strdup_printf ("%s:pt", override_code);
+          g_autofree char *compound = g_strdup_printf ("%s:pt:C", override_code);
           g_setenv ("LANGUAGE", compound, TRUE);
         }
       else
         {
-          g_setenv ("LANGUAGE", override_code, TRUE);
+          g_autofree char *compound = g_strdup_printf ("%s:C", override_code);
+          g_setenv ("LANGUAGE", compound, TRUE);
         }
-      g_setenv ("LC_MESSAGES", override_code, TRUE);
     }
   else
     {

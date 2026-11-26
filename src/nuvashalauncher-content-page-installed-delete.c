@@ -11,6 +11,92 @@
 
 /* Single and bulk deletion of installed content, including dependent cleanup. */
 
+static gboolean
+file_matches_dependency_id (const NuvashaLauncherContentFile *provider, const char *dep)
+{
+  if (provider == NULL || dep == NULL || *dep == '\0')
+    return FALSE;
+
+  if (provider->project_id != NULL && *provider->project_id != '\0' &&
+      g_strcmp0 (dep, provider->project_id) == 0)
+    return TRUE;
+
+  if (provider->local_id != NULL && *provider->local_id != '\0' &&
+      g_strcmp0 (dep, provider->local_id) == 0)
+    return TRUE;
+
+  if (provider->provided_ids != NULL)
+    {
+      for (guint i = 0; i < provider->provided_ids->len; i++)
+        {
+          const char *alias = g_ptr_array_index (provider->provided_ids, i);
+          if (alias != NULL && *alias != '\0' && g_strcmp0 (dep, alias) == 0)
+            return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
+static gboolean
+file_depends_on (const NuvashaLauncherContentFile *candidate,
+                 const NuvashaLauncherContentFile *provider)
+{
+  if (candidate == NULL || provider == NULL || candidate == provider ||
+      candidate->required_dependencies == NULL)
+    return FALSE;
+
+  for (guint i = 0; i < candidate->required_dependencies->len; i++)
+    {
+      const char *dep = g_ptr_array_index (candidate->required_dependencies, i);
+      if (file_matches_dependency_id (provider, dep))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+/* Returns borrowed NuvashaLauncherContentFile* pointers for every installed
+ * file that directly or transitively depends on @target. */
+GPtrArray *
+nuvashalauncher_content_page_find_dependents (NuvashaLauncherContentPage *self,
+                                              NuvashaLauncherContentFile *target)
+{
+  GPtrArray *result = g_ptr_array_new ();
+
+  if (self == NULL || target == NULL || self->installed.files == NULL)
+    return result;
+
+  g_autoptr (GHashTable) seen = g_hash_table_new (g_direct_hash, g_direct_equal);
+  g_hash_table_add (seen, target);
+
+  g_autoptr (GPtrArray) queue = g_ptr_array_new ();
+  g_ptr_array_add (queue, target);
+
+  for (guint q = 0; q < queue->len; q++)
+    {
+      NuvashaLauncherContentFile *provider = g_ptr_array_index (queue, q);
+
+      for (guint i = 0; i < self->installed.files->len; i++)
+        {
+          NuvashaLauncherContentFile *candidate =
+            g_ptr_array_index (self->installed.files, i);
+
+          if (g_hash_table_contains (seen, candidate))
+            continue;
+
+          if (file_depends_on (candidate, provider))
+            {
+              g_hash_table_add (seen, candidate);
+              g_ptr_array_add (result, candidate);
+              g_ptr_array_add (queue, candidate);
+            }
+        }
+    }
+
+  return result;
+}
+
 static void
 remove_installed_file_by_path (NuvashaLauncherContentPage *self, const char *target_path)
 {
@@ -98,25 +184,16 @@ on_deleted (GObject *source, GAsyncResult *result, gpointer user_data)
             }
         }
 
-      if (deleted != NULL && deleted->project_id != NULL)
-        for (guint i = 0; i < self->installed.files->len; i++)
-          {
-            NuvashaLauncherContentFile *other =
-              g_ptr_array_index (self->installed.files, i);
-
-            if (other == deleted || other->required_dependencies == NULL)
-              continue;
-
-            for (guint j = 0; j < other->required_dependencies->len; j++)
-              if (g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
-                             deleted->project_id) == 0 ||
-                  g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
-                             deleted->local_id) == 0)
-                {
-                  g_ptr_array_add (dependent_paths, g_strdup (other->path));
-                  break;
-                }
-          }
+      if (deleted != NULL)
+        {
+          g_autoptr (GPtrArray) deps =
+            nuvashalauncher_content_page_find_dependents (self, deleted);
+          for (guint i = 0; i < deps->len; i++)
+            {
+              NuvashaLauncherContentFile *other = g_ptr_array_index (deps, i);
+              g_ptr_array_add (dependent_paths, g_strdup (other->path));
+            }
+        }
 
       for (guint i = 0; i < dependent_paths->len; i++)
         {
@@ -265,29 +342,20 @@ nuvashalauncher_content_page_on_trash_clicked (GtkButton *button G_GNUC_UNUSED,
   if (title == NULL || *title == '\0')
     title = file->filename;
 
-  if (file->project_id != NULL)
-    for (guint i = 0; i < self->installed.files->len; i++)
+  {
+    g_autoptr (GPtrArray) deps =
+      nuvashalauncher_content_page_find_dependents (self, file);
+    for (guint i = 0; i < deps->len; i++)
       {
-        NuvashaLauncherContentFile *other = g_ptr_array_index (self->installed.files, i);
-        const char *other_title = NULL;
+        NuvashaLauncherContentFile *other = g_ptr_array_index (deps, i);
+        const char *other_title = nuvashalauncher_content_page_file_display_name (other);
 
-        if (other == file || other->required_dependencies == NULL)
-          continue;
-
-        for (guint j = 0; j < other->required_dependencies->len; j++)
-          if (g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
-                         file->project_id) == 0 ||
-              g_strcmp0 (g_ptr_array_index (other->required_dependencies, j),
-                         file->local_id) == 0)
-            {
-              other_title = nuvashalauncher_content_page_file_display_name (other);
-              if (dependents->len > 0)
-                g_string_append_c (dependents, '\n');
-              g_string_append (dependents, other_title);
-              g_ptr_array_add (dependent_paths, g_strdup (other->path));
-              break;
-            }
+        if (dependents->len > 0)
+          g_string_append_c (dependents, '\n');
+        g_string_append (dependents, other_title);
+        g_ptr_array_add (dependent_paths, g_strdup (other->path));
       }
+  }
 
   heading = g_strdup_printf (_("Delete “%s”?"), title);
   if (dependents->len > 0)

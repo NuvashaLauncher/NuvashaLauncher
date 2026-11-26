@@ -57,12 +57,14 @@ nuvashalauncher_content_index_entry_free (NuvashaLauncherContentIndexEntry *entr
   g_free (entry->env_server);
   g_free (entry->provider);
   g_free (entry->project_id);
+  g_free (entry->local_id);
   g_free (entry->project_name);
   g_free (entry->icon_url);
   g_free (entry->local_icon_member);
   g_free (entry->local_icon_path);
   g_free (entry->version_id);
   g_free (entry->version_name);
+  g_clear_pointer (&entry->provided_ids, g_ptr_array_unref);
   g_clear_pointer (&entry->required_dependencies, g_ptr_array_unref);
   g_clear_pointer (&entry->optional_dependencies, g_ptr_array_unref);
   g_clear_pointer (&entry->incompatible_dependencies, g_ptr_array_unref);
@@ -72,9 +74,10 @@ nuvashalauncher_content_index_entry_free (NuvashaLauncherContentIndexEntry *entr
 static void
 read_dependencies (JsonObject *object, NuvashaLauncherContentIndexEntry *entry)
 {
-  const char *names[] = { "required_dependencies", "optional_dependencies",
-                          "incompatible_dependencies" };
-  GPtrArray *arrays[] = { entry->required_dependencies,
+  const char *names[] = { "provided_ids", "required_dependencies",
+                          "optional_dependencies", "incompatible_dependencies" };
+  GPtrArray *arrays[] = { entry->provided_ids,
+                          entry->required_dependencies,
                           entry->optional_dependencies,
                           entry->incompatible_dependencies };
 
@@ -143,6 +146,8 @@ entry_from_object (JsonObject *object, GError **error)
     object, "provider", INDEX_PROVIDER));
   entry->project_id = g_strdup (json_object_get_string_member_with_default (
     object, "project_id", ""));
+  entry->local_id = g_strdup (json_object_get_string_member_with_default (
+    object, "local_id", ""));
   entry->project_name = g_strdup (json_object_get_string_member_with_default (
     object, "project_name", ""));
   entry->icon_url = g_strdup (json_object_get_string_member_with_default (
@@ -157,6 +162,7 @@ entry_from_object (JsonObject *object, GError **error)
     object, "version_id", ""));
   entry->version_name = g_strdup (json_object_get_string_member_with_default (
     object, "version_name", ""));
+  entry->provided_ids = g_ptr_array_new_with_free_func (g_free);
   entry->required_dependencies = g_ptr_array_new_with_free_func (g_free);
   entry->optional_dependencies = g_ptr_array_new_with_free_func (g_free);
   entry->incompatible_dependencies = g_ptr_array_new_with_free_func (g_free);
@@ -343,6 +349,7 @@ entry_to_json (NuvashaLauncherContentIndexEntry *entry, gsize *length)
   ADD_STRING ("env_server", entry->env_server);
   ADD_STRING ("provider", entry->provider != NULL ? entry->provider : INDEX_PROVIDER);
   ADD_STRING ("project_id", entry->project_id);
+  ADD_STRING ("local_id", entry->local_id);
   ADD_STRING ("project_name", entry->project_name);
   ADD_STRING ("icon_url", entry->icon_url);
   json_builder_set_member_name (builder, "metadata_checked");
@@ -352,6 +359,7 @@ entry_to_json (NuvashaLauncherContentIndexEntry *entry, gsize *length)
   ADD_STRING ("version_id", entry->version_id);
   ADD_STRING ("version_name", entry->version_name);
 #undef ADD_STRING
+  add_string_array (builder, "provided_ids", entry->provided_ids);
   add_string_array (builder, "required_dependencies", entry->required_dependencies);
   add_string_array (builder, "optional_dependencies", entry->optional_dependencies);
   add_string_array (builder, "incompatible_dependencies", entry->incompatible_dependencies);

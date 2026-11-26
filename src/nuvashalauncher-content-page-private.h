@@ -130,6 +130,7 @@ void nuvashalauncher_content_page_move_actions_into_bar (NuvashaLauncherContentP
                                              gboolean browsing);
 void nuvashalauncher_content_page_on_batch_install_clicked (GtkButton *button,
                                                             gpointer user_data);
+void nuvashalauncher_content_page_clear_selection (NuvashaLauncherContentPage *self);
 void nuvashalauncher_content_page_start_batch_plan (NuvashaLauncherContentPage *self,
                                                     GPtrArray *projects);
 
@@ -192,6 +193,8 @@ gboolean nuvashalauncher_content_page_toggle_file (NuvashaLauncherContentPage *s
 const char *nuvashalauncher_content_page_file_display_name (NuvashaLauncherContentFile *file);
 void nuvashalauncher_content_page_on_trash_clicked (GtkButton *button,
                                                     gpointer   user_data);
+GPtrArray *nuvashalauncher_content_page_find_dependents (NuvashaLauncherContentPage *self,
+                                                         NuvashaLauncherContentFile *target);
 
 G_END_DECLS
 

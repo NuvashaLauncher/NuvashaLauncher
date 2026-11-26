@@ -394,7 +394,8 @@ publish_download (DownloadRequest *request)
     }
 
   g_clear_pointer (&request->tmp_path, g_free);
-  if (request->expected_hash != NULL)
+  if (request->expected_hash != NULL &&
+      nuvashalauncher_download_should_global_cache (request->dest_path))
     {
       if (request->global_cache_path == NULL)
         request->global_cache_path = nuvashalauncher_download_global_cache_path (request->expected_hash);

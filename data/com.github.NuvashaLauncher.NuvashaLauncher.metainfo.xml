@@ -13,9 +13,10 @@
   <description>
     <p>Nuvasha Launcher keeps Minecraft installations separate, so each instance
     can have its own version, loader, Java runtime, settings, mods, and worlds.</p>
-    <p>Browse Modrinth to install modpacks, mods, resource packs, and shaders.
-    Local <code>.mrpack</code> files can be imported and exported, with downloads
-    checked before they are installed.</p>
+    <p>Browse Modrinth to install modpacks, mods, resource packs, shaders, and
+    per-world datapacks, or download verified Eclipse Temurin Java runtimes
+    directly in the app. Local <code>.mrpack</code> files can be imported and
+    exported, with downloads checked before they are installed.</p>
     <p>The launcher supports vanilla Minecraft and the Fabric, Quilt, Forge, and
     NeoForge loaders. It can use Microsoft or offline accounts, and includes
     account-specific skins and capes.</p>
@@ -82,6 +83,11 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="2.0" date="2026-11-26">
+      <description>
+        <p>Release 2.0 adds a built-in Eclipse Temurin Java runtime downloader with automatic recommended-version detection, a per-world Modrinth datapacks browser and manager, global launch defaults with per-instance dedicated GPU, GameMode, and MangoHud toggles, live Minecraft server status and latency pings, drag-and-drop reordering for servers and worlds, direct version-picker downloads with inline spinners, transitive mod dependency tracking with an optional disable-dependents setting, instant cached icons with pack.png fallbacks, and cache/locale fixes.</p>
+      </description>
+    </release>
     <release version="1.9" date="2026-11-25">
       <description>
         <p>Release 1.9 tightens Flatpak permissions by switching account storage to the XDG Secret Portal, runs local .mrpack imports in the background without opening the modpack browser, updates browser version-picker icons, streamlines empty states and translations, refreshes documentation, and enables headless display tests in CI.</p>

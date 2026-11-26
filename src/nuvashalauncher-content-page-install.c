@@ -1100,6 +1100,8 @@ on_batch_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
       return;
     }
 
+  nuvashalauncher_content_page_clear_selection (self);
+
   guint count = batch->selected_titles->len;
   const char *msg_format = NULL;
   switch (self->type)

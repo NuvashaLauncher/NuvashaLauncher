@@ -167,13 +167,34 @@ nuvashalauncher_content_page_on_installed_search_changed (GtkEditable *editable 
   installed_filter_rows (user_data);
 }
 
+static char *
+content_row_display_title (NuvashaLauncherContentPage *self,
+                           NuvashaLauncherContentFile *file)
+{
+  if (file == NULL)
+    return g_strdup ("");
+
+  if (self != NULL && self->type == NUVASHALAUNCHER_CONTENT_RESOURCE_PACK &&
+      file->filename != NULL && *file->filename != '\0')
+    {
+      g_autofree char *name = nuvashalauncher_content_disabled_name (file->filename, TRUE);
+      gsize len = strlen (name);
+      if (len > 4 && g_ascii_strcasecmp (name + len - 4, ".zip") == 0)
+        return g_strndup (name, len - 4);
+      return g_steal_pointer (&name);
+    }
+
+  const char *display = nuvashalauncher_content_page_file_display_name (file);
+  return g_strdup (display != NULL ? display : "");
+}
+
 void
 file_row_refresh (GtkWidget *row)
 {
   NuvashaLauncherContentFile *file = g_object_get_data (G_OBJECT (row), "nuvashalauncher-file");
   NuvashaLauncherContentPage *self =
     NUVASHALAUNCHER_CONTENT_PAGE (g_object_get_data (G_OBJECT (row), "nuvashalauncher-page"));
-  const char *title = NULL;
+  g_autofree char *title = NULL;
 
   if (file == NULL || !GTK_IS_WIDGET (row))
     return;
@@ -189,14 +210,8 @@ file_row_refresh (GtkWidget *row)
       gtk_widget_set_visible (sw, TRUE);
   }
 
-  if (file->project_name != NULL && *file->project_name != '\0')
-    title = file->project_name;
-
-  /* The index may provide the project name before local archive metadata
-   * finishes. The filename remains the fallback for unknown files. */
-  adw_preferences_row_set_title (
-       ADW_PREFERENCES_ROW (row),
-       title != NULL ? title : file->filename);
+  title = content_row_display_title (self, file);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title);
   if (file->description != NULL && *file->description != '\0')
     row_show_description (row, file->description);
 
@@ -272,6 +287,63 @@ row_show_description (GtkWidget *row, const char *description)
  * only the switch the user touched moves. When the rename fails the
  * switch stays where it was, rather than showing a state the file does
  * not have. */
+static void
+sync_row_mod_switch (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
+{
+  GtkWidget *row = self->installed.rows != NULL && file->path != NULL
+                     ? g_hash_table_lookup (self->installed.rows, file->path)
+                     : NULL;
+  if (row == NULL)
+    return;
+
+  GtkSwitch *sw = GTK_SWITCH (
+    g_object_get_data (G_OBJECT (row), "nuvashalauncher-mod-switch"));
+  if (sw == NULL)
+    return;
+
+  gulong handler = GPOINTER_TO_SIZE (
+    g_object_get_data (G_OBJECT (sw), "nuvashalauncher-toggle-handler"));
+  if (handler != 0)
+    g_signal_handler_block (sw, handler);
+  gtk_switch_set_active (sw, file->enabled);
+  if (handler != 0)
+    g_signal_handler_unblock (sw, handler);
+  gtk_widget_set_tooltip_text (GTK_WIDGET (sw),
+                               file->enabled ? _("Disable") : _("Enable"));
+}
+
+static char *
+canonical_mod_key (const char *filename)
+{
+  if (filename == NULL)
+    return NULL;
+
+  gsize len = strlen (filename);
+  gsize suffix_len = strlen (NUVASHALAUNCHER_CONTENT_DISABLED_SUFFIX);
+
+  if (len > suffix_len &&
+      g_str_has_suffix (filename, NUVASHALAUNCHER_CONTENT_DISABLED_SUFFIX))
+    return g_strndup (filename, len - suffix_len);
+
+  return g_strdup (filename);
+}
+
+static GHashTable *
+auto_disabled_map (NuvashaLauncherContentPage *self)
+{
+  GHashTable *map = g_object_get_data (G_OBJECT (self), "nuvashalauncher-auto-disabled");
+
+  if (map == NULL)
+    {
+      map = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
+                                   (GDestroyNotify) g_ptr_array_unref);
+      g_object_set_data_full (G_OBJECT (self), "nuvashalauncher-auto-disabled",
+                              map, (GDestroyNotify) g_hash_table_unref);
+    }
+
+  return map;
+}
+
 static gboolean
 on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
 {
@@ -283,6 +355,70 @@ on_mod_toggled (GtkSwitch *sw, gboolean state G_GNUC_UNUSED, gpointer user_data)
 
   gtk_widget_set_tooltip_text (GTK_WIDGET (sw),
                                 file->enabled ? _("Disable") : _("Enable"));
+
+  if (!file->enabled)
+    {
+      g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
+
+      if (nuvashalauncher_settings_get_disable_dependents (settings))
+        {
+          g_autoptr (GPtrArray) deps =
+            nuvashalauncher_content_page_find_dependents (self, file);
+          g_autoptr (GPtrArray) disabled_names =
+            g_ptr_array_new_with_free_func (g_free);
+
+          for (guint i = 0; i < deps->len; i++)
+            {
+              NuvashaLauncherContentFile *dep = g_ptr_array_index (deps, i);
+
+              if (!dep->enabled)
+                continue;
+
+              if (!nuvashalauncher_content_page_toggle_file (self, dep))
+                continue;
+
+              if (dep->filename != NULL)
+                g_ptr_array_add (disabled_names, canonical_mod_key (dep->filename));
+              sync_row_mod_switch (self, dep);
+            }
+
+          if (disabled_names->len > 0 && file->filename != NULL)
+            g_hash_table_replace (auto_disabled_map (self),
+                                  canonical_mod_key (file->filename),
+                                  g_steal_pointer (&disabled_names));
+        }
+    }
+  else if (file->filename != NULL)
+    {
+      GHashTable *map = g_object_get_data (G_OBJECT (self), "nuvashalauncher-auto-disabled");
+      g_autofree char *provider_key = canonical_mod_key (file->filename);
+      GPtrArray *disabled_names = map != NULL && provider_key != NULL
+                                    ? g_hash_table_lookup (map, provider_key)
+                                    : NULL;
+
+      if (disabled_names != NULL && self->installed.files != NULL)
+        {
+          for (guint i = 0; i < disabled_names->len; i++)
+            {
+              const char *dep_key = g_ptr_array_index (disabled_names, i);
+
+              for (guint j = 0; j < self->installed.files->len; j++)
+                {
+                  NuvashaLauncherContentFile *dep =
+                    g_ptr_array_index (self->installed.files, j);
+                  g_autofree char *cand_key = canonical_mod_key (dep->filename);
+
+                  if (g_strcmp0 (cand_key, dep_key) == 0 && !dep->enabled)
+                    {
+                      if (nuvashalauncher_content_page_toggle_file (self, dep))
+                        sync_row_mod_switch (self, dep);
+                      break;
+                    }
+                }
+            }
+          g_hash_table_remove (map, provider_key);
+        }
+    }
 
   return FALSE;
 }
@@ -300,19 +436,27 @@ file_row (NuvashaLauncherContentPage *self, NuvashaLauncherContentFile *file)
   /* Treat file names and paths as plain text. The tooltip contains the path;
      the subtitle contains project metadata when available. */
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
-  adw_preferences_row_set_title (
-    ADW_PREFERENCES_ROW (row),
-    nuvashalauncher_content_page_file_display_name (file));
+  {
+    g_autofree char *title = content_row_display_title (self, file);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), title);
+  }
   adw_action_row_set_subtitle_lines (ADW_ACTION_ROW (row), 2);
   adw_action_row_set_subtitle_selectable (ADW_ACTION_ROW (row), FALSE);
   if (file->description != NULL && *file->description != '\0')
     row_show_description (GTK_WIDGET (row), file->description);
 
   /* Use a fixed icon square and replace the placeholder when project data
-     becomes available. */
+     becomes available. Apply already-cached icons immediately so fast
+     scrolling never flashes pack.png for icons already on disk. */
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
   adw_action_row_add_prefix (ADW_ACTION_ROW (row), icon);
   g_object_set_data (G_OBJECT (row), "nuvashalauncher-icon", icon);
+  if ((file->local_icon_path != NULL &&
+       nuvashalauncher_icon_widget_set_file (icon, file->local_icon_path)) ||
+      (file->icon_url != NULL && *file->icon_url != '\0' &&
+       nuvashalauncher_icon_widget_set_cached_url (icon, file->icon_url)))
+    g_object_set_data (G_OBJECT (row), "nuvashalauncher-icon-loaded",
+                       GINT_TO_POINTER (1));
 
   /* Only a mod is something that can be turned off: a resource pack or a
      shader pack is loaded whenever it is present, so neither has a
@@ -424,8 +568,8 @@ load_row_icon (NuvashaLauncherContentPage *self, GtkWidget *row, int scroller_he
       !gtk_widget_compute_bounds (row, scroller, &bounds))
     return;
 
-  if (bounds.origin.y + bounds.size.height < 0 ||
-      bounds.origin.y > scroller_height)
+  if (bounds.origin.y + bounds.size.height < -800 ||
+      bounds.origin.y > scroller_height + 800)
     return;
 
   if (file->local_icon_path != NULL &&
