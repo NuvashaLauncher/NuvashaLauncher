@@ -2529,3 +2529,75 @@ msgstr "لا توجد عوالم"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "نسبة الأعطال %u%%"
+
+msgid "Java downloader"
+msgstr "أداة تنزيل Java"
+
+msgid "Open"
+msgstr "فتح"
+
+msgid "Downloading…"
+msgstr "جارٍ التنزيل…"
+
+msgid "Extracting…"
+msgstr "جارٍ الاستخراج…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "تم تثبيت Eclipse Temurin %d."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "بنية هذا النظام غير مدعومة من Eclipse Temurin."
+
+msgid "No Java releases found"
+msgstr "لم يتم العثور على إصدارات Java"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "لا تتوفر إصدارات Eclipse Temurin لهذا النظام."
+
+msgid "Could not load Java releases"
+msgstr "تعذر تحميل إصدارات Java"
+
+msgid "Launch defaults"
+msgstr "إعدادات التشغيل الافتراضية"
+
+msgid "RAM (MiB)"
+msgstr "الذاكرة العشوائية (MiB)"
+
+msgid "Window"
+msgstr "النافذة"
+
+msgid "Custom window settings"
+msgstr "إعدادات نافذة مخصصة"
+
+msgid "Window width"
+msgstr "عرض النافذة"
+
+msgid "Window height"
+msgstr "ارتفاع النافذة"
+
+msgid "Start in fullscreen"
+msgstr "البدء بملء الشاشة"
+
+msgid "Checking…"
+msgstr "جارٍ التحقق…"
+
+msgid "Online"
+msgstr "متصل"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld لاعب"

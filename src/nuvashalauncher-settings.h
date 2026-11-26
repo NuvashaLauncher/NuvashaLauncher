@@ -45,6 +45,9 @@ GQuark nuvashalauncher_settings_error_quark (void);
 #define NUVASHALAUNCHER_SETTINGS_DEFAULT_LOG_LINE_LIMIT 5000
 #define NUVASHALAUNCHER_SETTINGS_DEFAULT_CACHE_EXPIRATION \
   NUVASHALAUNCHER_SETTINGS_CACHE_EXPIRATION_1_HOUR
+#define NUVASHALAUNCHER_SETTINGS_DEFAULT_MEMORY_MIB 2048U
+#define NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_WIDTH 854U
+#define NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_HEIGHT 480U
 
 /* Looks up or compiles the application GSettings schema and opens a new
  * GSettings instance, returning NULL when no schema source is available. */
@@ -109,6 +112,32 @@ gboolean nuvashalauncher_settings_get_delete_dependents (NuvashaLauncherSettings
 gboolean nuvashalauncher_settings_set_delete_dependents (NuvashaLauncherSettings *self,
                                               gboolean value,
                                               GError **error);
+
+/* Global launch defaults (overridable per instance). */
+guint nuvashalauncher_settings_get_default_memory_mib (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_default_memory_mib (NuvashaLauncherSettings *self,
+                                                          guint value,
+                                                          GError **error);
+
+const char *nuvashalauncher_settings_get_default_jvm_args (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_default_jvm_args (NuvashaLauncherSettings *self,
+                                                        const char *value,
+                                                        GError **error);
+
+guint nuvashalauncher_settings_get_default_game_width (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_default_game_width (NuvashaLauncherSettings *self,
+                                                          guint value,
+                                                          GError **error);
+
+guint nuvashalauncher_settings_get_default_game_height (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_default_game_height (NuvashaLauncherSettings *self,
+                                                           guint value,
+                                                           GError **error);
+
+gboolean nuvashalauncher_settings_get_default_game_fullscreen (NuvashaLauncherSettings *self);
+gboolean nuvashalauncher_settings_set_default_game_fullscreen (NuvashaLauncherSettings *self,
+                                                               gboolean value,
+                                                               GError **error);
 
 G_END_DECLS
 

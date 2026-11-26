@@ -165,8 +165,16 @@ void on_banner_dismiss (AdwBanner *banner, gpointer user_data);
 void show_toast (NuvashaLauncherContentPage *self, const char *message);
 GtkWidget *plain_label (const char *text);
 void watch_widget (gpointer field, GtkWidget *widget);
+typedef void (*ContentInstallFinishedFunc) (gboolean success, gpointer user_data);
+
 void start_plan (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version,
                  const char *title, const char *replaces, gboolean disabled);
+void start_plan_direct (NuvashaLauncherContentPage *self,
+                        NuvashaLauncherModrinthVersion *version,
+                        const char *title,
+                        ContentInstallFinishedFunc on_finished,
+                        gpointer user_data,
+                        GDestroyNotify destroy_data);
 NuvashaLauncherContentFile *installed_project_file (NuvashaLauncherContentPage *self,
                                        const char *project_id);
 void remove_duplicate_project_files (NuvashaLauncherContentPage *self,

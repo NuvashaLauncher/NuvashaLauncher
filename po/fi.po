@@ -2484,3 +2484,75 @@ msgstr "Ei maailmoja"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% kaatumisaste"
+
+msgid "Java downloader"
+msgstr "Javan lataaja"
+
+msgid "Open"
+msgstr "Avaa"
+
+msgid "Downloading…"
+msgstr "Ladataan…"
+
+msgid "Extracting…"
+msgstr "Puretaan…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d asennettu."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Eclipse Temurin ei tue tätä järjestelmäarkkitehtuuria."
+
+msgid "No Java releases found"
+msgstr "Java-julkaisuja ei löytynyt"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "Tälle järjestelmälle ei ole saatavilla Eclipse Temurin -koonteja."
+
+msgid "Could not load Java releases"
+msgstr "Java-julkaisujen lataaminen epäonnistui"
+
+msgid "Launch defaults"
+msgstr "Käynnistyksen oletukset"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "Ikkuna"
+
+msgid "Custom window settings"
+msgstr "Mukautetut ikkuna-asetukset"
+
+msgid "Window width"
+msgstr "Ikkunan leveys"
+
+msgid "Window height"
+msgstr "Ikkunan korkeus"
+
+msgid "Start in fullscreen"
+msgstr "Käynnistä koko näytössä"
+
+msgid "Checking…"
+msgstr "Tarkistetaan…"
+
+msgid "Online"
+msgstr "Yhdistetty"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld pelaajaa"

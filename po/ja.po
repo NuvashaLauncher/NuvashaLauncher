@@ -2489,3 +2489,75 @@ msgstr "ワールドがありません"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "クラッシュ率 %u%%"
+
+msgid "Java downloader"
+msgstr "Java ダウンローダー"
+
+msgid "Open"
+msgstr "開く"
+
+msgid "Downloading…"
+msgstr "ダウンロード中…"
+
+msgid "Extracting…"
+msgstr "展開中…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d をインストールしました。"
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "このシステムアーキテクチャは Eclipse Temurin でサポートされていません。"
+
+msgid "No Java releases found"
+msgstr "Java リリースが見つかりません"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "このシステムで利用可能な Eclipse Temurin ビルドはありません。"
+
+msgid "Could not load Java releases"
+msgstr "Java リリースを読み込めませんでした"
+
+msgid "Launch defaults"
+msgstr "起動のデフォルト設定"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "ウィンドウ"
+
+msgid "Custom window settings"
+msgstr "カスタムウィンドウ設定"
+
+msgid "Window width"
+msgstr "ウィンドウの幅"
+
+msgid "Window height"
+msgstr "ウィンドウの高さ"
+
+msgid "Start in fullscreen"
+msgstr "フルスクリーンで起動"
+
+msgid "Checking…"
+msgstr "確認中…"
+
+msgid "Online"
+msgstr "オンライン"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld プレイヤー"

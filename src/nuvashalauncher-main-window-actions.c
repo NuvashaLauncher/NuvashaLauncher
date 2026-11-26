@@ -360,6 +360,105 @@ on_clear_cache_confirmed (GObject *source, GAsyncResult *result,
   wait->operation = nuvashalauncher_cache_clear_all_async (on_cache_cleared, wait);
 }
 
+static void
+on_default_memory_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                           gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  AdwSpinRow *row = ADW_SPIN_ROW (object);
+  guint value = (guint) adw_spin_row_get_value (row);
+  g_autoptr (GError) error = NULL;
+
+  if (value == nuvashalauncher_settings_get_default_memory_mib (self->model->settings))
+    return;
+
+  if (!nuvashalauncher_settings_set_default_memory_mib (self->model->settings, value, &error))
+    {
+      adw_spin_row_set_value (
+        row, nuvashalauncher_settings_get_default_memory_mib (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
+    }
+}
+
+static void
+on_default_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
+  g_autoptr (GError) error = NULL;
+
+  if (g_strcmp0 (text, nuvashalauncher_settings_get_default_jvm_args (self->model->settings)) == 0)
+    return;
+
+  if (!nuvashalauncher_settings_set_default_jvm_args (self->model->settings, text, &error))
+    {
+      gtk_editable_set_text (
+        GTK_EDITABLE (row),
+        nuvashalauncher_settings_get_default_jvm_args (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
+    }
+}
+
+static void
+on_default_game_width_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                               gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  AdwSpinRow *row = ADW_SPIN_ROW (object);
+  guint value = (guint) adw_spin_row_get_value (row);
+  g_autoptr (GError) error = NULL;
+
+  if (value == nuvashalauncher_settings_get_default_game_width (self->model->settings))
+    return;
+
+  if (!nuvashalauncher_settings_set_default_game_width (self->model->settings, value, &error))
+    {
+      adw_spin_row_set_value (
+        row, nuvashalauncher_settings_get_default_game_width (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
+    }
+}
+
+static void
+on_default_game_height_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                                gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  AdwSpinRow *row = ADW_SPIN_ROW (object);
+  guint value = (guint) adw_spin_row_get_value (row);
+  g_autoptr (GError) error = NULL;
+
+  if (value == nuvashalauncher_settings_get_default_game_height (self->model->settings))
+    return;
+
+  if (!nuvashalauncher_settings_set_default_game_height (self->model->settings, value, &error))
+    {
+      adw_spin_row_set_value (
+        row, nuvashalauncher_settings_get_default_game_height (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
+    }
+}
+
+static void
+on_default_game_fullscreen_toggled (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                                    gpointer user_data)
+{
+  NuvashaLauncherMainWindow *self = NUVASHALAUNCHER_MAIN_WINDOW (user_data);
+  AdwSwitchRow *row = ADW_SWITCH_ROW (object);
+  gboolean active = adw_switch_row_get_active (row);
+  g_autoptr (GError) error = NULL;
+
+  if (active == nuvashalauncher_settings_get_default_game_fullscreen (self->model->settings))
+    return;
+
+  if (!nuvashalauncher_settings_set_default_game_fullscreen (self->model->settings, active, &error))
+    {
+      adw_switch_row_set_active (
+        row, nuvashalauncher_settings_get_default_game_fullscreen (self->model->settings));
+      nuvashalauncher_ui_show_error (GTK_WIDGET (row), _("Technical details"), error);
+    }
+}
+
 static AdwDialog *
 create_settings_dialog (NuvashaLauncherMainWindow *self)
 {
@@ -370,6 +469,7 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
   AdwPreferencesGroup *language_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *cache_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwPreferencesGroup *general_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  AdwPreferencesGroup *defaults_group = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
   AdwComboRow *language_row = ADW_COMBO_ROW (adw_combo_row_new ());
   AdwSwitchRow *row = ADW_SWITCH_ROW (adw_switch_row_new ());
   AdwSpinRow *limit_row = NULL;
@@ -550,8 +650,75 @@ create_settings_dialog (NuvashaLauncherMainWindow *self)
   }
   adw_preferences_group_add (cache_group, GTK_WIDGET (clear_cache_row));
 
+  /* Global launch defaults */
+  adw_preferences_group_set_title (defaults_group, _("Launch defaults"));
+  {
+    AdwSpinRow *ram_row = ADW_SPIN_ROW (adw_spin_row_new (
+      gtk_adjustment_new (
+        nuvashalauncher_settings_get_default_memory_mib (self->model->settings),
+        512, 65536, 512, 2048, 0),
+      0, 0));
+    adw_spin_row_set_digits (ram_row, 0);
+    adw_spin_row_set_numeric (ram_row, TRUE);
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ram_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ram_row), _("RAM (MiB)"));
+    g_signal_connect_object (ram_row, "notify::value",
+                             G_CALLBACK (on_default_memory_changed), self, 0);
+    adw_preferences_group_add (defaults_group, GTK_WIDGET (ram_row));
+
+    AdwEntryRow *jvm_row = ADW_ENTRY_ROW (adw_entry_row_new ());
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (jvm_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (jvm_row), _("JVM Arguments"));
+    adw_entry_row_set_show_apply_button (jvm_row, TRUE);
+    gtk_editable_set_text (
+      GTK_EDITABLE (jvm_row),
+      nuvashalauncher_settings_get_default_jvm_args (self->model->settings));
+    g_signal_connect_object (jvm_row, "apply",
+                             G_CALLBACK (on_default_jvm_args_apply), self, 0);
+    adw_preferences_group_add (defaults_group, GTK_WIDGET (jvm_row));
+
+    AdwSpinRow *width_row = ADW_SPIN_ROW (adw_spin_row_new (
+      gtk_adjustment_new (
+        nuvashalauncher_settings_get_default_game_width (self->model->settings),
+        320, 7680, 10, 100, 0),
+      0, 0));
+    adw_spin_row_set_digits (width_row, 0);
+    adw_spin_row_set_numeric (width_row, TRUE);
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (width_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (width_row), _("Window width"));
+    g_signal_connect_object (width_row, "notify::value",
+                             G_CALLBACK (on_default_game_width_changed), self, 0);
+    adw_preferences_group_add (defaults_group, GTK_WIDGET (width_row));
+
+    AdwSpinRow *height_row = ADW_SPIN_ROW (adw_spin_row_new (
+      gtk_adjustment_new (
+        nuvashalauncher_settings_get_default_game_height (self->model->settings),
+        240, 4320, 10, 100, 0),
+      0, 0));
+    adw_spin_row_set_digits (height_row, 0);
+    adw_spin_row_set_numeric (height_row, TRUE);
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (height_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (height_row), _("Window height"));
+    g_signal_connect_object (height_row, "notify::value",
+                             G_CALLBACK (on_default_game_height_changed), self, 0);
+    adw_preferences_group_add (defaults_group, GTK_WIDGET (height_row));
+
+    AdwSwitchRow *fullscreen_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (fullscreen_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (fullscreen_row),
+                                   _("Start in fullscreen"));
+    adw_switch_row_set_active (
+      fullscreen_row,
+      nuvashalauncher_settings_get_default_game_fullscreen (self->model->settings));
+    g_signal_connect_object (fullscreen_row, "notify::active",
+                             G_CALLBACK (on_default_game_fullscreen_toggled), self, 0);
+    adw_preferences_group_add (defaults_group, GTK_WIDGET (fullscreen_row));
+  }
+
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                              general_group);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                             defaults_group);
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                              versions_group);
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),

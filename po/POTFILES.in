@@ -50,6 +50,8 @@ src/nuvashalauncher-instance-page-stats.c
 src/nuvashalauncher-instance-page.c
 src/nuvashalauncher-instance.c
 src/nuvashalauncher-java-discovery.c
+src/nuvashalauncher-java-download.c
+src/nuvashalauncher-java-downloader-dialog.c
 src/nuvashalauncher-java-parse.c
 src/nuvashalauncher-java-row-discovery.c
 src/nuvashalauncher-java-row.c
@@ -107,6 +109,7 @@ src/nuvashalauncher-modrinth.c
 src/nuvashalauncher-nbt.c
 src/nuvashalauncher-offline-account-dialog.c
 src/nuvashalauncher-secret-store.c
+src/nuvashalauncher-server-ping.c
 src/nuvashalauncher-servers-page.c
 src/nuvashalauncher-settings.c
 src/nuvashalauncher-sign-in-dialog.c
@@ -125,6 +128,7 @@ src/nuvashalauncher-version-row.c
 src/nuvashalauncher-worlds-page.c
 data/ui/nuvashalauncher-create-instance.ui
 data/ui/nuvashalauncher-download-row.ui
+data/ui/nuvashalauncher-java-downloader-dialog.ui
 data/ui/nuvashalauncher-modpack-browser-states.ui
 data/ui/nuvashalauncher-modpack-browser-toolbar.ui
 data/ui/nuvashalauncher-modpack-dialog.ui

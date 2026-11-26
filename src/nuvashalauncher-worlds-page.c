@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <glib/gstdio.h>
+#include <math.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -61,6 +62,7 @@ struct _NuvashaLauncherWorldsPage {
   GtkWidget *right_actions;
   AdwViewStack *stack;
   AdwPreferencesGroup *group;
+  GtkFixed *drag_layer;
   GtkSearchEntry *search_bar;
   AdwHeaderBar *header_bar;
   AdwClamp *header_search_clamp;
@@ -601,8 +603,265 @@ popover_menu_button (const char *label, WorldEntry *w, GtkWidget *popover,
   return btn;
 }
 
+static void rebuild_world_rows (NuvashaLauncherWorldsPage *self);
+
+typedef struct {
+  char *level_dat_path;
+  gint64 last_played;
+} WorldOrderUpdate;
+
+static void
+world_order_update_free (WorldOrderUpdate *u)
+{
+  if (u == NULL)
+    return;
+  g_free (u->level_dat_path);
+  g_free (u);
+}
+
+static void
+reorder_worlds_thread (GTask *task,
+                       gpointer source_object G_GNUC_UNUSED,
+                       gpointer task_data,
+                       GCancellable *cancellable G_GNUC_UNUSED)
+{
+  GPtrArray *updates = task_data;
+
+  for (guint i = 0; i < updates->len; i++)
+    {
+      WorldOrderUpdate *u = g_ptr_array_index (updates, i);
+      g_autoptr (NuvashaLauncherNbtTag) root =
+        nuvashalauncher_nbt_parse_file (u->level_dat_path, NULL);
+      NuvashaLauncherNbtTag *data =
+        root != NULL ? nuvashalauncher_nbt_compound_get (root, "Data") : NULL;
+
+      if (data == NULL || data->type != NUVASHALAUNCHER_NBT_COMPOUND)
+        continue;
+
+      nuvashalauncher_nbt_compound_set (
+        data, nuvashalauncher_nbt_new_long ("LastPlayed", u->last_played));
+      nuvashalauncher_nbt_write_file (root, u->level_dat_path, TRUE, NULL);
+    }
+
+  g_task_return_boolean (task, TRUE);
+}
+
+static void
+reorder_world (NuvashaLauncherWorldsPage *self, guint from_index, guint to_index)
+{
+  gpointer item;
+  gint64 max_ts = g_get_real_time () / 1000;
+  GPtrArray *updates;
+  g_autoptr (GTask) task = NULL;
+
+  if (self->worlds == NULL || self->group == NULL ||
+      from_index == to_index ||
+      from_index >= self->worlds->len ||
+      to_index >= self->worlds->len)
+    return;
+
+  item = g_ptr_array_steal_index (self->worlds, from_index);
+  g_ptr_array_insert (self->worlds, (gint) to_index, item);
+
+  for (guint i = 0; i < self->worlds->len; i++)
+    {
+      WorldEntry *w = g_ptr_array_index (self->worlds, i);
+      if (w->last_played > max_ts)
+        max_ts = w->last_played;
+    }
+
+  updates = g_ptr_array_new_with_free_func ((GDestroyNotify) world_order_update_free);
+  for (guint i = 0; i < self->worlds->len; i++)
+    {
+      WorldEntry *w = g_ptr_array_index (self->worlds, i);
+      gint64 desired = max_ts - (gint64) i * 1000;
+      if (w->last_played != desired)
+        {
+          WorldOrderUpdate *u = g_new0 (WorldOrderUpdate, 1);
+          w->last_played = desired;
+          u->level_dat_path = g_strdup (w->level_dat_path);
+          u->last_played = desired;
+          g_ptr_array_add (updates, u);
+        }
+    }
+
+  rebuild_world_rows (self);
+
+  if (updates->len > 0)
+    {
+      task = g_task_new (self, NULL, NULL, NULL);
+      g_task_set_task_data (task, updates, (GDestroyNotify) g_ptr_array_unref);
+      g_task_run_in_thread (task, reorder_worlds_thread);
+    }
+  else
+    {
+      g_ptr_array_unref (updates);
+    }
+}
+
+typedef struct {
+  NuvashaLauncherWorldsPage *page;
+  guint from_index;
+  guint target_index;
+  double start_y;
+  double ghost_origin_x;
+  double ghost_origin_y;
+  gboolean dragging;
+  GtkWidget *highlighted_row;
+  GtkWidget *ghost;
+} WorldRowDrag;
+
+static void
+clear_world_drag_visuals (WorldRowDrag *drag)
+{
+  if (drag->highlighted_row != NULL)
+    {
+      gtk_widget_remove_css_class (drag->highlighted_row, "nuvashalauncher-drop-target");
+      drag->highlighted_row = NULL;
+    }
+
+  if (drag->ghost != NULL)
+    {
+      if (drag->page != NULL && drag->page->drag_layer != NULL &&
+          gtk_widget_get_parent (drag->ghost) == GTK_WIDGET (drag->page->drag_layer))
+        gtk_fixed_remove (drag->page->drag_layer, drag->ghost);
+      drag->ghost = NULL;
+    }
+}
+
+static void
+world_row_drag_free (gpointer data)
+{
+  WorldRowDrag *drag = data;
+  if (drag == NULL)
+    return;
+  clear_world_drag_visuals (drag);
+  g_free (drag);
+}
+
+static void
+on_world_drag_begin (GtkGestureDrag *gesture,
+                     double start_x G_GNUC_UNUSED,
+                     double start_y,
+                     gpointer user_data)
+{
+  WorldRowDrag *drag = user_data;
+  GtkWidget *row = gtk_event_controller_get_widget (GTK_EVENT_CONTROLLER (gesture));
+
+  drag->from_index = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (row), "nuvashalauncher-idx"));
+  drag->target_index = drag->from_index;
+  drag->start_y = start_y;
+  drag->dragging = FALSE;
+  clear_world_drag_visuals (drag);
+}
+
+static void
+on_world_drag_update (GtkGestureDrag *gesture,
+                      double offset_x G_GNUC_UNUSED,
+                      double offset_y,
+                      gpointer user_data)
+{
+  WorldRowDrag *drag = user_data;
+  NuvashaLauncherWorldsPage *self = drag->page;
+  GtkWidget *row = gtk_event_controller_get_widget (GTK_EVENT_CONTROLLER (gesture));
+  double cur_y;
+
+  if (self == NULL || self->rows == NULL)
+    return;
+
+  if (!drag->dragging)
+    {
+      if (fabs (offset_y) < 8.0)
+        return;
+      drag->dragging = TRUE;
+
+      if (self->drag_layer != NULL)
+        {
+          graphene_rect_t bounds;
+          if (gtk_widget_compute_bounds (row, GTK_WIDGET (self->drag_layer), &bounds))
+            {
+              g_autoptr (GdkPaintable) paintable = gtk_widget_paintable_new (row);
+              GtkWidget *pic = gtk_picture_new_for_paintable (paintable);
+              gtk_widget_set_size_request (pic,
+                                           (int) bounds.size.width,
+                                           (int) bounds.size.height);
+              gtk_widget_set_can_target (pic, FALSE);
+              gtk_widget_add_css_class (pic, "nuvashalauncher-drag-ghost");
+              drag->ghost_origin_x = bounds.origin.x;
+              drag->ghost_origin_y = bounds.origin.y;
+              gtk_fixed_put (self->drag_layer, pic,
+                             drag->ghost_origin_x,
+                             drag->ghost_origin_y + offset_y);
+              drag->ghost = pic;
+            }
+        }
+    }
+  else if (drag->ghost != NULL && self->drag_layer != NULL)
+    {
+      gtk_fixed_move (self->drag_layer, drag->ghost,
+                      drag->ghost_origin_x,
+                      drag->ghost_origin_y + offset_y);
+    }
+
+  cur_y = drag->start_y + offset_y;
+  guint best = drag->from_index;
+  GtkWidget *best_row = NULL;
+
+  for (guint i = 0; i < self->rows->len; i++)
+    {
+      GtkWidget *cand = g_ptr_array_index (self->rows, i);
+      graphene_rect_t bounds;
+
+      if (!gtk_widget_get_visible (cand))
+        continue;
+      if (!gtk_widget_compute_bounds (cand, row, &bounds))
+        continue;
+
+      if (cur_y >= bounds.origin.y &&
+          cur_y <= bounds.origin.y + bounds.size.height)
+        {
+          best = i;
+          best_row = cand;
+          break;
+        }
+    }
+
+  drag->target_index = best;
+  if (drag->highlighted_row != best_row)
+    {
+      if (drag->highlighted_row != NULL)
+        {
+          gtk_widget_remove_css_class (drag->highlighted_row, "nuvashalauncher-drop-target");
+          drag->highlighted_row = NULL;
+        }
+      if (best_row != NULL && best_row != row)
+        {
+          gtk_widget_add_css_class (best_row, "nuvashalauncher-drop-target");
+          drag->highlighted_row = best_row;
+        }
+    }
+}
+
+static void
+on_world_drag_end (GtkGestureDrag *gesture G_GNUC_UNUSED,
+                   double offset_x G_GNUC_UNUSED,
+                   double offset_y G_GNUC_UNUSED,
+                   gpointer user_data)
+{
+  WorldRowDrag *drag = user_data;
+  guint from = drag->from_index;
+  guint to = drag->target_index;
+  gboolean was_dragging = drag->dragging;
+
+  clear_world_drag_visuals (drag);
+  drag->dragging = FALSE;
+
+  if (was_dragging && from != to && drag->page != NULL)
+    reorder_world (drag->page, from, to);
+}
+
 static GtkWidget *
-build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w)
+build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w, guint index)
 {
   AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
   adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
@@ -660,6 +919,20 @@ build_world_row (NuvashaLauncherWorldsPage *self, WorldEntry *w)
   gtk_menu_button_set_popover (GTK_MENU_BUTTON (menu_btn), popover);
   adw_action_row_add_suffix (row, menu_btn);
 
+  g_object_set_data (G_OBJECT (row), "nuvashalauncher-idx", GUINT_TO_POINTER (index));
+
+  WorldRowDrag *drag_state = g_new0 (WorldRowDrag, 1);
+  drag_state->page = self;
+  g_object_set_data_full (G_OBJECT (row), "nuvashalauncher-drag-state",
+                          drag_state, world_row_drag_free);
+
+  GtkGesture *drag_gesture = gtk_gesture_drag_new ();
+  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (drag_gesture), GDK_BUTTON_PRIMARY);
+  g_signal_connect (drag_gesture, "drag-begin", G_CALLBACK (on_world_drag_begin), drag_state);
+  g_signal_connect (drag_gesture, "drag-update", G_CALLBACK (on_world_drag_update), drag_state);
+  g_signal_connect (drag_gesture, "drag-end", G_CALLBACK (on_world_drag_end), drag_state);
+  gtk_widget_add_controller (GTK_WIDGET (row), GTK_EVENT_CONTROLLER (drag_gesture));
+
   return GTK_WIDGET (row);
 }
 
@@ -695,7 +968,7 @@ rebuild_world_rows (NuvashaLauncherWorldsPage *self)
   for (guint i = 0; i < self->worlds->len; i++)
     {
       WorldEntry *w = g_ptr_array_index (self->worlds, i);
-      GtkWidget *row = build_world_row (self, w);
+      GtkWidget *row = build_world_row (self, w, i);
       g_ptr_array_add (self->rows, row);
       adw_preferences_group_add (self->group, row);
     }
@@ -1243,7 +1516,13 @@ nuvashalauncher_worlds_page_new (NuvashaLauncherInstance *instance,
   g_signal_connect_object (empty_add_btn, "clicked", G_CALLBACK (on_add_world_clicked), self, 0);
   adw_status_page_set_child (empty, empty_add_btn);
 
-  adw_view_stack_add_named (self->stack, GTK_WIDGET (scroller), "list");
+  GtkOverlay *drag_overlay = GTK_OVERLAY (gtk_overlay_new ());
+  gtk_overlay_set_child (drag_overlay, GTK_WIDGET (scroller));
+  self->drag_layer = GTK_FIXED (gtk_fixed_new ());
+  gtk_widget_set_can_target (GTK_WIDGET (self->drag_layer), FALSE);
+  gtk_overlay_add_overlay (drag_overlay, GTK_WIDGET (self->drag_layer));
+
+  adw_view_stack_add_named (self->stack, GTK_WIDGET (drag_overlay), "list");
   adw_view_stack_add_named (self->stack, GTK_WIDGET (empty), "empty");
   gtk_box_append (inner, GTK_WIDGET (self->stack));
 

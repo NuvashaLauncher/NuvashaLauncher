@@ -2469,3 +2469,75 @@ msgstr "Không có thế giới nào"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% tỉ lệ lỗi"
+
+msgid "Java downloader"
+msgstr "Trình tải Java"
+
+msgid "Open"
+msgstr "Mở"
+
+msgid "Downloading…"
+msgstr "Đang tải xuống…"
+
+msgid "Extracting…"
+msgstr "Đang giải nén…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Đã cài đặt Eclipse Temurin %d."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Kiến trúc hệ thống này không được Eclipse Temurin hỗ trợ."
+
+msgid "No Java releases found"
+msgstr "Không tìm thấy phiên bản Java nào"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "Không có bản dựng Eclipse Temurin nào cho hệ thống này."
+
+msgid "Could not load Java releases"
+msgstr "Không thể tải danh sách phiên bản Java"
+
+msgid "Launch defaults"
+msgstr "Mặc định khởi chạy"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "Cửa sổ"
+
+msgid "Custom window settings"
+msgstr "Cài đặt cửa sổ tùy chỉnh"
+
+msgid "Window width"
+msgstr "Chiều rộng cửa sổ"
+
+msgid "Window height"
+msgstr "Chiều cao cửa sổ"
+
+msgid "Start in fullscreen"
+msgstr "Khởi chạy toàn màn hình"
+
+msgid "Checking…"
+msgstr "Đang kiểm tra…"
+
+msgid "Online"
+msgstr "Trực tuyến"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld người chơi"

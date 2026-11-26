@@ -6,6 +6,7 @@
     <file>ui/nuvashalauncher-sign-in.ui</file>
     <file>ui/nuvashalauncher-offline-account.ui</file>
     <file>ui/nuvashalauncher-create-instance.ui</file>
+    <file>ui/nuvashalauncher-java-downloader-dialog.ui</file>
     <file>ui/nuvashalauncher-modpack-import.ui</file>
     <file>ui/nuvashalauncher-modpack-dialog.ui</file>
     <file>ui/nuvashalauncher-modpack-browser-toolbar.ui</file>

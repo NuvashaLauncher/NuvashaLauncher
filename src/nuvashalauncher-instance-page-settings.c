@@ -8,6 +8,7 @@
 #include "nuvashalauncher-content-page.h"
 #include "nuvashalauncher-version-row.h"
 #include "nuvashalauncher-java.h"
+#include "nuvashalauncher-java-downloader-dialog.h"
 #include "nuvashalauncher-launcher.h"
 #include "nuvashalauncher-minecraft-versions.h"
 #include "nuvashalauncher-modpack.h"
@@ -67,30 +68,6 @@ on_jvm_args_apply (AdwEntryRow *row, gpointer user_data)
     }
 }
 
-static gboolean
-on_memory_output (AdwSpinRow *row, gpointer user_data G_GNUC_UNUSED)
-{
-  if ((guint) adw_spin_row_get_value (row) == 0)
-    {
-      gtk_editable_set_text (GTK_EDITABLE (row), "Default");
-      return TRUE;
-    }
-  return FALSE;
-}
-
-static gint
-on_memory_input (AdwSpinRow *row, gdouble *new_value, gpointer user_data G_GNUC_UNUSED)
-{
-  const char *text = gtk_editable_get_text (GTK_EDITABLE (row));
-
-  if (text != NULL && g_ascii_strcasecmp (text, "Default") == 0)
-    {
-      *new_value = 0.0;
-      return TRUE;
-    }
-  return FALSE;
-}
-
 static void
 on_memory_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED, gpointer user_data)
 {
@@ -107,9 +84,58 @@ on_memory_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED, gpointer us
   if (!nuvashalauncher_instance_manager_set_memory_mib (self->manager, self->instance,
                                                         value, &error))
     {
+      guint fallback = current > 0
+                         ? current
+                         : nuvashalauncher_settings_get_default_memory_mib (self->settings);
       instance_page_show_error (self, error);
-      adw_spin_row_set_value (row, (double) current);
+      adw_spin_row_set_value (row, (double) fallback);
     }
+}
+
+typedef struct {
+  NuvashaLauncherInstancePage *page;
+  AdwSwitchRow *override_row;
+  AdwSpinRow *width_row;
+  AdwSpinRow *height_row;
+  AdwSwitchRow *fullscreen_row;
+  gboolean syncing;
+} WindowOverrideControls;
+
+static void
+window_override_controls_save (WindowOverrideControls *ctrl)
+{
+  NuvashaLauncherInstancePage *self = ctrl->page;
+  gboolean active;
+  guint width = 0, height = 0;
+  gint fullscreen = -1;
+  g_autoptr (GError) error = NULL;
+
+  if (ctrl->syncing)
+    return;
+
+  active = adw_switch_row_get_active (ctrl->override_row);
+  gtk_widget_set_sensitive (GTK_WIDGET (ctrl->width_row), active);
+  gtk_widget_set_sensitive (GTK_WIDGET (ctrl->height_row), active);
+  gtk_widget_set_sensitive (GTK_WIDGET (ctrl->fullscreen_row), active);
+
+  if (active)
+    {
+      width = (guint) adw_spin_row_get_value (ctrl->width_row);
+      height = (guint) adw_spin_row_get_value (ctrl->height_row);
+      fullscreen = adw_switch_row_get_active (ctrl->fullscreen_row) ? 1 : 0;
+    }
+
+  if (!nuvashalauncher_instance_manager_set_window_settings (
+        self->manager, self->instance, width, height, fullscreen, &error))
+    instance_page_show_error (self, error);
+}
+
+static void
+on_window_override_changed (GObject *object G_GNUC_UNUSED,
+                            GParamSpec *pspec G_GNUC_UNUSED,
+                            gpointer user_data)
+{
+  window_override_controls_save (user_data);
 }
 
 typedef struct
@@ -422,6 +448,16 @@ on_java_selected (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
   java_status_refresh (self);
 }
 
+
+static void
+on_java_downloader_open_clicked (GtkButton *button G_GNUC_UNUSED, gpointer user_data)
+{
+  NuvashaLauncherInstancePage *self = NUVASHALAUNCHER_INSTANCE_PAGE (user_data);
+  NuvashaLauncherJavaDownloaderDialog *dialog =
+    nuvashalauncher_java_downloader_dialog_new (self->java_row);
+
+  adw_dialog_present (ADW_DIALOG (dialog), instance_page_dialog_parent (self));
+}
 
 /* ---------------------------------------------------------- *
  * The icon row
@@ -944,12 +980,23 @@ create_settings_page (NuvashaLauncherInstancePage *self)
                            GTK_WIDGET (nuvashalauncher_loader_row_get_version_row (
                              self->loader_row)));
 
-  /* Java: the installations detection found. The row ends in an entry
-     that adds one it did not report, so that is where they are added
-     from. */
+  /* Java: downloader row above the detected installations picker. */
   GtkWidget *java_row = GTK_WIDGET (nuvashalauncher_java_row_new ());
+  AdwActionRow *java_downloader_row = ADW_ACTION_ROW (adw_action_row_new ());
+  GtkWidget *java_downloader_open = gtk_button_new_with_label (_("Open"));
 
   adw_preferences_group_set_title (java, _("Java"));
+
+  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (java_downloader_row), FALSE);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (java_downloader_row),
+                                 _("Java downloader"));
+  gtk_widget_set_valign (java_downloader_open, GTK_ALIGN_CENTER);
+  g_signal_connect_object (java_downloader_open, "clicked",
+                           G_CALLBACK (on_java_downloader_open_clicked), self, 0);
+  adw_action_row_add_suffix (java_downloader_row, java_downloader_open);
+  adw_action_row_set_activatable_widget (java_downloader_row, java_downloader_open);
+  adw_preferences_group_add (java, GTK_WIDGET (java_downloader_row));
+  settings_search_add_row (java_group, GTK_WIDGET (java_downloader_row));
 
   g_signal_connect_object (java_row, "notify::selected",
                            G_CALLBACK (on_java_selected), self, 0);
@@ -975,16 +1022,12 @@ create_settings_page (NuvashaLauncherInstancePage *self)
 
   guint memory_mib = 0;
   g_object_get (self->instance, "memory-mib", &memory_mib, NULL);
-  AdwSpinRow *memory_row = ADW_SPIN_ROW (adw_spin_row_new_with_range (0, 65536, 512));
-  adw_spin_row_set_digits (memory_row, 0);
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (memory_row), "RAM (MiB)");
-  g_signal_connect_object (memory_row, "output",
-                           G_CALLBACK (on_memory_output), self, 0);
-  g_signal_connect_object (memory_row, "input",
-                           G_CALLBACK (on_memory_input), self, 0);
-  adw_spin_row_set_value (memory_row, (double) memory_mib);
   if (memory_mib == 0)
-    gtk_editable_set_text (GTK_EDITABLE (memory_row), "Default");
+    memory_mib = nuvashalauncher_settings_get_default_memory_mib (self->settings);
+  AdwSpinRow *memory_row = ADW_SPIN_ROW (adw_spin_row_new_with_range (512, 65536, 512));
+  adw_spin_row_set_digits (memory_row, 0);
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (memory_row), _("RAM (MiB)"));
+  adw_spin_row_set_value (memory_row, (double) memory_mib);
   g_signal_connect_object (memory_row, "notify::value",
                            G_CALLBACK (on_memory_changed), self, 0);
   adw_preferences_group_add (java, GTK_WIDGET (memory_row));
@@ -998,6 +1041,89 @@ create_settings_page (NuvashaLauncherInstancePage *self)
                            self, 0);
   adw_preferences_group_add (java, GTK_WIDGET (jvm_args_row));
   settings_search_add_row (java_group, GTK_WIDGET (jvm_args_row));
+
+  /* Window overrides (falls back to global defaults when off). */
+  AdwPreferencesGroup *window_group_widget = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  SettingsSearchGroup *window_search_group =
+    settings_search_add_group (search_state, window_group_widget);
+  gtk_widget_add_css_class (GTK_WIDGET (window_group_widget),
+                            "nuvashalauncher-preferences-surface");
+  adw_preferences_group_set_title (window_group_widget, _("Window"));
+  {
+    guint inst_width = 0, inst_height = 0;
+    gint inst_fullscreen = -1;
+    gboolean has_override;
+    guint shown_width, shown_height;
+    gboolean shown_fullscreen;
+    WindowOverrideControls *ctrl = g_new0 (WindowOverrideControls, 1);
+
+    g_object_get (self->instance,
+                  "game-width", &inst_width,
+                  "game-height", &inst_height,
+                  "game-fullscreen", &inst_fullscreen,
+                  NULL);
+    has_override = (inst_width > 0 || inst_height > 0 || inst_fullscreen >= 0);
+    shown_width = inst_width > 0
+                    ? inst_width
+                    : nuvashalauncher_settings_get_default_game_width (self->settings);
+    shown_height = inst_height > 0
+                     ? inst_height
+                     : nuvashalauncher_settings_get_default_game_height (self->settings);
+    shown_fullscreen = inst_fullscreen >= 0
+                         ? (inst_fullscreen != 0)
+                         : nuvashalauncher_settings_get_default_game_fullscreen (self->settings);
+
+    ctrl->page = self;
+    ctrl->syncing = TRUE;
+    ctrl->override_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->override_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->override_row),
+                                   _("Custom window settings"));
+    adw_switch_row_set_active (ctrl->override_row, has_override);
+
+    ctrl->width_row = ADW_SPIN_ROW (adw_spin_row_new_with_range (320, 7680, 10));
+    adw_spin_row_set_digits (ctrl->width_row, 0);
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->width_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->width_row), _("Window width"));
+    adw_spin_row_set_value (ctrl->width_row, (double) shown_width);
+    gtk_widget_set_sensitive (GTK_WIDGET (ctrl->width_row), has_override);
+
+    ctrl->height_row = ADW_SPIN_ROW (adw_spin_row_new_with_range (240, 4320, 10));
+    adw_spin_row_set_digits (ctrl->height_row, 0);
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->height_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->height_row), _("Window height"));
+    adw_spin_row_set_value (ctrl->height_row, (double) shown_height);
+    gtk_widget_set_sensitive (GTK_WIDGET (ctrl->height_row), has_override);
+
+    ctrl->fullscreen_row = ADW_SWITCH_ROW (adw_switch_row_new ());
+    adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (ctrl->fullscreen_row), FALSE);
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (ctrl->fullscreen_row),
+                                   _("Start in fullscreen"));
+    adw_switch_row_set_active (ctrl->fullscreen_row, shown_fullscreen);
+    gtk_widget_set_sensitive (GTK_WIDGET (ctrl->fullscreen_row), has_override);
+
+    ctrl->syncing = FALSE;
+    g_object_set_data_full (G_OBJECT (window_group_widget),
+                            "nuvashalauncher-window-override", ctrl, g_free);
+
+    g_signal_connect (ctrl->override_row, "notify::active",
+                      G_CALLBACK (on_window_override_changed), ctrl);
+    g_signal_connect (ctrl->width_row, "notify::value",
+                      G_CALLBACK (on_window_override_changed), ctrl);
+    g_signal_connect (ctrl->height_row, "notify::value",
+                      G_CALLBACK (on_window_override_changed), ctrl);
+    g_signal_connect (ctrl->fullscreen_row, "notify::active",
+                      G_CALLBACK (on_window_override_changed), ctrl);
+
+    adw_preferences_group_add (window_group_widget, GTK_WIDGET (ctrl->override_row));
+    settings_search_add_row (window_search_group, GTK_WIDGET (ctrl->override_row));
+    adw_preferences_group_add (window_group_widget, GTK_WIDGET (ctrl->width_row));
+    settings_search_add_row (window_search_group, GTK_WIDGET (ctrl->width_row));
+    adw_preferences_group_add (window_group_widget, GTK_WIDGET (ctrl->height_row));
+    settings_search_add_row (window_search_group, GTK_WIDGET (ctrl->height_row));
+    adw_preferences_group_add (window_group_widget, GTK_WIDGET (ctrl->fullscreen_row));
+    settings_search_add_row (window_search_group, GTK_WIDGET (ctrl->fullscreen_row));
+  }
 
   /* The Java row's compatibility warning needs the javaVersion field of
    * the instance's version document; fetching is offline-friendly via
@@ -1030,6 +1156,8 @@ create_settings_page (NuvashaLauncherInstancePage *self)
                             minecraft);
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             java);
+  adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
+                            window_group_widget);
   adw_preferences_page_add (ADW_PREFERENCES_PAGE (page),
                             actions);
 

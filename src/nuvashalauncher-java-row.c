@@ -552,7 +552,7 @@ nuvashalauncher_java_row_init (NuvashaLauncherJavaRow *self)
   g_signal_connect_object (self, "notify::selected",
                            G_CALLBACK (nuvashalauncher_java_row_on_picked), self, 0);
 
-  self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add Java runtime")));
+  self->add_button = GTK_BUTTON (gtk_button_new_with_label (_("Add")));
   gtk_widget_set_valign (GTK_WIDGET (self->add_button), GTK_ALIGN_CENTER);
   gtk_widget_set_visible (GTK_WIDGET (self->add_button), FALSE);
   g_signal_connect_object (self->add_button, "clicked",

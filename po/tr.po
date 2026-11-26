@@ -2490,3 +2490,75 @@ msgstr "Dünya Yok"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%%%u çökme oranı"
+
+msgid "Java downloader"
+msgstr "Java indirici"
+
+msgid "Open"
+msgstr "Aç"
+
+msgid "Downloading…"
+msgstr "İndiriliyor…"
+
+msgid "Extracting…"
+msgstr "Çıkarılıyor…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d kuruldu."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Bu sistem mimarisi Eclipse Temurin tarafından desteklenmiyor."
+
+msgid "No Java releases found"
+msgstr "Java sürümü bulunamadı"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "Bu sistem için kullanılabilir Eclipse Temurin derlemesi yok."
+
+msgid "Could not load Java releases"
+msgstr "Java sürümleri yüklenemedi"
+
+msgid "Launch defaults"
+msgstr "Varsayılan başlatma ayarları"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "Pencere"
+
+msgid "Custom window settings"
+msgstr "Özel pencere ayarları"
+
+msgid "Window width"
+msgstr "Pencere genişliği"
+
+msgid "Window height"
+msgstr "Pencere yüksekliği"
+
+msgid "Start in fullscreen"
+msgstr "Tam ekranda başlat"
+
+msgid "Checking…"
+msgstr "Kontrol ediliyor…"
+
+msgid "Online"
+msgstr "Çevrimiçi"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld oyuncu"

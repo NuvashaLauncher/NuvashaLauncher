@@ -6,7 +6,10 @@
 #include "nuvashalauncher-i18n.h"
 #include "nuvashalauncher-icons.h"
 #include "nuvashalauncher-nbt.h"
+#include "nuvashalauncher-server-ping.h"
 #include "nuvashalauncher-ui-feedback.h"
+
+#include <math.h>
 
 typedef struct {
   char *name;
@@ -17,6 +20,11 @@ typedef struct {
   gboolean has_accept_textures;
   gint8 hidden;
   gboolean has_hidden;
+  gboolean ping_done;
+  gboolean online;
+  gint64 players_online;
+  gint64 players_max;
+  gint64 ping_ms;
 } ServerEntry;
 
 static void
@@ -56,12 +64,14 @@ struct _NuvashaLauncherServersPage {
   GtkWidget *refresh_button;
   AdwViewStack *stack;
   AdwPreferencesGroup *group;
+  GtkFixed *drag_layer;
   GtkSearchEntry *search_bar;
   AdwHeaderBar *header_bar;
   AdwClamp *header_search_clamp;
   GPtrArray *rows;
   GPtrArray *servers;
   GHashTable *icon_cache;
+  GCancellable *ping_cancellable;
 };
 
 G_DEFINE_FINAL_TYPE (NuvashaLauncherServersPage, nuvashalauncher_servers_page, GTK_TYPE_BOX)
@@ -134,36 +144,27 @@ on_join_server_clicked (GtkButton *button, gpointer user_data)
   nuvashalauncher_launcher_start (self->launcher);
 }
 
-static void
-on_move_up_clicked (GtkButton *button, gpointer user_data)
-{
-  NuvashaLauncherServersPage *self = NUVASHALAUNCHER_SERVERS_PAGE (user_data);
-  guint index = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (button), "nuvashalauncher-idx"));
-
-  if (index == 0 || index >= self->servers->len)
-    return;
-
-  gpointer a = g_ptr_array_index (self->servers, index - 1);
-  gpointer b = g_ptr_array_index (self->servers, index);
-  g_ptr_array_index (self->servers, index - 1) = b;
-  g_ptr_array_index (self->servers, index) = a;
-  persist_and_reload (self);
-}
+static void rebuild_server_rows (NuvashaLauncherServersPage *self);
 
 static void
-on_move_down_clicked (GtkButton *button, gpointer user_data)
+reorder_server (NuvashaLauncherServersPage *self, guint from_index, guint to_index)
 {
-  NuvashaLauncherServersPage *self = NUVASHALAUNCHER_SERVERS_PAGE (user_data);
-  guint index = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (button), "nuvashalauncher-idx"));
+  g_autoptr (GError) error = NULL;
+  gpointer item;
 
-  if (index + 1 >= self->servers->len)
+  if (self->servers == NULL || self->group == NULL ||
+      from_index == to_index ||
+      from_index >= self->servers->len ||
+      to_index >= self->servers->len)
     return;
 
-  gpointer a = g_ptr_array_index (self->servers, index);
-  gpointer b = g_ptr_array_index (self->servers, index + 1);
-  g_ptr_array_index (self->servers, index) = b;
-  g_ptr_array_index (self->servers, index + 1) = a;
-  persist_and_reload (self);
+  item = g_ptr_array_steal_index (self->servers, from_index);
+  g_ptr_array_insert (self->servers, (gint) to_index, item);
+
+  if (!save_servers_dat (self, &error))
+    nuvashalauncher_ui_error_toast (GTK_WIDGET (self), GTK_WIDGET (self->toasts), error);
+
+  rebuild_server_rows (self);
 }
 
 typedef struct {
@@ -319,7 +320,11 @@ static void
 on_edit_server_clicked (GtkButton *button, gpointer user_data)
 {
   NuvashaLauncherServersPage *self = NUVASHALAUNCHER_SERVERS_PAGE (user_data);
+  GtkWidget *popover = g_object_get_data (G_OBJECT (button), "nuvashalauncher-popover");
   guint index = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (button), "nuvashalauncher-idx"));
+
+  if (popover != NULL)
+    gtk_popover_popdown (GTK_POPOVER (popover));
   present_server_dialog (self, TRUE, index);
 }
 
@@ -358,7 +363,11 @@ static void
 on_delete_server_clicked (GtkButton *button, gpointer user_data)
 {
   NuvashaLauncherServersPage *self = NUVASHALAUNCHER_SERVERS_PAGE (user_data);
+  GtkWidget *popover = g_object_get_data (G_OBJECT (button), "nuvashalauncher-popover");
   guint index = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (button), "nuvashalauncher-idx"));
+
+  if (popover != NULL)
+    gtk_popover_popdown (GTK_POPOVER (popover));
   if (index >= self->servers->len)
     return;
 
@@ -384,40 +393,280 @@ on_delete_server_clicked (GtkButton *button, gpointer user_data)
                            on_delete_server_response, d);
 }
 
+static void
+apply_server_icon (NuvashaLauncherServersPage *self,
+                   GtkWidget *icon,
+                   const char *icon_b64)
+{
+  if (icon == NULL || icon_b64 == NULL || *icon_b64 == '\0')
+    return;
+
+  GdkTexture *cached = self->icon_cache != NULL
+    ? g_hash_table_lookup (self->icon_cache, icon_b64)
+    : NULL;
+
+  if (cached != NULL)
+    {
+      nuvashalauncher_icon_widget_set_texture (icon, cached);
+      return;
+    }
+
+  gsize raw_len = 0;
+  g_autofree guchar *raw = g_base64_decode (icon_b64, &raw_len);
+  if (raw != NULL && raw_len > 0)
+    {
+      g_autoptr (GBytes) bytes = g_bytes_new (raw, raw_len);
+      g_autoptr (GdkTexture) texture = gdk_texture_new_from_bytes (bytes, NULL);
+      if (texture != NULL)
+        {
+          if (self->icon_cache != NULL)
+            g_hash_table_replace (self->icon_cache, g_strdup (icon_b64),
+                                  g_object_ref (texture));
+          nuvashalauncher_icon_widget_set_texture (icon, texture);
+        }
+    }
+}
+
 static GtkWidget *
 server_icon_widget (NuvashaLauncherServersPage *self, const char *icon_b64)
 {
   GtkWidget *icon = nuvashalauncher_icon_widget_new ("network-server-symbolic");
 
-  if (icon_b64 != NULL && *icon_b64 != '\0')
+  apply_server_icon (self, icon, icon_b64);
+  return icon;
+}
+
+static void
+update_server_row_status (GtkWidget *row, const ServerEntry *s)
+{
+  GtkWidget *dot = g_object_get_data (G_OBJECT (row), "nuvashalauncher-dot");
+  GtkLabel *ping_label = g_object_get_data (G_OBJECT (row), "nuvashalauncher-ping");
+  GtkLabel *subtitle_label = g_object_get_data (G_OBJECT (row), "nuvashalauncher-subtitle");
+
+  if (dot != NULL)
     {
-      GdkTexture *cached = self->icon_cache != NULL
-        ? g_hash_table_lookup (self->icon_cache, icon_b64)
-        : NULL;
+      gtk_widget_remove_css_class (dot, "nuvashalauncher-server-dot-online");
+      gtk_widget_remove_css_class (dot, "nuvashalauncher-server-dot-offline");
+      gtk_widget_remove_css_class (dot, "nuvashalauncher-server-dot-checking");
 
-      if (cached != NULL)
+      if (!s->ping_done)
+        gtk_widget_add_css_class (dot, "nuvashalauncher-server-dot-checking");
+      else if (s->online)
+        gtk_widget_add_css_class (dot, "nuvashalauncher-server-dot-online");
+      else
+        gtk_widget_add_css_class (dot, "nuvashalauncher-server-dot-offline");
+    }
+
+  if (ping_label != NULL)
+    {
+      if (s->ping_done && s->online && s->ping_ms >= 0)
         {
-          nuvashalauncher_icon_widget_set_texture (icon, cached);
-          return icon;
+          g_autofree char *ping_str = g_strdup_printf ("%" G_GINT64_FORMAT " ms", s->ping_ms);
+          gtk_label_set_text (ping_label, ping_str);
+          gtk_widget_set_visible (GTK_WIDGET (ping_label), TRUE);
         }
-
-      gsize raw_len = 0;
-      g_autofree guchar *raw = g_base64_decode (icon_b64, &raw_len);
-      if (raw != NULL && raw_len > 0)
+      else
         {
-          g_autoptr (GBytes) bytes = g_bytes_new (raw, raw_len);
-          g_autoptr (GdkTexture) texture = gdk_texture_new_from_bytes (bytes, NULL);
-          if (texture != NULL)
-            {
-              if (self->icon_cache != NULL)
-                g_hash_table_replace (self->icon_cache, g_strdup (icon_b64),
-                                      g_object_ref (texture));
-              nuvashalauncher_icon_widget_set_texture (icon, texture);
-            }
+          gtk_widget_set_visible (GTK_WIDGET (ping_label), FALSE);
         }
     }
 
-  return icon;
+  if (subtitle_label != NULL)
+    {
+      if (!s->ping_done)
+        {
+          gtk_label_set_text (subtitle_label, _("Checking…"));
+        }
+      else if (!s->online)
+        {
+          gtk_label_set_text (subtitle_label, _("Offline"));
+        }
+      else if (s->players_online >= 0 && s->players_max >= 0)
+        {
+          g_autofree char *players_str = g_strdup_printf (
+            _("%lld / %lld players"),
+            (long long) s->players_online, (long long) s->players_max);
+          gtk_label_set_text (subtitle_label, players_str);
+        }
+      else
+        {
+          gtk_label_set_text (subtitle_label, _("Online"));
+        }
+    }
+}
+
+static GtkWidget *
+server_popover_menu_button (const char *label, guint index, GtkWidget *popover,
+                            GCallback cb, NuvashaLauncherServersPage *self)
+{
+  GtkWidget *btn = gtk_button_new_with_label (label);
+  gtk_widget_add_css_class (btn, "flat");
+  gtk_widget_set_halign (btn, GTK_ALIGN_FILL);
+  g_object_set_data (G_OBJECT (btn), "nuvashalauncher-idx", GUINT_TO_POINTER (index));
+  g_object_set_data (G_OBJECT (btn), "nuvashalauncher-popover", popover);
+  g_signal_connect_object (btn, "clicked", cb, self, 0);
+  return btn;
+}
+
+typedef struct {
+  NuvashaLauncherServersPage *page;
+  guint from_index;
+  guint target_index;
+  double start_y;
+  double ghost_origin_x;
+  double ghost_origin_y;
+  gboolean dragging;
+  GtkWidget *highlighted_row;
+  GtkWidget *ghost;
+} ServerRowDrag;
+
+static void
+clear_server_drag_visuals (ServerRowDrag *drag)
+{
+  if (drag->highlighted_row != NULL)
+    {
+      gtk_widget_remove_css_class (drag->highlighted_row, "nuvashalauncher-drop-target");
+      drag->highlighted_row = NULL;
+    }
+
+  if (drag->ghost != NULL)
+    {
+      if (drag->page != NULL && drag->page->drag_layer != NULL &&
+          gtk_widget_get_parent (drag->ghost) == GTK_WIDGET (drag->page->drag_layer))
+        gtk_fixed_remove (drag->page->drag_layer, drag->ghost);
+      drag->ghost = NULL;
+    }
+}
+
+static void
+server_row_drag_free (gpointer data)
+{
+  ServerRowDrag *drag = data;
+  if (drag == NULL)
+    return;
+  clear_server_drag_visuals (drag);
+  g_free (drag);
+}
+
+static void
+on_server_drag_begin (GtkGestureDrag *gesture,
+                      double start_x G_GNUC_UNUSED,
+                      double start_y,
+                      gpointer user_data)
+{
+  ServerRowDrag *drag = user_data;
+  GtkWidget *row = gtk_event_controller_get_widget (GTK_EVENT_CONTROLLER (gesture));
+
+  drag->from_index = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (row), "nuvashalauncher-idx"));
+  drag->target_index = drag->from_index;
+  drag->start_y = start_y;
+  drag->dragging = FALSE;
+  clear_server_drag_visuals (drag);
+}
+
+static void
+on_server_drag_update (GtkGestureDrag *gesture,
+                       double offset_x G_GNUC_UNUSED,
+                       double offset_y,
+                       gpointer user_data)
+{
+  ServerRowDrag *drag = user_data;
+  NuvashaLauncherServersPage *self = drag->page;
+  GtkWidget *row = gtk_event_controller_get_widget (GTK_EVENT_CONTROLLER (gesture));
+  double cur_y;
+
+  if (self == NULL || self->rows == NULL)
+    return;
+
+  if (!drag->dragging)
+    {
+      if (fabs (offset_y) < 8.0)
+        return;
+      drag->dragging = TRUE;
+
+      if (self->drag_layer != NULL)
+        {
+          graphene_rect_t bounds;
+          if (gtk_widget_compute_bounds (row, GTK_WIDGET (self->drag_layer), &bounds))
+            {
+              g_autoptr (GdkPaintable) paintable = gtk_widget_paintable_new (row);
+              GtkWidget *pic = gtk_picture_new_for_paintable (paintable);
+              gtk_widget_set_size_request (pic,
+                                           (int) bounds.size.width,
+                                           (int) bounds.size.height);
+              gtk_widget_set_can_target (pic, FALSE);
+              gtk_widget_add_css_class (pic, "nuvashalauncher-drag-ghost");
+              drag->ghost_origin_x = bounds.origin.x;
+              drag->ghost_origin_y = bounds.origin.y;
+              gtk_fixed_put (self->drag_layer, pic,
+                             drag->ghost_origin_x,
+                             drag->ghost_origin_y + offset_y);
+              drag->ghost = pic;
+            }
+        }
+    }
+  else if (drag->ghost != NULL && self->drag_layer != NULL)
+    {
+      gtk_fixed_move (self->drag_layer, drag->ghost,
+                      drag->ghost_origin_x,
+                      drag->ghost_origin_y + offset_y);
+    }
+
+  cur_y = drag->start_y + offset_y;
+  guint best = drag->from_index;
+  GtkWidget *best_row = NULL;
+
+  for (guint i = 0; i < self->rows->len; i++)
+    {
+      GtkWidget *cand = g_ptr_array_index (self->rows, i);
+      graphene_rect_t bounds;
+
+      if (!gtk_widget_get_visible (cand))
+        continue;
+      if (!gtk_widget_compute_bounds (cand, row, &bounds))
+        continue;
+
+      if (cur_y >= bounds.origin.y &&
+          cur_y <= bounds.origin.y + bounds.size.height)
+        {
+          best = i;
+          best_row = cand;
+          break;
+        }
+    }
+
+  drag->target_index = best;
+  if (drag->highlighted_row != best_row)
+    {
+      if (drag->highlighted_row != NULL)
+        {
+          gtk_widget_remove_css_class (drag->highlighted_row, "nuvashalauncher-drop-target");
+          drag->highlighted_row = NULL;
+        }
+      if (best_row != NULL && best_row != row)
+        {
+          gtk_widget_add_css_class (best_row, "nuvashalauncher-drop-target");
+          drag->highlighted_row = best_row;
+        }
+    }
+}
+
+static void
+on_server_drag_end (GtkGestureDrag *gesture G_GNUC_UNUSED,
+                    double offset_x G_GNUC_UNUSED,
+                    double offset_y G_GNUC_UNUSED,
+                    gpointer user_data)
+{
+  ServerRowDrag *drag = user_data;
+  guint from = drag->from_index;
+  guint to = drag->target_index;
+  gboolean was_dragging = drag->dragging;
+
+  clear_server_drag_visuals (drag);
+  drag->dragging = FALSE;
+
+  if (was_dragging && from != to && drag->page != NULL)
+    reorder_server (drag->page, from, to);
 }
 
 static GtkWidget *
@@ -435,39 +684,100 @@ server_action_button (const char *icon_name, const char *tooltip, guint index,
 static GtkWidget *
 build_server_row (NuvashaLauncherServersPage *self, ServerEntry *s, guint index)
 {
-  AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
-  adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (row), FALSE);
-  adw_action_row_set_subtitle_lines (row, 2);
-  adw_action_row_set_subtitle_selectable (row, FALSE);
-  gtk_widget_add_css_class (GTK_WIDGET (row), "nuvashalauncher-content-file-row");
-  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row),
-                                 s->name != NULL && *s->name != '\0' ? s->name : s->ip);
-
-  adw_action_row_set_subtitle (row, s->ip != NULL ? s->ip : "");
-
+  AdwPreferencesRow *row = ADW_PREFERENCES_ROW (adw_preferences_row_new ());
+  GtkBox *hbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12));
   GtkWidget *icon = server_icon_widget (self, s->icon_b64);
+  GtkBox *vbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 2));
+  GtkBox *title_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+  GtkLabel *name_label = GTK_LABEL (gtk_label_new (
+    s->name != NULL && *s->name != '\0' ? s->name : (s->ip != NULL ? s->ip : "")));
+  GtkWidget *dot = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+  GtkLabel *ping_label = GTK_LABEL (gtk_label_new (""));
+  GtkLabel *subtitle_label = GTK_LABEL (gtk_label_new (""));
+  GtkWidget *play_btn;
+  GtkWidget *menu_btn;
+  GtkWidget *popover;
+  GtkBox *menu_box;
+  GtkWidget *del_btn;
+  GtkGesture *drag_gesture;
+  ServerRowDrag *drag_state;
+
+  gtk_widget_add_css_class (GTK_WIDGET (row), "nuvashalauncher-content-file-row");
+  gtk_widget_add_css_class (GTK_WIDGET (hbox), "nuvashalauncher-server-row-box");
+
   gtk_widget_set_valign (icon, GTK_ALIGN_CENTER);
-  adw_action_row_add_prefix (row, icon);
+  gtk_box_append (hbox, icon);
 
-  adw_action_row_add_suffix (
-    row, server_action_button ("media-playback-start-symbolic", _("Play"),
-                               index, G_CALLBACK (on_join_server_clicked), self));
-  GtkWidget *up = server_action_button ("go-up-symbolic", _("Move up"),
-                                        index, G_CALLBACK (on_move_up_clicked), self);
-  gtk_widget_set_sensitive (up, index > 0);
-  adw_action_row_add_suffix (row, up);
+  gtk_widget_set_hexpand (GTK_WIDGET (vbox), TRUE);
+  gtk_widget_set_valign (GTK_WIDGET (vbox), GTK_ALIGN_CENTER);
 
-  GtkWidget *down = server_action_button ("go-down-symbolic", _("Move down"),
-                                          index, G_CALLBACK (on_move_down_clicked), self);
-  gtk_widget_set_sensitive (down, index + 1 < self->servers->len);
-  adw_action_row_add_suffix (row, down);
+  gtk_label_set_ellipsize (name_label, PANGO_ELLIPSIZE_END);
+  gtk_label_set_xalign (name_label, 0.0f);
+  gtk_box_append (title_box, GTK_WIDGET (name_label));
 
-  adw_action_row_add_suffix (
-    row, server_action_button ("document-edit-symbolic", _("Edit"),
-                               index, G_CALLBACK (on_edit_server_clicked), self));
-  adw_action_row_add_suffix (
-    row, server_action_button ("edit-delete-symbolic", _("Delete"),
-                               index, G_CALLBACK (on_delete_server_clicked), self));
+  gtk_widget_set_valign (dot, GTK_ALIGN_CENTER);
+  gtk_widget_set_size_request (dot, 8, 8);
+  gtk_box_append (title_box, dot);
+
+  gtk_widget_add_css_class (GTK_WIDGET (ping_label), "dim-label");
+  gtk_widget_add_css_class (GTK_WIDGET (ping_label), "caption");
+  gtk_widget_set_valign (GTK_WIDGET (ping_label), GTK_ALIGN_CENTER);
+  gtk_widget_set_visible (GTK_WIDGET (ping_label), FALSE);
+  gtk_box_append (title_box, GTK_WIDGET (ping_label));
+
+  gtk_box_append (vbox, GTK_WIDGET (title_box));
+
+  gtk_widget_add_css_class (GTK_WIDGET (subtitle_label), "dim-label");
+  gtk_widget_add_css_class (GTK_WIDGET (subtitle_label), "caption");
+  gtk_label_set_ellipsize (subtitle_label, PANGO_ELLIPSIZE_END);
+  gtk_label_set_xalign (subtitle_label, 0.0f);
+  gtk_box_append (vbox, GTK_WIDGET (subtitle_label));
+
+  gtk_box_append (hbox, GTK_WIDGET (vbox));
+
+  play_btn = server_action_button ("media-playback-start-symbolic", _("Play"),
+                                   index, G_CALLBACK (on_join_server_clicked), self);
+  gtk_box_append (hbox, play_btn);
+
+  menu_btn = gtk_menu_button_new ();
+  gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (menu_btn), "view-more-symbolic");
+  gtk_widget_add_css_class (menu_btn, "flat");
+  gtk_widget_set_valign (menu_btn, GTK_ALIGN_CENTER);
+
+  popover = gtk_popover_new ();
+  menu_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 2));
+  gtk_box_append (menu_box,
+                  server_popover_menu_button (_("Edit"), index, popover,
+                                              G_CALLBACK (on_edit_server_clicked), self));
+  del_btn = server_popover_menu_button (_("Delete"), index, popover,
+                                        G_CALLBACK (on_delete_server_clicked), self);
+  gtk_widget_add_css_class (del_btn, "destructive-action");
+  gtk_box_append (menu_box, del_btn);
+  gtk_popover_set_child (GTK_POPOVER (popover), GTK_WIDGET (menu_box));
+  gtk_menu_button_set_popover (GTK_MENU_BUTTON (menu_btn), popover);
+  gtk_box_append (hbox, menu_btn);
+
+  gtk_list_box_row_set_child (GTK_LIST_BOX_ROW (row), GTK_WIDGET (hbox));
+
+  g_object_set_data (G_OBJECT (row), "nuvashalauncher-idx", GUINT_TO_POINTER (index));
+  g_object_set_data (G_OBJECT (row), "nuvashalauncher-icon", icon);
+  g_object_set_data (G_OBJECT (row), "nuvashalauncher-dot", dot);
+  g_object_set_data (G_OBJECT (row), "nuvashalauncher-ping", ping_label);
+  g_object_set_data (G_OBJECT (row), "nuvashalauncher-subtitle", subtitle_label);
+
+  update_server_row_status (GTK_WIDGET (row), s);
+
+  drag_state = g_new0 (ServerRowDrag, 1);
+  drag_state->page = self;
+  g_object_set_data_full (G_OBJECT (row), "nuvashalauncher-drag-state",
+                          drag_state, server_row_drag_free);
+
+  drag_gesture = gtk_gesture_drag_new ();
+  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (drag_gesture), GDK_BUTTON_PRIMARY);
+  g_signal_connect (drag_gesture, "drag-begin", G_CALLBACK (on_server_drag_begin), drag_state);
+  g_signal_connect (drag_gesture, "drag-update", G_CALLBACK (on_server_drag_update), drag_state);
+  g_signal_connect (drag_gesture, "drag-end", G_CALLBACK (on_server_drag_end), drag_state);
+  gtk_widget_add_controller (GTK_WIDGET (row), GTK_EVENT_CONTROLLER (drag_gesture));
 
   return GTK_WIDGET (row);
 }
@@ -542,10 +852,104 @@ on_server_search_key (GtkEventControllerKey *controller G_GNUC_UNUSED,
   return GDK_EVENT_PROPAGATE;
 }
 
+typedef struct {
+  NuvashaLauncherServersPage *page;
+  ServerEntry *entry; /* valid while ping_cancellable is not cancelled */
+} ServerPingReq;
+
+static void
+on_server_ping_ready (GObject *source G_GNUC_UNUSED,
+                      GAsyncResult *result,
+                      gpointer user_data)
+{
+  g_autofree ServerPingReq *req = user_data;
+  NuvashaLauncherServersPage *self = req->page;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaLauncherServerStatus) status =
+    nuvashalauncher_server_ping_finish (result, &error);
+  guint idx = 0;
+
+  if (status == NULL || self == NULL || self->servers == NULL ||
+      !g_ptr_array_find (self->servers, req->entry, &idx))
+    {
+      g_clear_object (&req->page);
+      return;
+    }
+
+  req->entry->ping_done = TRUE;
+  req->entry->online = status->online;
+  req->entry->players_online = status->players_online;
+  req->entry->players_max = status->players_max;
+  req->entry->ping_ms = status->ping_ms;
+
+  if (status->icon_b64 != NULL && *status->icon_b64 != '\0' &&
+      g_strcmp0 (req->entry->icon_b64, status->icon_b64) != 0)
+    {
+      g_free (req->entry->icon_b64);
+      req->entry->icon_b64 = g_strdup (status->icon_b64);
+      save_servers_dat (self, NULL);
+    }
+
+  if (idx < self->rows->len)
+    {
+      GtkWidget *row = g_ptr_array_index (self->rows, idx);
+      GtkWidget *icon = g_object_get_data (G_OBJECT (row), "nuvashalauncher-icon");
+      if (req->entry->icon_b64 != NULL)
+        apply_server_icon (self, icon, req->entry->icon_b64);
+      update_server_row_status (row, req->entry);
+    }
+
+  g_clear_object (&req->page);
+}
+
+static void
+ping_all_servers (NuvashaLauncherServersPage *self)
+{
+  if (self->ping_cancellable != NULL)
+    {
+      g_cancellable_cancel (self->ping_cancellable);
+      g_clear_object (&self->ping_cancellable);
+    }
+
+  if (self->servers->len == 0)
+    return;
+
+  self->ping_cancellable = g_cancellable_new ();
+
+  for (guint i = 0; i < self->servers->len; i++)
+    {
+      ServerEntry *s = g_ptr_array_index (self->servers, i);
+      ServerPingReq *req;
+      NuvashaLauncherTaskScope *scope;
+
+      if (s->ip == NULL || *s->ip == '\0')
+        {
+          s->ping_done = TRUE;
+          s->online = FALSE;
+          if (i < self->rows->len)
+            update_server_row_status (g_ptr_array_index (self->rows, i), s);
+          continue;
+        }
+
+      req = g_new0 (ServerPingReq, 1);
+      req->page = g_object_ref (self);
+      req->entry = s;
+
+      scope = nuvashalauncher_server_ping_async (s->ip, on_server_ping_ready, req);
+      nuvashalauncher_task_scope_release_when_done (scope, self->ping_cancellable);
+    }
+}
+
 void
 nuvashalauncher_servers_page_reload (NuvashaLauncherServersPage *self)
 {
   g_return_if_fail (NUVASHALAUNCHER_IS_SERVERS_PAGE (self));
+
+  if (self->ping_cancellable != NULL)
+    {
+      g_cancellable_cancel (self->ping_cancellable);
+      g_clear_object (&self->ping_cancellable);
+    }
 
   g_ptr_array_set_size (self->servers, 0);
 
@@ -575,6 +979,9 @@ nuvashalauncher_servers_page_reload (NuvashaLauncherServersPage *self)
                 nuvashalauncher_nbt_compound_get_byte (c, "acceptTextures", 0);
               s->has_hidden = nuvashalauncher_nbt_compound_get (c, "hidden") != NULL;
               s->hidden = nuvashalauncher_nbt_compound_get_byte (c, "hidden", 0);
+              s->players_online = -1;
+              s->players_max = -1;
+              s->ping_ms = -1;
               server_entry_refresh_search_key (s);
               g_ptr_array_add (self->servers, s);
             }
@@ -582,6 +989,7 @@ nuvashalauncher_servers_page_reload (NuvashaLauncherServersPage *self)
     }
 
   rebuild_server_rows (self);
+  ping_all_servers (self);
 }
 
 static void
@@ -600,6 +1008,12 @@ static void
 nuvashalauncher_servers_page_dispose (GObject *object)
 {
   NuvashaLauncherServersPage *self = NUVASHALAUNCHER_SERVERS_PAGE (object);
+
+  if (self->ping_cancellable != NULL)
+    {
+      g_cancellable_cancel (self->ping_cancellable);
+      g_clear_object (&self->ping_cancellable);
+    }
 
   if (self->header_bar != NULL)
     nuvashalauncher_servers_page_detach_header (self, self->header_bar);
@@ -695,6 +1109,12 @@ nuvashalauncher_servers_page_new (NuvashaLauncherInstance *instance,
   gtk_scrolled_window_set_policy (scroller, GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
   gtk_scrolled_window_set_child (scroller, GTK_WIDGET (clamp));
 
+  GtkOverlay *drag_overlay = GTK_OVERLAY (gtk_overlay_new ());
+  gtk_overlay_set_child (drag_overlay, GTK_WIDGET (scroller));
+  self->drag_layer = GTK_FIXED (gtk_fixed_new ());
+  gtk_widget_set_can_target (GTK_WIDGET (self->drag_layer), FALSE);
+  gtk_overlay_add_overlay (drag_overlay, GTK_WIDGET (self->drag_layer));
+
   AdwStatusPage *empty = ADW_STATUS_PAGE (adw_status_page_new ());
   gtk_widget_set_hexpand (GTK_WIDGET (empty), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (empty), TRUE);
@@ -708,7 +1128,7 @@ nuvashalauncher_servers_page_new (NuvashaLauncherInstance *instance,
   g_signal_connect_object (empty_add, "clicked", G_CALLBACK (on_add_server_clicked), self, 0);
   adw_status_page_set_child (empty, empty_add);
 
-  adw_view_stack_add_named (self->stack, GTK_WIDGET (scroller), "list");
+  adw_view_stack_add_named (self->stack, GTK_WIDGET (drag_overlay), "list");
   adw_view_stack_add_named (self->stack, GTK_WIDGET (empty), "empty");
   gtk_box_append (inner, GTK_WIDGET (self->stack));
 

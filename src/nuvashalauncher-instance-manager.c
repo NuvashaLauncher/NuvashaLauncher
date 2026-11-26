@@ -727,6 +727,51 @@ nuvashalauncher_instance_manager_set_memory_mib (NuvashaLauncherInstanceManager 
   return TRUE;
 }
 
+gboolean
+nuvashalauncher_instance_manager_set_window_settings (NuvashaLauncherInstanceManager *self,
+                                                      NuvashaLauncherInstance *instance,
+                                                      guint game_width,
+                                                      guint game_height,
+                                                      gint game_fullscreen,
+                                                      GError **error)
+{
+  guint old_width = 0, old_height = 0;
+  gint old_fullscreen = -1;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE_MANAGER (self), FALSE);
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_INSTANCE (instance), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (!g_list_store_find (self->instances, instance, NULL))
+    {
+      g_set_error_literal (error, NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR,
+                           NUVASHALAUNCHER_INSTANCE_MANAGER_ERROR_NOT_FOUND,
+                           "the instance is not registered");
+      return FALSE;
+    }
+
+  g_object_get (instance,
+                "game-width", &old_width,
+                "game-height", &old_height,
+                "game-fullscreen", &old_fullscreen,
+                NULL);
+  g_object_set (instance,
+                "game-width", game_width,
+                "game-height", game_height,
+                "game-fullscreen", game_fullscreen,
+                NULL);
+  if (!nuvashalauncher_instance_manager_save (self, error))
+    {
+      g_object_set (instance,
+                    "game-width", old_width,
+                    "game-height", old_height,
+                    "game-fullscreen", old_fullscreen,
+                    NULL);
+      return FALSE;
+    }
+  return TRUE;
+}
+
 static gboolean
 ensure_registered (NuvashaLauncherInstanceManager *self,
                    NuvashaLauncherInstance *instance,

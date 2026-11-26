@@ -13,6 +13,7 @@
 #include "nuvashalauncher-instance-manager.h"
 #include "nuvashalauncher-loaders.h"
 #include "nuvashalauncher-java.h"
+#include "nuvashalauncher-java-download.h"
 #include "nuvashalauncher-launcher.h"
 #include "nuvashalauncher-settings.h"
 #include "nuvashalauncher-instance.h"
@@ -23,7 +24,8 @@ nuvashalauncher_error_is_cancelled (const GError *error)
 {
   return g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) ||
     g_error_matches (error, NUVASHALAUNCHER_DOWNLOAD_ERROR, NUVASHALAUNCHER_DOWNLOAD_ERROR_CANCELLED) ||
-    g_error_matches (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED);
+    g_error_matches (error, NUVASHALAUNCHER_MODPACK_ERROR, NUVASHALAUNCHER_MODPACK_ERROR_CANCELLED) ||
+    g_error_matches (error, NUVASHALAUNCHER_JAVA_DOWNLOAD_ERROR, NUVASHALAUNCHER_JAVA_DOWNLOAD_ERROR_CANCELLED);
 }
 
 const char *
@@ -160,6 +162,22 @@ nuvashalauncher_error_message (const GError *error)
     return _("Could not install this mod loader. Choose another version or inspect Technical Details.");
   if (error->domain == NUVASHALAUNCHER_JAVA_ERROR)
     return _("The Java executable could not be used. Select a working Java runtime.");
+  if (error->domain == NUVASHALAUNCHER_JAVA_DOWNLOAD_ERROR)
+    {
+      switch (error->code)
+        {
+        case NUVASHALAUNCHER_JAVA_DOWNLOAD_ERROR_UNSUPPORTED_ARCH:
+          return _("This system architecture is not supported by Eclipse Temurin.");
+        case NUVASHALAUNCHER_JAVA_DOWNLOAD_ERROR_FORMAT:
+          return response;
+        case NUVASHALAUNCHER_JAVA_DOWNLOAD_ERROR_ARCHIVE:
+          return archive;
+        case NUVASHALAUNCHER_JAVA_DOWNLOAD_ERROR_IO:
+          return io;
+        default:
+          return _("The operation failed. See Technical Details for more information.");
+        }
+    }
   if (error->domain == NUVASHALAUNCHER_MC_ERROR)
     return _("The game metadata is invalid or unavailable. Refresh the version list and try again.");
   if (error->domain == NUVASHALAUNCHER_RESOLVE_ERROR)

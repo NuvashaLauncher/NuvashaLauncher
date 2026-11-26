@@ -2487,3 +2487,75 @@ msgstr "Inga världar"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% kraschfrekvens"
+
+msgid "Java downloader"
+msgstr "Java-hämtare"
+
+msgid "Open"
+msgstr "Öppna"
+
+msgid "Downloading…"
+msgstr "Hämtar…"
+
+msgid "Extracting…"
+msgstr "Packar upp…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d installerad."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Denna systemarkitektur stöds inte av Eclipse Temurin."
+
+msgid "No Java releases found"
+msgstr "Inga Java-utgåvor hittades"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "Inga Eclipse Temurin-byggen är tillgängliga för detta system."
+
+msgid "Could not load Java releases"
+msgstr "Kunde inte läsa in Java-utgåvor"
+
+msgid "Launch defaults"
+msgstr "Standardinställningar för start"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "Fönster"
+
+msgid "Custom window settings"
+msgstr "Anpassade fönsterinställningar"
+
+msgid "Window width"
+msgstr "Fönsterbredd"
+
+msgid "Window height"
+msgstr "Fönsterhöjd"
+
+msgid "Start in fullscreen"
+msgstr "Starta i helskärm"
+
+msgid "Checking…"
+msgstr "Kontrollerar…"
+
+msgid "Online"
+msgstr "Online"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld spelare"

@@ -10,6 +10,7 @@
 #include "nuvashalauncher-loaders.h"
 #include "nuvashalauncher-minecraft-resolve.h"
 #include "nuvashalauncher-minecraft-versions.h"
+#include "nuvashalauncher-settings.h"
 
 #include <string.h>
 
@@ -128,18 +129,83 @@ run_the_game (NuvashaLauncher *self)
   set_log_private_values (self, &session);
 
   guint memory_mib = 0;
+  guint game_width = 0;
+  guint game_height = 0;
+  gint game_fullscreen = -1;
+  g_autoptr (NuvashaLauncherSettings) settings = nuvashalauncher_settings_new ();
+  const char *effective_jvm_args = NULL;
+  guint effective_width = 0;
+  guint effective_height = 0;
+  gboolean effective_fullscreen = FALSE;
 
-  g_object_get (self->instance, "jvm-args", &jvm_args, "memory-mib", &memory_mib, NULL);
+  g_object_get (self->instance,
+                "jvm-args", &jvm_args,
+                "memory-mib", &memory_mib,
+                "game-width", &game_width,
+                "game-height", &game_height,
+                "game-fullscreen", &game_fullscreen,
+                NULL);
+
+  if (memory_mib == 0)
+    memory_mib = nuvashalauncher_settings_get_default_memory_mib (settings);
+
+  effective_jvm_args = (jvm_args != NULL && *jvm_args != '\0')
+                         ? jvm_args
+                         : nuvashalauncher_settings_get_default_jvm_args (settings);
+
+  effective_width = game_width > 0
+                      ? game_width
+                      : nuvashalauncher_settings_get_default_game_width (settings);
+  effective_height = game_height > 0
+                       ? game_height
+                       : nuvashalauncher_settings_get_default_game_height (settings);
+  effective_fullscreen = game_fullscreen >= 0
+                           ? (game_fullscreen != 0)
+                           : nuvashalauncher_settings_get_default_game_fullscreen (settings);
 
   argv = nuvashalauncher_launch_build_arguments_with_memory (
                                      self->preparation.resolved, &session,
                                      self->preparation.java_executable,
-                                     self->game_directory, jvm_args, memory_mib, &error);
+                                     self->game_directory, effective_jvm_args,
+                                     memory_mib, &error);
 
   if (argv == NULL)
     {
       launch_finished_with_error (self, g_steal_pointer (&error));
       return;
+    }
+
+  if (effective_fullscreen)
+    {
+      gboolean has_fullscreen = FALSE;
+      for (guint i = 0; i < argv->len; i++)
+        if (g_strcmp0 (g_ptr_array_index (argv, i), "--fullscreen") == 0)
+          {
+            has_fullscreen = TRUE;
+            break;
+          }
+      if (!has_fullscreen)
+        g_ptr_array_add (argv, g_strdup ("--fullscreen"));
+    }
+  else if (effective_width > 0 && effective_height > 0)
+    {
+      gboolean has_width = FALSE;
+      gboolean has_height = FALSE;
+      for (guint i = 0; i < argv->len; i++)
+        {
+          const char *arg = g_ptr_array_index (argv, i);
+          if (g_strcmp0 (arg, "--width") == 0)
+            has_width = TRUE;
+          else if (g_strcmp0 (arg, "--height") == 0)
+            has_height = TRUE;
+        }
+      if (!has_width && !has_height)
+        {
+          g_ptr_array_add (argv, g_strdup ("--width"));
+          g_ptr_array_add (argv, g_strdup_printf ("%u", effective_width));
+          g_ptr_array_add (argv, g_strdup ("--height"));
+          g_ptr_array_add (argv, g_strdup_printf ("%u", effective_height));
+        }
     }
 
   {

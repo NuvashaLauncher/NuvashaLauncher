@@ -5,6 +5,9 @@
 #ifndef NUVASHALAUNCHER_INSTANCE_PRIVATE_H
 #define NUVASHALAUNCHER_INSTANCE_PRIVATE_H
 #include "nuvashalauncher-instance.h"
+
+#define NUVASHALAUNCHER_INSTANCE_DEFAULT_MEMORY_MIB 2048U
+
 struct _NuvashaLauncherInstance
 {
   GObject parent_instance;
@@ -18,6 +21,9 @@ struct _NuvashaLauncherInstance
   char *java_path;
   char *jvm_args;
   guint memory_mib;
+  guint game_width;
+  guint game_height;
+  gint game_fullscreen; /* -1 = global default, 0 = windowed, 1 = fullscreen */
   guint64 play_seconds;
   gint64 last_played_at;
   gint64 created_at;

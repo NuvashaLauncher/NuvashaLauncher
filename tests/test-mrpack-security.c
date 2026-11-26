@@ -411,6 +411,15 @@ test_download_url_allowed (void)
     nuvashalauncher_modpack_download_url_allowed ("https://github.com:443/u/r/raw/f"));
   g_assert_true (nuvashalauncher_modpack_redirect_allowed (
     "https://github.com/u/r/raw/f", "https://cdn.modrinth.com/data/x"));
+  g_assert_true (nuvashalauncher_modpack_redirect_allowed (
+    "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21/jdk.tar.gz",
+    "https://release-assets.githubusercontent.com/github-production-release-asset/x"));
+  g_assert_true (nuvashalauncher_modpack_redirect_allowed (
+    "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21/jdk.tar.gz",
+    "https://objects.githubusercontent.com/github-production-release-asset/x"));
+  g_assert_false (nuvashalauncher_modpack_redirect_allowed (
+    "https://cdn.modrinth.com/data/x",
+    "https://release-assets.githubusercontent.com/x"));
   g_assert_false (nuvashalauncher_modpack_redirect_allowed (
     "https://github.com/u/r/raw/f", "https://evil.example/x"));
   g_assert_true (nuvashalauncher_modpack_redirect_allowed (

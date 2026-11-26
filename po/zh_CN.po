@@ -2441,3 +2441,75 @@ msgstr "无世界"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% 崩溃率"
+
+msgid "Java downloader"
+msgstr "Java 下载器"
+
+msgid "Open"
+msgstr "打开"
+
+msgid "Downloading…"
+msgstr "正在下载…"
+
+msgid "Extracting…"
+msgstr "正在解压…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "已安装 Eclipse Temurin %d。"
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Eclipse Temurin 不支持此系统架构。"
+
+msgid "No Java releases found"
+msgstr "未找到 Java 版本"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "此系统没有可用的 Eclipse Temurin 构建。"
+
+msgid "Could not load Java releases"
+msgstr "无法加载 Java 版本"
+
+msgid "Launch defaults"
+msgstr "默认启动设置"
+
+msgid "RAM (MiB)"
+msgstr "内存 (MiB)"
+
+msgid "Window"
+msgstr "窗口"
+
+msgid "Custom window settings"
+msgstr "自定义窗口设置"
+
+msgid "Window width"
+msgstr "窗口宽度"
+
+msgid "Window height"
+msgstr "窗口高度"
+
+msgid "Start in fullscreen"
+msgstr "以全屏启动"
+
+msgid "Checking…"
+msgstr "正在检查…"
+
+msgid "Online"
+msgstr "在线"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld 名玩家"

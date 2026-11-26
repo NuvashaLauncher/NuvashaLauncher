@@ -2493,3 +2493,75 @@ msgstr "Žádné světy"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% pádů"
+
+msgid "Java downloader"
+msgstr "Stahování Javy"
+
+msgid "Open"
+msgstr "Otevřít"
+
+msgid "Downloading…"
+msgstr "Stahování…"
+
+msgid "Extracting…"
+msgstr "Rozbalování…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d byl nainstalován."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Tato architektura systému není podporována Eclipse Temurin."
+
+msgid "No Java releases found"
+msgstr "Nebyly nalezeny žádné verze Javy"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "Pro tento systém nejsou dostupná žádná sestavení Eclipse Temurin."
+
+msgid "Could not load Java releases"
+msgstr "Nepodařilo se načíst verze Javy"
+
+msgid "Launch defaults"
+msgstr "Výchozí nastavení spuštění"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "Okno"
+
+msgid "Custom window settings"
+msgstr "Vlastní nastavení okna"
+
+msgid "Window width"
+msgstr "Šířka okna"
+
+msgid "Window height"
+msgstr "Výška okna"
+
+msgid "Start in fullscreen"
+msgstr "Spustit na celou obrazovku"
+
+msgid "Checking…"
+msgstr "Kontrola…"
+
+msgid "Online"
+msgstr "Online"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld hráčů"

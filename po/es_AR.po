@@ -2517,3 +2517,75 @@ msgstr "Sin mundos"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% de fallos"
+
+msgid "Java downloader"
+msgstr "Descargador de Java"
+
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Downloading…"
+msgstr "Descargando…"
+
+msgid "Extracting…"
+msgstr "Extrayendo…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d instalado."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Esta arquitectura del sistema no es compatible con Eclipse Temurin."
+
+msgid "No Java releases found"
+msgstr "No se encontraron versiones de Java"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "No hay compilaciones de Eclipse Temurin disponibles para este sistema."
+
+msgid "Could not load Java releases"
+msgstr "No se pudieron cargar las versiones de Java"
+
+msgid "Launch defaults"
+msgstr "Valores predeterminados de inicio"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "Ventana"
+
+msgid "Custom window settings"
+msgstr "Configuración de ventana personalizada"
+
+msgid "Window width"
+msgstr "Ancho de ventana"
+
+msgid "Window height"
+msgstr "Alto de ventana"
+
+msgid "Start in fullscreen"
+msgstr "Iniciar en pantalla completa"
+
+msgid "Checking…"
+msgstr "Comprobando…"
+
+msgid "Online"
+msgstr "En línea"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld jugadores"

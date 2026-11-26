@@ -217,6 +217,29 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
         }
     }
 
+  guint game_width = get_nonneg_uint (object, "game_width");
+  if (game_width > 7680)
+    game_width = 0;
+  guint game_height = get_nonneg_uint (object, "game_height");
+  if (game_height > 4320)
+    game_height = 0;
+  gint game_fullscreen = -1;
+  if (json_object_has_member (object, "game_fullscreen"))
+    {
+      JsonNode *node = json_object_get_member (object, "game_fullscreen");
+      if (node != NULL && JSON_NODE_HOLDS_VALUE (node))
+        {
+          if (json_node_get_value_type (node) == G_TYPE_BOOLEAN)
+            game_fullscreen = json_node_get_boolean (node) ? 1 : 0;
+          else if (json_node_get_value_type (node) == G_TYPE_INT64)
+            {
+              gint64 v = json_node_get_int (node);
+              if (v == 0 || v == 1)
+                game_fullscreen = (gint) v;
+            }
+        }
+    }
+
   guint64 play_seconds = (guint64) get_nonneg_int64 (object, "play_seconds");
   gint64 last_played_at = get_nonneg_int64 (object, "last_played_at");
   gint64 created_at = get_nonneg_int64 (object, "created_at");
@@ -248,6 +271,9 @@ nuvashalauncher_instance_new_from_json (JsonNode *node, GError **error)
                  "java-path", java_path,
                  "jvm_args", jvm_args,
                  "memory-mib", memory_mib,
+                 "game-width", game_width,
+                 "game-height", game_height,
+                 "game-fullscreen", game_fullscreen,
                  "play-seconds", play_seconds,
                  "last-played-at", last_played_at,
                  "created-at", created_at,
@@ -329,6 +355,13 @@ nuvashalauncher_instance_to_json (NuvashaLauncherInstance *self)
 
   add_optional_member (builder, "jvm_args", self->jvm_args);
   add_positive_int64 (builder, "memory_mib", (gint64) self->memory_mib);
+  add_positive_int64 (builder, "game_width", (gint64) self->game_width);
+  add_positive_int64 (builder, "game_height", (gint64) self->game_height);
+  if (self->game_fullscreen >= 0)
+    {
+      json_builder_set_member_name (builder, "game_fullscreen");
+      json_builder_add_boolean_value (builder, self->game_fullscreen != 0);
+    }
   add_positive_int64 (builder, "play_seconds", (gint64) self->play_seconds);
   add_positive_int64 (builder, "last_played_at", self->last_played_at);
   add_positive_int64 (builder, "created_at", self->created_at);

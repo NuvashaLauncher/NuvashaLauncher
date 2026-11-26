@@ -2478,3 +2478,75 @@ msgstr "Tidak Ada Dunia"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% tingkat crash"
+
+msgid "Java downloader"
+msgstr "Pengunduh Java"
+
+msgid "Open"
+msgstr "Buka"
+
+msgid "Downloading…"
+msgstr "Mengunduh…"
+
+msgid "Extracting…"
+msgstr "Mengekstrak…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d terpasang."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Arsitektur sistem ini tidak didukung oleh Eclipse Temurin."
+
+msgid "No Java releases found"
+msgstr "Tidak ada rilis Java yang ditemukan"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "Tidak ada build Eclipse Temurin yang tersedia untuk sistem ini."
+
+msgid "Could not load Java releases"
+msgstr "Tidak dapat memuat rilis Java"
+
+msgid "Launch defaults"
+msgstr "Default peluncuran"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "Jendela"
+
+msgid "Custom window settings"
+msgstr "Pengaturan jendela khusus"
+
+msgid "Window width"
+msgstr "Lebar jendela"
+
+msgid "Window height"
+msgstr "Tinggi jendela"
+
+msgid "Start in fullscreen"
+msgstr "Mulai dalam layar penuh"
+
+msgid "Checking…"
+msgstr "Memeriksa…"
+
+msgid "Online"
+msgstr "Daring"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld pemain"

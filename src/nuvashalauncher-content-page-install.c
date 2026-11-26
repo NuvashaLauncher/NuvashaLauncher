@@ -177,13 +177,39 @@ typedef struct {
   GPtrArray *files;       /* InstallFile* */
   guint index;
   NuvashaLauncherDownload *download;  /* the manager's entry, held while the run lives */
+  ContentInstallFinishedFunc on_finished;
+  gpointer on_finished_data;
+  GDestroyNotify on_finished_destroy;
 } FetchRun;
 
 static void fetch_next (FetchRun *run);
 
 static void
+fetch_notify (FetchRun *run, gboolean success)
+{
+  if (run->on_finished != NULL)
+    {
+      ContentInstallFinishedFunc cb = run->on_finished;
+      gpointer data = run->on_finished_data;
+      run->on_finished = NULL;
+      cb (success, data);
+    }
+}
+
+static void
 fetch_free (FetchRun *run)
 {
+  fetch_notify (run, FALSE);
+
+  if (run->on_finished_destroy != NULL)
+    {
+      GDestroyNotify destroy = run->on_finished_destroy;
+      gpointer data = run->on_finished_data;
+      run->on_finished_destroy = NULL;
+      run->on_finished_data = NULL;
+      destroy (data);
+    }
+
   if (run->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (run->page), (gpointer *) &run->page);
 
@@ -305,6 +331,8 @@ fetch_next (FetchRun *run)
 
   if (run->index >= run->files->len)
     {
+      fetch_notify (run, TRUE);
+
       if (self != NULL)
         {
           if (self->install_model->updating)
@@ -359,10 +387,12 @@ content_download_kind (NuvashaLauncherContentType type)
     }
 }
 
-/* Takes the files of an install and writes them in order. The run owns
- * @files from here. */
 static void
-start_fetch (NuvashaLauncherContentPage *self, GPtrArray *files)
+start_fetch_with_callback (NuvashaLauncherContentPage *self,
+                           GPtrArray *files,
+                           ContentInstallFinishedFunc on_finished,
+                           gpointer user_data,
+                           GDestroyNotify destroy_data)
 {
   FetchRun *run = g_new0 (FetchRun, 1);
   guint count = files != NULL ? files->len : 0;
@@ -371,6 +401,9 @@ start_fetch (NuvashaLauncherContentPage *self, GPtrArray *files)
   g_object_add_weak_pointer (G_OBJECT (self), (gpointer *) &run->page);
   run->files = files;
   run->folder = g_strdup (self->folder);
+  run->on_finished = on_finished;
+  run->on_finished_data = user_data;
+  run->on_finished_destroy = destroy_data;
 
   {
     const char *title = NULL;
@@ -391,6 +424,14 @@ start_fetch (NuvashaLauncherContentPage *self, GPtrArray *files)
   }
 
   fetch_next (run);
+}
+
+/* Takes the files of an install and writes them in order. The run owns
+ * @files from here. */
+static void
+start_fetch (NuvashaLauncherContentPage *self, GPtrArray *files)
+{
+  start_fetch_with_callback (self, files, NULL, NULL, NULL);
 }
 
 /* ---------------------------------------------------------- *
@@ -415,6 +456,11 @@ typedef struct {
 
   /* The versions request that has to answer before the plan moves on. */
   NuvashaLauncherTaskScope *operation;
+
+  gboolean skip_confirm;
+  ContentInstallFinishedFunc on_finished;
+  gpointer on_finished_data;
+  GDestroyNotify on_finished_destroy;
 } PlanRun;
 
 static void plan_free (PlanRun *plan);
@@ -469,6 +515,23 @@ plan_free (PlanRun *plan)
 {
   if (plan == NULL)
     return;
+
+  if (plan->on_finished != NULL)
+    {
+      ContentInstallFinishedFunc cb = plan->on_finished;
+      gpointer data = plan->on_finished_data;
+      plan->on_finished = NULL;
+      cb (FALSE, data);
+    }
+
+  if (plan->on_finished_destroy != NULL)
+    {
+      GDestroyNotify destroy = plan->on_finished_destroy;
+      gpointer data = plan->on_finished_data;
+      plan->on_finished_destroy = NULL;
+      plan->on_finished_data = NULL;
+      destroy (data);
+    }
 
   if (plan->page != NULL)
     g_object_remove_weak_pointer (G_OBJECT (plan->page),
@@ -595,11 +658,19 @@ on_plan_chosen (GObject *source, GAsyncResult *result, gpointer user_data)
 static void
 show_plan (NuvashaLauncherContentPage *self, PlanRun *plan)
 {
-  /* An update of the whole list was confirmed once, as a whole: this plan
-     is not asked for again, it is simply carried out. */
-  if (self->install_model->updating)
+  /* An update of the whole list was confirmed once, as a whole, and direct
+     version-picker downloads start immediately without a confirmation dialog. */
+  if (self->install_model->updating || plan->skip_confirm)
     {
-      start_fetch (self, plan->files);
+      ContentInstallFinishedFunc cb = plan->on_finished;
+      gpointer data = plan->on_finished_data;
+      GDestroyNotify destroy = plan->on_finished_destroy;
+
+      plan->on_finished = NULL;
+      plan->on_finished_data = NULL;
+      plan->on_finished_destroy = NULL;
+
+      start_fetch_with_callback (self, plan->files, cb, data, destroy);
       plan->files = NULL; /* the fetch owns them now */
       plan_free (plan);
       return;
@@ -746,10 +817,16 @@ plan_versions_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   plan_next (plan);
 }
 
-/* The install of one version and of everything it requires. */
-void
-start_plan (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version,
-            const char *title, const char *replaces, gboolean disabled)
+static void
+start_plan_internal (NuvashaLauncherContentPage *self,
+                     NuvashaLauncherModrinthVersion *version,
+                     const char *title,
+                     const char *replaces,
+                     gboolean disabled,
+                     gboolean skip_confirm,
+                     ContentInstallFinishedFunc on_finished,
+                     gpointer user_data,
+                     GDestroyNotify destroy_data)
 {
   PlanRun *plan = g_new0 (PlanRun, 1);
 
@@ -767,6 +844,10 @@ start_plan (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *ve
     }
   plan->replaces = replaces != NULL ? g_strdup (replaces) : NULL;
   plan->stays_disabled = disabled;
+  plan->skip_confirm = skip_confirm;
+  plan->on_finished = on_finished;
+  plan->on_finished_data = user_data;
+  plan->on_finished_destroy = destroy_data;
   plan->files =
     g_ptr_array_new_with_free_func ((GDestroyNotify) install_file_free);
   plan->queue = g_ptr_array_new_with_free_func (
@@ -783,6 +864,27 @@ start_plan (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *ve
   /* Show the plan first: the file itself is listed in it, and only the
    * fetch writes anything to the folder. */
   plan_next (plan);
+}
+
+/* The install of one version and of everything it requires. */
+void
+start_plan (NuvashaLauncherContentPage *self, NuvashaLauncherModrinthVersion *version,
+            const char *title, const char *replaces, gboolean disabled)
+{
+  start_plan_internal (self, version, title, replaces, disabled,
+                       FALSE, NULL, NULL, NULL);
+}
+
+void
+start_plan_direct (NuvashaLauncherContentPage *self,
+                   NuvashaLauncherModrinthVersion *version,
+                   const char *title,
+                   ContentInstallFinishedFunc on_finished,
+                   gpointer user_data,
+                   GDestroyNotify destroy_data)
+{
+  start_plan_internal (self, version, title, NULL, FALSE,
+                       TRUE, on_finished, user_data, destroy_data);
 }
 
 /* ---------------------------------------------------------- *

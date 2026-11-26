@@ -40,8 +40,31 @@ loader_request_free (LoaderRequest *request)
   g_free (request);
 }
 
+typedef struct {
+  NuvashaLauncher *launcher;
+  NuvashaLauncherVersionDescription *merged;
+  char *client_jar;
+  NuvashaLauncherTaskScope *operation;
+  GPtrArray *javas;
+} ResolveJavaCheck;
+
 static void
-start_description_resolve (NuvashaLauncher                   *self,
+resolve_java_check_free (ResolveJavaCheck *check)
+{
+  if (check == NULL)
+    return;
+
+  g_clear_object (&check->launcher);
+  g_clear_object (&check->merged);
+  g_free (check->client_jar);
+  g_clear_pointer (&check->javas, g_ptr_array_unref);
+  if (check->operation != NULL)
+    nuvashalauncher_task_scope_unref (check->operation);
+  g_free (check);
+}
+
+static void
+begin_description_resolve (NuvashaLauncher                   *self,
                            NuvashaLauncherVersionDescription *merged,
                            const char                        *client_jar)
 {
@@ -54,6 +77,129 @@ start_description_resolve (NuvashaLauncher                   *self,
   nuvashalauncher_task_scope_follow_cancellable (resolving,
                                      self->preparation.cancellable);
   nuvashalauncher_task_scope_unref_when_done (resolving);
+}
+
+static void
+finish_resolve_java_check (ResolveJavaCheck *check, GPtrArray *javas)
+{
+  NuvashaLauncher *self = check->launcher;
+  g_autofree char *instance_java = NULL;
+  int required = (check->merged != NULL && check->merged->java_version != NULL)
+                   ? check->merged->java_version->major_version
+                   : 0;
+  const NuvashaLauncherJava *java = choose_java (self, javas, required, &instance_java);
+
+  if (java == NULL)
+    {
+      resolve_java_check_free (check);
+      return;
+    }
+
+  remember_java (self, java);
+  begin_description_resolve (self, check->merged, check->client_jar);
+  resolve_java_check_free (check);
+}
+
+static void
+on_resolve_custom_java_probed (GObject *source G_GNUC_UNUSED,
+                               GAsyncResult *result,
+                               gpointer user_data)
+{
+  ResolveJavaCheck *check = user_data;
+  NuvashaLauncher *self = check->launcher;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaLauncherJava) custom =
+    nuvashalauncher_java_probe_finish (result, &error);
+
+  if (self->process.stop_requested ||
+      g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+    {
+      resolve_java_check_free (check);
+      return;
+    }
+
+  if (custom == NULL)
+    nuvashalauncher_instance_set_string (self->instance, "java-path", NULL, NULL);
+  else
+    g_ptr_array_add (check->javas, g_steal_pointer (&custom));
+
+  finish_resolve_java_check (check, check->javas);
+}
+
+static void
+on_resolve_java_detected (GObject *source G_GNUC_UNUSED,
+                          GAsyncResult *result,
+                          gpointer user_data)
+{
+  ResolveJavaCheck *check = user_data;
+  NuvashaLauncher *self = check->launcher;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (GPtrArray) javas = nuvashalauncher_java_detect_finish (result, &error);
+
+  if (javas == NULL)
+    {
+      launch_finished_with_error (self, g_steal_pointer (&error));
+      resolve_java_check_free (check);
+      return;
+    }
+
+  if (self->process.stop_requested)
+    {
+      resolve_java_check_free (check);
+      return;
+    }
+
+  finish_resolve_java_check (check, javas);
+}
+
+static void
+start_description_resolve (NuvashaLauncher                   *self,
+                           NuvashaLauncherVersionDescription *merged,
+                           const char                        *client_jar)
+{
+  /* If Java was already selected (e.g. before a Forge/NeoForge installer),
+   * go straight to resolving and downloading game files. */
+  if (self->preparation.java_executable != NULL)
+    {
+      begin_description_resolve (self, merged, client_jar);
+      return;
+    }
+
+  /* Verify a compatible Java runtime is available before downloading any
+   * game files, libraries, or assets so missing-Java launches fail fast. */
+  g_autofree char *instance_java = NULL;
+  ResolveJavaCheck *check = g_new0 (ResolveJavaCheck, 1);
+
+  check->launcher = g_object_ref (self);
+  check->merged = g_object_ref (merged);
+  check->client_jar = g_strdup (client_jar);
+
+  g_object_get (self->instance, "java-path", &instance_java, NULL);
+  if (instance_java != NULL && *instance_java != '\0')
+    {
+      if (g_file_test (instance_java, G_FILE_TEST_IS_REGULAR) &&
+          g_file_test (instance_java, G_FILE_TEST_IS_EXECUTABLE))
+        {
+          check->javas = g_ptr_array_new_with_free_func (
+            (GDestroyNotify) nuvashalauncher_java_free);
+          check->operation = nuvashalauncher_java_probe_async (
+            instance_java, on_resolve_custom_java_probed, check);
+        }
+      else
+        {
+          nuvashalauncher_instance_set_string (self->instance, "java-path", NULL, NULL);
+          check->operation = nuvashalauncher_java_detect_async (
+            on_resolve_java_detected, check);
+        }
+    }
+  else
+    {
+      check->operation = nuvashalauncher_java_detect_async (
+        on_resolve_java_detected, check);
+    }
+
+  nuvashalauncher_task_scope_follow_cancellable (check->operation,
+                                                 self->preparation.cancellable);
 }
 
 /* What an install is fetching, which is a handful of files out of the
@@ -316,6 +462,32 @@ resolve_with_a_loader (NuvashaLauncher *self,
                                      self->preparation.cancellable);
 }
 
+static void
+on_vanilla_only_loaded (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
+                        gpointer user_data)
+{
+  NuvashaLauncher *self = NUVASHALAUNCHER_LAUNCHER (user_data);
+  g_autoptr (GError) error = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) document =
+    nuvashalauncher_version_load_finish (result, &error);
+
+  if (document == NULL)
+    {
+      launch_finished_with_error (self, g_steal_pointer (&error));
+      g_object_unref (self);
+      return;
+    }
+
+  if (self->process.stop_requested)
+    {
+      g_object_unref (self);
+      return;
+    }
+
+  start_description_resolve (self, document, NULL);
+  g_object_unref (self);
+}
+
 void
 on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
                    gpointer user_data)
@@ -363,15 +535,12 @@ on_manifest_ready (GObject *source G_GNUC_UNUSED, GAsyncResult *result,
   }
 
   {
-    g_autofree char *natives_dir =
-      g_build_filename (self->game_directory, "natives", NULL);
-    NuvashaLauncherTaskScope *resolving = nuvashalauncher_resolve_version_async (
-      manifest, self->version, NULL, natives_dir, NULL, on_resolve_progress,
-      self, on_resolved, g_object_ref (self));
+    NuvashaLauncherTaskScope *loading = nuvashalauncher_version_load_async (
+      manifest, self->version, on_vanilla_only_loaded, g_object_ref (self));
 
-    nuvashalauncher_task_scope_follow_cancellable (resolving,
-                                       self->preparation.cancellable);
-    nuvashalauncher_task_scope_unref_when_done (resolving);
+    nuvashalauncher_task_scope_follow_cancellable (loading,
+                                                   self->preparation.cancellable);
+    nuvashalauncher_task_scope_unref_when_done (loading);
   }
 
   g_object_unref (self);

@@ -53,6 +53,9 @@ enum
   PROP_JAVA_PATH,
   PROP_JVM_ARGS,
   PROP_MEMORY_MIB,
+  PROP_GAME_WIDTH,
+  PROP_GAME_HEIGHT,
+  PROP_GAME_FULLSCREEN,
   PROP_PLAY_SECONDS,
   PROP_LAST_PLAYED_AT,
   PROP_CREATED_AT,
@@ -641,6 +644,18 @@ nuvashalauncher_instance_set_property (GObject      *object,
       self->memory_mib = g_value_get_uint (value);
       break;
 
+    case PROP_GAME_WIDTH:
+      self->game_width = g_value_get_uint (value);
+      break;
+
+    case PROP_GAME_HEIGHT:
+      self->game_height = g_value_get_uint (value);
+      break;
+
+    case PROP_GAME_FULLSCREEN:
+      self->game_fullscreen = g_value_get_int (value);
+      break;
+
     case PROP_PLAY_SECONDS:
       self->play_seconds = g_value_get_uint64 (value);
       break;
@@ -730,6 +745,18 @@ nuvashalauncher_instance_get_property (GObject    *object,
 
     case PROP_MEMORY_MIB:
       g_value_set_uint (value, self->memory_mib);
+      break;
+
+    case PROP_GAME_WIDTH:
+      g_value_set_uint (value, self->game_width);
+      break;
+
+    case PROP_GAME_HEIGHT:
+      g_value_set_uint (value, self->game_height);
+      break;
+
+    case PROP_GAME_FULLSCREEN:
+      g_value_set_int (value, self->game_fullscreen);
       break;
 
     case PROP_PLAY_SECONDS:
@@ -857,9 +884,27 @@ nuvashalauncher_instance_class_init (NuvashaLauncherInstanceClass *klass)
 
   properties[PROP_MEMORY_MIB] =
     g_param_spec_uint ("memory-mib", "Maximum memory (MiB)",
-                       "Maximum JVM heap memory in MiB (0 for default)",
+                       "Maximum JVM heap memory in MiB (0 for global default)",
                        0, 1048576, 0,
                        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_GAME_WIDTH] =
+    g_param_spec_uint ("game-width", "Game window width",
+                       "Game window width override (0 for global default)",
+                       0, 7680, 0,
+                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_GAME_HEIGHT] =
+    g_param_spec_uint ("game-height", "Game window height",
+                       "Game window height override (0 for global default)",
+                       0, 4320, 0,
+                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  properties[PROP_GAME_FULLSCREEN] =
+    g_param_spec_int ("game-fullscreen", "Game fullscreen",
+                      "Game fullscreen override (-1 for global default, 0 windowed, 1 fullscreen)",
+                      -1, 1, -1,
+                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   properties[PROP_PLAY_SECONDS] =
     g_param_spec_uint64 ("play-seconds", "Play time (seconds)",
@@ -915,6 +960,10 @@ nuvashalauncher_instance_init (NuvashaLauncherInstance *self)
   /* Property defaults only apply to construct properties, so the JVM
    * arguments are set here. */
   self->jvm_args = g_strdup (DEFAULT_JVM_ARGS);
+  self->memory_mib = 0;
+  self->game_width = 0;
+  self->game_height = 0;
+  self->game_fullscreen = -1;
   self->loader = NUVASHALAUNCHER_LOADER_VANILLA;
   self->components = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                              g_free);

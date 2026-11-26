@@ -2513,3 +2513,75 @@ msgstr "Nicio lume"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% rată de blocare"
+
+msgid "Java downloader"
+msgstr "Descărcător Java"
+
+msgid "Open"
+msgstr "Deschide"
+
+msgid "Downloading…"
+msgstr "Se descarcă…"
+
+msgid "Extracting…"
+msgstr "Se extrage…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d a fost instalat."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Această arhitectură de sistem nu este suportată de Eclipse Temurin."
+
+msgid "No Java releases found"
+msgstr "Nu s-au găsit versiuni Java"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "Nu există versiuni Eclipse Temurin disponibile pentru acest sistem."
+
+msgid "Could not load Java releases"
+msgstr "Nu s-au putut încărca versiunile Java"
+
+msgid "Launch defaults"
+msgstr "Valori implicite de lansare"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "Fereastră"
+
+msgid "Custom window settings"
+msgstr "Setări personalizate ale ferestrei"
+
+msgid "Window width"
+msgstr "Lățime fereastră"
+
+msgid "Window height"
+msgstr "Înălțime fereastră"
+
+msgid "Start in fullscreen"
+msgstr "Pornește în ecran complet"
+
+msgid "Checking…"
+msgstr "Se verifică…"
+
+msgid "Online"
+msgstr "Online"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld jucători"

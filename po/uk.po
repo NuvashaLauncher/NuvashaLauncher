@@ -2497,3 +2497,75 @@ msgstr "Немає світів"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% збоїв"
+
+msgid "Java downloader"
+msgstr "Завантажувач Java"
+
+msgid "Open"
+msgstr "Відкрити"
+
+msgid "Downloading…"
+msgstr "Завантаження…"
+
+msgid "Extracting…"
+msgstr "Розпакування…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d встановлено."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Ця архітектура системи не підтримується Eclipse Temurin."
+
+msgid "No Java releases found"
+msgstr "Версій Java не знайдено"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "Для цієї системи немає доступних збірок Eclipse Temurin."
+
+msgid "Could not load Java releases"
+msgstr "Не вдалося завантажити версії Java"
+
+msgid "Launch defaults"
+msgstr "Типові параметри запуску"
+
+msgid "RAM (MiB)"
+msgstr "ОЗП (МіБ)"
+
+msgid "Window"
+msgstr "Вікно"
+
+msgid "Custom window settings"
+msgstr "Власні параметри вікна"
+
+msgid "Window width"
+msgstr "Ширина вікна"
+
+msgid "Window height"
+msgstr "Висота вікна"
+
+msgid "Start in fullscreen"
+msgstr "Запускати в повноекранному режимі"
+
+msgid "Checking…"
+msgstr "Перевірка…"
+
+msgid "Online"
+msgstr "У мережі"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld гравців"

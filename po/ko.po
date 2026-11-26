@@ -2467,3 +2467,75 @@ msgstr "월드 없음"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "충돌률 %u%%"
+
+msgid "Java downloader"
+msgstr "Java 다운로더"
+
+msgid "Open"
+msgstr "열기"
+
+msgid "Downloading…"
+msgstr "다운로드 중…"
+
+msgid "Extracting…"
+msgstr "압축 해제 중…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Eclipse Temurin %d 설치됨."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "이 시스템 아키텍처는 Eclipse Temurin에서 지원하지 않습니다."
+
+msgid "No Java releases found"
+msgstr "Java 릴리스를 찾을 수 없습니다"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "이 시스템에서 사용할 수 있는 Eclipse Temurin 빌드가 없습니다."
+
+msgid "Could not load Java releases"
+msgstr "Java 릴리스를 불러올 수 없습니다"
+
+msgid "Launch defaults"
+msgstr "기본 실행 설정"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "창"
+
+msgid "Custom window settings"
+msgstr "사용자 지정 창 설정"
+
+msgid "Window width"
+msgstr "창 너비"
+
+msgid "Window height"
+msgstr "창 높이"
+
+msgid "Start in fullscreen"
+msgstr "전체 화면으로 시작"
+
+msgid "Checking…"
+msgstr "확인 중…"
+
+msgid "Online"
+msgstr "온라인"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld명"

@@ -13,8 +13,13 @@ static const char *allowed_hosts[] = {
   "gitlab.com",
 };
 
-gboolean
-nuvashalauncher_modpack_download_url_allowed (const char *url)
+static const char *github_redirect_hosts[] = {
+  "release-assets.githubusercontent.com",
+  "objects.githubusercontent.com",
+};
+
+static gboolean
+url_matches_hosts (const char *url, const char *const *hosts, gsize n_hosts)
 {
   g_autoptr (GUri) uri = NULL;
   const char *scheme = NULL;
@@ -36,17 +41,35 @@ nuvashalauncher_modpack_download_url_allowed (const char *url)
       host == NULL || userinfo != NULL || g_uri_get_port (uri) != -1)
     return FALSE;
 
-  for (gsize i = 0; i < G_N_ELEMENTS (allowed_hosts); i++)
-    if (g_ascii_strcasecmp (host, allowed_hosts[i]) == 0)
+  for (gsize i = 0; i < n_hosts; i++)
+    if (g_ascii_strcasecmp (host, hosts[i]) == 0)
       return TRUE;
 
   return FALSE;
 }
 
 gboolean
+nuvashalauncher_modpack_download_url_allowed (const char *url)
+{
+  return url_matches_hosts (url, allowed_hosts, G_N_ELEMENTS (allowed_hosts));
+}
+
+gboolean
 nuvashalauncher_modpack_redirect_allowed (const char *original,
                                           const char *redirected)
 {
-  return !nuvashalauncher_modpack_download_url_allowed (original) ||
-         nuvashalauncher_modpack_download_url_allowed (redirected);
+  static const char *const github_only[] = { "github.com" };
+
+  if (!nuvashalauncher_modpack_download_url_allowed (original))
+    return TRUE;
+
+  if (nuvashalauncher_modpack_download_url_allowed (redirected))
+    return TRUE;
+
+  if (url_matches_hosts (original, github_only, G_N_ELEMENTS (github_only)) &&
+      url_matches_hosts (redirected, github_redirect_hosts,
+                         G_N_ELEMENTS (github_redirect_hosts)))
+    return TRUE;
+
+  return FALSE;
 }

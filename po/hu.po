@@ -2494,3 +2494,75 @@ msgstr "Nincsenek világok"
 
 #~ msgid "%u%% crash rate"
 #~ msgstr "%u%% összeomlási arány"
+
+msgid "Java downloader"
+msgstr "Java-letöltő"
+
+msgid "Open"
+msgstr "Megnyitás"
+
+msgid "Downloading…"
+msgstr "Letöltés…"
+
+msgid "Extracting…"
+msgstr "Kicsomagolás…"
+
+msgid "Java %d"
+msgstr "Java %d"
+
+msgid "Java %d (LTS)"
+msgstr "Java %d (LTS)"
+
+msgid "Eclipse Temurin"
+msgstr "Eclipse Temurin"
+
+msgid "Eclipse Temurin %d"
+msgstr "Eclipse Temurin %d"
+
+msgid "Installed Eclipse Temurin %d."
+msgstr "Az Eclipse Temurin %d telepítve lett."
+
+msgid "Linux (%s)"
+msgstr "Linux (%s)"
+
+msgid "This system architecture is not supported by Eclipse Temurin."
+msgstr "Ezt a rendszerarchitektúrát nem támogatja az Eclipse Temurin."
+
+msgid "No Java releases found"
+msgstr "Nem találhatók Java-kiadások"
+
+msgid "No Eclipse Temurin builds are available for this system."
+msgstr "Ehhez a rendszerhez nem érhetők el Eclipse Temurin buildek."
+
+msgid "Could not load Java releases"
+msgstr "Nem sikerült betölteni a Java-kiadásokat"
+
+msgid "Launch defaults"
+msgstr "Indítási alapértékek"
+
+msgid "RAM (MiB)"
+msgstr "RAM (MiB)"
+
+msgid "Window"
+msgstr "Ablak"
+
+msgid "Custom window settings"
+msgstr "Egyéni ablakbeállítások"
+
+msgid "Window width"
+msgstr "Ablakszélesség"
+
+msgid "Window height"
+msgstr "Ablakmagasság"
+
+msgid "Start in fullscreen"
+msgstr "Indítás teljes képernyőn"
+
+msgid "Checking…"
+msgstr "Ellenőrzés…"
+
+msgid "Online"
+msgstr "Online"
+
+msgid "%lld / %lld players"
+msgstr "%lld / %lld játékos"

@@ -15,6 +15,11 @@
 #define CACHE_EXPIRATION_KEY "cache-expiration"
 #define EXPORT_METADATA_KEY "export-metadata"
 #define DELETE_DEPENDENTS_KEY "delete-dependents"
+#define DEFAULT_MEMORY_MIB_KEY "default-memory-mib"
+#define DEFAULT_JVM_ARGS_KEY "default-jvm-args"
+#define DEFAULT_GAME_WIDTH_KEY "default-game-width"
+#define DEFAULT_GAME_HEIGHT_KEY "default-game-height"
+#define DEFAULT_GAME_FULLSCREEN_KEY "default-game-fullscreen"
 
 /* A stored limit below this is not a number a log can be trimmed to. */
 #define LOG_LINE_LIMIT_FLOOR 1
@@ -31,6 +36,11 @@ struct _NuvashaLauncherSettings
   NuvashaLauncherSettingsCacheExpiration cache_expiration;
   gboolean export_metadata;
   gboolean delete_dependents;
+  guint default_memory_mib;
+  char *default_jvm_args;
+  guint default_game_width;
+  guint default_game_height;
+  gboolean default_game_fullscreen;
   GSettings *desktop_settings;
 };
 
@@ -66,6 +76,20 @@ load (NuvashaLauncherSettings *self)
     self->desktop_settings, EXPORT_METADATA_KEY);
   self->delete_dependents = g_settings_get_boolean (
     self->desktop_settings, DELETE_DEPENDENTS_KEY);
+  {
+    guint mem = g_settings_get_uint (self->desktop_settings, DEFAULT_MEMORY_MIB_KEY);
+    self->default_memory_mib = mem >= 512 ? mem : NUVASHALAUNCHER_SETTINGS_DEFAULT_MEMORY_MIB;
+  }
+  g_free (self->default_jvm_args);
+  self->default_jvm_args = g_settings_get_string (self->desktop_settings, DEFAULT_JVM_ARGS_KEY);
+  {
+    guint w = g_settings_get_uint (self->desktop_settings, DEFAULT_GAME_WIDTH_KEY);
+    guint h = g_settings_get_uint (self->desktop_settings, DEFAULT_GAME_HEIGHT_KEY);
+    self->default_game_width = w >= 320 ? w : NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_WIDTH;
+    self->default_game_height = h >= 240 ? h : NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_HEIGHT;
+  }
+  self->default_game_fullscreen = g_settings_get_boolean (
+    self->desktop_settings, DEFAULT_GAME_FULLSCREEN_KEY);
 }
 
 static gboolean
@@ -343,6 +367,165 @@ nuvashalauncher_settings_set_cache_expiration (NuvashaLauncherSettings *self,
   return FALSE;
 }
 
+guint
+nuvashalauncher_settings_get_default_memory_mib (NuvashaLauncherSettings *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self),
+                        NUVASHALAUNCHER_SETTINGS_DEFAULT_MEMORY_MIB);
+  return self->default_memory_mib;
+}
+
+gboolean
+nuvashalauncher_settings_set_default_memory_mib (NuvashaLauncherSettings *self,
+                                                 guint value,
+                                                 GError **error)
+{
+  guint previous;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (value < 512 || value > 1048576)
+    {
+      g_set_error (error, NUVASHALAUNCHER_SETTINGS_ERROR, NUVASHALAUNCHER_SETTINGS_ERROR_INVALID,
+                   "the default RAM value is out of range");
+      return FALSE;
+    }
+
+  previous = self->default_memory_mib;
+  self->default_memory_mib = value;
+  if (save_uint (self, DEFAULT_MEMORY_MIB_KEY, value))
+    return TRUE;
+
+  self->default_memory_mib = previous;
+  return FALSE;
+}
+
+const char *
+nuvashalauncher_settings_get_default_jvm_args (NuvashaLauncherSettings *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), "");
+  return self->default_jvm_args != NULL ? self->default_jvm_args : "";
+}
+
+gboolean
+nuvashalauncher_settings_set_default_jvm_args (NuvashaLauncherSettings *self,
+                                               const char *value,
+                                               GError **error)
+{
+  char *previous;
+  const char *next = value != NULL ? value : "";
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->default_jvm_args;
+  self->default_jvm_args = g_strdup (next);
+  if (save_string (self, DEFAULT_JVM_ARGS_KEY, next))
+    {
+      g_free (previous);
+      return TRUE;
+    }
+
+  g_free (self->default_jvm_args);
+  self->default_jvm_args = previous;
+  return FALSE;
+}
+
+guint
+nuvashalauncher_settings_get_default_game_width (NuvashaLauncherSettings *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self),
+                        NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_WIDTH);
+  return self->default_game_width;
+}
+
+gboolean
+nuvashalauncher_settings_set_default_game_width (NuvashaLauncherSettings *self,
+                                                 guint value,
+                                                 GError **error)
+{
+  guint previous;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (value < 320 || value > 7680)
+    {
+      g_set_error (error, NUVASHALAUNCHER_SETTINGS_ERROR, NUVASHALAUNCHER_SETTINGS_ERROR_INVALID,
+                   "the default window width is out of range");
+      return FALSE;
+    }
+
+  previous = self->default_game_width;
+  self->default_game_width = value;
+  if (save_uint (self, DEFAULT_GAME_WIDTH_KEY, value))
+    return TRUE;
+
+  self->default_game_width = previous;
+  return FALSE;
+}
+
+guint
+nuvashalauncher_settings_get_default_game_height (NuvashaLauncherSettings *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self),
+                        NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_HEIGHT);
+  return self->default_game_height;
+}
+
+gboolean
+nuvashalauncher_settings_set_default_game_height (NuvashaLauncherSettings *self,
+                                                  guint value,
+                                                  GError **error)
+{
+  guint previous;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  if (value < 240 || value > 4320)
+    {
+      g_set_error (error, NUVASHALAUNCHER_SETTINGS_ERROR, NUVASHALAUNCHER_SETTINGS_ERROR_INVALID,
+                   "the default window height is out of range");
+      return FALSE;
+    }
+
+  previous = self->default_game_height;
+  self->default_game_height = value;
+  if (save_uint (self, DEFAULT_GAME_HEIGHT_KEY, value))
+    return TRUE;
+
+  self->default_game_height = previous;
+  return FALSE;
+}
+
+gboolean
+nuvashalauncher_settings_get_default_game_fullscreen (NuvashaLauncherSettings *self)
+{
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  return self->default_game_fullscreen;
+}
+
+gboolean
+nuvashalauncher_settings_set_default_game_fullscreen (NuvashaLauncherSettings *self,
+                                                      gboolean value,
+                                                      GError **error)
+{
+  gboolean previous;
+
+  g_return_val_if_fail (NUVASHALAUNCHER_IS_SETTINGS (self), FALSE);
+  g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
+
+  previous = self->default_game_fullscreen;
+  self->default_game_fullscreen = value;
+  if (save_boolean (self, DEFAULT_GAME_FULLSCREEN_KEY, value))
+    return TRUE;
+
+  self->default_game_fullscreen = previous;
+  return FALSE;
+}
+
 static void
 nuvashalauncher_settings_dispose (GObject *object)
 {
@@ -359,6 +542,7 @@ nuvashalauncher_settings_finalize (GObject *object)
   NuvashaLauncherSettings *self = NUVASHALAUNCHER_SETTINGS (object);
 
   g_clear_pointer (&self->language, g_free);
+  g_clear_pointer (&self->default_jvm_args, g_free);
 
   G_OBJECT_CLASS (nuvashalauncher_settings_parent_class)->finalize (object);
 }
@@ -538,6 +722,11 @@ nuvashalauncher_settings_init (NuvashaLauncherSettings *self)
   self->cache_expiration = NUVASHALAUNCHER_SETTINGS_DEFAULT_CACHE_EXPIRATION;
   self->export_metadata = FALSE;
   self->delete_dependents = TRUE;
+  self->default_memory_mib = NUVASHALAUNCHER_SETTINGS_DEFAULT_MEMORY_MIB;
+  self->default_jvm_args = g_strdup ("");
+  self->default_game_width = NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_WIDTH;
+  self->default_game_height = NUVASHALAUNCHER_SETTINGS_DEFAULT_GAME_HEIGHT;
+  self->default_game_fullscreen = FALSE;
 
   if (self->desktop_settings != NULL)
     load (self);
