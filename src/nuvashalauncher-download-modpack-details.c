@@ -791,6 +791,12 @@ on_modpack_batch_confirmed (GObject *source, GAsyncResult *result, gpointer user
             g_object_ref_sink (g_object_new (NUVASHALAUNCHER_TYPE_DOWNLOAD_MODPACK_DIALOG, NULL));
           runner->manager = g_object_ref (self->manager);
           runner->closed = TRUE;
+          g_clear_pointer (&runner->filter_loaders, g_ptr_array_unref);
+          g_clear_pointer (&runner->filter_versions, g_ptr_array_unref);
+          if (self->filter_loaders != NULL)
+            runner->filter_loaders = g_ptr_array_ref (self->filter_loaders);
+          if (self->filter_versions != NULL)
+            runner->filter_versions = g_ptr_array_ref (self->filter_versions);
 
           BatchModpackVersionFetch *fetch = g_new0 (BatchModpackVersionFetch, 1);
           fetch->dialog = runner;
