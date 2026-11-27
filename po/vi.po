@@ -2599,3 +2599,7 @@ msgstr "Đang tải phần phụ thuộc…"
 
 msgid "Downloading assets…"
 msgstr "Đang tải tài nguyên…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Bất kỳ trình nạp mod nào"

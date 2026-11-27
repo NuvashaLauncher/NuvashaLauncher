@@ -2614,3 +2614,7 @@ msgstr "Downloader afhængigheder…"
 
 msgid "Downloading assets…"
 msgstr "Downloader ressourcer…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Enhver modloader"

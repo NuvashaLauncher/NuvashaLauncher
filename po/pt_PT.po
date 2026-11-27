@@ -2623,3 +2623,7 @@ msgstr "A transferir dependências…"
 
 msgid "Downloading assets…"
 msgstr "A transferir recursos…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Qualquer carregador de mods"

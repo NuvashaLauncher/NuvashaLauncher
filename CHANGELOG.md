@@ -36,7 +36,7 @@ All notable changes to Nuvasha Launcher are documented in this file.
 - **Clean Language Overrides**: Stopped mutating `LC_MESSAGES` when switching the interface language and terminated `LANGUAGE` with `:C`, eliminating `Locale not supported by C library` GTK warnings on non-system languages.
 - **Forge & NeoForge Processor Maven Coordinate Resolution**: Resolved direct `[group:artifact:version@ext]` Maven coordinate arguments in Forge/NeoForge `install_profile.json` processors (such as `MCP_DATA`'s `mcp_config` input on Forge 1.20.1) to their `libraries/` paths and queued them for download instead of passing literal bracketed coordinates.
 - **Forge Missing Manifest & Version Prefix Normalization**: Created `META-INF/MANIFEST.MF` with `Manifest-Version: 1.0` when a Forge/NeoForge patched client JAR lacks a manifest before writing `Minecraft-Dists`, and normalized Forge versions missing the `<mc>-` prefix (such as `47.3.1` → `1.20.1-47.3.1`) when fetching the installer.
-- **Modpack Version Filtering by Active Filters**: Applied active modloader and Minecraft version filters when listing, quick-installing, and batch-installing modpack versions so unselected loaders or game versions are excluded.
+- **Modpack Version Filtering by Active Filters**: Applied active modloader and Minecraft version filters when listing, quick-installing, and batch-installing modpack versions so unselected loaders or game versions are excluded, and replaced the modpack loader checkboxes with a dropdown defaulting to **Any modloader** across all 28 translation catalogs.
 
 **Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.9...v2.0
 

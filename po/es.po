@@ -2647,3 +2647,7 @@ msgstr "Descargando dependencias…"
 
 msgid "Downloading assets…"
 msgstr "Descargando recursos…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Cualquier cargador de mods"

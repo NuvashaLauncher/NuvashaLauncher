@@ -2616,3 +2616,7 @@ msgstr "Laster ned avhengigheter…"
 
 msgid "Downloading assets…"
 msgstr "Laster ned ressurser…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Hvilken som helst modlaster"

@@ -2671,3 +2671,7 @@ msgstr "جارٍ تنزيل التبعيات…"
 
 msgid "Downloading assets…"
 msgstr "جارٍ تنزيل الأصول…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "أي محمل تعديلات"

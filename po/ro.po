@@ -2646,3 +2646,7 @@ msgstr "Se descarcă dependențele…"
 
 msgid "Downloading assets…"
 msgstr "Se descarcă resursele…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Orice modloader"

@@ -2594,3 +2594,7 @@ msgstr "종속성 다운로드 중…"
 
 msgid "Downloading assets…"
 msgstr "에셋 다운로드 중…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "모든 모드 로더"

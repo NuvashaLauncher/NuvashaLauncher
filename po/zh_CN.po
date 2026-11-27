@@ -2568,3 +2568,7 @@ msgstr "正在下载依赖…"
 
 msgid "Downloading assets…"
 msgstr "正在下载资源…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "任意模组加载器"

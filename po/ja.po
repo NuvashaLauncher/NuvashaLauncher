@@ -2616,3 +2616,7 @@ msgstr "依存関係をダウンロード中…"
 
 msgid "Downloading assets…"
 msgstr "アセットをダウンロード中…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "すべてのModローダー"

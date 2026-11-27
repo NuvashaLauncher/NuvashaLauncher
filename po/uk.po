@@ -2627,3 +2627,7 @@ msgstr "Завантаження залежностей…"
 
 msgid "Downloading assets…"
 msgstr "Завантаження ресурсів…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Будь-який завантажувач модів"

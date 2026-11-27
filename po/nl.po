@@ -2631,3 +2631,7 @@ msgstr "Afhankelijkheden downloaden…"
 
 msgid "Downloading assets…"
 msgstr "Middelen downloaden…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Elke modloader"

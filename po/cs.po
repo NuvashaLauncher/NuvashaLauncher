@@ -2626,3 +2626,7 @@ msgstr "Stahování závislostí…"
 
 msgid "Downloading assets…"
 msgstr "Stahování zdrojů…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Jakýkoli zavaděč"

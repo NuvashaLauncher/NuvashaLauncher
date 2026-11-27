@@ -2608,3 +2608,7 @@ msgstr "Mengunduh dependensi…"
 
 msgid "Downloading assets…"
 msgstr "Mengunduh aset…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Modloader apa saja"

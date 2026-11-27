@@ -118,32 +118,22 @@ on_modpack_sort_changed (GObject *object G_GNUC_UNUSED, GParamSpec *pspec G_GNUC
 }
 
 static void
-on_modpack_filter_toggled (GtkCheckButton *button, gpointer user_data)
+on_modpack_loader_changed (GObject *object, GParamSpec *pspec G_GNUC_UNUSED,
+                           gpointer user_data)
 {
   NuvashaLauncherDownloadModpackDialog *self = user_data;
-  GPtrArray *values = g_object_get_data (G_OBJECT (button), "filter-values");
-  const char *value = g_object_get_data (G_OBJECT (button), "filter-value");
+  GtkDropDown *drop = GTK_DROP_DOWN (object);
+  /* API values follow the dropdown order, never its translated labels. */
+  static const char *const loader_values[] = {
+    NULL, "fabric", "forge", "neoforge", "quilt"
+  };
+  guint selected = gtk_drop_down_get_selected (drop);
 
-  if (gtk_check_button_get_active (button))
-    g_ptr_array_add (values, g_strdup (value));
-  else
-    for (guint i = 0; i < values->len; i++)
-      if (g_strcmp0 (g_ptr_array_index (values, i), value) == 0)
-        { g_ptr_array_remove_index (values, i); break; }
+  g_ptr_array_set_size (self->filter_loaders, 0);
+  if (selected > 0 && selected < G_N_ELEMENTS (loader_values))
+    g_ptr_array_add (self->filter_loaders, g_strdup (loader_values[selected]));
 
-  on_modpack_filter_changed (GTK_WIDGET (button), self);
-}
-
-static GtkWidget *
-filter_check (const char *label, const char *value, GPtrArray *values,
-             NuvashaLauncherDownloadModpackDialog *self)
-{
-  GtkCheckButton *button = GTK_CHECK_BUTTON (gtk_check_button_new_with_label (label));
-  gtk_widget_add_css_class (GTK_WIDGET (button), "flat");
-  g_object_set_data (G_OBJECT (button), "filter-value", (gpointer) value);
-  g_object_set_data (G_OBJECT (button), "filter-values", values);
-  g_signal_connect (button, "toggled", G_CALLBACK (on_modpack_filter_toggled), self);
-  return GTK_WIDGET (button);
+  on_modpack_filter_changed (NULL, self);
 }
 
 /* ---------------------------------------------------------- *
@@ -771,26 +761,30 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
       _("All versions"), NULL });
     GtkDropDown *version_dropdown = GTK_DROP_DOWN (
       gtk_drop_down_new (G_LIST_MODEL (version_model), NULL));
+    GtkStringList *loader_model = gtk_string_list_new ((const char *[]) {
+      _("Any modloader"), "Fabric", "Forge", "NeoForge", "Quilt", NULL });
+    GtkDropDown *loader_dropdown = GTK_DROP_DOWN (
+      gtk_drop_down_new (G_LIST_MODEL (loader_model), NULL));
     GtkStringList *sort_model = gtk_string_list_new ((const char *[]) {
       _("Downloads"), _("Relevance"), _("Newest"), _("Recently updated"),
       _("Followers"), NULL });
     GtkDropDown *sort = GTK_DROP_DOWN (gtk_drop_down_new (G_LIST_MODEL (sort_model), NULL));
 
     gtk_widget_set_hexpand (GTK_WIDGET (version_dropdown), TRUE);
+    gtk_widget_set_hexpand (GTK_WIDGET (loader_dropdown), TRUE);
     gtk_drop_down_set_enable_search (version_dropdown, TRUE);
     gtk_widget_set_margin_start (GTK_WIDGET (filters), 8);
     gtk_widget_set_margin_end (GTK_WIDGET (filters), 8);
     gtk_widget_set_margin_top (GTK_WIDGET (filters), 8);
     gtk_widget_set_margin_bottom (GTK_WIDGET (filters), 8);
     gtk_box_append (filters, GTK_WIDGET (version_dropdown));
-    gtk_box_append (filters, filter_check ("Fabric", "fabric", self->filter_loaders, self));
-    gtk_box_append (filters, filter_check ("Forge", "forge", self->filter_loaders, self));
-    gtk_box_append (filters, filter_check ("NeoForge", "neoforge", self->filter_loaders, self));
-    gtk_box_append (filters, filter_check ("Quilt", "quilt", self->filter_loaders, self));
+    gtk_box_append (filters, GTK_WIDGET (loader_dropdown));
     gtk_box_append (filters, GTK_WIDGET (sort));
     nuvashalauncher_filter_entry_set_popover (
       NUVASHALAUNCHER_FILTER_ENTRY (self->search_entry), popover, _("Filter modpacks"));
     gtk_popover_set_child (popover, GTK_WIDGET (filters));
+    g_signal_connect (loader_dropdown, "notify::selected",
+                      G_CALLBACK (on_modpack_loader_changed), self);
     g_signal_connect (sort, "notify::selected", G_CALLBACK (on_modpack_sort_changed), self);
     gtk_widget_set_hexpand (GTK_WIDGET (toolbar), TRUE);
     self->filter_popover = popover;

@@ -2614,3 +2614,7 @@ msgstr "Ladataan riippuvuuksia…"
 
 msgid "Downloading assets…"
 msgstr "Ladataan resursseja…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Mikä tahansa modilataaja"

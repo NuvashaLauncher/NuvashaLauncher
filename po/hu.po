@@ -2624,3 +2624,7 @@ msgstr "Függőségek letöltése…"
 
 msgid "Downloading assets…"
 msgstr "Erőforrások letöltése…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Bármely modbetöltő"

@@ -2620,3 +2620,7 @@ msgstr "Bağımlılıklar indiriliyor…"
 
 msgid "Downloading assets…"
 msgstr "Varlıklar indiriliyor…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Herhangi bir mod yükleyici"

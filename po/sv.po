@@ -2617,3 +2617,7 @@ msgstr "Laddar ner beroenden…"
 
 msgid "Downloading assets…"
 msgstr "Laddar ner resurser…"
+
+#: src/nuvashalauncher-download-modpack-browser.c
+msgid "Any modloader"
+msgstr "Valfri modladdare"
