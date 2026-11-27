@@ -337,6 +337,30 @@ test_processor_bracket_coordinate_argument (void)
   remove_recursive (directory);
 }
 
+static void
+test_write_manifest_attribute_creates_missing_manifest (void)
+{
+  g_autofree char *directory = make_tmp_dir ();
+  g_autofree char *jar = g_build_filename (directory, "patched-no-manifest.jar", NULL);
+  g_autofree char *dists = NULL;
+  g_autoptr (GError) error = NULL;
+  const ZipEntry entries[] = {
+    ZIP_FILE ("net/minecraft/client/Main.class", "classbytes")
+  };
+
+  zip_write (jar, entries, G_N_ELEMENTS (entries));
+  g_assert_null (nuvashalauncher_loader_jar_manifest_attribute (jar, "Minecraft-Dists"));
+
+  g_assert_true (nuvashalauncher_loader_write_jar_manifest_attribute (
+    jar, "Minecraft-Dists", "client", &error));
+  g_assert_no_error (error);
+
+  dists = nuvashalauncher_loader_jar_manifest_attribute (jar, "Minecraft-Dists");
+  g_assert_cmpstr (dists, ==, "client");
+
+  remove_recursive (directory);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -351,5 +375,7 @@ main (int argc, char **argv)
                    test_builtin_installer_variables);
   g_test_add_func ("/loaders/bracket-coordinate-argument",
                    test_processor_bracket_coordinate_argument);
+  g_test_add_func ("/loaders/write-missing-manifest",
+                   test_write_manifest_attribute_creates_missing_manifest);
   return g_test_run ();
 }

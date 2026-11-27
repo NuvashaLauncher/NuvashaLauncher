@@ -464,6 +464,29 @@ nuvashalauncher_loader_write_jar_manifest_attribute (const char *path, const cha
   if (status != ARCHIVE_EOF)
     ok = FALSE;
 
+  /* Some Forge/NeoForge patched client jars have no META-INF/MANIFEST.MF;
+     create a minimal manifest with the requested attribute in that case. */
+  if (ok && !written)
+    {
+      struct archive_entry *manifest = archive_entry_new ();
+      g_autofree char *text =
+        g_strdup_printf ("Manifest-Version: 1.0\r\n%s: %s\r\n", name, value);
+      gsize len = strlen (text);
+
+      archive_entry_set_pathname (manifest, "META-INF/MANIFEST.MF");
+      archive_entry_set_filetype (manifest, AE_IFREG);
+      archive_entry_set_perm (manifest, 0644);
+      archive_entry_set_size (manifest, (la_int64_t) len);
+
+      if (archive_write_header (out, manifest) != ARCHIVE_OK ||
+          archive_write_data (out, text, len) != (la_ssize_t) len)
+        ok = FALSE;
+      else
+        written = TRUE;
+
+      archive_entry_free (manifest);
+    }
+
   archive_read_close (in);
   close (fd);
   fd = -1;

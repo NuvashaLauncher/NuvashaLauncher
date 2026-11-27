@@ -603,7 +603,17 @@ nuvashalauncher_loaders_install_async (NuvashaLauncherLoader              loader
   request->scope = scope;
   request->loader = loader;
   request->game_version = g_strdup (game_version);
-  request->loader_version = g_strdup (loader_version);
+  /* Modpack manifests (such as .mrpack) record Forge versions without the
+     "<mc>-" prefix, while Forge's Maven repository requires "<mc>-<forge>". */
+  if (loader == NUVASHALAUNCHER_LOADER_FORGE)
+    {
+      g_autofree char *prefix = g_strconcat (game_version, "-", NULL);
+
+      if (!g_str_has_prefix (loader_version, prefix))
+        request->loader_version = g_strconcat (prefix, loader_version, NULL);
+    }
+  if (request->loader_version == NULL)
+    request->loader_version = g_strdup (loader_version);
   request->java = g_strdup (java_executable);
   request->pending = g_ptr_array_new_with_free_func (install_file_free);
   request->progress = progress;
@@ -632,7 +642,7 @@ nuvashalauncher_loaders_install_async (NuvashaLauncherLoader              loader
      whole. */
   request->root = g_build_filename (request->data_dir, NUVASHALAUNCHER_LOADERS_SUBDIR,
                                     nuvashalauncher_loader_to_string (loader),
-                                    loader_version, NULL);
+                                    request->loader_version, NULL);
 
   /* The artifacts of a profile go into the library directory of the games,
      which is where the document of the loader names them: the patched
@@ -641,7 +651,8 @@ nuvashalauncher_loaders_install_async (NuvashaLauncherLoader              loader
                                              NULL);
 
   jar_name = g_strdup_printf ("%s-%s-installer.jar",
-                              nuvashalauncher_loader_to_string (loader), loader_version);
+                              nuvashalauncher_loader_to_string (loader),
+                              request->loader_version);
   request->installer = g_build_filename (request->root, jar_name, NULL);
 
   /* The client jar of the game version is what the processors patch, and
