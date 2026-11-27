@@ -756,7 +756,7 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
   {
     GtkBox *toolbar = GTK_BOX (gtk_widget_get_parent (GTK_WIDGET (self->search_entry)));
     GtkPopover *popover = GTK_POPOVER (gtk_popover_new ());
-    GtkBox *filters = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+    GtkBox *filters = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 6));
     GtkStringList *version_model = gtk_string_list_new ((const char *[]) {
       _("All versions"), NULL });
     GtkDropDown *version_dropdown = GTK_DROP_DOWN (
