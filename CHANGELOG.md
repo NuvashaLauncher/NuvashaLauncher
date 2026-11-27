@@ -34,6 +34,7 @@ All notable changes to Nuvasha Launcher are documented in this file.
 - **Disable Dependents Setting**: Added **Disabling a dependency disables the mod that depended on it** (off by default) in **Settings → General** across all 28 translation catalogs; re-enabling a dependency automatically re-enables the dependents it disabled.
 - **No Duplicate Minecraft Assets in File Cache**: Skipped copying globally shared Minecraft `assets/`, `libraries/`, and `versions/` into `~/.cache/nuvashalauncher/files/`, eliminating duplicate cached audio/library files while keeping hash caching for per-instance content.
 - **Clean Language Overrides**: Stopped mutating `LC_MESSAGES` when switching the interface language and terminated `LANGUAGE` with `:C`, eliminating `Locale not supported by C library` GTK warnings on non-system languages.
+- **Forge & NeoForge Processor Maven Coordinate Resolution**: Resolved direct `[group:artifact:version@ext]` Maven coordinate arguments in Forge/NeoForge `install_profile.json` processors (such as `MCP_DATA`'s `mcp_config` input on Forge 1.20.1) to their `libraries/` paths and queued them for download instead of passing literal bracketed coordinates.
 
 **Full Changelog**: https://github.com/NuvashaLauncher/NuvashaLauncher/compare/v1.9...v2.0
 

@@ -233,6 +233,110 @@ test_builtin_installer_variables (void)
     "\"json\":\"/version.json\"}", TRUE);
 }
 
+static void
+test_processor_bracket_coordinate_argument (void)
+{
+  g_autofree char *directory = make_tmp_dir ();
+  g_autofree char *libraries = g_build_filename (directory, "libraries", NULL);
+  g_autofree char *artifact_dir = g_build_filename (
+    libraries, "net/minecraftforge/forge/47.2.0", NULL);
+  g_autofree char *artifact = g_build_filename (artifact_dir, "forge-47.2.0.jar", NULL);
+  g_autofree char *mcp_dir = g_build_filename (
+    libraries, "de/oceanlabs/mcp/mcp_config/1.20.1-20230612.114412", NULL);
+  g_autofree char *mcp_zip = g_build_filename (
+    mcp_dir, "mcp_config-1.20.1-20230612.114412.zip", NULL);
+  g_autofree char *patched = g_build_filename (directory, "patched.jar", NULL);
+  g_autofree char *captured = g_build_filename (directory, "captured.txt", NULL);
+  g_autofree char *java = g_build_filename (directory, "java", NULL);
+  g_autofree char *script = NULL;
+  g_autofree char *json = NULL;
+  g_autofree char *contents = NULL;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (JsonParser) parser = NULL;
+  g_autoptr (NuvashaLauncherVersionDescription) description = NULL;
+  g_autoptr (GPtrArray) processors = NULL;
+  g_autoptr (GPtrArray) pending = NULL;
+  g_autoptr (GHashTable) variables = NULL;
+  InstallRequest *request = g_new0 (InstallRequest, 1);
+  ProcessorWait wait = { 0 };
+  const ZipEntry entries[] = {
+    ZIP_FILE ("META-INF/MANIFEST.MF",
+              "Manifest-Version: 1.0\r\n"
+              "Main-Class: example.Processor\r\n\r\n")
+  };
+
+  g_assert_cmpint (g_mkdir_with_parents (artifact_dir, 0700), ==, 0);
+  g_assert_cmpint (g_mkdir_with_parents (mcp_dir, 0700), ==, 0);
+  zip_write (artifact, entries, G_N_ELEMENTS (entries));
+  g_assert_true (g_file_set_contents (mcp_zip, "zip", -1, &error));
+  g_assert_no_error (error);
+
+  script = g_strdup_printf (
+    "#!/bin/sh\n"
+    "printf '%%s' \"$4\" > \"%s\"\n"
+    "cp \"$2\" \"$5\"\n",
+    captured);
+  g_assert_true (g_file_set_contents (java, script, -1, &error));
+  g_assert_no_error (error);
+  g_assert_cmpint (chmod (java, 0700), ==, 0);
+
+  json = g_strdup (
+    "{\"id\":\"forge-47.2.0-1.20.1\",\"type\":\"release\","
+    "\"mainClass\":\"example.Main\",\"processors\":[{"
+    "\"jar\":\"net.minecraftforge:forge:47.2.0\","
+    "\"args\":[\"[de.oceanlabs.mcp:mcp_config:1.20.1-20230612.114412@zip]\",\"{PATCHED}\"]}]}");
+  parser = json_parser_new ();
+  g_assert_true (json_parser_load_from_data (parser, json, -1, &error));
+  g_assert_no_error (error);
+  description = nuvashalauncher_version_description_new_from_json (
+    "{\"id\":\"1.20.1\",\"type\":\"release\","
+    "\"mainClass\":\"example.Main\"}", -1, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (description);
+
+  processors = g_ptr_array_new ();
+  g_ptr_array_add (processors,
+                   json_array_get_element (
+                     json_node_get_array (json_object_get_member (
+                       json_node_get_object (json_parser_get_root (parser)),
+                       "processors")), 0));
+  pending = g_ptr_array_new ();
+  variables = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+  g_hash_table_insert (variables, g_strdup ("PATCHED"), g_strdup (patched));
+
+  wait.loop = g_main_loop_new (NULL, FALSE);
+  wait.scope = nuvashalauncher_task_scope_new (NULL, NULL,
+                                               processor_finished, &wait);
+  request->task = g_object_ref (nuvashalauncher_task_scope_task (wait.scope));
+  request->scope = wait.scope;
+  request->loader = NUVASHALAUNCHER_LOADER_FORGE;
+  request->stage = STAGE_RUN;
+  request->index = 0;
+  request->loader_version = g_strdup ("47.2.0");
+  request->java = g_strdup (java);
+  request->libraries_dir = g_strdup (libraries);
+  request->patched_jar = g_strdup (patched);
+  request->processors = g_steal_pointer (&processors);
+  request->pending = g_steal_pointer (&pending);
+  request->variables = g_steal_pointer (&variables);
+  request->description = g_object_ref (description);
+
+  stage_run (request);
+  g_main_loop_run (wait.loop);
+
+  g_assert_null (wait.scope);
+  g_assert_no_error (wait.error);
+  g_assert_nonnull (wait.install);
+  g_assert_true (g_file_get_contents (captured, &contents, NULL, &error));
+  g_assert_no_error (error);
+  g_assert_cmpstr (contents, ==, mcp_zip);
+
+  nuvashalauncher_loader_install_free (wait.install);
+  g_clear_error (&wait.error);
+  g_main_loop_unref (wait.loop);
+  remove_recursive (directory);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -245,5 +349,7 @@ main (int argc, char **argv)
                    test_malformed_install_profile_fails_cleanly);
   g_test_add_func ("/loaders/builtin-variables",
                    test_builtin_installer_variables);
+  g_test_add_func ("/loaders/bracket-coordinate-argument",
+                   test_processor_bracket_coordinate_argument);
   return g_test_run ();
 }

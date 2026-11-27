@@ -184,6 +184,28 @@ installer_data (InstallRequest *request, const char *name)
   return NULL;
 }
 
+static char *
+resolve_bracket_artifact (InstallRequest *request, const char *value,
+                          gsize length, GError **error)
+{
+  g_autofree char *coordinate = g_strndup (value + 1, length - 2);
+  g_autofree char *path = artifact_path (request, coordinate);
+
+  if (path == NULL)
+    {
+      g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR,
+                   NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN,
+                   "\"%s\" is no path an artifact of %s can live at",
+                   coordinate,
+                   nuvashalauncher_loader_display_name (request->loader));
+      return NULL;
+    }
+
+  queue_artifact (request, coordinate, TRUE);
+
+  return g_steal_pointer (&path);
+}
+
 static gboolean
 resolve_variable (InstallRequest *request, const char *name, GError **error)
 {
@@ -221,18 +243,11 @@ resolve_variable (InstallRequest *request, const char *name, GError **error)
   /* An artifact of the maven of the loader, written as "[coordinate]". */
   if (length > 2 && value[0] == '[' && value[length - 1] == ']')
     {
-      g_autofree char *coordinate = g_strndup (value + 1, length - 2);
-      g_autofree char *path = artifact_path (request, coordinate);
+      g_autofree char *path =
+        resolve_bracket_artifact (request, value, length, error);
 
       if (path == NULL)
-        {
-          g_set_error (error, NUVASHALAUNCHER_LOADERS_ERROR, NUVASHALAUNCHER_LOADERS_ERROR_NO_MAVEN,
-                       "\"%s\" is no path an artifact of %s can live at",
-                       coordinate, nuvashalauncher_loader_display_name (request->loader));
-          return FALSE;
-        }
-
-      queue_artifact (request, coordinate, TRUE);
+        return FALSE;
 
       if (g_str_equal (name, "PATCHED"))
         {
@@ -317,6 +332,12 @@ substitute_argument (InstallRequest *request, const char *argument,
 
       p = end;
     }
+
+  /* An argument written directly as "[coordinate]" resolves to the same
+     artifact path as a data variable of that form. */
+  if (result->len > 2 && result->str[0] == '[' &&
+      result->str[result->len - 1] == ']')
+    return resolve_bracket_artifact (request, result->str, result->len, error);
 
   return g_strdup (result->str);
 }
