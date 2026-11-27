@@ -41,8 +41,34 @@ by_date_desc (gconstpointer a, gconstpointer b)
   return g_strcmp0 (vb->date_published, va->date_published);
 }
 
+static gboolean
+version_matches_filter_list (GPtrArray *haystack, GPtrArray *needles)
+{
+  if (needles == NULL || needles->len == 0)
+    return TRUE;
+
+  if (haystack == NULL || haystack->len == 0)
+    return FALSE;
+
+  for (guint i = 0; i < haystack->len; i++)
+    {
+      const char *item = g_ptr_array_index (haystack, i);
+
+      for (guint j = 0; j < needles->len; j++)
+        {
+          const char *wanted = g_ptr_array_index (needles, j);
+
+          if (g_strcmp0 (item, wanted) == 0)
+            return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
 static GPtrArray *
-versions_of_answer (JsonNode *root, GError **error)
+versions_of_answer (JsonNode *root, GPtrArray *filter_loaders,
+                    GPtrArray *filter_versions, GError **error)
 {
   JsonArray *array = NULL;
   GPtrArray *versions = NULL;
@@ -83,7 +109,9 @@ versions_of_answer (JsonNode *root, GError **error)
               is_a_pack = TRUE;
           }
 
-        if (!is_a_pack)
+        if (!is_a_pack ||
+            !version_matches_filter_list (version->loaders, filter_loaders) ||
+            !version_matches_filter_list (version->game_versions, filter_versions))
           {
             nuvashalauncher_modrinth_version_free (version);
             continue;
@@ -282,7 +310,8 @@ on_modpack_quick_versions_ready (GObject *source G_GNUC_UNUSED,
     }
 
   g_autoptr (GPtrArray) versions =
-    versions_of_answer (json_parser_get_root (parser), &error);
+    versions_of_answer (json_parser_get_root (parser),
+                        self->filter_loaders, self->filter_versions, &error);
   if (versions == NULL)
     {
       push_failure (self, _("Could not load versions. Try again."), error, NULL);
@@ -579,7 +608,8 @@ on_modpack_choose_versions_ready (GObject *source G_GNUC_UNUSED,
     }
 
   g_autoptr (GPtrArray) versions =
-    versions_of_answer (json_parser_get_root (parser), &error);
+    versions_of_answer (json_parser_get_root (parser),
+                        self->filter_loaders, self->filter_versions, &error);
   if (versions == NULL)
     {
       adw_dialog_close (fetch->picker);
@@ -705,7 +735,9 @@ on_batch_single_modpack_versions_ready (GObject *source G_GNUC_UNUSED,
   if (parser != NULL && error == NULL)
     {
       g_autoptr (GPtrArray) versions =
-        versions_of_answer (json_parser_get_root (parser), NULL);
+        versions_of_answer (json_parser_get_root (parser),
+                            runner->filter_loaders, runner->filter_versions,
+                            NULL);
       if (versions != NULL && versions->len > 0)
         {
           NuvashaLauncherModrinthVersion *latest = g_ptr_array_index (versions, 0);
