@@ -783,11 +783,11 @@ build_browse_page (NuvashaLauncherDownloadModpackDialog *self, gboolean start_se
     gtk_widget_set_margin_top (GTK_WIDGET (filters), 8);
     gtk_widget_set_margin_bottom (GTK_WIDGET (filters), 8);
     gtk_box_append (filters, GTK_WIDGET (version_dropdown));
-    gtk_box_append (filters, GTK_WIDGET (sort));
     gtk_box_append (filters, filter_check ("Fabric", "fabric", self->filter_loaders, self));
     gtk_box_append (filters, filter_check ("Forge", "forge", self->filter_loaders, self));
     gtk_box_append (filters, filter_check ("NeoForge", "neoforge", self->filter_loaders, self));
     gtk_box_append (filters, filter_check ("Quilt", "quilt", self->filter_loaders, self));
+    gtk_box_append (filters, GTK_WIDGET (sort));
     nuvashalauncher_filter_entry_set_popover (
       NUVASHALAUNCHER_FILTER_ENTRY (self->search_entry), popover, _("Filter modpacks"));
     gtk_popover_set_child (popover, GTK_WIDGET (filters));
